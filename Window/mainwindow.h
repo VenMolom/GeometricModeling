@@ -21,9 +21,6 @@ public:
 
     ~MainWindow() override;
 
-    // TODO: add controls for Scene (Camera, Light, Minimum drawing segments), Ellipsoid (radius, color)
-    // TODO: add adaptive drawing
-
 private slots:
 
     void controlsUpdated(int segments);

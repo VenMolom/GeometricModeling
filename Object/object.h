@@ -21,7 +21,7 @@ protected:
     QMatrix4x4 model;
 
 public:
-    Object();
+    Object(QVector3D position, QColor color, int specular);
 
     Object(Object &object) = default;
 

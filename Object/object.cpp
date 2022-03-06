@@ -4,9 +4,10 @@
 
 #include "object.h"
 
-Object::Object() : position(0, 0, 0, 1), specular(4), color(QColorConstants::Red) {
+Object::Object(QVector3D position, QColor color, int specular) : position(position, 1), color(color),
+                                                                   specular(specular) {
     model = QMatrix4x4();
-    model.translate(position.toVector3DAffine());
+    model.translate(position);
 }
 
 QColor

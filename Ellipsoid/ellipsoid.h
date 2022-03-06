@@ -13,7 +13,7 @@ class Ellipsoid : public Object {
     QMatrix4x4 implicitMatrix;
 
 public:
-    Ellipsoid();
+    Ellipsoid(QVector3D position, QVector3D radius, QColor color, int specular);
 
     Ellipsoid(Ellipsoid &ellipsoid) = default;
 

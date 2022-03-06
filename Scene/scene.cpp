@@ -4,10 +4,8 @@
 
 #include "scene.h"
 
-Scene::Scene() : ellipsoid(), camera() {
-}
+Scene::Scene(Ellipsoid &&ellipsoid) : ellipsoid(ellipsoid), camera() {
 
-Scene::Scene(Camera &&camera) noexcept: ellipsoid(), camera(std::move(camera)) {
 }
 
 void Scene::draw(QImage &target) const {

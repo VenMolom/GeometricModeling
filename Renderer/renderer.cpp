@@ -11,10 +11,8 @@ Renderer::Renderer(QWidget *parent, std::shared_ptr<Scene> scenePtr)
         : QWidget(parent),
           ui(new Ui::Renderer),
           scene(std::move(scenePtr)),
-          backgroundColor(10, 10, 10),
-          image(100, 100, QImage::Format_ARGB32),
           mouseButtonPressed(false),
-
+          moveButtonPressed(false),
           lastMousePos() {
     ui->setupUi(this);
 }
@@ -22,27 +20,47 @@ Renderer::Renderer(QWidget *parent, std::shared_ptr<Scene> scenePtr)
 void Renderer::update(bool updateSize) {
     if (updateSize) {
         auto size = ui->label->size();
-        image = QImage(size, QImage::Format_ARGB32);
         scene->getCamera().resize(size);
     }
 
-    render();
+    if (!renderThread) {
+        initialiseThread();
+        return;
+    }
+
+    renderThread->update();
 }
 
-void Renderer::render() {
-    image.fill(backgroundColor);
+void Renderer::update(int startingSegments) {
+    if (!renderThread) {
+        initialiseThread(startingSegments);
+        return;
+    }
 
-    scene->draw(image);
-    ui->label->setPixmap(QPixmap::fromImage(image));
+    renderThread->setStartingSegments(startingSegments);
+    renderThread->update();
 }
 
 void Renderer::setScene(std::shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
 }
 
+void Renderer::initialiseThread(int startingSegments) {
+    renderThread = std::make_unique<RenderThread>(ui->label, scene, startingSegments, this);
+
+    connect(renderThread.get(), &RenderThread::finished, renderThread.get(), &QObject::deleteLater);
+    renderThread->start();
+}
+
+
 Renderer::~Renderer() {
     delete ui;
+
+    renderThread->finish();
+    renderThread->wait();
 }
+
+#pragma region Event_Handlers
 
 void Renderer::mousePressEvent(QMouseEvent *event) {
     QWidget::mousePressEvent(event);
@@ -86,6 +104,7 @@ void Renderer::wheelEvent(QWheelEvent *event) {
 }
 
 void Renderer::resizeEvent(QResizeEvent *event) {
+    // leads to QLabel::setPixmap crash when fired too often
     QWidget::resizeEvent(event);
 
     update(true);
@@ -112,3 +131,5 @@ void Renderer::keyReleaseEvent(QKeyEvent *event) {
         moveButtonPressed = false;
     }
 }
+
+#pragma endregion Event_Handlers

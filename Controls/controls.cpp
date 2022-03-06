@@ -3,10 +3,9 @@
 
 Controls::Controls(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Controls),
-    segments(10)
-{
+    ui(new Ui::Controls) {
     ui->setupUi(this);
+    segments = ui->renderingSegments->value();
 }
 
 Controls::~Controls()
@@ -49,4 +48,8 @@ void Controls::on_specular_valueChanged(int arg1)
 {
     scene->getEllipsoid().setSpecular(arg1);
     emit updated(segments);
+}
+
+QVector3D Controls::getRadius() {
+    return QVector3D(ui->radiusX->value(),ui->radiusY->value(),ui->radiusZ->value());
 }

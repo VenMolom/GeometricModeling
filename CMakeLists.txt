@@ -32,7 +32,7 @@ set(PROJECT_SOURCES
         Renderer/renderer.ui
         Controls/controls.h
         Controls/controls.cpp
-        Controls/controls.ui)
+        Controls/controls.ui RenderThread/renderThread.cpp RenderThread/renderThread.h)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(MG1

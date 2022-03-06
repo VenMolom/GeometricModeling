@@ -17,9 +17,7 @@ class Scene {
     Camera camera;
 
 public:
-    Scene();
-
-    explicit Scene(Camera &&camera) noexcept;
+    explicit Scene(Ellipsoid &&ellipsoid);
 
     void draw(QImage &target) const;
 

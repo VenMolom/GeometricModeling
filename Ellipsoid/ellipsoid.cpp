@@ -5,12 +5,13 @@
 #include "ellipsoid.h"
 #include <cmath>
 
-Ellipsoid::Ellipsoid() : Object(),
-                         radius(1, 1, 1),
-                         implicitMatrix(1 / powf(radius.x(), 2), 0, 0, 0,
-                                        0, 1 / powf(radius.y(), 2), 0, 0,
-                                        0, 0, 1 / powf(radius.z(), 2), 0,
-                                        0, 0, 0, -1) {
+Ellipsoid::Ellipsoid::Ellipsoid(QVector3D position, QVector3D radius, QColor color, int specular)
+        : Object(position, color, specular),
+          radius(radius),
+          implicitMatrix(1 / powf(radius.x(), 2), 0, 0, 0,
+                         0, 1 / powf(radius.y(), 2), 0, 0,
+                         0, 0, 1 / powf(radius.z(), 2), 0,
+                         0, 0, 0, -1) {
 }
 
 void Ellipsoid::draw(QImage &target, const QMatrix4x4 &camera, const QVector3D &lightPosition) const {
@@ -84,7 +85,7 @@ void Ellipsoid::setRadiusZ(float z) {
 
 void Ellipsoid::recalculateMatrix() {
     implicitMatrix = QMatrix4x4(1 / powf(radius.x(), 2), 0, 0, 0,
-                                    0, 1 / powf(radius.y(), 2), 0, 0,
-                                    0, 0, 1 / powf(radius.z(), 2), 0,
-                                    0, 0, 0, -1);
+                                0, 1 / powf(radius.y(), 2), 0, 0,
+                                0, 0, 1 / powf(radius.z(), 2), 0,
+                                0, 0, 0, -1);
 }
