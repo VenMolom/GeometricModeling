@@ -5,7 +5,7 @@
 #ifndef MG1_RENDERTHREAD_H
 #define MG1_RENDERTHREAD_H
 
-#define SLEEP 50
+#define SLEEP 100
 #define BACKGROUND_COLOR 4278848010 // 10,10,10
 
 #include <QThread>

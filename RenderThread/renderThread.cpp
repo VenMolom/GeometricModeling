@@ -37,6 +37,8 @@ void RenderThread::run() {
         if (restart) {
             currentSegments = 1 << startingSegments;
             restart = false;
+            msleep(SLEEP);
+            continue;
         }
 
         auto targetSize = target->size();
