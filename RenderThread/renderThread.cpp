@@ -37,7 +37,7 @@ void RenderThread::run() {
         if (restart) {
             currentSegments = 1 << startingSegments;
             restart = false;
-            msleep(SLEEP);
+            msleep(SHORT_SLEEP);
             continue;
         }
 

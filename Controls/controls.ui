@@ -134,14 +134,14 @@
       <item row="0" column="0">
        <widget class="QLabel" name="startSegmentsLabel">
         <property name="text">
-         <string>Starting segments</string>
+         <string>Starting divisions</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
        <widget class="QSpinBox" name="renderingSegments">
         <property name="minimum">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="maximum">
          <number>500</number>
