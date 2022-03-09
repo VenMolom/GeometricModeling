@@ -49,13 +49,6 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="specularLabel">
-        <property name="text">
-         <string>Specular</string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="radiusY">
         <property name="decimals">
@@ -69,6 +62,13 @@
         </property>
         <property name="value">
          <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QLabel" name="radiusLabel">
+        <property name="text">
+         <string>Radius</string>
         </property>
        </widget>
       </item>
@@ -88,37 +88,20 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="colorLabel">
-        <property name="text">
-         <string>Color</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="3">
-       <widget class="QLabel" name="radiusLabel">
-        <property name="text">
-         <string>Radius</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="2">
-       <widget class="QFrame" name="frame">
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
        <widget class="QSpinBox" name="specular">
         <property name="maximum">
          <number>512</number>
         </property>
         <property name="value">
          <number>4</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="specularLabel">
+        <property name="text">
+         <string>Specular</string>
         </property>
        </widget>
       </item>

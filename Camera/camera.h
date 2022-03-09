@@ -11,13 +11,14 @@
 #define STEP 1.2
 #define SENSITIVITY 0.005f
 #define SPEED 0.01f
-#define LIMIT M_PI - 0.1f
+#define LIMIT M_PI_2 - 0.1f
 
 class Camera {
     QMatrix4x4 perspective;
     QMatrix4x4 view;
 
     QVector3D position;
+    QVector3D center;
     QVector3D front;
     QVector3D up;
     QVector3D worldUp;
@@ -25,6 +26,7 @@ class Camera {
 
     QRectF viewPlane;
     float viewDepth;
+    float distance;
     float zoom;
     float yaw;
     float pitch;
