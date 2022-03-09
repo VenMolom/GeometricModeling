@@ -53,7 +53,7 @@ void Camera::rotate(QPointF angle) {
     auto rotate = angle * SENSITIVITY;
 
     yaw += rotate.x();
-    pitch = std::clamp<float>(pitch -= rotate.y(), -LIMIT, LIMIT);
+    pitch = std::clamp<float>(pitch += rotate.y(), -LIMIT, LIMIT);
 
 
     position.setX(cos(yaw) * cos(pitch));
@@ -71,7 +71,8 @@ void Camera::rotate(QPointF angle) {
 
 void Camera::move(QPointF direction) {
     center += SPEED * direction.x() * right;
-    center -= SPEED * direction.y() * up;
+    center += SPEED * direction.y() * up;
+    position += SPEED * direction.y() * up;
 
     view = QMatrix4x4();
     view.lookAt(position, center, up);
