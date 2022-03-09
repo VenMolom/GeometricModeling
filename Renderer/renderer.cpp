@@ -28,7 +28,7 @@ void Renderer::update(bool updateSize) {
         return;
     }
 
-    renderThread->update();
+    renderThread->update(updateSize);
 }
 
 void Renderer::update(int startingSegments) {

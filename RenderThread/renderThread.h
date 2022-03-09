@@ -17,6 +17,7 @@ class RenderThread : public QThread {
     Q_OBJECT
     int startingSegments;
     bool restart;
+    bool resize;
     bool working;
     std::shared_ptr<Scene> scene;
     QLabel *target;
@@ -29,7 +30,7 @@ public:
 
     void setStartingSegments(int startingSegments);
 
-    void update();
+    void update(bool resize = false);
 
 protected:
     void run() override;

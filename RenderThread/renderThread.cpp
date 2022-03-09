@@ -12,6 +12,7 @@ RenderThread::RenderThread(QLabel *target, std::shared_ptr<Scene> scene, int sta
           scene(std::move(scene)),
           startingSegments(startingSegments),
           restart(false),
+          resize(false),
           working(true) {
 
 }
@@ -24,8 +25,9 @@ void RenderThread::setStartingSegments(int startingSegments) {
     this->startingSegments = startingSegments;
 }
 
-void RenderThread::update() {
+void RenderThread::update(bool resize) {
     restart = true;
+    this->resize = resize;
 }
 
 void RenderThread::run() {
@@ -37,8 +39,12 @@ void RenderThread::run() {
         if (restart) {
             currentSegments = 1 << startingSegments;
             restart = false;
-            msleep(SHORT_SLEEP);
-            continue;
+
+            if (resize) {
+                resize = false;
+                msleep(SHORT_SLEEP);
+                continue;
+            }
         }
 
         auto targetSize = target->size();
