@@ -20,11 +20,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
-
-private slots:
-
-    void controlsUpdated(int segments);
-
 };
 
 #endif // MAINWINDOW_H

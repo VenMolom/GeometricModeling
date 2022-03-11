@@ -5,25 +5,24 @@
 #ifndef MG1_SCENE_H
 #define MG1_SCENE_H
 
-
-#include <QImage>
 #include <list>
-#include "Object/object.h"
+#include "Objects/Object/object.h"
 #include "Camera/camera.h"
-#include "Ellipsoid/ellipsoid.h"
 
 class Scene {
-    Ellipsoid ellipsoid;
-    Camera camera;
 
 public:
-    explicit Scene(Ellipsoid &&ellipsoid);
+    explicit Scene() = default;
 
-    void draw(QImage &target) const;
+    void addObject(std::unique_ptr<Object> &&object);
 
-    [[nodiscard]] Camera &getCamera() { return camera; }
+    void draw(const Renderer &renderer) const;
 
-    Ellipsoid &getEllipsoid() { return ellipsoid; }
+    Camera &getCamera() { return camera; }
+
+private:
+    std::vector<std::unique_ptr<Object>> objects;
+    Camera camera;
 };
 
 

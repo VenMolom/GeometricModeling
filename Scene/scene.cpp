@@ -4,10 +4,12 @@
 
 #include "scene.h"
 
-Scene::Scene(Ellipsoid &&ellipsoid) : ellipsoid(ellipsoid), camera() {
-
+void Scene::draw(const Renderer &renderer) const {
+    for (auto &object: objects) {
+        object->draw(renderer, camera.viewMatrix());
+    }
 }
 
-void Scene::draw(QImage &target) const {
-    ellipsoid.draw(target, camera.viewMatrix(), camera.getPosition());
+void Scene::addObject(std::unique_ptr<Object> &&object) {
+    objects.push_back(std::move(object));
 }

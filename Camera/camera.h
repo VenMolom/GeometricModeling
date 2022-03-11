@@ -5,48 +5,50 @@
 #ifndef MG1_CAMERA_H
 #define MG1_CAMERA_H
 
+#include <DirectXMath.h>
+#include <QRect>
 
-#include <QMatrix4x4>
-
-#define STEP 1.2
+#define STEP 1.001
 #define SENSITIVITY 0.005f
 #define SPEED 0.01f
-#define LIMIT M_PI_2 - 0.1f
+#define LIMIT DirectX::XM_PIDIV2 - 0.1f
 
 class Camera {
-    QMatrix4x4 perspective;
-    QMatrix4x4 view;
-
-    QVector3D position;
-    QVector3D center;
-    QVector3D front;
-    QVector3D up;
-    QVector3D worldUp;
-    QVector3D right;
-
-    QRectF viewPlane;
-    float viewDepth;
-    float distance;
-    float zoom;
-    float yaw;
-    float pitch;
 
 public:
     Camera();
 
     Camera(Camera &&camera) = default;
 
-    [[nodiscard]] QMatrix4x4 viewMatrix() const;
+    DirectX::XMMATRIX viewMatrix() const;
 
     void resize(QSizeF newSize);
 
     void changeZoom(float delta, QSizeF viewportSize);
 
-    [[nodiscard]] QVector3D getPosition() const { return position; }
-
     void rotate(QPointF angle);
 
     void move(QPointF direction);
+
+private:
+    DirectX::XMFLOAT4X4 projection;
+    DirectX::XMFLOAT4X4 view;
+
+    DirectX::XMFLOAT3 position;
+    DirectX::XMFLOAT3 center;
+    DirectX::XMFLOAT3 front;
+    DirectX::XMFLOAT3 up;
+    DirectX::XMFLOAT3 worldUp;
+    DirectX::XMFLOAT3 right;
+
+    float distance;
+    float zoom;
+    float yaw;
+    float pitch;
+
+    void calculateView();
+
+    void calculateProjection(float aspectRatio);
 };
 
 

@@ -4,76 +4,93 @@
 
 #include "camera.h"
 
+using namespace DirectX;
+
 Camera::Camera() : position(0, 0, 1),
                    center(0, 0, 0),
-                   viewPlane(-1, 1, 2, 2),
                    front(0, 0, -1),
                    up(0, 1, 0),
                    worldUp(0, 1, 0),
                    right(1, 0, 0),
-                   viewDepth(100),
                    distance(5),
-                   zoom(0.01),
-                   yaw(M_PI_2),
+                   zoom(1),
+                   yaw(XM_PIDIV2),
                    pitch(0) {
-    perspective = QMatrix4x4();
-    perspective.ortho(viewPlane.left(), viewPlane.right(), viewPlane.top() - viewPlane.height(), viewPlane.top(), 0,
-                      viewDepth);
-
-    position *= distance;
-    view = QMatrix4x4();
-    view.lookAt(position, center, up);
+    calculateProjection(1);
+    calculateView();
 }
 
-QMatrix4x4 Camera::viewMatrix() const {
-    return perspective * view;
+XMMATRIX Camera::viewMatrix() const {
+    return XMLoadFloat4x4(&view) * XMLoadFloat4x4(&projection);
 }
 
 void Camera::resize(QSizeF newSize) {
-    auto size = newSize * zoom;
-    viewPlane = QRectF(-size.width() / 2, size.height() / 2, size.width(), size.height());
-
-    perspective = QMatrix4x4();
-    perspective.ortho(viewPlane.left(), viewPlane.right(), viewPlane.top() - viewPlane.height(), viewPlane.top(), 0,
-                      viewDepth);
+    calculateProjection(newSize.width() / newSize.height());
 }
 
 void Camera::changeZoom(float delta, QSizeF viewportSize) {
-    // TODO: change distance (near/far)
-
     if (delta <= 0) {
         zoom *= STEP;
     } else {
         zoom /= STEP;
     }
+
     resize(viewportSize);
+    calculateView();
 }
 
 void Camera::rotate(QPointF angle) {
     auto rotate = angle * SENSITIVITY;
 
-    yaw += rotate.x();
-    pitch = std::clamp<float>(pitch += rotate.y(), -LIMIT, LIMIT);
+    yaw += static_cast<float>(rotate.x());
+    pitch = std::clamp<float>(pitch + static_cast<float>(rotate.y()), -LIMIT, LIMIT);
 
+    position = {
+            cos(yaw) * cos(pitch),
+            sin(pitch),
+            sin(yaw) * cos(pitch),
+    };
+    XMStoreFloat3(&position, XMVector3Normalize(XMLoadFloat3(&position)));
 
-    position.setX(cos(yaw) * cos(pitch));
-    position.setY(sin(pitch));
-    position.setZ(sin(yaw) * cos(pitch));
-    position.normalize();
-    position *= distance;
+    XMStoreFloat3(&right, XMVector3Normalize(
+            XMVector3Cross(
+                    XMLoadFloat3(&worldUp),
+                    XMLoadFloat3(&front)
+            )
+    ));
+    XMStoreFloat3(&up, XMVector3Normalize(
+            XMVector3Cross(
+                    XMLoadFloat3(&front),
+                    XMLoadFloat3(&right)
+            )
+    ));
 
-    right = QVector3D::crossProduct(front, worldUp).normalized();
-    up = QVector3D::crossProduct(right, front).normalized();
-
-    view = QMatrix4x4();
-    view.lookAt(position, center, up);
+    calculateView();
 }
 
 void Camera::move(QPointF direction) {
-    center += SPEED * direction.x() * right;
-    center += SPEED * direction.y() * up;
-    position += SPEED * direction.y() * up;
+    auto moveRight = XMVectorScale(XMLoadFloat3(&right), SPEED * direction.x());
+    auto moveUp = XMVectorScale(XMLoadFloat3(&up), SPEED * direction.y());
+    auto move = XMVectorAdd(moveRight, moveUp);
 
-    view = QMatrix4x4();
-    view.lookAt(position, center, up);
+    XMStoreFloat3(&center, XMVectorAdd(XMLoadFloat3(&center), move));
+    XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&position), move));
+
+    calculateView();
+}
+
+void Camera::calculateView() {
+    XMStoreFloat3(&position, XMVectorScale(XMLoadFloat3(&position), distance * zoom));
+
+    XMStoreFloat4x4(&view, XMMatrixLookAtRH(
+            XMLoadFloat3(&position),
+            XMLoadFloat3(&center),
+            XMLoadFloat3(&up)
+    ));
+}
+
+void Camera::calculateProjection(float aspectRatio) {
+    XMStoreFloat4x4(&projection, XMMatrixPerspectiveFovRH(
+            XMConvertToRadians(45),
+            aspectRatio, 0.1f, 100.0f));
 }

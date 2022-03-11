@@ -61,7 +61,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="Renderer" name="renderWidget" native="true">
+        <widget class="DxRenderer" name="renderWidget" native="true">
          <property name="focusPolicy">
           <enum>Qt::StrongFocus</enum>
          </property>
@@ -102,15 +102,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>Renderer</class>
-   <extends>QWidget</extends>
-   <header>Renderer/renderer.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>Controls</class>
    <extends>QWidget</extends>
    <header>Controls/controls.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DxRenderer</class>
+   <extends>QWidget</extends>
+   <header>DirectX/DXRenderer/dxRenderer.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

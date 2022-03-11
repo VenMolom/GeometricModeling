@@ -21,8 +21,6 @@ public:
 
     void setScene(std::shared_ptr<Scene> scenePtr);
 
-    QVector3D getRadius();
-
     int getSpecular() { return ui->specular->value(); }
 
     int getRenderingSegments() { return ui->renderingSegments->value(); }
@@ -38,10 +36,6 @@ private slots:
     void on_renderingSegments_valueChanged(int arg1);
 
     void on_specular_valueChanged(int arg1);
-
-signals:
-
-    void updated(int segments);
 
 private:
     Ui::Controls *ui;
