@@ -11,8 +11,6 @@ namespace Ui {
 
 class Controls : public QWidget {
 Q_OBJECT
-    std::shared_ptr<Scene> scene;
-    int segments;
 
 public:
     explicit Controls(QWidget *parent = nullptr);
@@ -38,6 +36,9 @@ private slots:
     void on_specular_valueChanged(int arg1);
 
 private:
+    std::shared_ptr<Scene> scene;
+    int segments;
+
     Ui::Controls *ui;
 };
 

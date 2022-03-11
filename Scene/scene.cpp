@@ -4,7 +4,7 @@
 
 #include "scene.h"
 
-void Scene::draw(const Renderer &renderer) const {
+void Scene::draw(Renderer &renderer) const {
     for (auto &object: objects) {
         object->draw(renderer, camera.viewMatrix());
     }

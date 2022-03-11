@@ -29,3 +29,5 @@ struct BufferDescription : D3D11_BUFFER_DESC
 struct VertexPositionColor {
     DirectX::XMFLOAT3 position, color;
 };
+
+typedef unsigned short Index;

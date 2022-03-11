@@ -8,13 +8,12 @@
 #include <DirectXMath.h>
 #include <QRect>
 
-#define STEP 1.001
+#define STEP 1.2f
 #define SENSITIVITY 0.005f
 #define SPEED 0.01f
 #define LIMIT DirectX::XM_PIDIV2 - 0.1f
 
 class Camera {
-
 public:
     Camera();
 

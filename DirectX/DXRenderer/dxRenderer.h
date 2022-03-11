@@ -10,6 +10,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include <Windows.h>
+#include <DirectXMath.h>
 
 #undef max
 #undef min
@@ -25,6 +26,10 @@ public:
     void renderScene();
 
     void setScene(std::shared_ptr<Scene> scenePtr);
+
+    void drawLines(const std::vector<VertexPositionColor> &vertices,
+                   const std::vector<Index> &indices,
+                   const DirectX::XMMATRIX &mvp) override;
 
     QPaintEngine *paintEngine() const override;
 

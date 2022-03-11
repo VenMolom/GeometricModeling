@@ -1,3 +1,4 @@
+#include <DirectXMath.h>
 #include "dxRenderer.h"
 
 using namespace mini;
@@ -14,53 +15,6 @@ DxRenderer::DxRenderer(QWidget *parent) : m_device(this),
     init3D3();
 }
 
-// TODO: remove
-//vector<DxRenderer::VertexPositionColor> DxRenderer::CreateCubeVertices() {
-//    return {
-//            // Front Face
-//            {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-//            {{+0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-//            {{+0.5f, +0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-//            {{-0.5f, +0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-//            // Back Face
-//            {{-0.5f, -0.5f, +0.5f}, {1.0f, 0.0f, 1.0f}},
-//            {{+0.5f, -0.5f, +0.5f}, {1.0f, 0.0f, 1.0f}},
-//            {{+0.5f, +0.5f, +0.5f}, {1.0f, 0.0f, 1.0f}},
-//            {{-0.5f, +0.5f, +0.5f}, {1.0f, 0.0f, 1.0f}},
-//            // Top Face
-//            {{-0.5f, +0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}},
-//            {{+0.5f, +0.5f, -0.5f}, {1.0f, 1.0f, 0.0f}},
-//            {{+0.5f, +0.5f, +0.5f}, {1.0f, 1.0f, 0.0f}},
-//            {{-0.5f, +0.5f, +0.5f}, {1.0f, 1.0f, 0.0f}},
-//            // Bottom Face
-//            {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-//            {{+0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-//            {{+0.5f, -0.5f, +0.5f}, {0.0f, 1.0f, 0.0f}},
-//            {{-0.5f, -0.5f, +0.5f}, {0.0f, 1.0f, 0.0f}},
-//            // Left Face
-//            {{+0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}},
-//            {{+0.5f, +0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}},
-//            {{+0.5f, +0.5f, +0.5f}, {0.0f, 1.0f, 1.0f}},
-//            {{+0.5f, -0.5f, +0.5f}, {0.0f, 1.0f, 1.0f}},
-//            // Right Face
-//            {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-//            {{-0.5f, +0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}},
-//            {{-0.5f, +0.5f, +0.5f}, {0.0f, 0.0f, 1.0f}},
-//            {{-0.5f, -0.5f, +0.5f}, {0.0f, 0.0f, 1.0f}}
-//    };
-//}
-//
-//std::vector<unsigned short> DxRenderer::createCubeIndices() {
-//    return {
-//            0, 2, 1, 0, 3, 2,
-//            5, 6, 4, 6, 7, 4,
-//            9, 8, 10, 8, 11, 10,
-//            14, 12, 13, 15, 12, 14,
-//            16, 17, 18, 16, 18, 19,
-//            22, 21, 20, 23, 22, 20
-//    };
-//}
-
 void DxRenderer::renderScene() {
     float clearColor[] = CLEAR_COLOR;
     m_device.context()->ClearRenderTargetView(m_backBuffer.get(), clearColor);
@@ -72,44 +26,34 @@ void DxRenderer::renderScene() {
     if (scene) {
         scene->draw(*this);
     }
-
-    // TODO: remove and move to target specific functions
-//    const auto vertices = CreateCubeVertices();
-//    m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
-//    const auto indices = createCubeIndices();
-//    m_indexBuffer = m_device.CreateIndexBuffer(indices);
-//    D3D11_MAPPED_SUBRESOURCE res;
-//    m_device.context()->Map(m_cbMVP.get(), 0,
-//                            D3D11_MAP_WRITE_DISCARD, 0, &res);
-//    XMMATRIX mvp = XMLoadFloat4x4(&m_modelMtx) *
-//                   XMLoadFloat4x4(&m_viewMtx) * XMLoadFloat4x4(&m_projMtx);
-//    memcpy(res.pData, &mvp, sizeof(XMMATRIX));
-//    m_device.context()->Unmap(m_cbMVP.get(), 0);
-//
-//    ID3D11Buffer *cbs[] = {m_cbMVP.get()};
-//    m_device.context()->VSSetConstantBuffers(0, 1, cbs);
-//    m_device.context()->IASetInputLayout(m_layout.get());
-//    m_device.context()->IASetPrimitiveTopology(
-//            D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-//    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
-//    UINT strides[] = {sizeof(VertexPositionColor)};
-//    UINT offsets[] = {0};
-//    m_device.context()->IASetVertexBuffers(
-//            0, 1, vbs, strides, offsets);
-//    m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
-//    m_device.context()->DrawIndexed(36, 0, 0);
-//
-//    m_device.context()->Map(m_cbMVP.get(), 0,
-//                            D3D11_MAP_WRITE_DISCARD, 0, &res);
-//    mvp = XMLoadFloat4x4(&m_modelMtx2) *
-//          XMLoadFloat4x4(&m_viewMtx) * XMLoadFloat4x4(&m_projMtx);
-//    memcpy(res.pData, &mvp, sizeof(XMMATRIX));
-//    m_device.context()->Unmap(m_cbMVP.get(), 0);
-//    m_device.context()->DrawIndexed(36, 0, 0);
 }
 
 void DxRenderer::setScene(std::shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
+}
+
+void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
+                           const vector<Index> &indices,
+                           const DirectX::XMMATRIX &mvp) {
+    m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
+    //m_indexBuffer = m_device.CreateIndexBuffer(indices);
+    D3D11_MAPPED_SUBRESOURCE res;
+    m_device.context()->Map(m_cbMVP.get(), 0,
+                            D3D11_MAP_WRITE_DISCARD, 0, &res);
+    memcpy(res.pData, &mvp, sizeof(XMMATRIX));
+    m_device.context()->Unmap(m_cbMVP.get(), 0);
+
+    ID3D11Buffer *cbs[] = {m_cbMVP.get()};
+    m_device.context()->VSSetConstantBuffers(0, 1, cbs);
+    m_device.context()->IASetInputLayout(m_layout.get());
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+    UINT strides[] = {sizeof(VertexPositionColor)};
+    UINT offsets[] = {0};
+    m_device.context()->IASetVertexBuffers(
+            0, 1, vbs, strides, offsets);
+    //m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
+    m_device.context()->Draw(vertices.size(), 0);
 }
 
 float DxRenderer::getFrameTime() {
@@ -225,22 +169,11 @@ void DxRenderer::init3D3() {
     };
     m_layout = m_device.CreateInputLayout(elements, vsBytes);
 
+    m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
+
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);
 }
-
-// TODO: remove
-//void DxRenderer::initScene() {
-//    XMStoreFloat4x4(&m_modelMtx, XMMatrixIdentity());
-//    XMStoreFloat4x4(&m_modelMtx2, XMMatrixTranslation(-10.0f, 0.0f, 0.0f));
-//    XMStoreFloat4x4(&m_viewMtx,
-//                    XMMatrixRotationX(cameraRotationAngle) *
-//                    XMMatrixTranslation(0.0f, 0.0f, cameraDistance));
-//    XMStoreFloat4x4(&m_projMtx, XMMatrixPerspectiveFovLH(
-//            XMConvertToRadians(45),
-//            static_cast<float>(width()) / static_cast<float>(height()), 0.1f, 100.0f));
-//    m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
-//}
 
 void DxRenderer::setupViewport() {
     ID3D11Texture2D *temp;

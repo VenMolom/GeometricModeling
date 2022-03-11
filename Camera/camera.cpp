@@ -12,7 +12,7 @@ Camera::Camera() : position(0, 0, 1),
                    up(0, 1, 0),
                    worldUp(0, 1, 0),
                    right(1, 0, 0),
-                   distance(5),
+                   distance(10),
                    zoom(1),
                    yaw(XM_PIDIV2),
                    pitch(0) {
@@ -80,10 +80,8 @@ void Camera::move(QPointF direction) {
 }
 
 void Camera::calculateView() {
-    XMStoreFloat3(&position, XMVectorScale(XMLoadFloat3(&position), distance * zoom));
-
     XMStoreFloat4x4(&view, XMMatrixLookAtRH(
-            XMLoadFloat3(&position),
+            XMVectorScale(XMLoadFloat3(&position), distance * zoom),
             XMLoadFloat3(&center),
             XMLoadFloat3(&up)
     ));
@@ -91,6 +89,6 @@ void Camera::calculateView() {
 
 void Camera::calculateProjection(float aspectRatio) {
     XMStoreFloat4x4(&projection, XMMatrixPerspectiveFovRH(
-            XMConvertToRadians(45),
+            XMConvertToRadians(90),
             aspectRatio, 0.1f, 100.0f));
 }

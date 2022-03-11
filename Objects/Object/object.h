@@ -17,14 +17,14 @@ protected:
 
     DirectX::XMFLOAT4X4 model;
 
-public:
     Object(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 color);
 
+public:
     Object(Object &object) = default;
 
     Object(Object &&object) = default;
 
-    virtual void draw(const Renderer &renderer, const DirectX::XMMATRIX &camera) const = 0;
+    virtual void draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const = 0;
 
     DirectX::XMMATRIX modelMatrix() const;
 };

@@ -10,13 +10,12 @@
 #include "Camera/camera.h"
 
 class Scene {
-
 public:
     explicit Scene() = default;
 
     void addObject(std::unique_ptr<Object> &&object);
 
-    void draw(const Renderer &renderer) const;
+    void draw(Renderer &renderer) const;
 
     Camera &getCamera() { return camera; }
 

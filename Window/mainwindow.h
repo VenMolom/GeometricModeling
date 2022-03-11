@@ -13,13 +13,15 @@ class Renderer;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT
-    Ui::MainWindow *ui;
-    std::shared_ptr<Scene> scene;
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
+
+private:
+    Ui::MainWindow *ui;
+    std::shared_ptr<Scene> scene;
 };
 
 #endif // MAINWINDOW_H

@@ -33,7 +33,9 @@ set(PROJECT_SOURCES
         DirectX/DXDevice/dxptr.h
         DirectX/DXStructures/dxStructures.cpp DirectX/DXStructures/dxStructures.h
         DirectX/DXDevice/exceptions.cpp DirectX/DXDevice/exceptions.h
-        Renderer/Renderer.h)
+        Renderer/Renderer.h
+        Objects/ParametricObject/parametricObject.h
+        Objects/Torus/torus.cpp Objects/Torus/torus.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
