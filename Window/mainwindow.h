@@ -3,13 +3,10 @@
 
 #include <QMainWindow>
 #include "Scene/scene.h"
-#include "Renderer/renderer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
-class Renderer;
 
 class MainWindow : public QMainWindow {
 Q_OBJECT

@@ -23,6 +23,10 @@ void DxRenderer::renderScene() {
             m_depthBuffer.get(),
             D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
+    ID3D11Buffer *cbs[] = {m_cbMVP.get()};
+    m_device.context()->VSSetConstantBuffers(0, 1, cbs);
+    m_device.context()->IASetInputLayout(m_layout.get());
+
     if (scene) {
         scene->draw(*this);
     }
@@ -35,28 +39,29 @@ void DxRenderer::setScene(std::shared_ptr<Scene> scenePtr) {
 void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
                            const vector<Index> &indices,
                            const DirectX::XMMATRIX &mvp) {
-    m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
-    //m_indexBuffer = m_device.CreateIndexBuffer(indices);
+    // map MVP matrix to shader buffer
     D3D11_MAPPED_SUBRESOURCE res;
     m_device.context()->Map(m_cbMVP.get(), 0,
                             D3D11_MAP_WRITE_DISCARD, 0, &res);
     memcpy(res.pData, &mvp, sizeof(XMMATRIX));
     m_device.context()->Unmap(m_cbMVP.get(), 0);
 
-    ID3D11Buffer *cbs[] = {m_cbMVP.get()};
-    m_device.context()->VSSetConstantBuffers(0, 1, cbs);
-    m_device.context()->IASetInputLayout(m_layout.get());
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+    // set vertex and index buffers
+    m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
+    m_indexBuffer = m_device.CreateIndexBuffer(indices);
     ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
     UINT strides[] = {sizeof(VertexPositionColor)};
     UINT offsets[] = {0};
     m_device.context()->IASetVertexBuffers(
             0, 1, vbs, strides, offsets);
-    //m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
-    m_device.context()->Draw(vertices.size(), 0);
+    m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
+
+    // draw lines
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    m_device.context()->DrawIndexed(indices.size(), 0, 0);
 }
 
-float DxRenderer::getFrameTime() {
+float DxRenderer::frameTime() {
     auto oldTicks = currentTicks;
     QueryPerformanceCounter(&currentTicks);
     auto countDelta = currentTicks.QuadPart - oldTicks.QuadPart;
@@ -72,7 +77,7 @@ QPaintEngine *DxRenderer::paintEngine() const {
 void DxRenderer::resizeEvent(QResizeEvent *event) {
     QWidget::resizeEvent(event);
 
-    scene->getCamera().resize(size());
+    scene->camera().resize(size());
 
     m_backBuffer.reset();
     m_depthBuffer.reset();
@@ -82,7 +87,7 @@ void DxRenderer::resizeEvent(QResizeEvent *event) {
 }
 
 void DxRenderer::paintEvent(QPaintEvent *event) {
-    auto deltaTime = getFrameTime();
+    auto deltaTime = frameTime();
 
     renderScene();
 
@@ -115,9 +120,9 @@ void DxRenderer::mouseMoveEvent(QMouseEvent *event) {
     if (!mouseButtonPressed) return;
 
     if (moveButtonPressed) {
-        scene->getCamera().move(event->position() - lastMousePos);
+        scene->camera().move(event->position() - lastMousePos);
     } else if (!lastMousePos.isNull()) {
-        scene->getCamera().rotate(event->position() - lastMousePos);
+        scene->camera().rotate(event->position() - lastMousePos);
     }
 
     lastMousePos = event->position();
@@ -126,7 +131,7 @@ void DxRenderer::mouseMoveEvent(QMouseEvent *event) {
 void DxRenderer::wheelEvent(QWheelEvent *event) {
     QWidget::wheelEvent(event);
 
-    scene->getCamera().changeZoom(static_cast<float>(event->angleDelta().y()), size());
+    scene->camera().changeZoom(static_cast<float>(event->angleDelta().y()), size());
 }
 
 void DxRenderer::keyPressEvent(QKeyEvent *event) {
@@ -164,7 +169,7 @@ void DxRenderer::init3D3() {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
                     D3D11_INPUT_PER_VERTEX_DATA, 0},
             {"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-                    offsetof(VertexPositionColor, color),
+                    static_cast<UINT>(offsetof(VertexPositionColor, color)),
                     D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_layout = m_device.CreateInputLayout(elements, vsBytes);

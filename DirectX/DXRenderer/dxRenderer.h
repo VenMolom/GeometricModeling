@@ -15,7 +15,7 @@
 #undef max
 #undef min
 
-#define CLEAR_COLOR {0.5f, 0.5f, 1.0f, 1.0f}
+#define CLEAR_COLOR {0.5f, 0.5f, 0.5f, 1.0f}
 
 class DxRenderer : public QWidget, public Renderer {
 Q_OBJECT
@@ -77,5 +77,5 @@ private:
 
     void setupViewport();
 
-    float getFrameTime();
+    float frameTime();
 };

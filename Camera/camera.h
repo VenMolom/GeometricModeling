@@ -10,8 +10,10 @@
 
 #define STEP 1.2f
 #define SENSITIVITY 0.005f
-#define SPEED 0.01f
-#define LIMIT DirectX::XM_PIDIV2 - 0.1f
+#define SPEED 0.1f
+#define LIMIT DirectX::XM_PIDIV2 - 0.001f
+#define MAX_ANGLE  LIMIT
+#define MIN_ANGLE -(LIMIT)
 
 class Camera {
 public:
@@ -27,15 +29,14 @@ public:
 
     void rotate(QPointF angle);
 
-    void move(QPointF direction);
+    void move(QPointF offset);
 
 private:
     DirectX::XMFLOAT4X4 projection;
     DirectX::XMFLOAT4X4 view;
 
-    DirectX::XMFLOAT3 position;
+    DirectX::XMFLOAT3 direction;
     DirectX::XMFLOAT3 center;
-    DirectX::XMFLOAT3 front;
     DirectX::XMFLOAT3 up;
     DirectX::XMFLOAT3 worldUp;
     DirectX::XMFLOAT3 right;

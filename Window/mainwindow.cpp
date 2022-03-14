@@ -12,8 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     scene = std::make_shared<Scene>();
 
-    unique_ptr<Object> torus = make_unique<Torus>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 0),
-                                                  0.5f, 1, array<int, 2>{4, 4});
+    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1),
+                                                  ui->controlsWidget->minorRadius(),
+                                                  ui->controlsWidget->majorRadius(),
+                                                  ui->controlsWidget->parameters<2>());
     scene->addObject(std::move(torus));
 
     setMouseTracking(true);

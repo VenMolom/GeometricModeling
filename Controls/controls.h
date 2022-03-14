@@ -19,27 +19,39 @@ public:
 
     void setScene(std::shared_ptr<Scene> scenePtr);
 
-    int getSpecular() { return ui->specular->value(); }
+    int majorRadius() const { return ui->majorRadius->value(); }
 
-    int getRenderingSegments() { return ui->renderingSegments->value(); }
+    int minorRadius() const { return ui->minorRadius->value(); }
+
+    template <size_t Dim>
+    std::array<int, Dim> parameters() const;
 
 private slots:
+    void on_uDensity_valueChanged(int arg1);
 
-    void on_radiusX_valueChanged(double arg1);
+    void on_vDensity_valueChanged(int arg1);
 
-    void on_radiusY_valueChanged(double arg1);
+    void on_majorRadius_valueChanged(double arg1);
 
-    void on_radiusZ_valueChanged(double arg1);
-
-    void on_renderingSegments_valueChanged(int arg1);
-
-    void on_specular_valueChanged(int arg1);
+    void on_minorRadius_valueChanged(double arg1);
 
 private:
     std::shared_ptr<Scene> scene;
-    int segments;
+    std::shared_ptr<Object> object;
+    int dim;
+
+    void setDensity() const;
 
     Ui::Controls *ui;
 };
+
+template<size_t Dim>
+std::array<int, Dim> Controls::parameters() const {
+    if constexpr (Dim == 1)
+        return {ui->uDensity->value()};
+    if constexpr (Dim == 2)
+        return {ui->uDensity->value(), ui->vDensity->value()};
+    return {};
+}
 
 #endif // CONTROLLS_H

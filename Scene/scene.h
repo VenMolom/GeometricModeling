@@ -13,15 +13,17 @@ class Scene {
 public:
     explicit Scene() = default;
 
-    void addObject(std::unique_ptr<Object> &&object);
+    void addObject(std::shared_ptr<Object> &&object);
 
     void draw(Renderer &renderer) const;
 
-    Camera &getCamera() { return camera; }
+    Camera &camera() { return _camera; }
+
+    std::weak_ptr<Object> selectedObject() { return objects[0]; }
 
 private:
-    std::vector<std::unique_ptr<Object>> objects;
-    Camera camera;
+    std::vector<std::shared_ptr<Object>> objects;
+    Camera _camera;
 };
 
 

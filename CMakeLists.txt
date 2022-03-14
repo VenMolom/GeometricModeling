@@ -12,7 +12,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(FXC_EXE "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22000.0/x64/fxc.exe")
@@ -35,7 +35,8 @@ set(PROJECT_SOURCES
         DirectX/DXDevice/exceptions.cpp DirectX/DXDevice/exceptions.h
         Renderer/Renderer.h
         Objects/ParametricObject/parametricObject.h
-        Objects/Torus/torus.cpp Objects/Torus/torus.h)
+        Objects/Torus/torus.cpp Objects/Torus/torus.h
+        Resources.qrc)
 
 # Build HLSL shaders
 add_custom_target(shaders)

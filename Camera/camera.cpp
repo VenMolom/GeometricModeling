@@ -6,9 +6,8 @@
 
 using namespace DirectX;
 
-Camera::Camera() : position(0, 0, 1),
+Camera::Camera() : direction(0, 0, 1),
                    center(0, 0, 0),
-                   front(0, 0, -1),
                    up(0, 1, 0),
                    worldUp(0, 1, 0),
                    right(1, 0, 0),
@@ -43,24 +42,24 @@ void Camera::rotate(QPointF angle) {
     auto rotate = angle * SENSITIVITY;
 
     yaw += static_cast<float>(rotate.x());
-    pitch = std::clamp<float>(pitch + static_cast<float>(rotate.y()), -LIMIT, LIMIT);
+    pitch = std::clamp<float>(pitch + static_cast<float>(rotate.y()), MIN_ANGLE, MAX_ANGLE);
 
-    position = {
+    direction = {
             cos(yaw) * cos(pitch),
             sin(pitch),
             sin(yaw) * cos(pitch),
     };
-    XMStoreFloat3(&position, XMVector3Normalize(XMLoadFloat3(&position)));
+    XMStoreFloat3(&direction, XMVector3Normalize(XMLoadFloat3(&direction)));
 
     XMStoreFloat3(&right, XMVector3Normalize(
             XMVector3Cross(
                     XMLoadFloat3(&worldUp),
-                    XMLoadFloat3(&front)
+                    XMLoadFloat3(&direction)
             )
     ));
     XMStoreFloat3(&up, XMVector3Normalize(
             XMVector3Cross(
-                    XMLoadFloat3(&front),
+                    XMLoadFloat3(&direction),
                     XMLoadFloat3(&right)
             )
     ));
@@ -68,21 +67,23 @@ void Camera::rotate(QPointF angle) {
     calculateView();
 }
 
-void Camera::move(QPointF direction) {
-    auto moveRight = XMVectorScale(XMLoadFloat3(&right), SPEED * direction.x());
-    auto moveUp = XMVectorScale(XMLoadFloat3(&up), SPEED * direction.y());
+void Camera::move(QPointF offset) {
+    auto moveRight = XMVectorScale(XMLoadFloat3(&right), SPEED * offset.x());
+    auto moveUp = XMVectorScale(XMLoadFloat3(&up), -SPEED * offset.y());
     auto move = XMVectorAdd(moveRight, moveUp);
 
     XMStoreFloat3(&center, XMVectorAdd(XMLoadFloat3(&center), move));
-    XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&position), move));
 
     calculateView();
 }
 
 void Camera::calculateView() {
+    auto centerVector = XMLoadFloat3(&center);
+    auto fromCenterVector = XMVectorScale(XMLoadFloat3(&direction), distance * zoom);
+
     XMStoreFloat4x4(&view, XMMatrixLookAtRH(
-            XMVectorScale(XMLoadFloat3(&position), distance * zoom),
-            XMLoadFloat3(&center),
+            XMVectorAdd(centerVector, fromCenterVector),
+            centerVector,
             XMLoadFloat3(&up)
     ));
 }

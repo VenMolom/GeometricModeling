@@ -6,10 +6,10 @@
 
 void Scene::draw(Renderer &renderer) const {
     for (auto &object: objects) {
-        object->draw(renderer, camera.viewMatrix());
+        object->draw(renderer, _camera.viewMatrix());
     }
 }
 
-void Scene::addObject(std::unique_ptr<Object> &&object) {
+void Scene::addObject(std::shared_ptr<Object> &&object) {
     objects.push_back(std::move(object));
 }

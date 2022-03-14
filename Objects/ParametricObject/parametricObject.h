@@ -5,13 +5,12 @@
 #ifndef MG1_PARAMETRICOBJECT_H
 #define MG1_PARAMETRICOBJECT_H
 
-#include <DirectXMath.h>
 #include <vector>
 #include <array>
 #include <functional>
 #include "Objects/Object/object.h"
 
-template <size_t Dim>
+template<size_t Dim>
 class ParametricObject : public Object {
 protected:
     ParametricObject(DirectX::XMFLOAT3 position,
@@ -22,12 +21,16 @@ protected:
     // must be called by derived class constructor
     void calculateVerticesAndIndices();
 
-    virtual VertexPositionColor parametricFunction(std::array<float, Dim> parameters) const = 0;
+    virtual std::vector<VertexPositionColor>
+    calculateVertices(const std::array<int, Dim> &density,
+                      const std::array<std::tuple<float, float>, Dim> &range) const = 0;
+
+    virtual std::vector<Index> calculateIndices(const std::array<int, Dim> &density) const = 0;
 
 public:
     void draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const final;
 
-    void setDensity(std::array<int, Dim> density);
+    void setDensity(const std::array<int, Dim> &density);
 
 private:
     std::array<int, Dim> density;
@@ -35,8 +38,6 @@ private:
 
     std::vector<VertexPositionColor> vertices;
     std::vector<Index> indices;
-
-    void calculateDimension(std::array<float, Dim> &value, int dimension);
 };
 
 template<size_t Dim>
@@ -50,7 +51,7 @@ ParametricObject<Dim>::ParametricObject(DirectX::XMFLOAT3 position,
 }
 
 template<size_t Dim>
-void ParametricObject<Dim>::setDensity(std::array<int, Dim> density) {
+void ParametricObject<Dim>::setDensity(const std::array<int, Dim> &density) {
     this->density = density;
 
     calculateVerticesAndIndices();
@@ -64,25 +65,8 @@ void ParametricObject<Dim>::draw(Renderer &renderer, const DirectX::XMMATRIX &ca
 
 template<size_t Dim>
 void ParametricObject<Dim>::calculateVerticesAndIndices() {
-    vertices.clear();
-    std::array<float, Dim> arr;
-    calculateDimension(arr, 0);
-}
-
-template<size_t Dim>
-void ParametricObject<Dim>::calculateDimension(std::array<float, Dim> &value, int dimension) {
-    if (dimension == Dim) {
-        vertices.push_back(parametricFunction(value));
-        return;
-    }
-
-    auto [start, end] = range[dimension];
-    auto delta = (end - start) / (density[dimension] - 1);
-
-    for (auto i = 0; i < density[dimension]; ++i) {
-        value[dimension] = start + i * delta;
-        calculateDimension(value, dimension + 1);
-    }
+    vertices = calculateVertices(density, range);
+    indices = calculateIndices(density);
 }
 
 #endif //MG1_PARAMETRICOBJECT_H

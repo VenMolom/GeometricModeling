@@ -9,6 +9,11 @@
 #include "DirectX/DXStructures/dxStructures.h"
 #include "Renderer/Renderer.h"
 
+
+enum Type {
+    TORUS
+};
+
 class Object {
 protected:
     DirectX::XMFLOAT3 position;
@@ -24,9 +29,11 @@ public:
 
     Object(Object &&object) = default;
 
+    DirectX::XMMATRIX modelMatrix() const;
+
     virtual void draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const = 0;
 
-    DirectX::XMMATRIX modelMatrix() const;
+    virtual Type type() const = 0;
 };
 
 
