@@ -33,9 +33,11 @@ public:
     void setDensity(const std::array<int, Dim> &density);
 
 private:
+    // TODO: expose publicly to read
     std::array<int, Dim> density;
     std::array<std::tuple<float, float>, Dim> range;
 
+    // TODO: store if range is looped
     std::vector<VertexPositionColor> vertices;
     std::vector<Index> indices;
 };
