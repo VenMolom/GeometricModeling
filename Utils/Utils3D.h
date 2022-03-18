@@ -13,24 +13,13 @@ namespace Utils3D {
         DirectX::XMFLOAT3 direction;
     };
 
-    XMFLOAT3RAY getRayFromScreen(DirectX::XMFLOAT2 screenPosition, DirectX::XMFLOAT2 screenSize, float near, float far,
-                                 DirectX::XMMATRIX projection, DirectX::XMMATRIX view) {
-        auto mouseNear = DirectX::XMVectorSet(screenPosition.x, screenPosition.y, 0.0f, 0.0f);
-        auto mouseFar = DirectX::XMVectorSet(screenPosition.x, screenPosition.y, 1.0f, 0.0f);
-        auto worldNear = DirectX::XMVector3Unproject(mouseNear, 0, 0,
-                                                     screenSize.x, screenSize.y,
-                                                     near, far, projection,
-                                                     view, DirectX::XMMatrixIdentity());
-        auto worldFar = DirectX::XMVector3Unproject(mouseFar, 0, 0,
-                                                    screenSize.x, screenSize.y,
-                                                    near, far, projection,
-                                                    view, DirectX::XMMatrixIdentity());
-        XMFLOAT3RAY result{};
-        DirectX::XMStoreFloat3(&result.position, mouseNear);
-        DirectX::XMStoreFloat3(&result.direction, DirectX::XMVector3Normalize(
-                DirectX::XMVectorSubtract(worldFar, worldNear)));
-        return result;
-    }
+    XMFLOAT3RAY
+    getRayFromScreen(DirectX::XMINT2 screenPosition, DirectX::XMFLOAT2 screenSize, float nearZ, float farZ,
+                     DirectX::XMMATRIX projection, DirectX::XMMATRIX view);
+
+    DirectX::XMFLOAT4 getPerpendicularPlaneThroughPoint(DirectX::XMFLOAT3 direction, DirectX::XMFLOAT3 point);
+
+    DirectX::XMFLOAT3 getRayCrossWithPlane(XMFLOAT3RAY ray, DirectX::XMFLOAT4 plane);
 }
 
 #endif //MG1_UTILS3D_H

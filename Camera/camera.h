@@ -7,6 +7,7 @@
 
 #include <DirectXMath.h>
 #include <QRect>
+#include <QProperty>
 
 #define STEP 1.2f
 #define SENSITIVITY 0.005f
@@ -21,30 +22,52 @@ public:
 
     Camera(Camera &&camera) = default;
 
+    DirectX::XMMATRIX cameraMatrix() const;
+
     DirectX::XMMATRIX viewMatrix() const;
+
+    QBindable<DirectX::XMFLOAT4X4> bindableView() { return &view; }
+
+    DirectX::XMMATRIX projectionMatrix() const;
+
+    QBindable<DirectX::XMFLOAT4X4> bindableProjection() { return &projection; }
+
+    QSizeF viewport() const { return viewportSize; }
+
+    DirectX::XMFLOAT3 center() const { return _center; }
+
+    DirectX::XMFLOAT3 direction() const { return _direction; }
+
+    float nearZ() const { return _near; }
+
+    float farZ() const { return _far; }
 
     void resize(QSizeF newSize);
 
-    void changeZoom(float delta, QSizeF viewportSize);
+    void changeZoom(float delta);
 
     void rotate(QPointF angle);
 
     void move(QPointF offset);
 
 private:
-    DirectX::XMFLOAT4X4 _projection;
-    DirectX::XMFLOAT4X4 view;
+    QProperty<DirectX::XMFLOAT4X4> projection;
+    QProperty<DirectX::XMFLOAT4X4> view;
 
-    DirectX::XMFLOAT3 direction{0, 0, 1};
-    DirectX::XMFLOAT3 center{0, 0, 0};
+    DirectX::XMFLOAT3 _direction{0, 0, 1};
+    DirectX::XMFLOAT3 _center{0, 0, 0};
     DirectX::XMFLOAT3 up{0, 1, 0};
     DirectX::XMFLOAT3 worldUp{0, 1, 0};
     DirectX::XMFLOAT3 right{1, 0, 0};
+
+    QSizeF viewportSize;
 
     float distance{10};
     float zoom{1};
     float yaw{DirectX::XM_PIDIV2};
     float pitch{0};
+    float _near{0.1f};
+    float _far{100.0f};
 
     void calculateView();
 

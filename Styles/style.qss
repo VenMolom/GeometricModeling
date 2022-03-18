@@ -79,7 +79,7 @@ QLabel, QGroupBox::title {
 }
 
 QProgressBar {
-	text-align: center;
+	text-align: _center;
 	color: rgb(240, 240, 240);
 	border-width: 1px;
 	border-radius: 10px;

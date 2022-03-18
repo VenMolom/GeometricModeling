@@ -11,22 +11,30 @@ Camera::Camera() {
     calculateView();
 }
 
+XMMATRIX Camera::cameraMatrix() const {
+    return XMLoadFloat4x4(&view.value()) * XMLoadFloat4x4(&projection.value());
+}
+
 XMMATRIX Camera::viewMatrix() const {
-    return XMLoadFloat4x4(&view) * XMLoadFloat4x4(&_projection);
+    return XMLoadFloat4x4(&view.value());
+}
+
+XMMATRIX Camera::projectionMatrix() const {
+    return XMLoadFloat4x4(&projection.value());
 }
 
 void Camera::resize(QSizeF newSize) {
+    viewportSize = newSize;
     calculateProjection(newSize.width() / newSize.height());
 }
 
-void Camera::changeZoom(float delta, QSizeF viewportSize) {
+void Camera::changeZoom(float delta) {
     if (delta <= 0) {
         zoom *= STEP;
     } else {
         zoom /= STEP;
     }
 
-    resize(viewportSize);
     calculateView();
 }
 
@@ -36,22 +44,22 @@ void Camera::rotate(QPointF angle) {
     yaw += static_cast<float>(rotate.x());
     pitch = std::clamp<float>(pitch + static_cast<float>(rotate.y()), MIN_ANGLE, MAX_ANGLE);
 
-    direction = {
+    _direction = {
             cos(yaw) * cos(pitch),
             sin(pitch),
             sin(yaw) * cos(pitch),
     };
-    XMStoreFloat3(&direction, XMVector3Normalize(XMLoadFloat3(&direction)));
+    XMStoreFloat3(&_direction, XMVector3Normalize(XMLoadFloat3(&_direction)));
 
     XMStoreFloat3(&right, XMVector3Normalize(
             XMVector3Cross(
                     XMLoadFloat3(&worldUp),
-                    XMLoadFloat3(&direction)
+                    XMLoadFloat3(&_direction)
             )
     ));
     XMStoreFloat3(&up, XMVector3Normalize(
             XMVector3Cross(
-                    XMLoadFloat3(&direction),
+                    XMLoadFloat3(&_direction),
                     XMLoadFloat3(&right)
             )
     ));
@@ -64,24 +72,27 @@ void Camera::move(QPointF offset) {
     auto moveUp = XMVectorScale(XMLoadFloat3(&up), -SPEED * offset.y());
     auto move = XMVectorAdd(moveRight, moveUp);
 
-    XMStoreFloat3(&center, XMVectorAdd(XMLoadFloat3(&center), move));
+    XMStoreFloat3(&_center, XMVectorAdd(XMLoadFloat3(&_center), move));
 
     calculateView();
 }
 
 void Camera::calculateView() {
-    auto centerVector = XMLoadFloat3(&center);
-    auto fromCenterVector = XMVectorScale(XMLoadFloat3(&direction), distance * zoom);
+    auto centerVector = XMLoadFloat3(&_center);
+    auto fromCenterVector = XMVectorScale(XMLoadFloat3(&_direction), distance * zoom);
 
-    XMStoreFloat4x4(&view, XMMatrixLookAtRH(
+    XMFLOAT4X4 v{};
+    XMStoreFloat4x4(&v, XMMatrixLookAtRH(
             XMVectorAdd(centerVector, fromCenterVector),
             centerVector,
-            XMLoadFloat3(&up)
-    ));
+            XMLoadFloat3(&up)));
+    view.setValue(v);
 }
 
 void Camera::calculateProjection(float aspectRatio) {
-    XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovRH(
+    XMFLOAT4X4 proj{};
+    XMStoreFloat4x4(&proj, XMMatrixPerspectiveFovRH(
             XMConvertToRadians(90),
-            aspectRatio, 0.1f, 100.0f));
+            aspectRatio, _near, _far));
+    projection.setValue(proj);
 }

@@ -133,7 +133,7 @@ void DxRenderer::mouseMoveEvent(QMouseEvent *event) {
 
 void DxRenderer::wheelEvent(QWheelEvent *event) {
     QWidget::wheelEvent(event);
-    inputHandler.wheelEvent(event, size());
+    inputHandler.wheelEvent(event);
 }
 
 void DxRenderer::keyPressEvent(QKeyEvent *event) {

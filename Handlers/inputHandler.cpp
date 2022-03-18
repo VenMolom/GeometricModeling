@@ -46,8 +46,8 @@ void InputHandler::mouseMoveEvent(QMouseEvent *event) {
     lastMousePos = event->position();
 }
 
-void InputHandler::wheelEvent(QWheelEvent *event, QSizeF size) {
-    scene->camera().changeZoom(static_cast<float>(event->angleDelta().y()), size);
+void InputHandler::wheelEvent(QWheelEvent *event) {
+    scene->camera().changeZoom(static_cast<float>(event->angleDelta().y()));
 }
 
 void InputHandler::keyPressEvent(QKeyEvent *event) {

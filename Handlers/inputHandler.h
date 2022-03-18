@@ -22,7 +22,7 @@ public:
 
     void mouseMoveEvent(QMouseEvent *event);
 
-    void wheelEvent(QWheelEvent *event, QSizeF size);
+    void wheelEvent(QWheelEvent *event);
 
     void keyPressEvent(QKeyEvent *event);
 

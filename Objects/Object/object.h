@@ -20,6 +20,9 @@ enum Type {
 
 class Object {
 protected:
+    QProperty<DirectX::XMFLOAT3> _position;
+    QProperty<DirectX::XMFLOAT3> _rotation{{0, 0, 0}};
+    QProperty<DirectX::XMFLOAT3> _scale{{1, 1, 1}};
     QProperty<DirectX::XMFLOAT3> _color;
 
     Object(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 color);
@@ -60,9 +63,6 @@ public:
     virtual Type type() const = 0;
 
 private:
-    QProperty<DirectX::XMFLOAT3> _position;
-    QProperty<DirectX::XMFLOAT3> _rotation{{0, 0, 0}};
-    QProperty<DirectX::XMFLOAT3> _scale{{1, 1, 1}};
     DirectX::XMFLOAT4X4 model;
 
     void calculateModel();

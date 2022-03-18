@@ -44,16 +44,17 @@ void Controls::updateSelected() {
         updateScale();
 
         switch (object->type()) {
-            case CURSOR:
+            case CURSOR: {
                 auto *c = dynamic_cast<Cursor *>(object.get());
                 ui->rotationFrame->hide();
                 ui->scaleFrame->hide();
                 ui->screenPosFrame->show();
 
-                ui->screenPosX->setValue(c->screenPosition().x);
-                ui->screenPosY->setValue(c->screenPosition().y);
-
-            case TORUS:
+                objectHandler.screen = c->bindableScreenPosition().addNotifier([&] { updateScreenPosition(); });
+                updateScreenPosition();
+                break;
+            }
+            case TORUS: {
                 auto *t = dynamic_cast<Torus *>(object.get());
                 dim = 2;
                 ui->torusGroupBox->show();
@@ -65,6 +66,7 @@ void Controls::updateSelected() {
                 ui->minorRadius->setValue(t->minorRadius());
                 ui->uDensity->setValue(t->density()[0]);
                 ui->vDensity->setValue(t->density()[1]);
+            }
         }
     } else {
         ui->objectGroupBox->hide();
@@ -116,6 +118,13 @@ void Controls::updateScale() {
     ui->scaleX->setValue(object->scale().x);
     ui->scaleY->setValue(object->scale().y);
     ui->scaleZ->setValue(object->scale().z);
+}
+
+void Controls::updateScreenPosition() {
+    if (auto *c = dynamic_cast<Cursor *>(object.get())) {
+        ui->screenPosX->setValue(c->screenPosition().x);
+        ui->screenPosY->setValue(c->screenPosition().y);
+    }
 }
 
 #pragma region Slots

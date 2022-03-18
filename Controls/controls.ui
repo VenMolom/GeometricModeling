@@ -549,7 +549,11 @@
           <number>0</number>
          </property>
          <item row="0" column="2">
-          <widget class="QSpinBox" name="screenPosX"/>
+          <widget class="QSpinBox" name="screenPosX">
+           <property name="maximum">
+            <number>10000</number>
+           </property>
+          </widget>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="screenPosLabel">
@@ -559,7 +563,11 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QSpinBox" name="screenPosY"/>
+          <widget class="QSpinBox" name="screenPosY">
+           <property name="maximum">
+            <number>10000</number>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

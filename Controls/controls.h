@@ -57,6 +57,7 @@ private:
         QPropertyNotifier position;
         QPropertyNotifier rotation;
         QPropertyNotifier scale;
+        QPropertyNotifier screen;
     };
     QPropertyNotifier sceneHandler;
     Controls::ObjectHandler objectHandler;
@@ -82,13 +83,14 @@ private:
 
     void updateScale();
 
+    void updateScreenPosition();
+
     template<size_t Dim>
     std::array<int, Dim> parameters() const;
 
     Ui::Controls *ui;
 
     // IN PROGRESS:
-    // TODO: control screen space and scene space location of 3D cursor (if present)
 
     // TODO
     // TODO: add torus and 3D point to scene in place of 3D cursor
@@ -96,8 +98,8 @@ private:
     // TODO: list objects on scene
     // TODO: names of objects on scene (in list and possible to change)
     // TODO: selection of object (from list and clicking on screen)
-    // TODO: show center of all selected objects
-    // TODO: modify _scale, _position and _rotation of selected objects (based on center of selected objects)
+    // TODO: show _center of all selected objects
+    // TODO: modify _scale, _position and _rotation of selected objects (based on _center of selected objects)
 };
 
 template<size_t Dim>
