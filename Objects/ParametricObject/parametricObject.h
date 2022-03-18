@@ -30,14 +30,18 @@ protected:
 public:
     void draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const final;
 
+    const std::array<int, Dim> &density() const { return _density; }
+
     void setDensity(const std::array<int, Dim> &density);
 
-private:
-    // TODO: expose publicly to read
-    std::array<int, Dim> density;
-    std::array<std::tuple<float, float>, Dim> range;
+    const std::array<std::tuple<float, float>, Dim> &range() const { return _range; }
 
-    // TODO: store if range is looped
+    virtual std::array<bool, 2> looped() const = 0;
+
+private:
+    std::array<int, Dim> _density;
+    std::array<std::tuple<float, float>, Dim> _range;
+
     std::vector<VertexPositionColor> vertices;
     std::vector<Index> indices;
 };
@@ -48,15 +52,8 @@ ParametricObject<Dim>::ParametricObject(DirectX::XMFLOAT3 position,
                                         std::array<int, Dim> density,
                                         std::array<std::tuple<float, float>, Dim> range)
         : Object(position, color),
-          density(density),
-          range(range) {
-}
-
-template<size_t Dim>
-void ParametricObject<Dim>::setDensity(const std::array<int, Dim> &density) {
-    this->density = density;
-
-    calculateVerticesAndIndices();
+          _density(density),
+          _range(range) {
 }
 
 template<size_t Dim>
@@ -67,8 +64,14 @@ void ParametricObject<Dim>::draw(Renderer &renderer, const DirectX::XMMATRIX &ca
 
 template<size_t Dim>
 void ParametricObject<Dim>::calculateVerticesAndIndices() {
-    vertices = calculateVertices(density, range);
-    indices = calculateIndices(density);
+    vertices = calculateVertices(_density, _range);
+    indices = calculateIndices(_density);
+}
+
+template<size_t Dim>
+void ParametricObject<Dim>::setDensity(const std::array<int, Dim> &density) {
+    _density = density;
+    calculateVerticesAndIndices();
 }
 
 #endif //MG1_PARAMETRICOBJECT_H

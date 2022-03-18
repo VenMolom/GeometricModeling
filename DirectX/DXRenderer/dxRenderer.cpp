@@ -6,9 +6,7 @@ using namespace std;
 using namespace DirectX;
 
 DxRenderer::DxRenderer(QWidget *parent) : m_device(this),
-                                          mouseButtonPressed(false),
-                                          moveButtonPressed(false),
-                                          lastMousePos() {
+                                          inputHandler() {
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NativeWindow, true);
 
@@ -34,6 +32,7 @@ void DxRenderer::renderScene() {
 
 void DxRenderer::setScene(std::shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
+    this->inputHandler.setScene(scene);
 }
 
 void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
@@ -60,6 +59,29 @@ void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
     m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
     m_device.context()->DrawIndexed(indices.size(), 0, 0);
 }
+
+void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
+                           const DirectX::XMMATRIX &mvp) {
+    // map MVP matrix to shader buffer
+    D3D11_MAPPED_SUBRESOURCE res;
+    m_device.context()->Map(m_cbMVP.get(), 0,
+                            D3D11_MAP_WRITE_DISCARD, 0, &res);
+    memcpy(res.pData, &mvp, sizeof(XMMATRIX));
+    m_device.context()->Unmap(m_cbMVP.get(), 0);
+
+    // set vertex
+    m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
+    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+    UINT strides[] = {sizeof(VertexPositionColor)};
+    UINT offsets[] = {0};
+    m_device.context()->IASetVertexBuffers(
+            0, 1, vbs, strides, offsets);
+
+    // draw lines
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    m_device.context()->Draw(vertices.size(), 0);
+}
+
 
 float DxRenderer::frameTime() {
     auto oldTicks = currentTicks;
@@ -90,64 +112,38 @@ void DxRenderer::paintEvent(QPaintEvent *event) {
     auto deltaTime = frameTime();
 
     renderScene();
-
     m_device.swapChain()->Present(0, 0);
-
     update();
 }
 
 void DxRenderer::mousePressEvent(QMouseEvent *event) {
     QWidget::mousePressEvent(event);
-
-    if (event->button() == Qt::MouseButton::LeftButton) {
-        mouseButtonPressed = true;
-        lastMousePos = event->position();
-    }
+    inputHandler.mousePressEvent(event);
 }
 
 void DxRenderer::mouseReleaseEvent(QMouseEvent *event) {
     QWidget::mouseReleaseEvent(event);
-
-    if (event->button() == Qt::MouseButton::LeftButton) {
-        mouseButtonPressed = false;
-        lastMousePos = QPoint();
-    }
+    inputHandler.mouseReleaseEvent(event);
 }
 
 void DxRenderer::mouseMoveEvent(QMouseEvent *event) {
     QWidget::mouseMoveEvent(event);
-
-    if (!mouseButtonPressed) return;
-
-    if (moveButtonPressed) {
-        scene->camera().move(event->position() - lastMousePos);
-    } else if (!lastMousePos.isNull()) {
-        scene->camera().rotate(event->position() - lastMousePos);
-    }
-
-    lastMousePos = event->position();
+    inputHandler.mouseMoveEvent(event);
 }
 
 void DxRenderer::wheelEvent(QWheelEvent *event) {
     QWidget::wheelEvent(event);
-
-    scene->camera().changeZoom(static_cast<float>(event->angleDelta().y()), size());
+    inputHandler.wheelEvent(event, size());
 }
 
 void DxRenderer::keyPressEvent(QKeyEvent *event) {
     QWidget::keyPressEvent(event);
-
-    if (event->key() == Qt::Key::Key_Shift) {
-        moveButtonPressed = true;
-    }
+    inputHandler.keyPressEvent(event);
 }
 
 void DxRenderer::keyReleaseEvent(QKeyEvent *event) {
     QWidget::keyReleaseEvent(event);
-
-    if (event->key() == Qt::Key::Key_Shift) {
-        moveButtonPressed = false;
-    }
+    inputHandler.keyReleaseEvent(event);
 }
 
 #pragma endregion Event_Handlers
@@ -169,7 +165,7 @@ void DxRenderer::init3D3() {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
                     D3D11_INPUT_PER_VERTEX_DATA, 0},
             {"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
-                    static_cast<UINT>(offsetof(VertexPositionColor, color)),
+                                                            static_cast<UINT>(offsetof(VertexPositionColor, color)),
                     D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_layout = m_device.CreateInputLayout(elements, vsBytes);

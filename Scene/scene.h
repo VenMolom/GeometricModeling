@@ -6,8 +6,8 @@
 #define MG1_SCENE_H
 
 #include <list>
-#include "Objects/Object/object.h"
 #include "Camera/camera.h"
+#include "Objects/Cursor/cursor.h"
 
 class Scene {
 public:
@@ -19,10 +19,15 @@ public:
 
     Camera &camera() { return _camera; }
 
-    std::weak_ptr<Object> selectedObject() { return objects[0]; }
+    std::weak_ptr<Object> selected() const { return _selected; }
+    QBindable<std::weak_ptr<Object>> bindableSelected() { return &_selected; }
+
+    void addCursor(QPoint screenPosition);
 
 private:
     std::vector<std::shared_ptr<Object>> objects;
+    std::shared_ptr<Cursor> cursor;
+    QProperty<std::weak_ptr<Object>> _selected;
     Camera _camera;
 };
 

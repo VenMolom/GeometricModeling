@@ -6,21 +6,13 @@
 
 using namespace DirectX;
 
-Camera::Camera() : direction(0, 0, 1),
-                   center(0, 0, 0),
-                   up(0, 1, 0),
-                   worldUp(0, 1, 0),
-                   right(1, 0, 0),
-                   distance(10),
-                   zoom(1),
-                   yaw(XM_PIDIV2),
-                   pitch(0) {
+Camera::Camera() {
     calculateProjection(1);
     calculateView();
 }
 
 XMMATRIX Camera::viewMatrix() const {
-    return XMLoadFloat4x4(&view) * XMLoadFloat4x4(&projection);
+    return XMLoadFloat4x4(&view) * XMLoadFloat4x4(&_projection);
 }
 
 void Camera::resize(QSizeF newSize) {
@@ -89,7 +81,7 @@ void Camera::calculateView() {
 }
 
 void Camera::calculateProjection(float aspectRatio) {
-    XMStoreFloat4x4(&projection, XMMatrixPerspectiveFovRH(
+    XMStoreFloat4x4(&_projection, XMMatrixPerspectiveFovRH(
             XMConvertToRadians(90),
             aspectRatio, 0.1f, 100.0f));
 }

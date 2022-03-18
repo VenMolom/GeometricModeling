@@ -32,19 +32,19 @@ public:
     void move(QPointF offset);
 
 private:
-    DirectX::XMFLOAT4X4 projection;
+    DirectX::XMFLOAT4X4 _projection;
     DirectX::XMFLOAT4X4 view;
 
-    DirectX::XMFLOAT3 direction;
-    DirectX::XMFLOAT3 center;
-    DirectX::XMFLOAT3 up;
-    DirectX::XMFLOAT3 worldUp;
-    DirectX::XMFLOAT3 right;
+    DirectX::XMFLOAT3 direction{0, 0, 1};
+    DirectX::XMFLOAT3 center{0, 0, 0};
+    DirectX::XMFLOAT3 up{0, 1, 0};
+    DirectX::XMFLOAT3 worldUp{0, 1, 0};
+    DirectX::XMFLOAT3 right{1, 0, 0};
 
-    float distance;
-    float zoom;
-    float yaw;
-    float pitch;
+    float distance{10};
+    float zoom{1};
+    float yaw{DirectX::XM_PIDIV2};
+    float pitch{0};
 
     void calculateView();
 

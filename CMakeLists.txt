@@ -36,7 +36,7 @@ set(PROJECT_SOURCES
         Renderer/Renderer.h
         Objects/ParametricObject/parametricObject.h
         Objects/Torus/torus.cpp Objects/Torus/torus.h
-        Resources.qrc)
+        Resources.qrc Handlers/inputHandler.cpp Handlers/inputHandler.h Objects/Cursor/cursor.cpp Objects/Cursor/cursor.h Utils/Utils3D.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

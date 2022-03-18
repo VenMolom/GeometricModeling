@@ -1,8 +1,7 @@
 #pragma once
 
 #include "DirectX/DXDevice/dxDevice.h"
-#include "Scene/scene.h"
-#include <QWheelEvent>
+#include "Handlers/inputHandler.h"
 #include <windowsx.h>
 #include <string>
 #include <basetsd.h>
@@ -31,6 +30,9 @@ public:
                    const std::vector<Index> &indices,
                    const DirectX::XMMATRIX &mvp) override;
 
+    void drawLines(const std::vector<VertexPositionColor> &vertices,
+                   const DirectX::XMMATRIX &mvp) override;
+
     QPaintEngine *paintEngine() const override;
 
 protected:
@@ -52,10 +54,7 @@ protected:
 
 private:
     std::shared_ptr<Scene> scene;
-
-    QPointF lastMousePos;
-    bool mouseButtonPressed;
-    bool moveButtonPressed;
+    InputHandler inputHandler;
 
     DxDevice m_device;
 

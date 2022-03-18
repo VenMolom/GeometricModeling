@@ -12,6 +12,9 @@ public:
     virtual void drawLines(const std::vector<VertexPositionColor> &vertices,
                            const std::vector<Index> &indices,
                            const DirectX::XMMATRIX &mvp) = 0;
+
+    virtual void drawLines(const std::vector<VertexPositionColor> &vertices,
+                           const DirectX::XMMATRIX &mvp) = 0;
 };
 
 #endif //MG1_RENDERER_H

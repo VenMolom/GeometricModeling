@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Objects/Torus/torus.h"
+#include "Objects/Cursor/cursor.h"
 #include <iostream>
 
 using namespace std;
@@ -12,10 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     scene = std::make_shared<Scene>();
 
-    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1),
-                                                  ui->controlsWidget->minorRadius(),
-                                                  ui->controlsWidget->majorRadius(),
-                                                  ui->controlsWidget->parameters<2>());
+    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1));
     scene->addObject(std::move(torus));
 
     setMouseTracking(true);
