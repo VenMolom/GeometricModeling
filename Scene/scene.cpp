@@ -9,14 +9,20 @@ using namespace std;
 
 void Scene::draw(Renderer &renderer) const {
     for (auto &object: objects) {
-        object->draw(renderer, _camera.cameraMatrix());
+        object->draw(renderer, _camera);
     }
     if (cursor) {
-        cursor->draw(renderer, _camera.cameraMatrix());
+        cursor->draw(renderer, _camera);
     }
 }
 
 void Scene::addObject(shared_ptr<Object> &&object) {
+    if (cursor) {
+        object->setPosition(cursor->position());
+        cursor.reset();
+    }
+
+    _selected = object;
     objects.push_back(std::move(object));
 }
 

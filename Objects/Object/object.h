@@ -12,9 +12,11 @@
 #include "DirectX/DXDevice/dxptr.h"
 #include "DirectX/DXStructures/dxStructures.h"
 #include "Renderer/Renderer.h"
+#include "Camera/camera.h"
 
 enum Type {
     CURSOR,
+    POINT3D,
     TORUS
 };
 
@@ -24,8 +26,9 @@ protected:
     QProperty<DirectX::XMFLOAT3> _rotation{{0, 0, 0}};
     QProperty<DirectX::XMFLOAT3> _scale{{1, 1, 1}};
     QProperty<DirectX::XMFLOAT3> _color;
+    QProperty<QString> _name;
 
-    Object(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 color);
+    Object(QString name, DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 color);
 
 public:
     Object(Object &object) = default;
@@ -58,7 +61,13 @@ public:
 
     QBindable<DirectX::XMFLOAT3> bindableColor() { return &_color; }
 
-    virtual void draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const = 0;
+    QString name() { return _name; }
+
+    void setName(QString name);
+
+    QBindable<QString> bindableName() { return &_name; }
+
+    virtual void draw(Renderer &renderer, const Camera &camera) const = 0;
 
     virtual Type type() const = 0;
 

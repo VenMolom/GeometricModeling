@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QModelIndexList>
 #include "Scene/scene.h"
 
 QT_BEGIN_NAMESPACE
@@ -15,6 +16,13 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
 
     ~MainWindow() override;
+
+private slots:
+    void on_addPoint_clicked();
+
+    void on_addTorus_clicked();
+
+    void on_objectsList_itemSelectionChanged();
 
 private:
     Ui::MainWindow *ui;

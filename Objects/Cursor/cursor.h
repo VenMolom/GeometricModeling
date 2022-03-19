@@ -13,7 +13,7 @@ class Cursor : public Object {
 public:
     Cursor(DirectX::XMFLOAT3 position, DirectX::XMINT2 screenPosition, Camera &camera);
 
-    void draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const override;
+    void draw(Renderer &renderer, const Camera &camera) const override;
 
     Type type() const override;
 
@@ -26,7 +26,6 @@ public:
 private:
     Camera &camera;
 
-    static const std::vector<VertexPositionColor> vertices;
     QProperty<DirectX::XMINT2> _screenPosition;
     QPropertyNotifier positionHandler;
     QPropertyNotifier viewHandler;

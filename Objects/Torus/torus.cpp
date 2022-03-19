@@ -9,7 +9,7 @@ using namespace std;
 using namespace DirectX;
 
 Torus::Torus(XMFLOAT3 position, XMFLOAT3 color)
-        : ParametricObject<DIM>(position, color, { 10, 10 }, {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)}) {
+        : ParametricObject<DIM>("Torus", position, color, { 10, 10 }, {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)}) {
     calculateVerticesAndIndices();
 }
 

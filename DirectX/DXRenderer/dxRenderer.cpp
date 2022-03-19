@@ -38,12 +38,7 @@ void DxRenderer::setScene(std::shared_ptr<Scene> scenePtr) {
 void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
                            const vector<Index> &indices,
                            const DirectX::XMMATRIX &mvp) {
-    // map MVP matrix to shader buffer
-    D3D11_MAPPED_SUBRESOURCE res;
-    m_device.context()->Map(m_cbMVP.get(), 0,
-                            D3D11_MAP_WRITE_DISCARD, 0, &res);
-    memcpy(res.pData, &mvp, sizeof(XMMATRIX));
-    m_device.context()->Unmap(m_cbMVP.get(), 0);
+    mapShaderMatrix(mvp);
 
     // set vertex and index buffers
     m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
@@ -60,18 +55,11 @@ void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
     m_device.context()->DrawIndexed(indices.size(), 0, 0);
 }
 
-void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
-                           const DirectX::XMMATRIX &mvp) {
-    // map MVP matrix to shader buffer
-    D3D11_MAPPED_SUBRESOURCE res;
-    m_device.context()->Map(m_cbMVP.get(), 0,
-                            D3D11_MAP_WRITE_DISCARD, 0, &res);
-    memcpy(res.pData, &mvp, sizeof(XMMATRIX));
-    m_device.context()->Unmap(m_cbMVP.get(), 0);
+void DxRenderer::drawCursor(const DirectX::XMMATRIX &mvp) {
+    mapShaderMatrix(mvp);
 
     // set vertex
-    m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
-    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+    ID3D11Buffer *vbs[] = {m_cursorBuffer.get()};
     UINT strides[] = {sizeof(VertexPositionColor)};
     UINT offsets[] = {0};
     m_device.context()->IASetVertexBuffers(
@@ -79,9 +67,32 @@ void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
 
     // draw lines
     m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    m_device.context()->Draw(vertices.size(), 0);
+    m_device.context()->Draw(cursorBufferSize, 0);
 }
 
+void DxRenderer::drawPoint(const DirectX::XMMATRIX &mvp) {
+    mapShaderMatrix(mvp);
+
+    // set vertex
+    ID3D11Buffer *vbs[] = {m_pointVertexBuffer.get()};
+    UINT strides[] = {sizeof(VertexPositionColor)};
+    UINT offsets[] = {0};
+    m_device.context()->IASetVertexBuffers(
+            0, 1, vbs, strides, offsets);
+    m_device.context()->IASetIndexBuffer(m_pointIndexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
+
+    // draw lines
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+    m_device.context()->DrawIndexed(pointBufferSize, 0, 0);
+}
+
+void DxRenderer::mapShaderMatrix(const DirectX::XMMATRIX &matrix) {
+    D3D11_MAPPED_SUBRESOURCE res;
+    m_device.context()->Map(m_cbMVP.get(), 0,
+                            D3D11_MAP_WRITE_DISCARD, 0, &res);
+    memcpy(res.pData, &matrix, sizeof(XMMATRIX));
+    m_device.context()->Unmap(m_cbMVP.get(), 0);
+}
 
 float DxRenderer::frameTime() {
     auto oldTicks = currentTicks;
@@ -171,6 +182,30 @@ void DxRenderer::init3D3() {
     m_layout = m_device.CreateInputLayout(elements, vsBytes);
 
     m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
+
+    std::vector<VertexPositionColor> cursorVertices = {
+            {{0, 0, 0}, {1, 0, 0}},
+            {{1, 0, 0}, {1, 0, 0}},
+            {{0, 0, 0}, {0, 1, 0}},
+            {{0, 1, 0}, {0, 1, 0}},
+            {{0, 0, 0}, {0, 0, 1}},
+            {{0, 0, 1}, {0, 0, 1}}
+    };
+    m_cursorBuffer = m_device.CreateVertexBuffer(cursorVertices);
+    cursorBufferSize = cursorVertices.size();
+
+    vector<VertexPositionColor> pointVertices = {
+            {{1, 1, 0}, {1, 1, 1}},
+            {{-1, 1, 0}, {1, 1, 1}},
+            {{-1, -1, 0}, {1, 1, 1}},
+            {{1, -1, 0}, {1, 1, 1}}
+    };
+    vector<Index> pointIndices = {
+            0, 1, 2, 3, 0, 2, 1, 3
+    };
+    m_pointVertexBuffer = m_device.CreateVertexBuffer(pointVertices);
+    m_pointIndexBuffer = m_device.CreateIndexBuffer(pointIndices);
+    pointBufferSize = pointIndices.size();
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);

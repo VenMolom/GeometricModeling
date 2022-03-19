@@ -13,7 +13,8 @@
 template<size_t Dim>
 class ParametricObject : public Object {
 protected:
-    ParametricObject(DirectX::XMFLOAT3 position,
+    ParametricObject(QString name,
+                     DirectX::XMFLOAT3 position,
                      DirectX::XMFLOAT3 color,
                      std::array<int, Dim> density,
                      std::array<std::tuple<float, float>, Dim> range);
@@ -28,7 +29,7 @@ protected:
     virtual std::vector<Index> calculateIndices(const std::array<int, Dim> &density) const = 0;
 
 public:
-    void draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const final;
+    void draw(Renderer &renderer, const Camera &camera) const final;
 
     const std::array<int, Dim> &density() const { return _density; }
 
@@ -47,19 +48,23 @@ private:
 };
 
 template<size_t Dim>
-ParametricObject<Dim>::ParametricObject(DirectX::XMFLOAT3 position,
+ParametricObject<Dim>::ParametricObject(QString name,
+                                        DirectX::XMFLOAT3 position,
                                         DirectX::XMFLOAT3 color,
                                         std::array<int, Dim> density,
                                         std::array<std::tuple<float, float>, Dim> range)
-        : Object(position, color),
+        : Object(name, position, color),
           _density(density),
           _range(range) {
 }
 
 template<size_t Dim>
-void ParametricObject<Dim>::draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const {
-    auto mvp = modelMatrix() * camera;
+void ParametricObject<Dim>::draw(Renderer &renderer, const Camera &camera) const {
+    auto mvp = modelMatrix() * camera.cameraMatrix();
     renderer.drawLines(vertices, indices, mvp);
+    // TODO: draw cursor if selected
+    // TODO: draw different color if selected
+    // renderer.drawCursor(mvp);
 }
 
 template<size_t Dim>

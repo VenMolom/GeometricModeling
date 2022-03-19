@@ -7,7 +7,7 @@
 using namespace DirectX;
 
 Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
-        : Object(position, {0, 0, 0}),
+        : Object("Cursor", position, {0, 0, 0}),
           _screenPosition(screenPosition),
           camera(camera) {
     positionHandler = this->bindablePosition().addNotifier([&] { updateScreenPosition(); });
@@ -15,23 +15,14 @@ Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
     viewHandler = camera.bindableView().addNotifier([&] { updateScreenPosition(); });
 }
 
-void Cursor::draw(Renderer &renderer, const DirectX::XMMATRIX &camera) const {
-    auto mvp = modelMatrix() * camera;
-    renderer.drawLines(vertices, mvp);
+void Cursor::draw(Renderer &renderer, const Camera &camera) const {
+    auto mvp = modelMatrix() * camera.cameraMatrix();
+    renderer.drawCursor(mvp);
 }
 
 Type Cursor::type() const {
     return CURSOR;
 }
-
-const std::vector<VertexPositionColor> Cursor::vertices = {
-        {{0, 0, 0}, {1, 0, 0}},
-        {{1, 0, 0}, {1, 0, 0}},
-        {{0, 0, 0}, {0, 1, 0}},
-        {{0, 1, 0}, {0, 1, 0}},
-        {{0, 0, 0}, {0, 0, 1}},
-        {{0, 0, 1}, {0, 0, 1}}
-};
 
 void Cursor::setScreenPosition(DirectX::XMINT2 position) {
     if (position.x == _screenPosition.value().x &&

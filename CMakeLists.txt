@@ -38,7 +38,8 @@ set(PROJECT_SOURCES
         Objects/Torus/torus.cpp Objects/Torus/torus.h
         Resources.qrc Handlers/inputHandler.cpp Handlers/inputHandler.h
         Objects/Cursor/cursor.cpp Objects/Cursor/cursor.h
-        Utils/Utils3D.h Utils/Utils3D.cpp)
+        Utils/Utils3D.h Utils/Utils3D.cpp
+        Objects/Point/point.cpp Objects/Point/point.h Objects/ObjectListItem/objectListItem.cpp Objects/ObjectListItem/objectListItem.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

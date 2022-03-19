@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Objects/Torus/torus.h"
-#include "Objects/Cursor/cursor.h"
+#include "Objects/Point/point.h"
 #include <iostream>
 
 using namespace std;
@@ -13,9 +13,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     scene = std::make_shared<Scene>();
 
-    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1));
-    scene->addObject(std::move(torus));
-
     setMouseTracking(true);
     ui->controlsWidget->setScene(scene);
     ui->renderWidget->setScene(scene);
@@ -24,3 +21,21 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
     delete ui;
 }
+
+void MainWindow::on_addPoint_clicked() {
+    shared_ptr<Object> point = make_shared<Point>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1));
+    ui->objectsList->insertItem(0, point->name());
+    scene->addObject(std::move(point));
+}
+
+void MainWindow::on_addTorus_clicked() {
+    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1));
+    ui->objectsList->insertItem(0, torus->name());
+    scene->addObject(std::move(torus));
+}
+
+void MainWindow::on_objectsList_itemSelectionChanged() {
+    auto a = ui->objectsList->selectedItems();
+    auto b = a.size();
+}
+

@@ -19,8 +19,6 @@ public:
 
     void setScene(std::shared_ptr<Scene> scenePtr);
 
-    void updateSelected();
-
 private slots:
     void on_uDensity_valueChanged(int arg1);
 
@@ -52,11 +50,14 @@ private slots:
 
     void on_screenPosY_valueChanged(int arg1);
 
+    void on_nameEdit_editingFinished();
+
 private:
     struct ObjectHandler {
         QPropertyNotifier position;
         QPropertyNotifier rotation;
         QPropertyNotifier scale;
+        QPropertyNotifier name;
         QPropertyNotifier screen;
     };
     QPropertyNotifier sceneHandler;
@@ -65,6 +66,8 @@ private:
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Object> object;
     int dim;
+
+    void updateSelected();
 
     void setDensity() const;
 
@@ -76,6 +79,8 @@ private:
 
     void setVectorZ(void (Object::*target)(DirectX::XMFLOAT3),
                               DirectX::XMFLOAT3 (Object::*source)() const, float value) const;
+
+    void resetView();
 
     void updatePosition();
 
@@ -91,13 +96,10 @@ private:
     Ui::Controls *ui;
 
     // IN PROGRESS:
+    // TODO: selection of object (from list and clicking on screen)
 
     // TODO
-    // TODO: add torus and 3D point to scene in place of 3D cursor
     // TODO: delete objects from scene
-    // TODO: list objects on scene
-    // TODO: names of objects on scene (in list and possible to change)
-    // TODO: selection of object (from list and clicking on screen)
     // TODO: show _center of all selected objects
     // TODO: modify _scale, _position and _rotation of selected objects (based on _center of selected objects)
 };

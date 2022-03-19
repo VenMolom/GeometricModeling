@@ -4,12 +4,14 @@
 
 #include "object.h"
 
+#include <utility>
+
 using namespace DirectX;
 
-Object::Object(XMFLOAT3 position, XMFLOAT3 color)
+Object::Object(QString name, XMFLOAT3 position, XMFLOAT3 color)
         : _position(position),
-          _color(color) {
-
+          _color(color),
+          _name(name) {
     calculateModel();
 }
 
@@ -42,4 +44,8 @@ void Object::setScale(DirectX::XMFLOAT3 scale) {
 
 void Object::setColor(DirectX::XMFLOAT3 color) {
     _color = color;
+}
+
+void Object::setName(QString name) {
+    _name = std::move(name);
 }

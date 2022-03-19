@@ -28,26 +28,31 @@ void Controls::setScene(shared_ptr<Scene> scenePtr) {
 void Controls::updateSelected() {
     object = scene->selected().lock();
     if (object) {
-        ui->objectGroupBox->show();
-        ui->rotationFrame->show();
-        ui->scaleFrame->show();
-        ui->screenPosFrame->hide();
-
+        resetView();
 
         objectHandler = {
                 object->bindablePosition().addNotifier([&] { updatePosition(); }),
                 object->bindableRotation().addNotifier([&] { updateRotation(); }),
-                object->bindableScale().addNotifier([&] { updateScale(); })
+                object->bindableScale().addNotifier([&] { updateScale(); }),
+                object->bindableName().addNotifier([&] { ui->nameEdit->setText(object->name()); })
+
         };
         updatePosition();
         updateRotation();
         updateScale();
+        ui->nameEdit->setText(object->name());
 
         switch (object->type()) {
+            case POINT3D:
+                ui->rotationFrame->hide();
+                ui->scaleFrame->hide();
+                break;
+
             case CURSOR: {
                 auto *c = dynamic_cast<Cursor *>(object.get());
                 ui->rotationFrame->hide();
                 ui->scaleFrame->hide();
+                ui->nameFrame->hide();
                 ui->screenPosFrame->show();
 
                 objectHandler.screen = c->bindableScreenPosition().addNotifier([&] { updateScreenPosition(); });
@@ -73,6 +78,16 @@ void Controls::updateSelected() {
         ui->parametersGroupBox->hide();
         ui->torusGroupBox->hide();
     }
+}
+
+void Controls::resetView() {
+    ui->objectGroupBox->show();
+    ui->rotationFrame->show();
+    ui->scaleFrame->show();
+    ui->nameFrame->show();
+    ui->screenPosFrame->hide();
+    ui->torusGroupBox->hide();
+    ui->parametersGroupBox->hide();
 }
 
 void Controls::setDensity() const {
@@ -201,6 +216,10 @@ void Controls::on_screenPosY_valueChanged(int arg1) {
         sp.y = static_cast<int>(arg1);
         c->setScreenPosition(sp);
     }
+}
+
+void Controls::on_nameEdit_editingFinished() {
+    object->setName(ui->nameEdit->text());
 }
 
 #pragma endregion Slots

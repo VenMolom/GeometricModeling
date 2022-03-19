@@ -30,8 +30,9 @@ public:
                    const std::vector<Index> &indices,
                    const DirectX::XMMATRIX &mvp) override;
 
-    void drawLines(const std::vector<VertexPositionColor> &vertices,
-                   const DirectX::XMMATRIX &mvp) override;
+    void drawCursor(const DirectX::XMMATRIX &mvp) override;
+
+    void drawPoint(const DirectX::XMMATRIX &mvp) override;
 
     QPaintEngine *paintEngine() const override;
 
@@ -64,6 +65,13 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_vertexBuffer;
     mini::dx_ptr<ID3D11Buffer> m_indexBuffer;
 
+    mini::dx_ptr<ID3D11Buffer> m_pointVertexBuffer;
+    mini::dx_ptr<ID3D11Buffer> m_pointIndexBuffer;
+    size_t pointBufferSize;
+
+    mini::dx_ptr<ID3D11Buffer> m_cursorBuffer;
+    size_t cursorBufferSize;
+
     mini::dx_ptr<ID3D11VertexShader> m_vertexShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11InputLayout> m_layout;
@@ -75,6 +83,8 @@ private:
     void init3D3();
 
     void setupViewport();
+
+    void mapShaderMatrix(const DirectX::XMMATRIX &matrix);
 
     float frameTime();
 };
