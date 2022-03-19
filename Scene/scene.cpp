@@ -26,6 +26,12 @@ void Scene::addObject(shared_ptr<Object> &&object) {
     objects.push_back(std::move(object));
 }
 
+
+void Scene::removeObject(const std::shared_ptr<Object>& object) {
+    objects.remove_if([&] (const shared_ptr<Object>& ob) { return ob.get() == object.get(); });
+    _selected.setValue({});
+}
+
 void Scene::addCursor(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
@@ -35,6 +41,18 @@ void Scene::addCursor(QPoint screenPosition) {
     auto plane = Utils3D::getPerpendicularPlaneThroughPoint(_camera.direction(), _camera.center());
     auto position = Utils3D::getRayCrossWithPlane(ray, plane);
 
-    cursor = make_shared<Cursor>(position, screenPos, _camera);
-    _selected = cursor;
+    if (cursor) {
+        cursor->setPosition(position);
+        cursor->setScreenPosition(screenPos);
+    } else {
+        cursor = make_shared<Cursor>(position, screenPos, _camera);
+        _selected = cursor;
+    }
+}
+
+void Scene::setSelected(std::shared_ptr<Object> object) {
+    if (find_if(objects.begin(), objects.end(), [&] (const shared_ptr<Object>& ob) { return ob.get() == object.get(); }) != objects.end()) {
+        _selected = object;
+        cursor.reset();
+    }
 }

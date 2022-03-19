@@ -14,6 +14,8 @@ public:
 
     void addObject(std::shared_ptr<Object> &&object);
 
+    void removeObject(const std::shared_ptr<Object>& object);
+
     void addCursor(QPoint screenPosition);
 
     void draw(Renderer &renderer) const;
@@ -21,6 +23,8 @@ public:
     Camera &camera() { return _camera; }
 
     std::weak_ptr<Object> selected() const { return _selected; }
+
+    void setSelected (std::shared_ptr<Object> object);
 
     QBindable<std::weak_ptr<Object>> bindableSelected() { return &_selected; }
 

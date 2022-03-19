@@ -74,6 +74,7 @@ void Controls::updateSelected() {
             }
         }
     } else {
+        objectHandler = {};
         ui->objectGroupBox->hide();
         ui->parametersGroupBox->hide();
         ui->torusGroupBox->hide();
