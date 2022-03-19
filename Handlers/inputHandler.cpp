@@ -14,7 +14,7 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
             panButtonPressed = true;
             break;
         case MAIN_BUTTON:
-            scene->addCursor(event->position().toPoint());
+            scene->selectOrAddCursor(event->position().toPoint());
             break;
         case ROTATE_BUTTON:
             rotateButtonPressed = true;

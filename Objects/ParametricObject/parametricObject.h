@@ -62,9 +62,8 @@ template<size_t Dim>
 void ParametricObject<Dim>::draw(Renderer &renderer, const Camera &camera) const {
     auto mvp = modelMatrix() * camera.cameraMatrix();
     renderer.drawLines(vertices, indices, mvp);
-    // TODO: draw cursor if selected
+    renderer.drawCursor(mvp);
     // TODO: draw different color if selected
-    // renderer.drawCursor(mvp);
 }
 
 template<size_t Dim>

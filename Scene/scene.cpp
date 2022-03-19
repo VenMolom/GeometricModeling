@@ -32,12 +32,26 @@ void Scene::removeObject(const std::shared_ptr<Object>& object) {
     _selected.setValue({});
 }
 
-void Scene::addCursor(QPoint screenPosition) {
+void Scene::selectOrAddCursor(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
     auto ray = Utils3D::getRayFromScreen(screenPos, screenSize, _camera.nearZ(), _camera.farZ(),
                                          _camera.projectionMatrix(), _camera.viewMatrix());
 
+    if(auto object = findIntersectingObject(ray)) {
+        setSelected(object);
+    } else {
+        addCursor(ray, screenPos);
+    }
+}
+
+shared_ptr<Object> &Scene::findIntersectingObject(Utils3D::XMFLOAT3RAY ray) {
+    for (auto &object : objects) {
+
+    }
+}
+
+void Scene::addCursor(Utils3D::XMFLOAT3RAY ray, XMINT2 screenPos) {
     auto plane = Utils3D::getPerpendicularPlaneThroughPoint(_camera.direction(), _camera.center());
     auto position = Utils3D::getRayCrossWithPlane(ray, plane);
 

@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     scene = std::make_shared<Scene>();
-    selectedHandler = scene->bindableSelected().addNotifier([&] { removeSelection(); });
+    selectedHandler = scene->bindableSelected().addNotifier([&] { updateSelection(); });
 
     setMouseTracking(true);
     ui->controlsWidget->setScene(scene);
@@ -42,10 +42,17 @@ void MainWindow::addObjectToScene(std::shared_ptr<Object> &&object) {
     scene->addObject(std::move(object));
 }
 
-void MainWindow::removeSelection() {
+void MainWindow::updateSelection() {
+    ui->objectsList->clearSelection();
+
     shared_ptr<Object> ob;
-    if (!(ob = scene->selected().lock()) || ob->type() == CURSOR) {
-        ui->objectsList->clearSelection();
+    if ((ob = scene->selected().lock()) && ob->type() != CURSOR) {
+        for (auto &item : items) {
+            // TODO: handle composite object
+            if (item->hasObject(ob)) {
+                ui->objectsList->setCurrentItem(item.get());
+            }
+        }
     }
 }
 
@@ -71,4 +78,3 @@ void MainWindow::on_deleteObject_clicked() {
        return selected.contains(ob.get());
     });
 }
-

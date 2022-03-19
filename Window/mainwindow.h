@@ -36,7 +36,7 @@ private:
 
     void addObjectToScene(std::shared_ptr<Object> &&object);
 
-    void removeSelection();
+    void updateSelection();
 };
 
 #endif // MAINWINDOW_H

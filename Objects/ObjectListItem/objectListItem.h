@@ -19,6 +19,8 @@ public:
     void select();
 
     void remove();
+
+    bool hasObject(std::shared_ptr<Object> object) { return this->object.get() == object.get(); }
 private:
     QPropertyNotifier nameHandler;
 

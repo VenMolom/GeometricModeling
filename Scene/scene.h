@@ -16,7 +16,7 @@ public:
 
     void removeObject(const std::shared_ptr<Object>& object);
 
-    void addCursor(QPoint screenPosition);
+    void selectOrAddCursor(QPoint screenPosition);
 
     void draw(Renderer &renderer) const;
 
@@ -33,6 +33,10 @@ private:
     std::shared_ptr<Cursor> cursor;
     QProperty<std::weak_ptr<Object>> _selected;
     Camera _camera;
+
+    std::shared_ptr<Object> &findIntersectingObject(Utils3D::XMFLOAT3RAY ray);
+
+    void addCursor(Utils3D::XMFLOAT3RAY ray, DirectX::XMINT2 screenPos);
 };
 
 
