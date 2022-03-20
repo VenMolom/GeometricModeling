@@ -32,20 +32,36 @@ void Scene::addObject(shared_ptr<Object> &&object) {
 }
 
 
-void Scene::removeObject(const std::shared_ptr<Object>& object) {
-    objects.remove_if([&] (const shared_ptr<Object>& ob) { return ob.get() == object.get(); });
+void Scene::removeObject(const std::shared_ptr<Object> &object) {
+    objects.remove_if([&](const shared_ptr<Object> &ob) { return ob.get() == object.get(); });
     composite.reset();
     _selected.setValue({});
 }
 
-void Scene::selectOrAddCursor(QPoint screenPosition) {
+void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
     auto ray = Utils3D::getRayFromScreen(screenPos, screenSize, _camera.nearZ(), _camera.farZ(),
                                          _camera.projectionMatrix(), _camera.viewMatrix());
 
-    if(auto object = findIntersectingObject(ray)) {
-        setSelected(object);
+    if (auto object = findIntersectingObject(ray)) {
+        shared_ptr<Object> sel;
+        if (multiple && (sel = _selected.value().lock()) && sel.get() != object.get()) {
+            if (composite) {
+                auto comp = dynamic_cast<CompositeObject *>(composite.get());
+
+                if (comp->contains(object)) return;
+
+                auto obs = comp->release();
+                obs.push_back(object);
+                setSelected(make_shared<CompositeObject>(std::move(obs)));
+            } else {
+                list<shared_ptr<Object>> obs = {sel, object};
+                setSelected(make_shared<CompositeObject>(std::move(obs)));
+            }
+        } else {
+            setSelected(object);
+        }
     } else {
         addCursor(ray, screenPos);
     }
@@ -55,9 +71,10 @@ shared_ptr<Object> Scene::findIntersectingObject(Utils3D::XMFLOAT3RAY ray) {
     shared_ptr<Object> closest{nullptr};
     float closestDistance = INFINITY;
 
-    for (auto &object : objects) {
+    for (auto &object: objects) {
         float distance{};
-        if (object->boundingBox().Intersects(XMLoadFloat3(&ray.position), XMLoadFloat3(&ray.direction), distance) && distance < closestDistance){
+        if (object->boundingBox().Intersects(XMLoadFloat3(&ray.position), XMLoadFloat3(&ray.direction), distance) &&
+            distance < closestDistance) {
             closest = object;
             closestDistance = distance;
         }
@@ -70,13 +87,13 @@ void Scene::addCursor(Utils3D::XMFLOAT3RAY ray, XMINT2 screenPos) {
     auto plane = Utils3D::getPerpendicularPlaneThroughPoint(_camera.direction(), _camera.center());
     auto position = Utils3D::getRayCrossWithPlane(ray, plane);
 
+    composite.reset();
     if (cursor) {
         cursor->setPosition(position);
         cursor->setScreenPosition(screenPos);
     } else {
         cursor = make_shared<Cursor>(position, screenPos, _camera);
         _selected = cursor;
-        composite.reset();
     }
 }
 
@@ -85,7 +102,8 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         composite = std::move(object);
         _selected = composite;
         cursor.reset();
-    }else if (find_if(objects.begin(), objects.end(), [&] (const shared_ptr<Object>& ob) { return ob.get() == object.get(); }) != objects.end()) {
+    } else if (find_if(objects.begin(), objects.end(),
+                       [&](const shared_ptr<Object> &ob) { return ob.get() == object.get(); }) != objects.end()) {
         _selected = object;
         composite.reset();
         cursor.reset();

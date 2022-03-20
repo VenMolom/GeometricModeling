@@ -11,6 +11,7 @@
 #define PAN_BUTTON Qt::MouseButton::MiddleButton
 #define MAIN_BUTTON Qt::MouseButton::LeftButton
 #define ROTATE_BUTTON Qt::MouseButton::RightButton
+#define MULTI_SELECT_KEY Qt::Key::Key_Shift
 
 class InputHandler {
 public:
@@ -36,6 +37,7 @@ private:
     QPointF lastMousePos{};
     bool panButtonPressed{false};
     bool rotateButtonPressed{false};
+    bool multiSelectButtonPressed{false};
 };
 
 

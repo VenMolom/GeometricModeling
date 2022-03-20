@@ -44,21 +44,28 @@ void MainWindow::addObjectToScene(std::shared_ptr<Object> &&object) {
 }
 
 void MainWindow::updateSelection() {
-    ui->objectsList->clearSelection();
-
     shared_ptr<Object> selected;
     if (!(selected = scene->selected().lock())) {
+        ui->objectsList->clearSelection();
         return;
     }
 
-    if (scene->selected().lock()->type() == COMPOSITE) {
-        // TODO: handle multiple from screen
+    if (selected->type() == COMPOSITE) {
+        auto composite = dynamic_cast<CompositeObject *>(selected.get());
+        for (auto &item: items) {
+            if (composite->contains(item->object())) {
+                ui->objectsList->setCurrentItem(item.get(), {QItemSelectionModel::SelectionFlag::Select});
+            }
+        }
+        return;
     }
 
+    ui->objectsList->clearSelection();
     if (selected->type() != CURSOR) {
-        for (auto &item : items) {
+        for (auto &item: items) {
             if (item->hasObject(selected)) {
                 ui->objectsList->setCurrentItem(item.get());
+                return;
             }
         }
     }
@@ -77,8 +84,8 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
         }
     } else {
         std::list<shared_ptr<Object>> objects{};
-        for (auto &select : selected) {
-            objects.push_back(dynamic_cast<ObjectListItem*>(select)->object());
+        for (auto &select: selected) {
+            objects.push_back(dynamic_cast<ObjectListItem *>(select)->object());
         }
         shared_ptr<Object> composite = make_shared<CompositeObject>(std::move(objects));
 
@@ -91,7 +98,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
 
 void MainWindow::on_deleteObject_clicked() {
     auto selected = ui->objectsList->selectedItems();
-    items.remove_if([&] (const unique_ptr<ObjectListItem> &ob) {
-       return selected.contains(ob.get());
+    items.remove_if([&](const unique_ptr<ObjectListItem> &ob) {
+        return selected.contains(ob.get());
     });
 }

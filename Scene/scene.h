@@ -7,6 +7,7 @@
 
 #include <list>
 #include "Objects/Cursor/cursor.h"
+#include "Objects/CompositeObject/compositeObject.h"
 
 class Scene {
 public:
@@ -16,7 +17,7 @@ public:
 
     void removeObject(const std::shared_ptr<Object>& object);
 
-    void selectOrAddCursor(QPoint screenPosition);
+    void selectOrAddCursor(QPoint screenPosition, bool multiple);
 
     void draw(Renderer &renderer) const;
 
@@ -29,9 +30,9 @@ public:
     QBindable<std::weak_ptr<Object>> bindableSelected() { return &_selected; }
 
 private:
+    QProperty<std::weak_ptr<Object>> _selected;
     std::list<std::shared_ptr<Object>> objects;
     std::shared_ptr<Cursor> cursor;
-    QProperty<std::weak_ptr<Object>> _selected;
     std::shared_ptr<Object> composite;
     Camera _camera;
 

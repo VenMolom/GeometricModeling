@@ -96,7 +96,6 @@ private:
     Ui::Controls *ui;
 
     // IN PROGRESS:
-    // TODO: create composite from screen
 
     // TODO: modify _scale, _position and _rotation of selected objects (based on _center of selected objects)
 };

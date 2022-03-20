@@ -14,7 +14,7 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
             panButtonPressed = true;
             break;
         case MAIN_BUTTON:
-            scene->selectOrAddCursor(event->position().toPoint());
+            scene->selectOrAddCursor(event->position().toPoint(), multiSelectButtonPressed);
             break;
         case ROTATE_BUTTON:
             rotateButtonPressed = true;
@@ -51,9 +51,15 @@ void InputHandler::wheelEvent(QWheelEvent *event) {
 }
 
 void InputHandler::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == MULTI_SELECT_KEY) {
+        multiSelectButtonPressed = true;
+    }
 }
 
 void InputHandler::keyReleaseEvent(QKeyEvent *event) {
+    if (event->key() == MULTI_SELECT_KEY) {
+        multiSelectButtonPressed = false;
+    }
 }
 
 void InputHandler::setScene(std::shared_ptr<Scene> scenePtr) {

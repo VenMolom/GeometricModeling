@@ -15,6 +15,10 @@ CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
     calculateCenter();
 }
 
+CompositeObject::~CompositeObject() {
+    release();
+}
+
 void CompositeObject::calculateCenter() {
     XMFLOAT3 center{};
     XMVECTOR c = XMLoadFloat3(&center);
@@ -23,13 +27,24 @@ void CompositeObject::calculateCenter() {
         c = XMVectorAdd(c, XMLoadFloat3(&oc));
     }
     XMStoreFloat3(&center, XMVectorScale(c, 1.0f / static_cast<float>(objects.size())));
-    setPosition(center);
+    Object::setPosition(center);
+}
+
+bool CompositeObject::contains(shared_ptr<Object> object) {
+    return find_if(objects.begin(), objects.end(),
+                   [&](const shared_ptr<Object> &ob) { return ob.get() == object.get(); }) != objects.end();
+}
+
+std::list<std::shared_ptr<Object>> &&CompositeObject::release() {
+    // TODO: apply changes to objects
+    return std::move(objects);
 }
 
 void CompositeObject::draw(Renderer &renderer, const Camera &camera, DrawType drawType) const {
     for (auto &object: objects) {
         object->draw(renderer, camera, NO_CURSOR);
     }
+    // TODO: don't multiply by scale matrix
     renderer.drawCursor(modelMatrix() * camera.cameraMatrix());
 }
 

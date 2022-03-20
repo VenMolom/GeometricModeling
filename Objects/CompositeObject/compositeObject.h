@@ -9,7 +9,13 @@
 
 class CompositeObject : public Object{
 public:
-    CompositeObject(std::list<std::shared_ptr<Object>> &&objects);
+    explicit CompositeObject(std::list<std::shared_ptr<Object>> &&objects);
+
+    ~CompositeObject();
+
+    bool contains(std::shared_ptr<Object> object);
+
+    std::list<std::shared_ptr<Object>> &&release();
 
     void draw(Renderer &renderer, const Camera &camera, DrawType drawType) const override;
 
