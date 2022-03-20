@@ -59,12 +59,14 @@ void MainWindow::updateSelection() {
                 ui->objectsList->setCurrentItem(item.get(), {QItemSelectionModel::SelectionFlag::Select});
             }
         }
+        ui->deleteObject->setEnabled(true);
         return;
     }
 
     for (auto &item: items) {
         if (item->hasObject(selected)) {
             ui->objectsList->setCurrentItem(item.get(), {QItemSelectionModel::SelectionFlag::ClearAndSelect});
+            ui->deleteObject->setEnabled(true);
             return;
         }
     }
