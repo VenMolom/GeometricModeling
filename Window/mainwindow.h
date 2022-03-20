@@ -37,6 +37,9 @@ private:
     void addObjectToScene(std::shared_ptr<Object> &&object);
 
     void updateSelection();
+
+    // TODO: look into reducing complexity / interlocking
+    // TODO: add grid (if possible)
 };
 
 #endif // MAINWINDOW_H

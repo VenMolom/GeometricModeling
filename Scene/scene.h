@@ -36,6 +36,7 @@ private:
     std::list<std::shared_ptr<Object>> _objects;
     std::shared_ptr<Cursor> cursor;
     std::shared_ptr<Object> composite;
+    // TODO: look into removing composite to reduce complexity
     Camera _camera;
 
     std::shared_ptr<Object> findIntersectingObject(Utils3D::XMFLOAT3RAY ray);
