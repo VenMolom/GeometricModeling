@@ -14,14 +14,6 @@ void ObjectListItem::select() {
     scene->setSelected(_object);
 }
 
-void ObjectListItem::remove() {
-    scene->removeObject(_object);
-}
-
-ObjectListItem::~ObjectListItem() {
-    remove();
-}
-
 void ObjectListItem::updateText() {
     setText(_object->name());
 }

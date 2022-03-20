@@ -2,6 +2,7 @@
 // Created by Molom on 2022-03-18.
 //
 
+#include <DirectXMath.h>
 #include "cursor.h"
 
 using namespace DirectX;
@@ -15,8 +16,8 @@ Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
     viewHandler = camera.bindableView().addNotifier([&] { updateScreenPosition(); });
 }
 
-void Cursor::draw(Renderer &renderer, const Camera &camera, DrawType drawType) const {
-    auto mvp = modelMatrix() * camera.cameraMatrix();
+void Cursor::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const {
+    auto mvp = modelMatrix() * view * projection;
     renderer.drawCursor(mvp);
 }
 

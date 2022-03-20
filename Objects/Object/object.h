@@ -9,6 +9,7 @@
 #include <utility>
 #include <QProperty>
 #include <DirectXCollision.h>
+#include <DirectXMath.h>
 #include "DirectX/DXDevice/dxptr.h"
 #include "DirectX/DXStructures/dxStructures.h"
 #include "Renderer/Renderer.h"
@@ -33,6 +34,10 @@ protected:
     QProperty<DirectX::XMFLOAT3> _rotation{{0, 0, 0}};
     QProperty<DirectX::XMFLOAT3> _scale{{1, 1, 1}};
     QProperty<QString> _name;
+
+    DirectX::XMFLOAT4X4 noScaleMatrix;
+    DirectX::XMFLOAT4X4 rotationMatrix;
+    DirectX::XMFLOAT4X4 scaleMatrix;
 
     Object(QString name, DirectX::XMFLOAT3 position);
 
@@ -67,7 +72,7 @@ public:
 
     QBindable<QString> bindableName() { return &_name; }
 
-    virtual void draw(Renderer &renderer, const Camera &camera, DrawType drawType) const = 0;
+    virtual void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const = 0;
 
     virtual Type type() const = 0;
 

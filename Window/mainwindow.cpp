@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
+    ui->objectsList->clearSelection();
     delete ui;
 }
 
@@ -45,7 +46,7 @@ void MainWindow::addObjectToScene(std::shared_ptr<Object> &&object) {
 
 void MainWindow::updateSelection() {
     shared_ptr<Object> selected;
-    if (!(selected = scene->selected().lock())) {
+    if (!(selected = scene->selected().lock()) || selected->type() == CURSOR) {
         ui->objectsList->clearSelection();
         return;
     }
@@ -60,13 +61,10 @@ void MainWindow::updateSelection() {
         return;
     }
 
-    ui->objectsList->clearSelection();
-    if (selected->type() != CURSOR) {
-        for (auto &item: items) {
-            if (item->hasObject(selected)) {
-                ui->objectsList->setCurrentItem(item.get());
-                return;
-            }
+    for (auto &item: items) {
+        if (item->hasObject(selected)) {
+            ui->objectsList->setCurrentItem(item.get(), {QItemSelectionModel::SelectionFlag::Current});
+            return;
         }
     }
 }
@@ -75,6 +73,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
     auto selected = ui->objectsList->selectedItems();
     if (selected.empty()) {
         ui->deleteObject->setEnabled(false);
+        scene->setSelected({});
         return;
     }
 
@@ -87,10 +86,9 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
         for (auto &select: selected) {
             objects.push_back(dynamic_cast<ObjectListItem *>(select)->object());
         }
-        shared_ptr<Object> composite = make_shared<CompositeObject>(std::move(objects));
 
         selectedHandler = {};
-        scene->setSelected(composite);
+        scene->addComposite(std::move(objects));
         selectedHandler = scene->bindableSelected().addNotifier([&] { updateSelection(); });
     }
     ui->deleteObject->setEnabled(true);
@@ -98,6 +96,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
 
 void MainWindow::on_deleteObject_clicked() {
     auto selected = ui->objectsList->selectedItems();
+    scene->removeSelected();
     items.remove_if([&](const unique_ptr<ObjectListItem> &ob) {
         return selected.contains(ob.get());
     });

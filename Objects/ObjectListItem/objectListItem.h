@@ -14,11 +14,7 @@ class ObjectListItem : public QListWidgetItem {
 public:
     ObjectListItem(std::shared_ptr<Object> object, std::shared_ptr<Scene> scene);
 
-    ~ObjectListItem();
-
     void select();
-
-    void remove();
 
     bool hasObject(std::shared_ptr<Object> object) { return this->_object.get() == object.get(); }
 

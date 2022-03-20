@@ -73,8 +73,10 @@ void Torus::setMinorRadius(float radius) {
 
 BoundingOrientedBox Torus::boundingBox() const {
     auto pos = _position.value();
-    auto size = XMFLOAT3(_majorRadius, _minorRadius, _majorRadius);
+    auto size = XMFLOAT3(_scale.value().x * (_majorRadius + _minorRadius), _scale.value().y * _minorRadius,
+                         _scale.value().z * (_majorRadius + _minorRadius));
     XMFLOAT4 rotation{};
-    XMStoreFloat4(&rotation, XMQuaternionRotationRollPitchYaw(_rotation.value().x, _rotation.value().y, _rotation.value().z));
+    XMStoreFloat4(&rotation,
+                  XMQuaternionRotationRollPitchYaw(_rotation.value().x, _rotation.value().y, _rotation.value().z));
     return {pos, size, rotation};
 }

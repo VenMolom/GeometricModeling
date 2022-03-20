@@ -7,7 +7,7 @@ namespace mini
 	 * Deleter function object class for COM pointers.
 	 * @tparam T COM object type that derives from IUnknown.
 	 * @remark This deleter is designed to be used with DirectX resources.
-	 * It can however work with any COM objects, since that is what all DirectX
+	 * It can however work with any COM _objects, since that is what all DirectX
 	 * resources are.
 	 *************************************************************************/
 	template<class T>
@@ -37,13 +37,13 @@ namespace mini
 	 * resource is released correctly based on RAII principle.
 	 * 
 	 * Copying is intentionally not supported. One can create multiple
-	 * dx_ptr objects pointing to the same COM object and rely on its built-in
+	 * dx_ptr _objects pointing to the same COM object and rely on its built-in
 	 * reference counting. IUnknown::AddRef must manually be called on the COM
 	 * object for each additional dx_ptr created that way, besides the first
 	 * one.
 	 * @tparam T COM object type that derives from IUnknown.
 	 * @remark This smart pointer is designed to be used with DirectX
-	 * resources. It can however work with any COM objects, since that is what
+	 * resources. It can however work with any COM _objects, since that is what
 	 * all DirectX resources are.
 	 *************************************************************************/
 	template<class T>

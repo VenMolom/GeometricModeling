@@ -8,6 +8,7 @@
 #include <vector>
 #include <array>
 #include <functional>
+#include <DirectXMath.h>
 #include "Objects/Object/object.h"
 
 template<size_t Dim>
@@ -28,7 +29,7 @@ protected:
     virtual std::vector<Index> calculateIndices(const std::array<int, Dim> &density) const = 0;
 
 public:
-    void draw(Renderer &renderer, const Camera &camera, DrawType drawType) const final;
+    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const final;
 
     const std::array<int, Dim> &density() const { return _density; }
 
@@ -57,8 +58,9 @@ ParametricObject<Dim>::ParametricObject(QString name,
 }
 
 template<size_t Dim>
-void ParametricObject<Dim>::draw(Renderer &renderer, const Camera &camera, DrawType drawType) const {
-    auto mvp = modelMatrix() * camera.cameraMatrix();
+void ParametricObject<Dim>::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
+                                 DrawType drawType) const {
+    auto mvp = modelMatrix() * view * projection;
     renderer.drawLines(vertices, indices, mvp, drawType != DEFAULT);
     if (drawType == SELECTED) renderer.drawCursor(mvp);
 }

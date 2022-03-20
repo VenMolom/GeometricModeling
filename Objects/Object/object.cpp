@@ -19,11 +19,11 @@ XMMATRIX Object::modelMatrix() const {
 }
 
 void Object::calculateModel() {
-    XMStoreFloat4x4(&model,
-                    XMMatrixScalingFromVector(XMLoadFloat3(&_scale.value())) *
-                    XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&_rotation.value())) *
-                    XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value()))
-    );
+    XMStoreFloat4x4(&rotationMatrix, XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&_rotation.value())));
+    XMStoreFloat4x4(&noScaleMatrix, XMLoadFloat4x4(&rotationMatrix) *
+                                    XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value())));
+    XMStoreFloat4x4(&scaleMatrix, XMMatrixScalingFromVector(XMLoadFloat3(&_scale.value())));
+    XMStoreFloat4x4(&model, XMLoadFloat4x4(&scaleMatrix) * XMLoadFloat4x4(&noScaleMatrix));
 }
 
 void Object::setPosition(DirectX::XMFLOAT3 position) {

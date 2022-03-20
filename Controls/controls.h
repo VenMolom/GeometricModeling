@@ -97,7 +97,7 @@ private:
 
     // IN PROGRESS:
 
-    // TODO: modify _scale, _position and _rotation of selected objects (based on _center of selected objects)
+    // TODO: modify _scale, _position and _rotation of selected _objects (based on _center of selected _objects)
 };
 
 template<size_t Dim>

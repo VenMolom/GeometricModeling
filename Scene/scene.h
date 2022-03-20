@@ -15,7 +15,9 @@ public:
 
     void addObject(std::shared_ptr<Object> &&object);
 
-    void removeObject(const std::shared_ptr<Object>& object);
+    void addComposite(std::list<std::shared_ptr<Object>>&& objects);
+
+    void removeSelected();
 
     void selectOrAddCursor(QPoint screenPosition, bool multiple);
 
@@ -31,7 +33,7 @@ public:
 
 private:
     QProperty<std::weak_ptr<Object>> _selected;
-    std::list<std::shared_ptr<Object>> objects;
+    std::list<std::shared_ptr<Object>> _objects;
     std::shared_ptr<Cursor> cursor;
     std::shared_ptr<Object> composite;
     Camera _camera;
@@ -39,6 +41,8 @@ private:
     std::shared_ptr<Object> findIntersectingObject(Utils3D::XMFLOAT3RAY ray);
 
     void addCursor(Utils3D::XMFLOAT3RAY ray, DirectX::XMINT2 screenPos);
+
+    void removeComposite();
 };
 
 
