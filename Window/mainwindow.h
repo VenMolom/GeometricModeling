@@ -37,8 +37,6 @@ private:
     void addObjectToScene(std::shared_ptr<Object> &&object);
 
     void updateSelection();
-
-    // TODO: exception when closing with composite selected
 };
 
 #endif // MAINWINDOW_H

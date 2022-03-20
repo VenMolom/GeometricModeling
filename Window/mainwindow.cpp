@@ -51,6 +51,7 @@ void MainWindow::updateSelection() {
         return;
     }
 
+    QSignalBlocker blocker(ui->objectsList);
     if (selected->type() == COMPOSITE) {
         auto composite = dynamic_cast<CompositeObject *>(selected.get());
         for (auto &item: items) {
@@ -63,7 +64,7 @@ void MainWindow::updateSelection() {
 
     for (auto &item: items) {
         if (item->hasObject(selected)) {
-            ui->objectsList->setCurrentItem(item.get(), {QItemSelectionModel::SelectionFlag::Current});
+            ui->objectsList->setCurrentItem(item.get(), {QItemSelectionModel::SelectionFlag::ClearAndSelect});
             return;
         }
     }

@@ -94,10 +94,6 @@ private:
     std::array<int, Dim> parameters() const;
 
     Ui::Controls *ui;
-
-    // IN PROGRESS:
-
-    // TODO: modify _scale, _position and _rotation of selected _objects (based on _center of selected _objects)
 };
 
 template<size_t Dim>
