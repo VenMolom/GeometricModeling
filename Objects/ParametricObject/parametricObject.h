@@ -15,7 +15,6 @@ class ParametricObject : public Object {
 protected:
     ParametricObject(QString name,
                      DirectX::XMFLOAT3 position,
-                     DirectX::XMFLOAT3 color,
                      std::array<int, Dim> density,
                      std::array<std::tuple<float, float>, Dim> range);
 
@@ -29,7 +28,7 @@ protected:
     virtual std::vector<Index> calculateIndices(const std::array<int, Dim> &density) const = 0;
 
 public:
-    void draw(Renderer &renderer, const Camera &camera) const final;
+    void draw(Renderer &renderer, const Camera &camera, DrawType drawType) const final;
 
     const std::array<int, Dim> &density() const { return _density; }
 
@@ -50,20 +49,18 @@ private:
 template<size_t Dim>
 ParametricObject<Dim>::ParametricObject(QString name,
                                         DirectX::XMFLOAT3 position,
-                                        DirectX::XMFLOAT3 color,
                                         std::array<int, Dim> density,
                                         std::array<std::tuple<float, float>, Dim> range)
-        : Object(name, position, color),
+        : Object(name, position),
           _density(density),
           _range(range) {
 }
 
 template<size_t Dim>
-void ParametricObject<Dim>::draw(Renderer &renderer, const Camera &camera) const {
+void ParametricObject<Dim>::draw(Renderer &renderer, const Camera &camera, DrawType drawType) const {
     auto mvp = modelMatrix() * camera.cameraMatrix();
-    renderer.drawLines(vertices, indices, mvp);
-    renderer.drawCursor(mvp);
-    // TODO: draw different color if selected
+    renderer.drawLines(vertices, indices, mvp, drawType != DEFAULT);
+    if (drawType == SELECTED) renderer.drawCursor(mvp);
 }
 
 template<size_t Dim>

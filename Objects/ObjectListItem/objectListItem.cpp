@@ -5,17 +5,17 @@
 #include "objectListItem.h"
 
 ObjectListItem::ObjectListItem(std::shared_ptr<Object> object, std::shared_ptr<Scene> scene)
-    : object(object), scene(scene) {
+    : _object(object), scene(scene) {
     updateText();
-    nameHandler = object->bindableName().addNotifier([&] { updateText(); });
+    nameHandler = _object->bindableName().addNotifier([&] { updateText(); });
 }
 
 void ObjectListItem::select() {
-    scene->setSelected(object);
+    scene->setSelected(_object);
 }
 
 void ObjectListItem::remove() {
-    scene->removeObject(object);
+    scene->removeObject(_object);
 }
 
 ObjectListItem::~ObjectListItem() {
@@ -23,5 +23,5 @@ ObjectListItem::~ObjectListItem() {
 }
 
 void ObjectListItem::updateText() {
-    setText(object->name());
+    setText(_object->name());
 }

@@ -11,7 +11,7 @@
 
 class Torus : public ParametricObject<DIM> {
 public:
-    Torus(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 color);
+    Torus(DirectX::XMFLOAT3 position);
 
     float majorRadius() const { return _majorRadius; }
 
@@ -24,6 +24,8 @@ public:
     Type type() const override { return TORUS; }
 
     std::array<bool, 2> looped() const override;
+
+    DirectX::BoundingOrientedBox boundingBox() const override;
 
 protected:
     std::vector<VertexPositionColor> calculateVertices(const std::array<int, DIM> &density,

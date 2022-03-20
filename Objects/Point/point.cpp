@@ -7,22 +7,27 @@
 
 using namespace DirectX;
 
-Point::Point(DirectX::XMFLOAT3 position, DirectX::XMFLOAT3 color) : Object("Point", position, color) {
+Point::Point(DirectX::XMFLOAT3 position) : Object("Point", position) {
 
 }
 
-void Point::draw(Renderer &renderer, const Camera &camera) const {
+void Point::draw(Renderer &renderer, const Camera &camera, DrawType drawType) const {
     auto t = XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value()));
-    auto s = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+    auto s = XMMatrixScalingFromVector(XMLoadFloat3(&size));
     auto w = XMFLOAT4(0, 0, 0, 1);
     auto vInv = XMMatrixInverse(nullptr, camera.viewMatrix());
     auto r = vInv * XMMatrixTranslationFromVector(XMVectorScale(
             XMVector4Transform(XMLoadFloat4(&w), vInv), -1));
 
     auto mvp = r * s * t * camera.cameraMatrix();
-    renderer.drawPoint(mvp);
+    renderer.drawPoint(mvp, drawType != DEFAULT);
 }
 
 Type Point::type() const {
     return POINT3D;
+}
+
+BoundingOrientedBox Point::boundingBox() const {
+    auto pos = _position.value();
+    return {pos, size, rot};
 }

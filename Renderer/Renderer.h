@@ -11,11 +11,11 @@ class Renderer {
 public:
     virtual void drawLines(const std::vector<VertexPositionColor> &vertices,
                            const std::vector<Index> &indices,
-                           const DirectX::XMMATRIX &mvp) = 0;
+                           const DirectX::XMMATRIX &mvp, bool selected) = 0;
 
     virtual void drawCursor(const DirectX::XMMATRIX &mvp) = 0;
 
-    virtual void drawPoint(const DirectX::XMMATRIX &mvp) = 0;
+    virtual void drawPoint(const DirectX::XMMATRIX &mvp, bool selected) = 0;
 };
 
 #endif //MG1_RENDERER_H

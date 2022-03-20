@@ -20,8 +20,6 @@ namespace Utils3D {
     DirectX::XMFLOAT4 getPerpendicularPlaneThroughPoint(DirectX::XMFLOAT3 direction, DirectX::XMFLOAT3 point);
 
     DirectX::XMFLOAT3 getRayCrossWithPlane(XMFLOAT3RAY ray, DirectX::XMFLOAT4 plane);
-
-    bool DirectX::XM
 }
 
 #endif //MG1_UTILS3D_H

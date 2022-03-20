@@ -2,15 +2,14 @@
 // Created by Molom on 2022-03-19.
 //
 
-#ifndef MG1_POINT_H
-#define MG1_POINT_H
+#ifndef MG1_COMPOSITEOBJECT_H
+#define MG1_COMPOSITEOBJECT_H
 
-#include <DirectXMath.h>
 #include "Objects/Object/object.h"
 
-class Point : public Object {
+class CompositeObject : public Object{
 public:
-    Point(DirectX::XMFLOAT3 position);
+    CompositeObject(std::list<std::shared_ptr<Object>> &&objects);
 
     void draw(Renderer &renderer, const Camera &camera, DrawType drawType) const override;
 
@@ -19,9 +18,10 @@ public:
     DirectX::BoundingOrientedBox boundingBox() const override;
 
 private:
-    DirectX::XMFLOAT3 size {0.5f, 0.5f, 0.5f};
-    DirectX::XMFLOAT4 rot {0.0f, 0.0f, 0.0f, 1.0f};
+    std::list<std::shared_ptr<Object>> objects;
+
+    void calculateCenter();
 };
 
 
-#endif //MG1_POINT_H
+#endif //MG1_COMPOSITEOBJECT_H

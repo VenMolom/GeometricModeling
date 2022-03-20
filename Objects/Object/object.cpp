@@ -8,9 +8,8 @@
 
 using namespace DirectX;
 
-Object::Object(QString name, XMFLOAT3 position, XMFLOAT3 color)
+Object::Object(QString name, XMFLOAT3 position)
         : _position(position),
-          _color(color),
           _name(name) {
     calculateModel();
 }
@@ -40,10 +39,6 @@ void Object::setRotation(DirectX::XMFLOAT3 rotation) {
 void Object::setScale(DirectX::XMFLOAT3 scale) {
     _scale = scale;
     calculateModel();
-}
-
-void Object::setColor(DirectX::XMFLOAT3 color) {
-    _color = color;
 }
 
 void Object::setName(QString name) {

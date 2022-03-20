@@ -32,9 +32,10 @@ private:
     std::list<std::shared_ptr<Object>> objects;
     std::shared_ptr<Cursor> cursor;
     QProperty<std::weak_ptr<Object>> _selected;
+    std::shared_ptr<Object> composite;
     Camera _camera;
 
-    std::shared_ptr<Object> &findIntersectingObject(Utils3D::XMFLOAT3RAY ray);
+    std::shared_ptr<Object> findIntersectingObject(Utils3D::XMFLOAT3RAY ray);
 
     void addCursor(Utils3D::XMFLOAT3RAY ray, DirectX::XMINT2 screenPos);
 };

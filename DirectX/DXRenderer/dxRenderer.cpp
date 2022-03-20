@@ -21,8 +21,10 @@ void DxRenderer::renderScene() {
             m_depthBuffer.get(),
             D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    ID3D11Buffer *cbs[] = {m_cbMVP.get()};
-    m_device.context()->VSSetConstantBuffers(0, 1, cbs);
+    ID3D11Buffer *vsCbs[] = {m_cbMVP.get()};
+    ID3D11Buffer *psCbs[] = {m_cbColor.get()};
+    m_device.context()->VSSetConstantBuffers(0, 1, vsCbs);
+    m_device.context()->PSSetConstantBuffers(0, 1, psCbs);
     m_device.context()->IASetInputLayout(m_layout.get());
 
     if (scene) {
@@ -37,8 +39,9 @@ void DxRenderer::setScene(std::shared_ptr<Scene> scenePtr) {
 
 void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
                            const vector<Index> &indices,
-                           const DirectX::XMMATRIX &mvp) {
+                           const DirectX::XMMATRIX &mvp, bool selected) {
     mapShaderMatrix(mvp);
+    setDrawColor(selected ? SELECTED_COLOR : DEFAULT_COLOR);
 
     // set vertex and index buffers
     m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
@@ -57,6 +60,7 @@ void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
 
 void DxRenderer::drawCursor(const DirectX::XMMATRIX &mvp) {
     mapShaderMatrix(mvp);
+    setDrawColor(DEFAULT_COLOR);
 
     // set vertex
     ID3D11Buffer *vbs[] = {m_cursorBuffer.get()};
@@ -70,8 +74,9 @@ void DxRenderer::drawCursor(const DirectX::XMMATRIX &mvp) {
     m_device.context()->Draw(cursorBufferSize, 0);
 }
 
-void DxRenderer::drawPoint(const DirectX::XMMATRIX &mvp) {
+void DxRenderer::drawPoint(const DirectX::XMMATRIX &mvp, bool selected) {
     mapShaderMatrix(mvp);
+    setDrawColor(selected ? SELECTED_COLOR : DEFAULT_COLOR);
 
     // set vertex
     ID3D11Buffer *vbs[] = {m_pointVertexBuffer.get()};
@@ -84,6 +89,14 @@ void DxRenderer::drawPoint(const DirectX::XMMATRIX &mvp) {
     // draw lines
     m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
     m_device.context()->DrawIndexed(pointBufferSize, 0, 0);
+}
+
+void DxRenderer::setDrawColor(DirectX::XMFLOAT4 color) {
+    D3D11_MAPPED_SUBRESOURCE res;
+    m_device.context()->Map(m_cbColor.get(), 0,
+                            D3D11_MAP_WRITE_DISCARD, 0, &res);
+    memcpy(res.pData, &color, sizeof(XMFLOAT4));
+    m_device.context()->Unmap(m_cbColor.get(), 0);
 }
 
 void DxRenderer::mapShaderMatrix(const DirectX::XMMATRIX &matrix) {
@@ -182,6 +195,7 @@ void DxRenderer::init3D3() {
     m_layout = m_device.CreateInputLayout(elements, vsBytes);
 
     m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
+    m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
 
     std::vector<VertexPositionColor> cursorVertices = {
             {{0, 0, 0}, {1, 0, 0}},

@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 #include "Objects/Torus/torus.h"
 #include "Objects/Point/point.h"
+#include "Objects/CompositeObject/compositeObject.h"
 #include <iostream>
 
 using namespace std;
@@ -24,12 +25,12 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_addPoint_clicked() {
-    shared_ptr<Object> point = make_shared<Point>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1));
+    shared_ptr<Object> point = make_shared<Point>(XMFLOAT3(0, 0, 0));
     addObjectToScene(std::move(point));
 }
 
 void MainWindow::on_addTorus_clicked() {
-    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0), XMFLOAT3(1, 0, 1));
+    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0));
     addObjectToScene(std::move(torus));
 }
 
@@ -45,11 +46,18 @@ void MainWindow::addObjectToScene(std::shared_ptr<Object> &&object) {
 void MainWindow::updateSelection() {
     ui->objectsList->clearSelection();
 
-    shared_ptr<Object> ob;
-    if ((ob = scene->selected().lock()) && ob->type() != CURSOR) {
+    shared_ptr<Object> selected;
+    if (!(selected = scene->selected().lock())) {
+        return;
+    }
+
+    if (scene->selected().lock()->type() == COMPOSITE) {
+        // TODO: handle multiple from screen
+    }
+
+    if (selected->type() != CURSOR) {
         for (auto &item : items) {
-            // TODO: handle composite object
-            if (item->hasObject(ob)) {
+            if (item->hasObject(selected)) {
                 ui->objectsList->setCurrentItem(item.get());
             }
         }
@@ -60,16 +68,25 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
     auto selected = ui->objectsList->selectedItems();
     if (selected.empty()) {
         ui->deleteObject->setEnabled(false);
-    } else {
-        ui->deleteObject->setEnabled(true);
+        return;
     }
+
     if (selected.size() == 1) {
         if (auto o = dynamic_cast<ObjectListItem *>(selected[0])) {
             o->select();
         }
-    }
+    } else {
+        std::list<shared_ptr<Object>> objects{};
+        for (auto &select : selected) {
+            objects.push_back(dynamic_cast<ObjectListItem*>(select)->object());
+        }
+        shared_ptr<Object> composite = make_shared<CompositeObject>(std::move(objects));
 
-    // TODO: composite object
+        selectedHandler = {};
+        scene->setSelected(composite);
+        selectedHandler = scene->bindableSelected().addNotifier([&] { updateSelection(); });
+    }
+    ui->deleteObject->setEnabled(true);
 }
 
 void MainWindow::on_deleteObject_clicked() {

@@ -20,11 +20,14 @@ public:
 
     void remove();
 
-    bool hasObject(std::shared_ptr<Object> object) { return this->object.get() == object.get(); }
+    bool hasObject(std::shared_ptr<Object> object) { return this->_object.get() == object.get(); }
+
+    std::shared_ptr<Object> object() const { return _object; }
+
 private:
     QPropertyNotifier nameHandler;
 
-    std::shared_ptr<Object> object;
+    std::shared_ptr<Object> _object;
     std::shared_ptr<Scene> scene;
 
     void updateText();

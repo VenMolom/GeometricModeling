@@ -48,6 +48,10 @@ void Controls::updateSelected() {
                 ui->scaleFrame->hide();
                 break;
 
+            case COMPOSITE:
+                ui->nameFrame->hide();
+                break;
+
             case CURSOR: {
                 auto *c = dynamic_cast<Cursor *>(object.get());
                 ui->rotationFrame->hide();
@@ -71,6 +75,7 @@ void Controls::updateSelected() {
                 ui->minorRadius->setValue(t->minorRadius());
                 ui->uDensity->setValue(t->density()[0]);
                 ui->vDensity->setValue(t->density()[1]);
+                break;
             }
         }
     } else {

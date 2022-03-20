@@ -1,6 +1,14 @@
 #include "Header.hlsli"
 
+cbuffer cbColor: register(b0) {
+	float4 color;
+}
+
 float4 main(VSOut i) : SV_TARGET
 {
-	return i.col;
+    if (color.w != 0.0f) {
+        return color;
+    } else {
+	    return i.col;
+    }
 }

@@ -8,8 +8,8 @@
 using namespace std;
 using namespace DirectX;
 
-Torus::Torus(XMFLOAT3 position, XMFLOAT3 color)
-        : ParametricObject<DIM>("Torus", position, color, { 10, 10 }, {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)}) {
+Torus::Torus(XMFLOAT3 position)
+        : ParametricObject<DIM>("Torus", position, {15, 15}, {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)}) {
     calculateVerticesAndIndices();
 }
 
@@ -27,12 +27,13 @@ Torus::calculateVertices(const array<int, DIM> &density, const array<tuple<float
         auto v = startV;
         for (auto j = 0; j < density[1]; ++j, v += deltaV) { // major _rotation
             vertices.push_back({
-                                     {
-                                             (_majorRadius + _minorRadius * cos(u)) * cos(v),
-                                             _minorRadius * sin(u),
-                                             (_majorRadius + _minorRadius * cos(u)) * sin(v)
-                                     }, _color
-                             });
+                                       {
+                                               (_majorRadius + _minorRadius * cos(u)) * cos(v),
+                                                  _minorRadius * sin(u),
+                                                     (_majorRadius + _minorRadius * cos(u)) * sin(v)
+                                       },
+                                       {       1, 1, 1}
+                               });
         }
     }
     // major _rotation first
@@ -57,7 +58,7 @@ vector<Index> Torus::calculateIndices(const array<int, DIM> &density) const {
 }
 
 array<bool, 2> Torus::looped() const {
-    return { true, true };
+    return {true, true};
 }
 
 void Torus::setMajorRadius(float radius) {
@@ -68,4 +69,12 @@ void Torus::setMajorRadius(float radius) {
 void Torus::setMinorRadius(float radius) {
     _minorRadius = radius;
     calculateVerticesAndIndices();
+}
+
+BoundingOrientedBox Torus::boundingBox() const {
+    auto pos = _position.value();
+    auto size = XMFLOAT3(_majorRadius, _minorRadius, _majorRadius);
+    XMFLOAT4 rotation{};
+    XMStoreFloat4(&rotation, XMQuaternionRotationRollPitchYaw(_rotation.value().x, _rotation.value().y, _rotation.value().z));
+    return {pos, size, rotation};
 }

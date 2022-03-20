@@ -8,12 +8,17 @@ using namespace DirectX;
 using namespace std;
 
 void Scene::draw(Renderer &renderer) const {
-    for (auto &object: objects) {
-        object->draw(renderer, _camera);
+    if (composite) {
+        composite->draw(renderer, _camera, SELECTED);
     }
     if (cursor) {
-        cursor->draw(renderer, _camera);
+        cursor->draw(renderer, _camera, DEFAULT);
     }
+    for (auto &object: objects) {
+        auto a = _selected.value().lock().get();
+        object->draw(renderer, _camera, a == object.get() ? SELECTED : DEFAULT);
+    }
+
 }
 
 void Scene::addObject(shared_ptr<Object> &&object) {
@@ -29,6 +34,7 @@ void Scene::addObject(shared_ptr<Object> &&object) {
 
 void Scene::removeObject(const std::shared_ptr<Object>& object) {
     objects.remove_if([&] (const shared_ptr<Object>& ob) { return ob.get() == object.get(); });
+    composite.reset();
     _selected.setValue({});
 }
 
@@ -45,10 +51,19 @@ void Scene::selectOrAddCursor(QPoint screenPosition) {
     }
 }
 
-shared_ptr<Object> &Scene::findIntersectingObject(Utils3D::XMFLOAT3RAY ray) {
-    for (auto &object : objects) {
+shared_ptr<Object> Scene::findIntersectingObject(Utils3D::XMFLOAT3RAY ray) {
+    shared_ptr<Object> closest{nullptr};
+    float closestDistance = INFINITY;
 
+    for (auto &object : objects) {
+        float distance{};
+        if (object->boundingBox().Intersects(XMLoadFloat3(&ray.position), XMLoadFloat3(&ray.direction), distance) && distance < closestDistance){
+            closest = object;
+            closestDistance = distance;
+        }
     }
+
+    return closest;
 }
 
 void Scene::addCursor(Utils3D::XMFLOAT3RAY ray, XMINT2 screenPos) {
@@ -61,12 +76,18 @@ void Scene::addCursor(Utils3D::XMFLOAT3RAY ray, XMINT2 screenPos) {
     } else {
         cursor = make_shared<Cursor>(position, screenPos, _camera);
         _selected = cursor;
+        composite.reset();
     }
 }
 
 void Scene::setSelected(std::shared_ptr<Object> object) {
-    if (find_if(objects.begin(), objects.end(), [&] (const shared_ptr<Object>& ob) { return ob.get() == object.get(); }) != objects.end()) {
+    if (object->type() == COMPOSITE) {
+        composite = std::move(object);
+        _selected = composite;
+        cursor.reset();
+    }else if (find_if(objects.begin(), objects.end(), [&] (const shared_ptr<Object>& ob) { return ob.get() == object.get(); }) != objects.end()) {
         _selected = object;
+        composite.reset();
         cursor.reset();
     }
 }

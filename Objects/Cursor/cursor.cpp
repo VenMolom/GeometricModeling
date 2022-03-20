@@ -7,7 +7,7 @@
 using namespace DirectX;
 
 Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
-        : Object("Cursor", position, {0, 0, 0}),
+        : Object("Cursor", position),
           _screenPosition(screenPosition),
           camera(camera) {
     positionHandler = this->bindablePosition().addNotifier([&] { updateScreenPosition(); });
@@ -15,7 +15,7 @@ Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
     viewHandler = camera.bindableView().addNotifier([&] { updateScreenPosition(); });
 }
 
-void Cursor::draw(Renderer &renderer, const Camera &camera) const {
+void Cursor::draw(Renderer &renderer, const Camera &camera, DrawType drawType) const {
     auto mvp = modelMatrix() * camera.cameraMatrix();
     renderer.drawCursor(mvp);
 }
@@ -53,4 +53,8 @@ void Cursor::updateScreenPosition() {
     XMFLOAT2 screenPos{};
     XMStoreFloat2(&screenPos, screen);
     _screenPosition = {static_cast<int32_t>(screenPos.x), static_cast<int32_t>(screenPos.y)};
+}
+
+BoundingOrientedBox Cursor::boundingBox() const {
+    return {};
 }

@@ -13,7 +13,7 @@ class Cursor : public Object {
 public:
     Cursor(DirectX::XMFLOAT3 position, DirectX::XMINT2 screenPosition, Camera &camera);
 
-    void draw(Renderer &renderer, const Camera &camera) const override;
+    void draw(Renderer &renderer, const Camera &camera, DrawType drawType) const override;
 
     Type type() const override;
 
@@ -22,6 +22,8 @@ public:
     void setScreenPosition(DirectX::XMINT2 position);
 
     QBindable<DirectX::XMINT2> bindableScreenPosition() { return &_screenPosition; }
+
+    DirectX::BoundingOrientedBox boundingBox() const override;
 
 private:
     Camera &camera;
