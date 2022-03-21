@@ -57,7 +57,7 @@
        <item row="0" column="0">
         <widget class="QGroupBox" name="addObjectsGroupBox">
          <property name="title">
-          <string>Add _objects</string>
+          <string>Add object</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">

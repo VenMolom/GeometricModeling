@@ -9,7 +9,7 @@
 #include <QRect>
 #include <QProperty>
 
-#define STEP 1.2f
+#define STEP 1.1f
 #define SENSITIVITY 0.005f
 #define SPEED 0.1f
 #define LIMIT DirectX::XM_PIDIV2 - 0.001f
