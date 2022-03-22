@@ -99,8 +99,18 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
 
 void MainWindow::on_deleteObject_clicked() {
     auto selected = ui->objectsList->selectedItems();
+    if (selected.empty()) return;
+
     scene->removeSelected();
     items.remove_if([&](const unique_ptr<ObjectListItem> &ob) {
         return selected.contains(ob.get());
     });
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    QWidget::keyPressEvent(event);
+
+    if (event->key() == Qt::Key::Key_Delete) {
+        on_deleteObject_clicked();
+    }
 }

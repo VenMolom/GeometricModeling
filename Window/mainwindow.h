@@ -27,6 +27,9 @@ private slots:
 
     void on_deleteObject_clicked();
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     Ui::MainWindow *ui;
     std::shared_ptr<Scene> scene;
