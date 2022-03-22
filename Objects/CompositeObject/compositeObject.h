@@ -40,7 +40,9 @@ private:
 
     void updateMatrix();
 
-    DirectX::XMFLOAT3 quaternionToEuler(DirectX::XMFLOAT4 quaternion);
+    DirectX::XMFLOAT3 rotationMatrixToEuler(DirectX::XMMATRIX rotationMatrix) const;
+
+    DirectX::XMMATRIX childTransformMatrix(const std::shared_ptr<Object>& child) const;
 };
 
 

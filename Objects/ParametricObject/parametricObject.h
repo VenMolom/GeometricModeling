@@ -62,7 +62,7 @@ void ParametricObject<Dim>::draw(Renderer &renderer, DirectX::XMMATRIX view, Dir
                                  DrawType drawType) const {
     auto mvp = modelMatrix() * view * projection;
     renderer.drawLines(vertices, indices, mvp, drawType != DEFAULT);
-    if (drawType == SELECTED) renderer.drawCursor(mvp);
+    if (drawType == SELECTED) renderer.drawCursor(DirectX::XMLoadFloat4x4(&noScaleMatrix) * view * projection);
 }
 
 template<size_t Dim>
