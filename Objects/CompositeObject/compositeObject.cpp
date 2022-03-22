@@ -28,8 +28,8 @@ void CompositeObject::calculateCenter() {
         c = XMVectorAdd(c, XMLoadFloat3(&oc));
     }
     XMStoreFloat3(&center, XMVectorScale(c, 1.0f / static_cast<float>(objects.size())));
-    startingPosition = center;
-    setPosition(center);
+    lastPosition = center;
+    _position.setValueBypassingBindings(center);
 }
 
 bool CompositeObject::contains(shared_ptr<Object> object) {
@@ -38,11 +38,57 @@ bool CompositeObject::contains(shared_ptr<Object> object) {
 }
 
 std::list<std::shared_ptr<Object>> &&CompositeObject::release() {
+    return std::move(objects);
+}
+
+void
+CompositeObject::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
+                      DrawType drawType) const {
+    for (auto &object: objects) {
+        object->draw(renderer, view, projection, NO_CURSOR);
+    }
+    renderer.drawCursor(XMLoadFloat4x4(&noScaleMatrix) * view * projection);
+}
+
+Type CompositeObject::type() const {
+    return COMPOSITE;
+}
+
+DirectX::BoundingOrientedBox CompositeObject::boundingBox() const {
+    return {};
+}
+
+void CompositeObject::setPosition(DirectX::XMFLOAT3 position) {
+    Object::setPosition(position);
+    updateChildren();
+    lastPosition = _position.value();
+}
+
+void CompositeObject::setRotation(DirectX::XMFLOAT3 rotation) {
+    Object::setRotation(rotation);
+    updateChildren();
+    lastRotation = _rotation.value();
+}
+
+void CompositeObject::setScale(DirectX::XMFLOAT3 scale) {
+    Object::setScale(scale);
+    updateChildren();
+    lastScale = _scale.value();
+}
+
+void CompositeObject::updateChildren() {
+    auto rotation = XMMatrixRotationRollPitchYawFromVector(XMVectorSubtract(XMLoadFloat3(&_rotation.value()), XMLoadFloat3(&lastRotation)));
+    auto scaling = XMMatrixScalingFromVector(XMVectorDivide(XMLoadFloat3(&_scale.value()), XMLoadFloat3(&lastScale)));
+
+    auto translationBack = XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value()));
+    auto translationToCenter = XMMatrixTranslationFromVector(XMVectorNegate(XMLoadFloat3(&lastPosition)));
+    auto modifyMatrix = translationToCenter * scaling * rotation * translationBack;
+
     XMVECTOR vpos{}, vrot{}, vscal{};
     XMFLOAT3 pos{} ,scal{}, eulerRot{};
     XMFLOAT4 rot{};
     for (auto &object : objects) {
-        auto childMatrix = object->modelMatrix() * childTransformMatrix(object);
+        auto childMatrix = object->modelMatrix() * modifyMatrix;
         auto res = XMMatrixDecompose(&vscal, &vrot, &vpos, childMatrix);
         XMStoreFloat3(&pos, vpos);
         XMStoreFloat3(&scal, vscal);
@@ -59,67 +105,18 @@ std::list<std::shared_ptr<Object>> &&CompositeObject::release() {
         object->setScale(scal);
         object->setRotation(eulerRot);
     }
-
-    return std::move(objects);
-}
-
-void
-CompositeObject::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
-                      DrawType drawType) const {
-    //auto modifiedView = XMLoadFloat4x4(&modifyMatrix) * view;
-    for (auto &object: objects) {
-        auto modifiedView = childTransformMatrix(object) * view;
-        object->draw(renderer, modifiedView, projection, NO_CURSOR);
-    }
-    renderer.drawCursor(XMLoadFloat4x4(&noScaleMatrix) * view * projection);
-}
-
-Type CompositeObject::type() const {
-    return COMPOSITE;
-}
-
-DirectX::BoundingOrientedBox CompositeObject::boundingBox() const {
-    return {};
-}
-
-void CompositeObject::setPosition(DirectX::XMFLOAT3 position) {
-    Object::setPosition(position);
-    updateMatrix();
-}
-
-void CompositeObject::setRotation(DirectX::XMFLOAT3 rotation) {
-    Object::setRotation(rotation);
-    updateMatrix();
-}
-
-void CompositeObject::setScale(DirectX::XMFLOAT3 scale) {
-    Object::setScale(scale);
-    updateMatrix();
-}
-
-void CompositeObject::updateMatrix() {
-
-}
-
-DirectX::XMMATRIX CompositeObject::childTransformMatrix(const std::shared_ptr<Object>& child) const {
-    auto translationBack = XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value()));
-    auto translationToCenter = XMMatrixTranslationFromVector(XMVectorNegate(XMLoadFloat3(&startingPosition)));
-    auto childRot = child->rotation();
-    auto scaling = XMLoadFloat4x4(&scaleMatrix) * XMMatrixInverse(nullptr, XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&childRot)));
-    return translationToCenter * scaling * XMLoadFloat4x4(&rotationMatrix) * translationBack;
-
 }
 
 DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix) const {
-//    XMFLOAT4X4 XMFLOAT4X4_Values;
-//    XMStoreFloat4x4(&XMFLOAT4X4_Values, XMMatrixTranspose(rotationMatrix));
-//
-//    XMFLOAT3 euler{};
-//    euler.x = (float)asin(-XMFLOAT4X4_Values._23);
-//    euler.y = (float) atan2(XMFLOAT4X4_Values._13, XMFLOAT4X4_Values._33);
-//    euler.z = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
-//
-//    return euler;
+    XMFLOAT4X4 XMFLOAT4X4_Values{};
+    XMStoreFloat4x4(&XMFLOAT4X4_Values, XMMatrixTranspose(rotationMatrix));
+
+    XMFLOAT3 euler{};
+    euler.x = (float)asin(-XMFLOAT4X4_Values._23);
+    euler.y = (float) atan2(XMFLOAT4X4_Values._13, XMFLOAT4X4_Values._33);
+    euler.z = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
+
+    return euler;
 
 //    XMFLOAT3 angles{};
 //    // roll (x-axis rotation)
@@ -141,18 +138,18 @@ DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix
 //
 //    return angles;
 
-    float c2 = sqrt(rotationMatrix.r[0].m128_f32[0] * rotationMatrix.r[0].m128_f32[0]
-            + rotationMatrix.r[0].m128_f32[1] * rotationMatrix.r[0].m128_f32[1]);
-
-    XMFLOAT3 euler{};
-    euler.x = atan2(rotationMatrix.r[1].m128_f32[2], rotationMatrix.r[2].m128_f32[2]);
-    euler.y = atan2(-rotationMatrix.r[0].m128_f32[2], c2);
-
-    float s1 = sin(euler.x);
-    float c1 = cos(euler.x);
-
-    euler.z = atan2(s1 * rotationMatrix.r[2].m128_f32[0] - c1 * rotationMatrix.r[1].m128_f32[0],
-                    c1 * rotationMatrix.r[1].m128_f32[1] - s1 * rotationMatrix.r[2].m128_f32[1]);
-
-    return euler;
+//    float c2 = sqrt(rotationMatrix.r[0].m128_f32[0] * rotationMatrix.r[0].m128_f32[0]
+//            + rotationMatrix.r[0].m128_f32[1] * rotationMatrix.r[0].m128_f32[1]);
+//
+//    XMFLOAT3 euler{};
+//    euler.x = atan2(rotationMatrix.r[1].m128_f32[2], rotationMatrix.r[2].m128_f32[2]);
+//    euler.y = atan2(-rotationMatrix.r[0].m128_f32[2], c2);
+//
+//    float s1 = sin(euler.x);
+//    float c1 = cos(euler.x);
+//
+//    euler.z = atan2(s1 * rotationMatrix.r[2].m128_f32[0] - c1 * rotationMatrix.r[1].m128_f32[0],
+//                    c1 * rotationMatrix.r[1].m128_f32[1] - s1 * rotationMatrix.r[2].m128_f32[1]);
+//
+//    return euler;
 }
