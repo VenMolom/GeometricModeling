@@ -124,24 +124,35 @@ void Controls::setVectorZ(void (Object::*target)(DirectX::XMFLOAT3),
 }
 
 void Controls::updatePosition() {
+    QSignalBlocker xBlocker(ui->posX);
+    QSignalBlocker yBlocker(ui->posY);
+    QSignalBlocker zBlocker(ui->posZ);
     ui->posX->setValue(object->position().x);
     ui->posY->setValue(object->position().y);
     ui->posZ->setValue(object->position().z);
 }
 
 void Controls::updateRotation() {
+    QSignalBlocker xBlocker(ui->rotX);
+    QSignalBlocker yBlocker(ui->rotY);
+    QSignalBlocker zBlocker(ui->rotZ);
     ui->rotX->setValue(XMConvertToDegrees(object->rotation().x));
     ui->rotY->setValue(XMConvertToDegrees(object->rotation().y));
     ui->rotZ->setValue(XMConvertToDegrees(object->rotation().z));
 }
 
 void Controls::updateScale() {
+    QSignalBlocker xBlocker(ui->scaleX);
+    QSignalBlocker yBlocker(ui->scaleY);
+    QSignalBlocker zBlocker(ui->scaleZ);
     ui->scaleX->setValue(object->scale().x);
     ui->scaleY->setValue(object->scale().y);
     ui->scaleZ->setValue(object->scale().z);
 }
 
 void Controls::updateScreenPosition() {
+    QSignalBlocker xBlocker(ui->screenPosX);
+    QSignalBlocker yBlocker(ui->screenPosY);
     if (auto *c = dynamic_cast<Cursor *>(object.get())) {
         ui->screenPosX->setValue(c->screenPosition().x);
         ui->screenPosY->setValue(c->screenPosition().y);

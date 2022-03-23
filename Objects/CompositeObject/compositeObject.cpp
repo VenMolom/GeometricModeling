@@ -28,8 +28,8 @@ void CompositeObject::calculateCenter() {
         c = XMVectorAdd(c, XMLoadFloat3(&oc));
     }
     XMStoreFloat3(&center, XMVectorScale(c, 1.0f / static_cast<float>(objects.size())));
-    startingPosition = center;
-    setPosition(center);
+    lastPosition = center;
+    _position.setValueBypassingBindings(center);
 }
 
 bool CompositeObject::contains(const shared_ptr<Object> &object) const {
@@ -38,28 +38,14 @@ bool CompositeObject::contains(const shared_ptr<Object> &object) const {
 }
 
 std::list<std::shared_ptr<Object>> &&CompositeObject::release() {
-    XMVECTOR vpos, vrot, vscal;
-    XMFLOAT3 pos{} ,scal{};
-    XMFLOAT4 rot{};
-    for (auto &object : objects) {
-        XMMatrixDecompose(&vscal, &vrot, &vpos, object->modelMatrix() * XMLoadFloat4x4(&modifyMatrix));
-        XMStoreFloat3(&pos, vpos);
-        XMStoreFloat3(&scal, vscal);
-        XMStoreFloat4(&rot, vrot);
-        object->setPosition(pos);
-        object->setScale(scal);
-        object->setRotation(quaternionToEuler(rot));
-    }
-
     return std::move(objects);
 }
 
 void
 CompositeObject::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
                       DrawType drawType) const {
-    auto modifiedView = XMLoadFloat4x4(&modifyMatrix) * view;
     for (auto &object: objects) {
-        object->draw(renderer, modifiedView, projection, NO_CURSOR);
+        object->draw(renderer, view, projection, NO_CURSOR);
     }
     renderer.drawCursor(XMLoadFloat4x4(&noScaleMatrix) * view * projection);
 }
@@ -74,46 +60,98 @@ DirectX::BoundingOrientedBox CompositeObject::boundingBox() const {
 
 void CompositeObject::setPosition(DirectX::XMFLOAT3 position) {
     Object::setPosition(position);
-    updateMatrix();
+    updateChildren();
+    lastPosition = _position.value();
 }
 
 void CompositeObject::setRotation(DirectX::XMFLOAT3 rotation) {
     Object::setRotation(rotation);
-    updateMatrix();
+    updateChildren();
+    lastRotation = _rotation.value();
 }
 
 void CompositeObject::setScale(DirectX::XMFLOAT3 scale) {
     Object::setScale(scale);
-    updateMatrix();
+    updateChildren();
+    lastScale = _scale.value();
 }
 
-void CompositeObject::updateMatrix() {
+void CompositeObject::updateChildren() {
+    auto rotation = XMMatrixRotationRollPitchYawFromVector(XMVectorSubtract(XMLoadFloat3(&_rotation.value()), XMLoadFloat3(&lastRotation)));
+    auto scaling = XMMatrixScalingFromVector(XMVectorDivide(XMLoadFloat3(&_scale.value()), XMLoadFloat3(&lastScale)));
+
     auto translationBack = XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value()));
-    auto translationToCenter = XMMatrixTranslationFromVector(XMVectorScale(XMLoadFloat3(&startingPosition), -1));
-    XMStoreFloat4x4(&modifyMatrix, translationToCenter * XMLoadFloat4x4(&scaleMatrix)
-                                   * XMLoadFloat4x4(&rotationMatrix) * translationBack);
+    auto translationToCenter = XMMatrixTranslationFromVector(XMVectorNegate(XMLoadFloat3(&lastPosition)));
+    auto modifyMatrix = translationToCenter * scaling * rotation * translationBack;
+
+    XMVECTOR vpos{}, vrot{}, vscal{};
+    XMFLOAT3 pos{} ,scal{}, eulerRot{};
+    XMFLOAT4 rot{};
+    for (auto &object : objects) {
+        auto childMatrix = object->modelMatrix() * modifyMatrix;
+        auto res = XMMatrixDecompose(&vscal, &vrot, &vpos, childMatrix);
+        XMStoreFloat3(&pos, vpos);
+        XMStoreFloat3(&scal, vscal);
+        XMStoreFloat4(&rot, vrot);
+        if (!res) {
+            childMatrix.r[0] = XMVectorScale(childMatrix.r[0], 1/scal.x);
+            childMatrix.r[1] = XMVectorScale(childMatrix.r[1], 1/scal.y);
+            childMatrix.r[2] = XMVectorScale(childMatrix.r[2], 1/scal.z);
+            eulerRot = rotationMatrixToEuler(childMatrix);
+        } else {
+            eulerRot = rotationMatrixToEuler(XMMatrixRotationQuaternion(vrot));
+        }
+        object->setPosition(pos);
+        object->setScale(scal);
+        object->setRotation(eulerRot);
+    }
 }
 
-DirectX::XMFLOAT3 CompositeObject::quaternionToEuler(DirectX::XMFLOAT4 quaternion) {
-    XMFLOAT3 angles{};
-    // roll (x-axis rotation)
-    double sinr_cosp = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z);
-    double cosr_cosp = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y);
-    angles.x = std::atan2(sinr_cosp, cosr_cosp);
+DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix) const {
+    XMFLOAT4X4 XMFLOAT4X4_Values{};
+    XMStoreFloat4x4(&XMFLOAT4X4_Values, XMMatrixTranspose(rotationMatrix));
 
-    // pitch (y-axis rotation)
-    double sinp = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x);
-    if (std::abs(sinp) >= 1)
-        angles.y = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-    else
-        angles.y = std::asin(sinp);
+    XMFLOAT3 euler{};
+    euler.x = (float)asin(-XMFLOAT4X4_Values._23);
+    euler.y = (float) atan2(XMFLOAT4X4_Values._13, XMFLOAT4X4_Values._33);
+    euler.z = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
 
-    // yaw (z-axis rotation)
-    double siny_cosp = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y);
-    double cosy_cosp = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z);
-    angles.z = std::atan2(siny_cosp, cosy_cosp);
+    return euler;
 
-    return angles;
+//    XMFLOAT3 angles{};
+//    // roll (x-axis rotation)
+//    double sinr_cosp = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z);
+//    double cosr_cosp = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y);
+//    angles.x = std::atan2(sinr_cosp, cosr_cosp);
+//
+//    // pitch (y-axis rotation)
+//    double sinp = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x);
+//    if (std::abs(sinp) >= 1)
+//        angles.y = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+//    else
+//        angles.y = std::asin(sinp);
+//
+//    // yaw (z-axis rotation)
+//    double siny_cosp = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y);
+//    double cosy_cosp = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z);
+//    angles.z = std::atan2(siny_cosp, cosy_cosp);
+//
+//    return angles;
+
+//    float c2 = sqrt(rotationMatrix.r[0].m128_f32[0] * rotationMatrix.r[0].m128_f32[0]
+//            + rotationMatrix.r[0].m128_f32[1] * rotationMatrix.r[0].m128_f32[1]);
+//
+//    XMFLOAT3 euler{};
+//    euler.x = atan2(rotationMatrix.r[1].m128_f32[2], rotationMatrix.r[2].m128_f32[2]);
+//    euler.y = atan2(-rotationMatrix.r[0].m128_f32[2], c2);
+//
+//    float s1 = sin(euler.x);
+//    float c1 = cos(euler.x);
+//
+//    euler.z = atan2(s1 * rotationMatrix.r[2].m128_f32[0] - c1 * rotationMatrix.r[1].m128_f32[0],
+//                    c1 * rotationMatrix.r[1].m128_f32[1] - s1 * rotationMatrix.r[2].m128_f32[1]);
+//
+//    return euler;
 }
 
 bool CompositeObject::equals(const shared_ptr<Object> &other) const {

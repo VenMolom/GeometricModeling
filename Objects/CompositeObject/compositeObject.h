@@ -34,15 +34,17 @@ public:
 
 private:
     std::list<std::shared_ptr<Object>> objects;
-
-    DirectX::XMFLOAT3 startingPosition;
-    DirectX::XMFLOAT4X4 modifyMatrix;
+    DirectX::XMFLOAT3 lastPosition;
+    DirectX::XMFLOAT3 lastRotation{0, 0, 0};
+    DirectX::XMFLOAT3 lastScale{1, 1, 1};
 
     void calculateCenter();
 
     void updateMatrix();
 
-    DirectX::XMFLOAT3 quaternionToEuler(DirectX::XMFLOAT4 quaternion);
+    void updateChildren();
+
+    DirectX::XMFLOAT3 rotationMatrixToEuler(DirectX::XMMATRIX rotationMatrix) const;
 };
 
 
