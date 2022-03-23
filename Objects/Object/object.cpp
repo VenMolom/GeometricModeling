@@ -44,3 +44,7 @@ void Object::setScale(DirectX::XMFLOAT3 scale) {
 void Object::setName(QString name) {
     _name = std::move(name);
 }
+
+bool Object::equals(const std::shared_ptr<Object> &other) const {
+    return other.get() == this;
+}

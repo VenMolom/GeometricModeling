@@ -32,9 +32,9 @@ void CompositeObject::calculateCenter() {
     setPosition(center);
 }
 
-bool CompositeObject::contains(shared_ptr<Object> object) {
+bool CompositeObject::contains(const shared_ptr<Object> &object) const {
     return find_if(objects.begin(), objects.end(),
-                   [&](const shared_ptr<Object> &ob) { return ob.get() == object.get(); }) != objects.end();
+                   [&](const shared_ptr<Object> &ob) { return object->equals(ob); }) != objects.end();
 }
 
 std::list<std::shared_ptr<Object>> &&CompositeObject::release() {
@@ -114,4 +114,8 @@ DirectX::XMFLOAT3 CompositeObject::quaternionToEuler(DirectX::XMFLOAT4 quaternio
     angles.z = std::atan2(siny_cosp, cosy_cosp);
 
     return angles;
+}
+
+bool CompositeObject::equals(const shared_ptr<Object> &other) const {
+    return contains(other);
 }

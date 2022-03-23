@@ -16,7 +16,8 @@ void Scene::draw(Renderer &renderer) const {
     }
     for (auto &object: _objects) {
         auto a = _selected.value().lock().get();
-        object->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), a == object.get() ? SELECTED : DEFAULT);
+        object->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(),
+                     a == object.get() ? SELECTED : DEFAULT);
     }
 
 }
@@ -34,7 +35,7 @@ void Scene::addObject(shared_ptr<Object> &&object) {
 void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
     _objects.remove_if([&](const shared_ptr<Object> &ob) {
         return find_if(objects.begin(), objects.end(),
-                [&](const shared_ptr<Object> &obb) { return ob.get() == obb.get(); }) != objects.end();
+                       [&](const shared_ptr<Object> &obb) { return ob->equals(obb); }) != objects.end();
     });
 
     auto comp = make_shared<CompositeObject>(std::move(objects));
@@ -43,7 +44,7 @@ void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
 
 void Scene::removeSelected() {
     if (auto selected = _selected.value().lock()) {
-        _objects.remove_if([&](const shared_ptr<Object> &ob) { return ob.get() == selected.get(); });
+        _objects.remove_if([&](const shared_ptr<Object> &ob) { return selected->equals(ob); });
         composite.reset();
         _selected.setValue({});
     }
@@ -109,7 +110,7 @@ void Scene::addCursor(Utils3D::XMFLOAT3RAY ray, XMINT2 screenPos) {
 }
 
 void Scene::setSelected(std::shared_ptr<Object> object) {
-    if(!object) {
+    if (!object) {
         removeComposite();
         _selected.setValue({});
         return;
@@ -119,8 +120,9 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         composite = std::move(object);
         _selected = composite;
         cursor.reset();
-    } else if (find_if(_objects.begin(), _objects.end(),
-                       [&](const shared_ptr<Object> &ob) { return ob.get() == object.get(); }) != _objects.end()) {
+    } else if ((composite && composite->equals(object))
+               || find_if(_objects.begin(), _objects.end(),
+                          [&](const shared_ptr<Object> &ob) { return object->equals(ob); }) != _objects.end()) {
         _selected = object;
         removeComposite();
         cursor.reset();

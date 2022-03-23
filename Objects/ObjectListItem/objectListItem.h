@@ -16,7 +16,7 @@ public:
 
     void select();
 
-    bool hasObject(std::shared_ptr<Object> object) { return this->_object.get() == object.get(); }
+    bool hasObject(const std::shared_ptr<Object> &object) { return _object->equals(object); }
 
     std::shared_ptr<Object> object() const { return _object; }
 

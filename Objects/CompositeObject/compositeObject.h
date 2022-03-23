@@ -14,7 +14,7 @@ public:
 
     ~CompositeObject();
 
-    bool contains(std::shared_ptr<Object> object);
+    bool contains(const std::shared_ptr<Object> &object) const;
 
     std::list<std::shared_ptr<Object>> &&release();
 
@@ -29,6 +29,8 @@ public:
     void setRotation(DirectX::XMFLOAT3 rotation) override;
 
     void setScale(DirectX::XMFLOAT3 scale) override;
+
+    bool equals(const std::shared_ptr<Object> &other) const override;
 
 private:
     std::list<std::shared_ptr<Object>> objects;

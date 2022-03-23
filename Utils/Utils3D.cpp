@@ -37,10 +37,8 @@ XMFLOAT3 Utils3D::getRayCrossWithPlane(XMFLOAT3RAY ray, XMFLOAT4 plane) {
     XMFLOAT4 p(ray.position.x, ray.position.y, ray.position.z, 1),
             v(ray.direction.x, ray.direction.y, ray.direction.z, 0);
     float pA, vA;
-    XMStoreFloat(&pA, XMVector4Dot(
-            XMLoadFloat4(&p), XMLoadFloat4(&plane)));
-    XMStoreFloat(&vA, XMVector4Dot(
-            XMLoadFloat4(&v), XMLoadFloat4(&plane)));
+    XMStoreFloat(&pA, XMVector4Dot(XMLoadFloat4(&p), XMLoadFloat4(&plane)));
+    XMStoreFloat(&vA, XMVector4Dot(XMLoadFloat4(&v), XMLoadFloat4(&plane)));
     float t = -pA / vA;
     XMFLOAT3 result{};
     XMStoreFloat3(&result, XMVectorAdd(

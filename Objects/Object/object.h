@@ -72,6 +72,8 @@ public:
 
     QBindable<QString> bindableName() { return &_name; }
 
+    virtual bool equals(const std::shared_ptr<Object> &other) const;
+
     virtual void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const = 0;
 
     virtual Type type() const = 0;
