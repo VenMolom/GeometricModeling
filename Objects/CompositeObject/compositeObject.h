@@ -34,9 +34,8 @@ public:
 
 private:
     std::list<std::shared_ptr<Object>> objects;
-    DirectX::XMFLOAT3 lastPosition;
-    DirectX::XMFLOAT3 lastRotation{0, 0, 0};
-    DirectX::XMFLOAT3 lastScale{1, 1, 1};
+    std::vector<DirectX::XMFLOAT4X4> startingMatrices{};
+    DirectX::XMFLOAT3 startingPosition;
 
     void calculateCenter();
 

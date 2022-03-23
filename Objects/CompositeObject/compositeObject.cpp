@@ -13,6 +13,13 @@ using namespace DirectX;
 CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
         : Object("Composite", {0, 0, 0}),
           objects(objects) {
+
+    for (auto &object : objects) {
+        XMFLOAT4X4 model{};
+        XMStoreFloat4x4(&model, object->modelMatrix());
+        startingMatrices.push_back(model);
+    }
+
     calculateCenter();
 }
 
@@ -28,7 +35,7 @@ void CompositeObject::calculateCenter() {
         c = XMVectorAdd(c, XMLoadFloat3(&oc));
     }
     XMStoreFloat3(&center, XMVectorScale(c, 1.0f / static_cast<float>(objects.size())));
-    lastPosition = center;
+    startingPosition = center;
     _position.setValueBypassingBindings(center);
 }
 
@@ -61,34 +68,32 @@ DirectX::BoundingOrientedBox CompositeObject::boundingBox() const {
 void CompositeObject::setPosition(DirectX::XMFLOAT3 position) {
     Object::setPosition(position);
     updateChildren();
-    lastPosition = _position.value();
 }
 
 void CompositeObject::setRotation(DirectX::XMFLOAT3 rotation) {
     Object::setRotation(rotation);
     updateChildren();
-    lastRotation = _rotation.value();
 }
 
 void CompositeObject::setScale(DirectX::XMFLOAT3 scale) {
     Object::setScale(scale);
     updateChildren();
-    lastScale = _scale.value();
 }
 
 void CompositeObject::updateChildren() {
-    auto rotation = XMMatrixRotationRollPitchYawFromVector(XMVectorSubtract(XMLoadFloat3(&_rotation.value()), XMLoadFloat3(&lastRotation)));
-    auto scaling = XMMatrixScalingFromVector(XMVectorDivide(XMLoadFloat3(&_scale.value()), XMLoadFloat3(&lastScale)));
+    auto rotation = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&_rotation.value()));
+    auto scaling = XMMatrixScalingFromVector(XMLoadFloat3(&_scale.value()));
 
     auto translationBack = XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value()));
-    auto translationToCenter = XMMatrixTranslationFromVector(XMVectorNegate(XMLoadFloat3(&lastPosition)));
+    auto translationToCenter = XMMatrixTranslationFromVector(XMVectorNegate(XMLoadFloat3(&startingPosition)));
     auto modifyMatrix = translationToCenter * scaling * rotation * translationBack;
 
     XMVECTOR vpos{}, vrot{}, vscal{};
     XMFLOAT3 pos{} ,scal{}, eulerRot{};
     XMFLOAT4 rot{};
+    int i = 0;
     for (auto &object : objects) {
-        auto childMatrix = object->modelMatrix() * modifyMatrix;
+        auto childMatrix = XMLoadFloat4x4(&startingMatrices[i++]) * modifyMatrix;
         auto res = XMMatrixDecompose(&vscal, &vrot, &vpos, childMatrix);
         XMStoreFloat3(&pos, vpos);
         XMStoreFloat3(&scal, vscal);
