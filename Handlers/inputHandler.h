@@ -11,7 +11,9 @@
 #define PAN_BUTTON Qt::MouseButton::MiddleButton
 #define MAIN_BUTTON Qt::MouseButton::LeftButton
 #define ROTATE_BUTTON Qt::MouseButton::RightButton
-#define MULTI_SELECT_KEY Qt::Key::Key_Shift
+
+#define ACTION_KEY Qt::Key::Key_Shift
+#define SUBACTION_KEY Qt::Key::Key_Control
 
 class InputHandler {
 public:
@@ -35,9 +37,9 @@ private:
     std::shared_ptr<Scene> scene;
 
     QPointF lastMousePos{};
-    bool panButtonPressed{false};
-    bool rotateButtonPressed{false};
-    bool multiSelectButtonPressed{false};
+    bool actionKeyPressed{false};
+    bool subactionKeyPressed{false};
+    bool moveable{false};
 };
 
 

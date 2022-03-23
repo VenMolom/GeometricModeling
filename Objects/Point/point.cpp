@@ -29,5 +29,5 @@ Type Point::type() const {
 
 BoundingOrientedBox Point::boundingBox() const {
     auto pos = _position.value();
-    return {pos, size, rot};
+    return {pos, boundingBoxSize, rot};
 }

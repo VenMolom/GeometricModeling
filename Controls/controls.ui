@@ -68,6 +68,12 @@
          </item>
          <item row="0" column="1">
           <widget class="QSpinBox" name="uDensity">
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="minimum">
             <number>2</number>
            </property>
@@ -115,6 +121,12 @@
          </item>
          <item row="0" column="1">
           <widget class="QSpinBox" name="vDensity">
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="minimum">
             <number>2</number>
            </property>
@@ -166,11 +178,17 @@
       </item>
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="majorRadius">
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="accelerated">
+         <bool>true</bool>
+        </property>
         <property name="decimals">
-         <number>4</number>
+         <number>3</number>
         </property>
         <property name="minimum">
-         <double>0.000100000000000</double>
+         <double>0.000000000000000</double>
         </property>
         <property name="maximum">
          <double>10000.000000000000000</double>
@@ -188,11 +206,17 @@
       </item>
       <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="minorRadius">
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="accelerated">
+         <bool>true</bool>
+        </property>
         <property name="decimals">
-         <number>4</number>
+         <number>3</number>
         </property>
         <property name="minimum">
-         <double>0.000100000000000</double>
+         <double>0.000000000000000</double>
         </property>
         <property name="maximum">
          <double>10000.000000000000000</double>
@@ -271,6 +295,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="prefix">
             <string>Z </string>
            </property>
@@ -296,6 +326,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="prefix">
             <string>X </string>
            </property>
@@ -320,6 +356,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
            </property>
            <property name="prefix">
             <string>Y </string>
@@ -370,7 +412,13 @@
           <number>0</number>
          </property>
          <item row="1" column="2">
-          <widget class="QSpinBox" name="screenPosX">
+          <widget class="QSpinBox" name="screenPosY">
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="prefix">
             <string>Y </string>
            </property>
@@ -380,7 +428,13 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QSpinBox" name="screenPosY">
+          <widget class="QSpinBox" name="screenPosX">
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="suffix">
             <string/>
            </property>
@@ -431,6 +485,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="prefix">
             <string>Z </string>
            </property>
@@ -456,6 +516,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="prefix">
             <string>Y </string>
            </property>
@@ -480,6 +546,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
            </property>
            <property name="prefix">
             <string>X </string>
@@ -537,6 +609,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="prefix">
             <string>Y </string>
            </property>
@@ -562,6 +640,12 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
+           </property>
            <property name="prefix">
             <string>Z </string>
            </property>
@@ -586,6 +670,12 @@
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
+           </property>
+           <property name="buttonSymbols">
+            <enum>QAbstractSpinBox::NoButtons</enum>
+           </property>
+           <property name="accelerated">
+            <bool>true</bool>
            </property>
            <property name="prefix">
             <string>X </string>

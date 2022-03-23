@@ -50,6 +50,14 @@ void Scene::removeSelected() {
     }
 }
 
+void Scene::moveSelected(QPoint screenPosition) {
+    // TODO: move selected based screen position
+}
+
+void Scene::addPoint(QPoint screenPosition) {
+    // TODO: add point at screen position (similar to cursor)
+}
+
 void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
@@ -58,7 +66,7 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
 
     if (auto object = findIntersectingObject(ray)) {
         shared_ptr<Object> sel;
-        if (multiple && (sel = _selected.value().lock()) && sel.get() != object.get()) {
+        if (multiple && (sel = _selected.value().lock()) && sel->type() != CURSOR && sel.get() != object.get()) {
             if (composite) {
                 auto comp = dynamic_cast<CompositeObject *>(composite.get());
 
@@ -110,6 +118,10 @@ void Scene::addCursor(Utils3D::XMFLOAT3RAY ray, XMINT2 screenPos) {
 }
 
 void Scene::setSelected(std::shared_ptr<Object> object) {
+    if (!object && cursor) {
+        return;
+    }
+
     if (!object) {
         removeComposite();
         _selected.setValue({});

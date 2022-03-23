@@ -36,7 +36,7 @@ void CompositeObject::calculateCenter() {
     }
     XMStoreFloat3(&center, XMVectorScale(c, 1.0f / static_cast<float>(objects.size())));
     startingPosition = center;
-    _position.setValueBypassingBindings(center);
+    setPosition(center);
 }
 
 bool CompositeObject::contains(const shared_ptr<Object> &object) const {

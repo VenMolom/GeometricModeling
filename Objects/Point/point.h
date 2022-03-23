@@ -19,7 +19,8 @@ public:
     DirectX::BoundingOrientedBox boundingBox() const override;
 
 private:
-    DirectX::XMFLOAT3 size {0.5f, 0.5f, 0.5f};
+    DirectX::XMFLOAT3 size {0.2f, 0.2f, 0.2f};
+    DirectX::XMFLOAT3 boundingBoxSize {0.4f, 0.4f, 0.4f};
     DirectX::XMFLOAT4 rot {0.0f, 0.0f, 0.0f, 1.0f};
 };
 

@@ -10,14 +10,13 @@ InputHandler::InputHandler() {
 
 void InputHandler::mousePressEvent(QMouseEvent *event) {
     switch (event->button()) {
-        case PAN_BUTTON:
-            panButtonPressed = true;
-            break;
         case MAIN_BUTTON:
-            scene->selectOrAddCursor(event->position().toPoint(), multiSelectButtonPressed);
-            break;
-        case ROTATE_BUTTON:
-            rotateButtonPressed = true;
+            if (subactionKeyPressed) {
+                scene->addPoint(event->position().toPoint());
+            } else {
+                scene->selectOrAddCursor(event->position().toPoint(), actionKeyPressed);
+            }
+            moveable = true;
             break;
     }
 
@@ -26,21 +25,21 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
 
 void InputHandler::mouseReleaseEvent(QMouseEvent *event) {
     switch (event->button()) {
-        case PAN_BUTTON:
-            panButtonPressed = false;
-            break;
-        case ROTATE_BUTTON:
-            rotateButtonPressed = false;
+        case MAIN_BUTTON:
+            moveable = false;
             break;
     }
 }
 
 void InputHandler::mouseMoveEvent(QMouseEvent *event) {
-    if (rotateButtonPressed) {
+    if (event->buttons() & ROTATE_BUTTON) {
         scene->camera().rotate(event->position() - lastMousePos);
     }
-    if (panButtonPressed) {
+    if (event->buttons() & PAN_BUTTON) {
         scene->camera().move(event->position() - lastMousePos);
+    }
+    if (event->buttons() & MAIN_BUTTON && moveable) {
+        scene->moveSelected(event->position().toPoint());
     }
 
     lastMousePos = event->position();
@@ -51,14 +50,24 @@ void InputHandler::wheelEvent(QWheelEvent *event) {
 }
 
 void InputHandler::keyPressEvent(QKeyEvent *event) {
-    if (event->key() == MULTI_SELECT_KEY) {
-        multiSelectButtonPressed = true;
+    switch (event->key()) {
+        case ACTION_KEY:
+            actionKeyPressed = true;
+            break;
+        case SUBACTION_KEY:
+            subactionKeyPressed = true;
+            break;
     }
 }
 
 void InputHandler::keyReleaseEvent(QKeyEvent *event) {
-    if (event->key() == MULTI_SELECT_KEY) {
-        multiSelectButtonPressed = false;
+    switch (event->key()) {
+        case ACTION_KEY:
+            actionKeyPressed = false;
+            break;
+        case SUBACTION_KEY:
+            subactionKeyPressed = false;
+            break;
     }
 }
 
