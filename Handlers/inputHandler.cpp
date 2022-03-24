@@ -46,6 +46,8 @@ void InputHandler::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void InputHandler::wheelEvent(QWheelEvent *event) {
+    if (event->buttons() & PAN_BUTTON) return;
+
     scene->camera().changeZoom(static_cast<float>(event->angleDelta().y()));
 }
 

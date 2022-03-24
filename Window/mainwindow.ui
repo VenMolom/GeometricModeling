@@ -77,18 +77,15 @@
          </layout>
         </widget>
        </item>
-       <item row="3" column="0">
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="deleteObject">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
+         <property name="text">
+          <string>Delete</string>
          </property>
-        </spacer>
+        </widget>
        </item>
        <item row="1" column="0">
         <widget class="QListWidget" name="objectsList">
@@ -106,13 +103,26 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="deleteObject">
+       <item row="4" column="0">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="centerObject">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Delete</string>
+          <string>Center</string>
          </property>
         </widget>
        </item>

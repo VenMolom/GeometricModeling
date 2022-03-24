@@ -2,9 +2,11 @@
 // Created by Molom on 2022-02-27.
 //
 
+#include <DirectXMath.h>
 #include "scene.h"
 
 using namespace DirectX;
+using namespace Utils3D;
 using namespace std;
 
 void Scene::draw(Renderer &renderer) const {
@@ -30,6 +32,8 @@ void Scene::addObject(shared_ptr<Object> &&object) {
 
     _selected = object;
     _objects.push_back(std::move(object));
+
+    emit objectAdded(_objects.back());
 }
 
 void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
@@ -51,18 +55,30 @@ void Scene::removeSelected() {
 }
 
 void Scene::moveSelected(QPoint screenPosition) {
-    // TODO: move selected based screen position
+    shared_ptr<Object> selected;
+    if (!(selected = _selected.value().lock())) return;
+
+    auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
+    auto position = getPositionOnPlane(screenPos, _camera.direction(), selected->position());
+
+    selected->setPosition(position);
 }
 
 void Scene::addPoint(QPoint screenPosition) {
-    // TODO: add point at screen position (similar to cursor)
+    auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
+    auto position = getPositionOnPlane(screenPos, _camera.direction(), _camera.center());
+    addObject(make_shared<Point>(position));
+}
+
+void Scene::centerSelected() {
+    if (auto selected = _selected.value().lock()) {
+        _camera.moveTo(selected->position());
+    }
 }
 
 void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
-    auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
-    auto ray = Utils3D::getRayFromScreen(screenPos, screenSize, _camera.nearZ(), _camera.farZ(),
-                                         _camera.projectionMatrix(), _camera.viewMatrix());
+    auto ray = getRayFromScreenPosition(screenPos);
 
     if (auto object = findIntersectingObject(ray)) {
         shared_ptr<Object> sel;
@@ -87,36 +103,6 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
     }
 }
 
-shared_ptr<Object> Scene::findIntersectingObject(Utils3D::XMFLOAT3RAY ray) {
-    shared_ptr<Object> closest{nullptr};
-    float closestDistance = INFINITY;
-
-    for (auto &object: _objects) {
-        float distance{};
-        if (object->boundingBox().Intersects(XMLoadFloat3(&ray.position), XMLoadFloat3(&ray.direction), distance) &&
-            distance < closestDistance) {
-            closest = object;
-            closestDistance = distance;
-        }
-    }
-
-    return closest;
-}
-
-void Scene::addCursor(Utils3D::XMFLOAT3RAY ray, XMINT2 screenPos) {
-    auto plane = Utils3D::getPerpendicularPlaneThroughPoint(_camera.direction(), _camera.center());
-    auto position = Utils3D::getRayCrossWithPlane(ray, plane);
-
-    removeComposite();
-    if (cursor) {
-        cursor->setPosition(position);
-        cursor->setScreenPosition(screenPos);
-    } else {
-        cursor = make_shared<Cursor>(position, screenPos, _camera);
-        _selected = cursor;
-    }
-}
-
 void Scene::setSelected(std::shared_ptr<Object> object) {
     if (!object && cursor) {
         return;
@@ -138,6 +124,48 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         _selected = object;
         removeComposite();
         cursor.reset();
+    }
+}
+
+Utils3D::XMFLOAT3RAY Scene::getRayFromScreenPosition(XMINT2 screenPosition) const {
+    auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
+    return getRayFromScreen(screenPosition, screenSize, _camera.nearZ(), _camera.farZ(),
+                                     _camera.projectionMatrix(), _camera.viewMatrix());
+}
+
+shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) const {
+    shared_ptr<Object> closest{nullptr};
+    float closestDistance = INFINITY;
+
+    for (auto &object: _objects) {
+        float distance{};
+        if (object->boundingBox().Intersects(XMLoadFloat3(&ray.position), XMLoadFloat3(&ray.direction), distance) &&
+            distance < closestDistance) {
+            closest = object;
+            closestDistance = distance;
+        }
+    }
+
+    return closest;
+}
+
+XMFLOAT3 Scene::getPositionOnPlane(DirectX::XMINT2 screenPosition, DirectX::XMFLOAT3 normal, DirectX::XMFLOAT3 point) const {
+    auto ray = getRayFromScreenPosition(screenPosition);
+    auto plane = Utils3D::getPerpendicularPlaneThroughPoint(normal, point);
+    return Utils3D::getRayCrossWithPlane(ray, plane);
+}
+
+void Scene::addCursor(XMFLOAT3RAY ray, XMINT2 screenPos) {
+    auto plane = getPerpendicularPlaneThroughPoint(_camera.direction(), _camera.center());
+    auto position = getRayCrossWithPlane(ray, plane);
+
+    removeComposite();
+    if (cursor) {
+        cursor->setPosition(position);
+        cursor->setScreenPosition(screenPos);
+    } else {
+        cursor = make_shared<Cursor>(position, screenPos, _camera);
+        _selected = cursor;
     }
 }
 

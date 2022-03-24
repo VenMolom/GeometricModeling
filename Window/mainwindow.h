@@ -27,6 +27,10 @@ private slots:
 
     void on_deleteObject_clicked();
 
+    void on_centerObject_clicked();
+
+    void onObjectAdded(const std::shared_ptr<Object>& object);
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 
@@ -36,8 +40,6 @@ private:
     std::list<std::unique_ptr<ObjectListItem>> items;
 
     QPropertyNotifier selectedHandler;
-
-    void addObjectToScene(std::shared_ptr<Object> &&object);
 
     void updateSelection();
 

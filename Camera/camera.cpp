@@ -77,6 +77,11 @@ void Camera::move(QPointF offset) {
     calculateView();
 }
 
+void Camera::moveTo(DirectX::XMFLOAT3 position) {
+    _center = position;
+    calculateView();
+}
+
 void Camera::calculateView() {
     auto centerVector = XMLoadFloat3(&_center);
     auto fromCenterVector = XMVectorScale(XMLoadFloat3(&_direction), distance * zoom);

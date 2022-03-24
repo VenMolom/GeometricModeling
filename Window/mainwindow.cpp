@@ -13,6 +13,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     scene = std::make_shared<Scene>();
+
+    connect(scene.get(), &Scene::objectAdded, this, &MainWindow::onObjectAdded);
+
     selectedHandler = scene->bindableSelected().addNotifier([&] { updateSelection(); });
 
     setMouseTracking(true);
@@ -27,21 +30,20 @@ MainWindow::~MainWindow() {
 
 void MainWindow::on_addPoint_clicked() {
     shared_ptr<Object> point = make_shared<Point>(XMFLOAT3(0, 0, 0));
-    addObjectToScene(std::move(point));
+    scene->addObject(std::move(point));
 }
 
 void MainWindow::on_addTorus_clicked() {
     shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0));
-    addObjectToScene(std::move(torus));
+    scene->addObject(std::move(torus));
 }
 
-void MainWindow::addObjectToScene(std::shared_ptr<Object> &&object) {
+void MainWindow::onObjectAdded(const std::shared_ptr<Object>& object) {
     auto item = std::make_unique<ObjectListItem>(object, scene);
     ui->objectsList->addItem(item.get());
     ui->objectsList->clearSelection();
     ui->objectsList->setCurrentItem(item.get());
     items.push_back(std::move(item));
-    scene->addObject(std::move(object));
 }
 
 void MainWindow::updateSelection() {
@@ -60,6 +62,7 @@ void MainWindow::updateSelection() {
             }
         }
         ui->deleteObject->setEnabled(true);
+        ui->centerObject->setEnabled(true);
         return;
     }
 
@@ -67,6 +70,7 @@ void MainWindow::updateSelection() {
         if (item->hasObject(selected)) {
             ui->objectsList->setCurrentItem(item.get(), {QItemSelectionModel::SelectionFlag::ClearAndSelect});
             ui->deleteObject->setEnabled(true);
+            ui->centerObject->setEnabled(true);
             return;
         }
     }
@@ -76,6 +80,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
     auto selected = ui->objectsList->selectedItems();
     if (selected.empty()) {
         ui->deleteObject->setEnabled(false);
+        ui->centerObject->setEnabled(false);
         scene->setSelected({});
         return;
     }
@@ -95,6 +100,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
         selectedHandler = scene->bindableSelected().addNotifier([&] { updateSelection(); });
     }
     ui->deleteObject->setEnabled(true);
+    ui->centerObject->setEnabled(true);
 }
 
 void MainWindow::on_deleteObject_clicked() {
@@ -105,6 +111,13 @@ void MainWindow::on_deleteObject_clicked() {
     items.remove_if([&](const unique_ptr<ObjectListItem> &ob) {
         return selected.contains(ob.get());
     });
+}
+
+void MainWindow::on_centerObject_clicked() {
+    auto selected = ui->objectsList->selectedItems();
+    if (selected.empty()) return;
+
+    scene->centerSelected();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {

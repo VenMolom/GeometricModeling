@@ -50,6 +50,8 @@ public:
 
     void move(QPointF offset);
 
+    void moveTo(DirectX::XMFLOAT3 position);
+
 private:
     QProperty<DirectX::XMFLOAT4X4> projection;
     QProperty<DirectX::XMFLOAT4X4> view;
