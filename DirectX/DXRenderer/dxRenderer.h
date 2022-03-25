@@ -34,6 +34,12 @@ public:
 
     void drawPoint(const DirectX::XMMATRIX &mvp, bool selected) override;
 
+    void drawCurve4(const std::vector<VertexPositionColor> &controlPoints, const DirectX::XMMATRIX &mvp,
+                    bool selected) override;
+
+    void
+    drawLineStrip(const std::vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp, bool selected) override;
+
     void setDrawColor(DirectX::XMFLOAT4 color);
 
     QPaintEngine *paintEngine() const override;
@@ -75,6 +81,8 @@ private:
     size_t cursorBufferSize;
 
     mini::dx_ptr<ID3D11VertexShader> m_vertexShader;
+    mini::dx_ptr<ID3D11HullShader> m_hullShader;
+    mini::dx_ptr<ID3D11DomainShader> m_domainShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11InputLayout> m_layout;
 

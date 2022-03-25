@@ -18,7 +18,7 @@ public:
 
     std::list<std::shared_ptr<Object>> &&release();
 
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const override;
+    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
 
     Type type() const override;
 

@@ -91,6 +91,48 @@ void DxRenderer::drawPoint(const DirectX::XMMATRIX &mvp, bool selected) {
     m_device.context()->DrawIndexed(pointBufferSize, 0, 0);
 }
 
+void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
+                            const DirectX::XMMATRIX &mvp, bool selected) {
+    mapShaderMatrix(mvp);
+    setDrawColor(selected ? SELECTED_COLOR : DEFAULT_COLOR);
+
+    // set vertex buffer
+    m_vertexBuffer = m_device.CreateVertexBuffer(controlPoints);
+    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+    UINT strides[] = {sizeof(VertexPositionColor)};
+    UINT offsets[] = {0};
+    m_device.context()->IASetVertexBuffers(
+            0, 1, vbs, strides, offsets);
+
+    m_device.context()->HSSetShader(m_hullShader.get(), nullptr, 0);
+    m_device.context()->DSSetShader(m_domainShader.get(), nullptr, 0);
+
+    // draw lines
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+    m_device.context()->Draw(controlPoints.size(), 0);
+
+    m_device.context()->HSSetShader(nullptr, nullptr, 0);
+    m_device.context()->DSSetShader(nullptr, nullptr, 0);
+}
+
+void DxRenderer::drawLineStrip(const vector<VertexPositionColor> &points,
+                               const DirectX::XMMATRIX &mvp, bool selected) {
+    mapShaderMatrix(mvp);
+    setDrawColor(selected ? SELECTED_COLOR : DEFAULT_COLOR);
+
+    // set vertex buffer
+    m_vertexBuffer = m_device.CreateVertexBuffer(points);
+    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+    UINT strides[] = {sizeof(VertexPositionColor)};
+    UINT offsets[] = {0};
+    m_device.context()->IASetVertexBuffers(
+            0, 1, vbs, strides, offsets);
+
+    // draw lines
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+    m_device.context()->Draw(points.size(), 0);
+}
+
 void DxRenderer::setDrawColor(DirectX::XMFLOAT4 color) {
     D3D11_MAPPED_SUBRESOURCE res;
     m_device.context()->Map(m_cbColor.get(), 0,
@@ -178,8 +220,12 @@ void DxRenderer::init3D3() {
     setupViewport();
 
     const auto vsBytes = DxDevice::LoadByteCode(L"vs.cso");
+    const auto hsBytes = DxDevice::LoadByteCode(L"hs.cso");
+    const auto dsBytes = DxDevice::LoadByteCode(L"ds.cso");
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
+    m_hullShader = m_device.CreateHullShader(hsBytes);
+    m_domainShader = m_device.CreateDomainShader(dsBytes);
     m_pixelShader = m_device.CreatePixelShader(psBytes);
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);

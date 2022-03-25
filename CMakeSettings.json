@@ -1,0 +1,15 @@
+﻿{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.2.3\\msvc2019_64;\"C:/Program Files (x86)/Windows Kits/10/Lib/10.0.22000.0/um/x64\";\"C:/Program Files (x86)/Windows Kits/10/Lib/10.0.22000.0/ucrt/x64\"",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": ""
+    }
+  ]
+}

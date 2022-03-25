@@ -19,7 +19,8 @@ enum Type {
     CURSOR,
     POINT3D,
     TORUS,
-    COMPOSITE
+    COMPOSITE,
+    BREZIERC0
 };
 
 enum DrawType {
@@ -74,7 +75,7 @@ public:
 
     virtual bool equals(const std::shared_ptr<Object> &other) const;
 
-    virtual void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const = 0;
+    virtual void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) = 0;
 
     virtual Type type() const = 0;
 

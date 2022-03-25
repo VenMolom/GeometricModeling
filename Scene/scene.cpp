@@ -24,8 +24,8 @@ void Scene::draw(Renderer &renderer) const {
 
 }
 
-void Scene::addObject(shared_ptr<Object> &&object) {
-    if (cursor) {
+void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
+    if (!overrideCursor && cursor) {
         object->setPosition(cursor->position());
         cursor.reset();
     }
@@ -67,7 +67,7 @@ void Scene::moveSelected(QPoint screenPosition) {
 void Scene::addPoint(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto position = getPositionOnPlane(screenPos, _camera.direction(), _camera.center());
-    addObject(make_shared<Point>(position));
+    addObject(make_shared<Point>(position), true);
 }
 
 void Scene::centerSelected() {

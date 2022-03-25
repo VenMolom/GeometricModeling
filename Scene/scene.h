@@ -18,7 +18,7 @@ Q_OBJECT
 public:
     explicit Scene() = default;
 
-    void addObject(std::shared_ptr<Object> &&object);
+    void addObject(std::shared_ptr<Object> &&object, bool overrideCursor = false);
 
     void addComposite(std::list<std::shared_ptr<Object>>&& objects);
 

@@ -41,16 +41,18 @@ set(PROJECT_SOURCES
         Utils/Utils3D.h Utils/Utils3D.cpp
         Objects/Point/point.cpp Objects/Point/point.h
         Objects/ObjectListItem/objectListItem.cpp Objects/ObjectListItem/objectListItem.h
-        Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h)
+        Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h Objects/BrezierC0/brezierC0.cpp Objects/BrezierC0/brezierC0.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
 
-set(HLSL_SHADER_FILES Shader/ps.hlsl Shader/vs.hlsl)
+set(HLSL_SHADER_FILES Shader/ps.hlsl Shader/vs.hlsl Shader/hs.hlsl Shader/ds.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
-set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "4_0")
+set_source_files_properties(Shader/hs.hlsl PROPERTIES ShaderType "hs")
+set_source_files_properties(Shader/ds.hlsl PROPERTIES ShaderType "ds")
+set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
 foreach(FILE ${HLSL_SHADER_FILES})
     get_filename_component(FILE_WE ${FILE} NAME_WE)

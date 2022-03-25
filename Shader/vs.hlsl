@@ -1,4 +1,4 @@
-#include "Header.hlsli"
+#include "Header.hlsl"
 
 cbuffer transformations: register(b0) {
 	matrix MVP;

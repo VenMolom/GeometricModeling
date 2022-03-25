@@ -16,7 +16,7 @@ Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
     viewHandler = camera.bindableView().addNotifier([&] { updateScreenPosition(); });
 }
 
-void Cursor::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const {
+void Cursor::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
     auto mvp = modelMatrix() * view * projection;
     renderer.drawCursor(mvp);
 }

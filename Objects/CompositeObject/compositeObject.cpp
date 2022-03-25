@@ -50,7 +50,7 @@ std::list<std::shared_ptr<Object>> &&CompositeObject::release() {
 
 void
 CompositeObject::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
-                      DrawType drawType) const {
+                      DrawType drawType) {
     for (auto &object: objects) {
         object->draw(renderer, view, projection, NO_CURSOR);
     }

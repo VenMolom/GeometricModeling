@@ -23,6 +23,8 @@ private slots:
 
     void on_addTorus_clicked();
 
+    void on_addBrezierC0_clicked();
+
     void on_objectsList_itemSelectionChanged();
 
     void on_deleteObject_clicked();
@@ -42,6 +44,19 @@ private:
     QPropertyNotifier selectedHandler;
 
     void updateSelection();
+
+    // IN PROGRESS:
+    // TODO: add segmented brezier curve
+
+    // TODO: add curve on selected points
+    // TODO: add point(s) to curve
+    // TODO: show curve on scene objects list
+    // TODO: delete curve (control points persist)
+    // TODO: select curve (all new points are added into it)
+    // TODO: remove any point from curve
+    // TODO: curve updates when points move
+    // TODO: posibility to show curve polygon
+
 
     // TODO: look into reducing complexity / interlocking
     // TODO: add grid (if possible)

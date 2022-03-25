@@ -1,4 +1,4 @@
-#include "Header.hlsli"
+#include "Header.hlsl"
 
 cbuffer cbColor: register(b0) {
 	float4 color;

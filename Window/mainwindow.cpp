@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 #include "Objects/Torus/torus.h"
 #include "Objects/Point/point.h"
+#include "Objects/BrezierC0/brezierC0.h"
 #include "Objects/CompositeObject/compositeObject.h"
 #include <iostream>
 
@@ -37,6 +38,24 @@ void MainWindow::on_addTorus_clicked() {
     shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0));
     scene->addObject(std::move(torus));
 }
+
+
+void MainWindow::on_addBrezierC0_clicked() {
+    // TODO: make proper implementation
+    std::vector<weak_ptr<Point>> objects{};
+    for (auto &item: items) {
+        weak_ptr<Point> p;
+        auto ob = item->object();
+        if ((p = dynamic_pointer_cast<Point>(ob)).lock()) {
+            objects.push_back(p);
+        }
+    }
+
+    auto brez = make_shared<BrezierC0>(objects);
+    brez->drawPolygonal(true);
+    scene->addObject(std::move(brez));
+}
+
 
 void MainWindow::onObjectAdded(const std::shared_ptr<Object>& object) {
     auto item = std::make_unique<ObjectListItem>(object, scene);

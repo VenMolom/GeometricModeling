@@ -29,7 +29,7 @@ protected:
     virtual std::vector<Index> calculateIndices(const std::array<int, Dim> &density) const = 0;
 
 public:
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const final;
+    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) final;
 
     const std::array<int, Dim> &density() const { return _density; }
 
@@ -59,7 +59,7 @@ ParametricObject<Dim>::ParametricObject(QString name,
 
 template<size_t Dim>
 void ParametricObject<Dim>::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
-                                 DrawType drawType) const {
+                                 DrawType drawType) {
     auto mvp = modelMatrix() * view * projection;
     renderer.drawLines(vertices, indices, mvp, drawType != DEFAULT);
     if (drawType == SELECTED) renderer.drawCursor(DirectX::XMLoadFloat4x4(&noScaleMatrix) * view * projection);

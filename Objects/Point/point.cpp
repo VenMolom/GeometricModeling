@@ -11,7 +11,7 @@ Point::Point(DirectX::XMFLOAT3 position) : Object("Point", position) {
 
 }
 
-void Point::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) const {
+void Point::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
     auto t = XMMatrixTranslationFromVector(XMLoadFloat3(&_position.value()));
     auto s = XMMatrixScalingFromVector(XMLoadFloat3(&size));
     auto w = XMFLOAT4(0, 0, 0, 1);

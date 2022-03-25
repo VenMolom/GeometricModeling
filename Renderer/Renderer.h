@@ -16,6 +16,12 @@ public:
     virtual void drawCursor(const DirectX::XMMATRIX &mvp) = 0;
 
     virtual void drawPoint(const DirectX::XMMATRIX &mvp, bool selected) = 0;
+
+    virtual void drawCurve4(const std::vector<VertexPositionColor> &controlPoints,
+                            const DirectX::XMMATRIX & mvp, bool selected) = 0;
+
+    virtual void drawLineStrip(const std::vector<VertexPositionColor> & points,
+                               const DirectX::XMMATRIX & mvp, bool selected) = 0;
 };
 
 #endif //MG1_RENDERER_H
