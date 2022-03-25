@@ -23,25 +23,36 @@ void BrezierC0::removePoint(int index) {
 }
 
 void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    if (points.size() < 4) return;
+    if (points.size() < 2) return;
 
     vector<VertexPositionColor> vertices{};
+    vector<VertexPositionColor> segments{};
     std::shared_ptr<Point> point;
 
+    auto mvp = modelMatrix() * view * projection;
     for (int i = 0; i < points.size(); ++i) {
         if (!(point = points[i].lock())) {
             removePoint(i);
             --i;
             continue;
         }
-        vertices.push_back({point->position(), {1, 1, 1}});
+
+        VertexPositionColor vert = {point->position(), {1, 1, 1}};
+        vertices.push_back(vert);
+        segments.push_back(vert);
+
+        if (vertices.size() == 4) {
+            renderer.drawCurve4(vertices, mvp, drawType != DEFAULT);
+            vertices.erase(vertices.begin(), next(vertices.begin(), 3));
+        }
     }
-    // TODO: slip drawing into 4 point parts
-    auto mvp = modelMatrix() * view * projection;
-    renderer.drawCurve4(vertices, mvp, drawType != DEFAULT);
+
+    if (vertices.size() > 1) {
+        renderer.drawCurve4(vertices, mvp, drawType != DEFAULT);
+    }
 
     if (polygonal && drawType != DEFAULT) {
-        renderer.drawLineStrip(vertices, mvp, true);
+        renderer.drawLineStrip(segments, mvp, true);
     }
 }
 

@@ -23,8 +23,10 @@ void DxRenderer::renderScene() {
 
     ID3D11Buffer *vsCbs[] = {m_cbMVP.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get()};
+    ID3D11Buffer *dsCbs[] = {m_cbPoints.get()};
     m_device.context()->VSSetConstantBuffers(0, 1, vsCbs);
     m_device.context()->PSSetConstantBuffers(0, 1, psCbs);
+    m_device.context()->DSSetConstantBuffers(0, 1, dsCbs);
     m_device.context()->IASetInputLayout(m_layout.get());
 
     if (scene) {
@@ -107,8 +109,18 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
     m_device.context()->HSSetShader(m_hullShader.get(), nullptr, 0);
     m_device.context()->DSSetShader(m_domainShader.get(), nullptr, 0);
 
+    XMFLOAT4 points = {static_cast<float>(controlPoints.size()), 0, 0, 0};
+    D3D11_MAPPED_SUBRESOURCE res;
+    m_device.context()->Map(m_cbPoints.get(), 0,
+                            D3D11_MAP_WRITE_DISCARD, 0, &res);
+    memcpy(res.pData, &points, sizeof(XMFLOAT4));
+    m_device.context()->Unmap(m_cbPoints.get(), 0);
+
     // draw lines
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+    auto topology = controlPoints.size() == 4
+            ? D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST : controlPoints.size() == 3
+            ? D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST : D3D11_PRIMITIVE_TOPOLOGY_2_CONTROL_POINT_PATCHLIST;
+    m_device.context()->IASetPrimitiveTopology(topology);
     m_device.context()->Draw(controlPoints.size(), 0);
 
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
@@ -242,6 +254,7 @@ void DxRenderer::init3D3() {
 
     m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
+    m_cbPoints = m_device.CreateConstantBuffer<XMFLOAT4>();
 
     std::vector<VertexPositionColor> cursorVertices = {
             {{0, 0, 0}, {1, 0, 0}},
@@ -255,10 +268,10 @@ void DxRenderer::init3D3() {
     cursorBufferSize = cursorVertices.size();
 
     vector<VertexPositionColor> pointVertices = {
-            {{1, 1, 0}, {1, 1, 1}},
-            {{-1, 1, 0}, {1, 1, 1}},
+            {{1,  1,  0}, {1, 1, 1}},
+            {{-1, 1,  0}, {1, 1, 1}},
             {{-1, -1, 0}, {1, 1, 1}},
-            {{1, -1, 0}, {1, 1, 1}}
+            {{1,  -1, 0}, {1, 1, 1}}
     };
     vector<Index> pointIndices = {
             0, 1, 2, 3, 0, 2, 1, 3

@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     setMouseTracking(true);
     ui->controlsWidget->setScene(scene);
     ui->renderWidget->setScene(scene);
+    ui->renderWidget->setFocus();
 }
 
 MainWindow::~MainWindow() {

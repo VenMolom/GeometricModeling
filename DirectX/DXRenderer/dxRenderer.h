@@ -88,6 +88,7 @@ private:
 
     mini::dx_ptr<ID3D11Buffer> m_cbMVP;
     mini::dx_ptr<ID3D11Buffer> m_cbColor;
+    mini::dx_ptr<ID3D11Buffer> m_cbPoints;
 
     LARGE_INTEGER currentTicks, ticksPerSecond;
 
