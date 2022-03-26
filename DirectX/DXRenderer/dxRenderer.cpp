@@ -301,4 +301,15 @@ void DxRenderer::setupViewport() {
     m_device.context()->RSSetViewports(1, &viewport);
 }
 
+void DxRenderer::handleKeyEvent(QKeyEvent *event) {
+    switch (event->type()) {
+        case QEvent::KeyPress:
+            keyPressEvent(event);
+            break;
+        case QEvent::KeyRelease:
+            keyReleaseEvent(event);
+            break;
+    }
+}
+
 #pragma endregion Init

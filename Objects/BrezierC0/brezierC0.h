@@ -17,7 +17,13 @@ public:
 
     void removePoint(int index);
 
-    void drawPolygonal(bool draw) { polygonal = draw; }
+    std::vector<std::weak_ptr<Point>> points() const { return _points; }
+
+    QBindable<int> bindablePoints() { return &pointsChanged; }
+
+    boolean drawPolygonal() { return polygonal; }
+
+    void setDrawPolygonal(bool draw) { polygonal = draw; }
 
     void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
 
@@ -32,7 +38,8 @@ public:
     void setScale(DirectX::XMFLOAT3 scale) override {};
 
 private:
-    std::vector<std::weak_ptr<Point>> points;
+    std::vector<std::weak_ptr<Point>> _points;
+    QProperty<int> pointsChanged{};
     bool polygonal{false};
 };
 

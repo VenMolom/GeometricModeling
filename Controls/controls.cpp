@@ -2,6 +2,7 @@
 #include "ui_controls.h"
 #include "Objects/Torus/torus.h"
 #include "Objects/Cursor/cursor.h"
+#include "Objects/BrezierC0/brezierC0.h"
 
 using namespace std;
 using namespace DirectX;
@@ -43,12 +44,6 @@ void Controls::updateSelected() {
         ui->nameEdit->setText(object->name());
 
         switch (object->type()) {
-            case BREZIERC0:
-                ui->positionFrame->hide();
-                ui->rotationFrame->hide();
-                ui->scaleFrame->hide();
-                break;
-
             case POINT3D:
                 ui->rotationFrame->hide();
                 ui->scaleFrame->hide();
@@ -83,12 +78,23 @@ void Controls::updateSelected() {
                 ui->vDensity->setValue(t->density()[1]);
                 break;
             }
+            case BREZIERC0: {
+                auto *b = dynamic_cast<BrezierC0 *>(object.get());
+                ui->positionFrame->hide();
+                ui->rotationFrame->hide();
+                ui->scaleFrame->hide();
+                ui->curveGroupBox->show();
+
+                ui->polygonalCheckBox->setCheckState(b->drawPolygonal() ? Qt::Checked : Qt::Unchecked);
+                break;
+            }
         }
     } else {
         objectHandler = {};
         ui->objectGroupBox->hide();
         ui->parametersGroupBox->hide();
         ui->torusGroupBox->hide();
+        ui->curveGroupBox->hide();
     }
 }
 
@@ -100,6 +106,7 @@ void Controls::resetView() {
     ui->nameFrame->show();
     ui->screenPosFrame->hide();
     ui->torusGroupBox->hide();
+    ui->curveGroupBox->hide();
     ui->parametersGroupBox->hide();
 }
 
@@ -244,6 +251,12 @@ void Controls::on_screenPosY_valueChanged(int arg1) {
 
 void Controls::on_nameEdit_editingFinished() {
     object->setName(ui->nameEdit->text());
+}
+
+void Controls::on_polygonalCheckBox_stateChanged(int arg1) {
+    if (auto *b = dynamic_cast<BrezierC0 *>(object.get())) {
+        b->setDrawPolygonal(Qt::Checked == (Qt::CheckState) arg1);
+    }
 }
 
 #pragma endregion Slots

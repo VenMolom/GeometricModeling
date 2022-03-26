@@ -29,11 +29,23 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
         object->setPosition(cursor->position());
         cursor.reset();
     }
+    boolean select = true;
 
-    _selected = object;
+    // add point to selected curve
+    if (_selected.value().lock() && _selected.value().lock()->type() == BREZIERC0 && object->type() == POINT3D) {
+        auto *c = dynamic_cast<BrezierC0 *>(_selected.value().lock().get());
+        shared_ptr<Point> p = dynamic_pointer_cast<Point>(object);
+
+        c->addPoint(p);
+        select = false;
+    }
+
+    if (select) {
+        _selected = object;
+    }
+
     _objects.push_back(std::move(object));
-
-    emit objectAdded(_objects.back());
+    emit objectAdded(_objects.back(), select);
 }
 
 void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
@@ -130,7 +142,7 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
 Utils3D::XMFLOAT3RAY Scene::getRayFromScreenPosition(XMINT2 screenPosition) const {
     auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
     return getRayFromScreen(screenPosition, screenSize, _camera.nearZ(), _camera.farZ(),
-                                     _camera.projectionMatrix(), _camera.viewMatrix());
+                            _camera.projectionMatrix(), _camera.viewMatrix());
 }
 
 shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) const {
@@ -149,7 +161,8 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) const {
     return closest;
 }
 
-XMFLOAT3 Scene::getPositionOnPlane(DirectX::XMINT2 screenPosition, DirectX::XMFLOAT3 normal, DirectX::XMFLOAT3 point) const {
+XMFLOAT3
+Scene::getPositionOnPlane(DirectX::XMINT2 screenPosition, DirectX::XMFLOAT3 normal, DirectX::XMFLOAT3 point) const {
     auto ray = getRayFromScreenPosition(screenPosition);
     auto plane = Utils3D::getPerpendicularPlaneThroughPoint(normal, point);
     return Utils3D::getRayCrossWithPlane(ray, plane);

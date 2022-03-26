@@ -10,6 +10,7 @@
 #include <DirectXMath.h>
 #include "Objects/Cursor/cursor.h"
 #include "Objects/Point/point.h"
+#include "Objects/BrezierC0/brezierC0.h"
 #include "Objects/CompositeObject/compositeObject.h"
 
 class Scene : public QObject {
@@ -43,7 +44,7 @@ public:
     QBindable<std::weak_ptr<Object>> bindableSelected() { return &_selected; }
 
 signals:
-    void objectAdded(const std::shared_ptr<Object>& object);
+    void objectAdded(const std::shared_ptr<Object>& object, bool select);
 
 private:
     QProperty<std::weak_ptr<Object>> _selected;

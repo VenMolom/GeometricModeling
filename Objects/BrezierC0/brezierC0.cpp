@@ -3,6 +3,8 @@
 //
 
 #include <DirectXMath.h>
+
+#include <utility>
 #include "brezierC0.h"
 
 using namespace std;
@@ -10,28 +12,35 @@ using namespace DirectX;
 
 BrezierC0::BrezierC0(vector<weak_ptr<Point>> points)
         : Object("Brezier C0", {0, 0, 0}),
-          points(points) {
+          _points(std::move(points)) {
 }
 
 void BrezierC0::addPoint(weak_ptr<Point> point) {
-    // TODO: check if point already in
-    points.push_back(point);
+    if (std::find_if(_points.begin(), _points.end(), [&](const weak_ptr<Point> &p) {
+        return point.lock().get() == p.lock().get();
+    }) != _points.end()) {
+        return;
+    }
+
+    _points.push_back(point);
+    pointsChanged.setValue(_points.size());
 }
 
 void BrezierC0::removePoint(int index) {
-    points.erase(next(points.begin(), index));
+    _points.erase(next(_points.begin(), index));
+    pointsChanged.setValue(_points.size());
 }
 
 void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    if (points.size() < 2) return;
+    if (_points.size() < 2) return;
 
     vector<VertexPositionColor> vertices{};
     vector<VertexPositionColor> segments{};
     std::shared_ptr<Point> point;
 
     auto mvp = modelMatrix() * view * projection;
-    for (int i = 0; i < points.size(); ++i) {
-        if (!(point = points[i].lock())) {
+    for (int i = 0; i < _points.size(); ++i) {
+        if (!(point = _points[i].lock())) {
             removePoint(i);
             --i;
             continue;

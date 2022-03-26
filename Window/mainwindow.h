@@ -31,10 +31,12 @@ private slots:
 
     void on_centerObject_clicked();
 
-    void onObjectAdded(const std::shared_ptr<Object>& object);
+    void onObjectAdded(const std::shared_ptr<Object>& object, bool select);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
+
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
@@ -46,13 +48,11 @@ private:
     void updateSelection();
 
     // IN PROGRESS:
-    // TODO: curve gui (show polygonal, point list)
-    // TODO: remove any point from curve
+    // TODO: curve gui (point list)
+    // TODO: remove any point from curve (gui)
 
-    // TODO: add curve on selected points
     // TODO: add point(s) to curve
-    // TODO: select curve (all new points are added into it)
-    // TODO: possibility to show curve polygon
+    // TODO: different color for polygonal
 
 
     // TODO: look into reducing complexity / interlocking

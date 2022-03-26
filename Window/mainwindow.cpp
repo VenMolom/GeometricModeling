@@ -4,7 +4,6 @@
 #include "Objects/Point/point.h"
 #include "Objects/BrezierC0/brezierC0.h"
 #include "Objects/CompositeObject/compositeObject.h"
-#include <iostream>
 
 using namespace std;
 using namespace DirectX;
@@ -22,7 +21,6 @@ MainWindow::MainWindow(QWidget *parent)
     setMouseTracking(true);
     ui->controlsWidget->setScene(scene);
     ui->renderWidget->setScene(scene);
-    ui->renderWidget->setFocus();
 }
 
 MainWindow::~MainWindow() {
@@ -42,27 +40,29 @@ void MainWindow::on_addTorus_clicked() {
 
 
 void MainWindow::on_addBrezierC0_clicked() {
-    // TODO: make proper implementation
+    auto selected = ui->objectsList->selectedItems();
+
     std::vector<weak_ptr<Point>> objects{};
-    for (auto &item: items) {
-        weak_ptr<Point> p;
-        auto ob = item->object();
-        if ((p = dynamic_pointer_cast<Point>(ob)).lock()) {
+    for (auto &select: selected) {
+        auto ob = dynamic_cast<ObjectListItem *>(select)->object();
+        weak_ptr<Point> p = dynamic_pointer_cast<Point>(ob);
+        if (p.lock()) {
             objects.push_back(p);
         }
     }
 
-    auto brez = make_shared<BrezierC0>(objects);
-    brez->drawPolygonal(true);
-    scene->addObject(std::move(brez));
+    scene->addObject(std::move(make_shared<BrezierC0>(objects)));
 }
 
 
-void MainWindow::onObjectAdded(const std::shared_ptr<Object>& object) {
+void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool select) {
     auto item = std::make_unique<ObjectListItem>(object, scene);
     ui->objectsList->addItem(item.get());
-    ui->objectsList->clearSelection();
-    ui->objectsList->setCurrentItem(item.get());
+
+    if (select) {
+        ui->objectsList->clearSelection();
+        ui->objectsList->setCurrentItem(item.get());
+    }
     items.push_back(std::move(item));
 }
 
@@ -146,4 +146,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key::Key_Delete) {
         on_deleteObject_clicked();
     }
+
+    ui->renderWidget->handleKeyEvent(event);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event) {
+    QWidget::keyReleaseEvent(event);
+
+    ui->renderWidget->handleKeyEvent(event);
 }

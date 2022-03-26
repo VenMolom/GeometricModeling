@@ -52,6 +52,8 @@ private slots:
 
     void on_nameEdit_editingFinished();
 
+    void on_polygonalCheckBox_stateChanged(int arg1);
+
 private:
     struct ObjectHandler {
         QPropertyNotifier position;

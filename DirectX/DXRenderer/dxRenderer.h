@@ -44,6 +44,7 @@ public:
 
     QPaintEngine *paintEngine() const override;
 
+    void handleKeyEvent(QKeyEvent *event);
 protected:
     void paintEvent(QPaintEvent *event) override;
 
