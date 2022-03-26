@@ -1,7 +1,7 @@
 #ifndef CONTROLLS_H
 #define CONTROLLS_H
 
-#include <QWidget>
+#include <QPushButton>
 #include "Scene/scene.h"
 #include "ui_controls.h"
 
@@ -54,6 +54,14 @@ private slots:
 
     void on_polygonalCheckBox_stateChanged(int arg1);
 
+    void on_pointsList_itemSelectionChanged();
+
+    void on_movePointUp_clicked();
+
+    void on_movePointDown_clicked();
+
+    void onDeletePointButtonClicked();
+
 private:
     struct ObjectHandler {
         QPropertyNotifier position;
@@ -63,10 +71,14 @@ private:
         QPropertyNotifier screen;
     };
     QPropertyNotifier sceneHandler;
+    QPropertyNotifier pointsHandler;
     Controls::ObjectHandler objectHandler;
 
     std::shared_ptr<Scene> scene;
     std::shared_ptr<Object> object;
+
+    std::list<std::unique_ptr<QTableWidgetItem>> points;
+    std::list<std::unique_ptr<QPushButton>> deletePointButtons;
     int dim;
 
     void updateSelected();
@@ -91,6 +103,8 @@ private:
     void updateScale();
 
     void updateScreenPosition();
+
+    void updateCurvePoints();
 
     template<size_t Dim>
     std::array<int, Dim> parameters() const;

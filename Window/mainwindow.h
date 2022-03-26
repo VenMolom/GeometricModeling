@@ -48,12 +48,9 @@ private:
     void updateSelection();
 
     // IN PROGRESS:
-    // TODO: curve gui (point list)
-    // TODO: remove any point from curve (gui)
-
     // TODO: add point(s) to curve
-    // TODO: different color for polygonal
 
+    // TODO: different color for polygonal
 
     // TODO: look into reducing complexity / interlocking
     // TODO: add grid (if possible)

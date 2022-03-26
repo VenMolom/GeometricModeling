@@ -130,7 +130,7 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
 void DxRenderer::drawLineStrip(const vector<VertexPositionColor> &points,
                                const DirectX::XMMATRIX &mvp, bool selected) {
     mapShaderMatrix(mvp);
-    setDrawColor(selected ? SELECTED_COLOR : DEFAULT_COLOR);
+    setDrawColor(selected ? POLYGONAL_COLOR : DEFAULT_COLOR);
 
     // set vertex buffer
     m_vertexBuffer = m_device.CreateVertexBuffer(points);

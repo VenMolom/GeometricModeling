@@ -14,6 +14,8 @@ Controls::Controls(QWidget *parent) :
 
     ui->torusGroupBox->hide();
     ui->parametersGroupBox->hide();
+
+    ui->pointsList->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 Controls::~Controls() {
@@ -84,6 +86,9 @@ void Controls::updateSelected() {
                 ui->rotationFrame->hide();
                 ui->scaleFrame->hide();
                 ui->curveGroupBox->show();
+
+                pointsHandler = b->bindablePoints().addNotifier([&] { updateCurvePoints(); });
+                updateCurvePoints();
 
                 ui->polygonalCheckBox->setCheckState(b->drawPolygonal() ? Qt::Checked : Qt::Unchecked);
                 break;
@@ -173,6 +178,31 @@ void Controls::updateScreenPosition() {
     }
 }
 
+void Controls::updateCurvePoints() {
+    points.clear();
+    deletePointButtons.clear();
+    ui->pointsList->clearContents();
+
+    if (auto *c = dynamic_cast<BrezierC0 *>(object.get())) {
+        ui->pointsList->setRowCount(c->points().size());
+        for (auto &point: c->points()) {
+            if (auto pp = point.lock()) {
+                auto item = make_unique<QTableWidgetItem>(pp->name());
+                auto button = make_unique<QPushButton>("Delete");
+                int index = static_cast<int>(points.size());
+                ui->pointsList->setItem(index, 0, item.get());
+                ui->pointsList->setCellWidget(index, 1, button.get());
+
+                connect(button.get(), &QPushButton::clicked, this, &Controls::onDeletePointButtonClicked);
+
+                points.push_back(std::move(item));
+                deletePointButtons.push_back(std::move(button));
+            }
+        }
+        ui->pointsList->setRowCount(points.size());
+    }
+}
+
 #pragma region Slots
 
 void Controls::on_uDensity_valueChanged(int arg1) {
@@ -256,6 +286,38 @@ void Controls::on_nameEdit_editingFinished() {
 void Controls::on_polygonalCheckBox_stateChanged(int arg1) {
     if (auto *b = dynamic_cast<BrezierC0 *>(object.get())) {
         b->setDrawPolygonal(Qt::Checked == (Qt::CheckState) arg1);
+    }
+}
+
+void Controls::on_pointsList_itemSelectionChanged() {
+    auto selected = ui->pointsList->selectedItems();
+    auto disable = selected.empty();
+    ui->movePointUp->setDisabled(disable);
+    ui->movePointDown->setDisabled(disable);
+}
+
+void Controls::on_movePointUp_clicked() {
+    auto selected = ui->pointsList->selectedItems();
+    if (selected.empty()) return;
+
+    if (auto *b = dynamic_cast<BrezierC0 *>(object.get())) {
+        b->movePoint(selected[0]->row(), Direction::UP);
+    }
+}
+
+void Controls::on_movePointDown_clicked() {
+    auto selected = ui->pointsList->selectedItems();
+    if (selected.empty()) return;
+
+    if (auto *b = dynamic_cast<BrezierC0 *>(object.get())) {
+        b->movePoint(selected[0]->row(), Direction::DOWN);
+    }
+}
+
+void Controls::onDeletePointButtonClicked() {
+    if (auto *c = dynamic_cast<BrezierC0 *>(object.get())) {
+        auto index = ui->pointsList->currentRow();
+        c->removePoint(index);
     }
 }
 

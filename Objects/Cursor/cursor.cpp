@@ -57,5 +57,5 @@ void Cursor::updateScreenPosition() {
 }
 
 BoundingOrientedBox Cursor::boundingBox() const {
-    return {};
+    return {{}, {}, {0, 0, 0, 1.f}};
 }

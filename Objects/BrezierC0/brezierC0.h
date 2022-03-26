@@ -9,11 +9,18 @@
 #include "Objects/Object/object.h"
 #include "Objects/Point/point.h"
 
+enum Direction {
+    UP,
+    DOWN
+};
+
 class BrezierC0 : public Object {
 public:
     explicit BrezierC0(std::vector<std::weak_ptr<Point>> points);
 
     void addPoint(std::weak_ptr<Point> point);
+
+    void movePoint(int index, Direction direction);
 
     void removePoint(int index);
 

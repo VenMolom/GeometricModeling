@@ -23,12 +23,21 @@ void BrezierC0::addPoint(weak_ptr<Point> point) {
     }
 
     _points.push_back(point);
-    pointsChanged.setValue(_points.size());
+    pointsChanged.setValue(pointsChanged.value() + 1);
+}
+
+void BrezierC0::movePoint(int index, Direction direction) {
+    auto move = direction == Direction::UP ? -1 : 1;
+
+    if (index + move >= _points.size()) return;
+
+    swap(_points[index], _points[index + move]);
+    pointsChanged.setValue(pointsChanged.value() + 1);
 }
 
 void BrezierC0::removePoint(int index) {
     _points.erase(next(_points.begin(), index));
-    pointsChanged.setValue(_points.size());
+    pointsChanged.setValue(pointsChanged.value() + 1);
 }
 
 void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
@@ -70,5 +79,5 @@ Type BrezierC0::type() const {
 }
 
 BoundingOrientedBox BrezierC0::boundingBox() const {
-    return {};
+    return {{}, {}, {0, 0, 0, 1.f}};
 }
