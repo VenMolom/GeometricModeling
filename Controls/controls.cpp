@@ -43,6 +43,12 @@ void Controls::updateSelected() {
         ui->nameEdit->setText(object->name());
 
         switch (object->type()) {
+            case BREZIERC0:
+                ui->positionFrame->hide();
+                ui->rotationFrame->hide();
+                ui->scaleFrame->hide();
+                break;
+
             case POINT3D:
                 ui->rotationFrame->hide();
                 ui->scaleFrame->hide();
@@ -88,6 +94,7 @@ void Controls::updateSelected() {
 
 void Controls::resetView() {
     ui->objectGroupBox->show();
+    ui->positionFrame->show();
     ui->rotationFrame->show();
     ui->scaleFrame->show();
     ui->nameFrame->show();

@@ -46,16 +46,13 @@ private:
     void updateSelection();
 
     // IN PROGRESS:
-    // TODO: add segmented brezier curve
+    // TODO: curve gui (show polygonal, point list)
+    // TODO: remove any point from curve
 
     // TODO: add curve on selected points
     // TODO: add point(s) to curve
-    // TODO: show curve on scene objects list
-    // TODO: delete curve (control points persist)
     // TODO: select curve (all new points are added into it)
-    // TODO: remove any point from curve
-    // TODO: curve updates when points move
-    // TODO: posibility to show curve polygon
+    // TODO: possibility to show curve polygon
 
 
     // TODO: look into reducing complexity / interlocking

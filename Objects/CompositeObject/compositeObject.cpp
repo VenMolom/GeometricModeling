@@ -112,7 +112,7 @@ void CompositeObject::updateChildren() {
     }
 }
 
-DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix) const {
+DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix) {
     XMFLOAT4X4 XMFLOAT4X4_Values{};
     XMStoreFloat4x4(&XMFLOAT4X4_Values, XMMatrixTranspose(rotationMatrix));
 
@@ -122,26 +122,6 @@ DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix
     euler.z = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
 
     return euler;
-
-//    XMFLOAT3 angles{};
-//    // roll (x-axis rotation)
-//    double sinr_cosp = 2 * (quaternion.w * quaternion.x + quaternion.y * quaternion.z);
-//    double cosr_cosp = 1 - 2 * (quaternion.x * quaternion.x + quaternion.y * quaternion.y);
-//    angles.x = std::atan2(sinr_cosp, cosr_cosp);
-//
-//    // pitch (y-axis rotation)
-//    double sinp = 2 * (quaternion.w * quaternion.y - quaternion.z * quaternion.x);
-//    if (std::abs(sinp) >= 1)
-//        angles.y = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-//    else
-//        angles.y = std::asin(sinp);
-//
-//    // yaw (z-axis rotation)
-//    double siny_cosp = 2 * (quaternion.w * quaternion.z + quaternion.x * quaternion.y);
-//    double cosy_cosp = 1 - 2 * (quaternion.y * quaternion.y + quaternion.z * quaternion.z);
-//    angles.z = std::atan2(siny_cosp, cosy_cosp);
-//
-//    return angles;
 
 //    float c2 = sqrt(rotationMatrix.r[0].m128_f32[0] * rotationMatrix.r[0].m128_f32[0]
 //            + rotationMatrix.r[0].m128_f32[1] * rotationMatrix.r[0].m128_f32[1]);

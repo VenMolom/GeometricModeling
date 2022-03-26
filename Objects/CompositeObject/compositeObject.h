@@ -43,7 +43,7 @@ private:
 
     void updateChildren();
 
-    DirectX::XMFLOAT3 rotationMatrixToEuler(DirectX::XMMATRIX rotationMatrix) const;
+    static DirectX::XMFLOAT3 rotationMatrixToEuler(DirectX::XMMATRIX rotationMatrix) ;
 };
 
 
