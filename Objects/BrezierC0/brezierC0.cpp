@@ -46,6 +46,7 @@ void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, Dra
     vector<VertexPositionColor> vertices{};
     vector<VertexPositionColor> segments{};
     std::shared_ptr<Point> point;
+    XMFLOAT3 min{INFINITY, INFINITY, INFINITY}, max{-INFINITY, -INFINITY, -INFINITY};
 
     auto mvp = modelMatrix() * view * projection;
     for (int i = 0; i < _points.size(); ++i) {
@@ -59,14 +60,19 @@ void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, Dra
         vertices.push_back(vert);
         segments.push_back(vert);
 
+        min = newMin(min, point->position());
+        max = newMax(max, point->position());
+
         if (vertices.size() == 4) {
-            renderer.drawCurve4(vertices, mvp, drawType != DEFAULT);
+            renderer.drawCurve4(vertices, XMLoadFloat3(&min), XMLoadFloat3(&max), mvp, drawType != DEFAULT);
             vertices.erase(vertices.begin(), next(vertices.begin(), 3));
+            max = {-INFINITY, -INFINITY, -INFINITY};
+            min = {INFINITY, INFINITY, INFINITY};
         }
     }
 
     if (vertices.size() > 1) {
-        renderer.drawCurve4(vertices, mvp, drawType != DEFAULT);
+        renderer.drawCurve4(vertices, XMLoadFloat3(&min), XMLoadFloat3(&max), mvp, drawType != DEFAULT);
     }
 
     if (polygonal && drawType != DEFAULT) {
@@ -79,5 +85,15 @@ Type BrezierC0::type() const {
 }
 
 BoundingOrientedBox BrezierC0::boundingBox() const {
-    return {{}, {}, {0, 0, 0, 1.f}};
+    return {{},
+            {},
+            {0, 0, 0, 1.f}};
+}
+
+XMFLOAT3 BrezierC0::newMax(XMFLOAT3 oldMax, XMFLOAT3 candidate) {
+    return {max(oldMax.x, candidate.x), max(oldMax.y, candidate.y), max(oldMax.z, candidate.z)};
+}
+
+XMFLOAT3 BrezierC0::newMin(XMFLOAT3 oldMin, XMFLOAT3 candidate) {
+    return {min(oldMin.x, candidate.x), min(oldMin.y, candidate.y), min(oldMin.z, candidate.z)};
 }

@@ -48,6 +48,10 @@ private:
     std::vector<std::weak_ptr<Point>> _points;
     QProperty<int> pointsChanged{};
     bool polygonal{false};
+
+    static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
+
+    static DirectX::XMFLOAT3 newMax(DirectX::XMFLOAT3 oldMax, DirectX::XMFLOAT3 candidate);
 };
 
 

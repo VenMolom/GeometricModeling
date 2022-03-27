@@ -50,8 +50,6 @@ private:
     // IN PROGRESS:
     // TODO: add point(s) to curve
 
-    // TODO: different color for polygonal
-
     // TODO: look into reducing complexity / interlocking
     // TODO: add grid (if possible)
 };

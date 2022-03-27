@@ -34,17 +34,17 @@ public:
 
     void drawPoint(const DirectX::XMMATRIX &mvp, bool selected) override;
 
-    void drawCurve4(const std::vector<VertexPositionColor> &controlPoints, const DirectX::XMMATRIX &mvp,
-                    bool selected) override;
+    void drawCurve4(const std::vector<VertexPositionColor> &controlPoints,
+                    DirectX::XMVECTOR min, DirectX::XMVECTOR max,
+                    const DirectX::XMMATRIX &mvp, bool selected) override;
 
     void
     drawLineStrip(const std::vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp, bool selected) override;
 
-    void setDrawColor(DirectX::XMFLOAT4 color);
-
     QPaintEngine *paintEngine() const override;
 
     void handleKeyEvent(QKeyEvent *event);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
@@ -90,18 +90,20 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_cbMVP;
     mini::dx_ptr<ID3D11Buffer> m_cbColor;
     mini::dx_ptr<ID3D11Buffer> m_cbPoints;
+    mini::dx_ptr<ID3D11Buffer> m_cbTesselation;
 
     LARGE_INTEGER currentTicks, ticksPerSecond;
 
-    const DirectX::XMFLOAT4 SELECTED_COLOR {1.0f, 0.4f, 0.0f, 1.0f};
-    const DirectX::XMFLOAT4 DEFAULT_COLOR {0.0f, 0.0f, 0.0f, 0.0f};
-    const DirectX::XMFLOAT4 POLYGONAL_COLOR {0.0f, 1.0f, 1.0f, 1.0f};
+    const DirectX::XMFLOAT4 SELECTED_COLOR{1.0f, 0.4f, 0.0f, 1.0f};
+    const DirectX::XMFLOAT4 DEFAULT_COLOR{0.0f, 0.0f, 0.0f, 0.0f};
+    const DirectX::XMFLOAT4 POLYGONAL_COLOR{0.0f, 1.0f, 1.0f, 1.0f};
 
     void init3D3();
 
     void setupViewport();
 
-    void mapShaderMatrix(const DirectX::XMMATRIX &matrix);
+    template<typename T>
+    void updateBuffer(const mini::dx_ptr<ID3D11Buffer> &buffer, const T &data);
 
     float frameTime();
 };

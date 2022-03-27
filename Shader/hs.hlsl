@@ -1,7 +1,7 @@
 #include "Header.hlsl"
 
 cbuffer cbTesselation: register(b0) {
-	float tesselationAmount;
+	float4 tesselationAmount;
 }
 
 HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
@@ -10,7 +10,7 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 {
 	HS_CONSTANT_DATA_OUTPUT output;
 
-    output.edges[0] = 64.0f; // TODO: calculate correct values
+    output.edges[0] = tesselationAmount.x;
     output.edges[1] = 64.0f;
 
 	return output;
