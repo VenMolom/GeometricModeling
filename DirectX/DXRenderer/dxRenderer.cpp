@@ -123,7 +123,7 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
                                           scene->camera().nearZ(), scene->camera().farZ(),
                                           mvp, XMMatrixIdentity(), XMMatrixIdentity()));
 
-    XMFLOAT4 tesselationAmount = { ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y))/64.0f), 0, 0, 0};
+    XMFLOAT4 tesselationAmount = {ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f), 0, 0, 0};
     XMFLOAT4 points = {static_cast<float>(controlPoints.size()), 0, 0, 0};
     updateBuffer(m_cbPoints, points);
     updateBuffer(m_cbTesselation, tesselationAmount);
@@ -194,6 +194,10 @@ void DxRenderer::resizeEvent(QResizeEvent *event) {
 
 void DxRenderer::paintEvent(QPaintEvent *event) {
     auto deltaTime = frameTime();
+
+    statusBar->showMessage(QString("Frame time: ")
+                                   .append(QString::number(deltaTime * 1000, 'f', 3))
+                                   .append(" ms"));
 
     renderScene();
     m_device.swapChain()->Present(0, 0);

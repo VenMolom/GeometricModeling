@@ -48,6 +48,8 @@ void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, Dra
     std::shared_ptr<Point> point;
     XMFLOAT3 min{INFINITY, INFINITY, INFINITY}, max{-INFINITY, -INFINITY, -INFINITY};
 
+    // TODO: maybe one buffer with indices?
+
     auto mvp = modelMatrix() * view * projection;
     for (int i = 0; i < _points.size(); ++i) {
         if (!(point = _points[i].lock())) {

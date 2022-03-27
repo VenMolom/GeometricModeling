@@ -10,6 +10,7 @@
 
 #include <Windows.h>
 #include <DirectXMath.h>
+#include <QStatusBar>
 
 #undef max
 #undef min
@@ -25,6 +26,8 @@ public:
     void renderScene();
 
     void setScene(std::shared_ptr<Scene> scenePtr);
+
+    void setStatusBar(QStatusBar *bar) { statusBar = bar; }
 
     void drawLines(const std::vector<VertexPositionColor> &vertices,
                    const std::vector<Index> &indices,
@@ -65,6 +68,7 @@ protected:
 private:
     std::shared_ptr<Scene> scene;
     InputHandler inputHandler;
+    QStatusBar *statusBar;
 
     DxDevice m_device;
 

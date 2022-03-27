@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     setMouseTracking(true);
     ui->controlsWidget->setScene(scene);
     ui->renderWidget->setScene(scene);
+    ui->renderWidget->setStatusBar(ui->statusbar);
 }
 
 MainWindow::~MainWindow() {
