@@ -124,9 +124,10 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
                                           mvp, XMMatrixIdentity(), XMMatrixIdentity()));
 
     // tesselationAmount, lastPatchID, lastPatchPoints
-    XMINT4 tesselationAmount = {static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)),
-                                static_cast<int>((indices.size() - 1) / 4),
-                                lastPatchSize, 0};
+    XMINT4 tesselationAmount = {
+            clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
+            static_cast<int>((indices.size() - 1) / 4),
+            lastPatchSize, 0};
     updateBuffer(m_cbTesselation, tesselationAmount);
 
     // draw lines
@@ -250,7 +251,7 @@ void DxRenderer::init3D3() {
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 
-    vector <D3D11_INPUT_ELEMENT_DESC> elements{
+    vector<D3D11_INPUT_ELEMENT_DESC> elements{
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
                     D3D11_INPUT_PER_VERTEX_DATA, 0},
             {"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
@@ -263,7 +264,7 @@ void DxRenderer::init3D3() {
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
 
-    std::vector <VertexPositionColor> cursorVertices = {
+    std::vector<VertexPositionColor> cursorVertices = {
             {{0, 0, 0}, {1, 0, 0}},
             {{1, 0, 0}, {1, 0, 0}},
             {{0, 0, 0}, {0, 1, 0}},
@@ -274,13 +275,13 @@ void DxRenderer::init3D3() {
     m_cursorBuffer = m_device.CreateVertexBuffer(cursorVertices);
     cursorBufferSize = cursorVertices.size();
 
-    vector <VertexPositionColor> pointVertices = {
+    vector<VertexPositionColor> pointVertices = {
             {{1,  1,  0}, {1, 1, 1}},
             {{-1, 1,  0}, {1, 1, 1}},
             {{-1, -1, 0}, {1, 1, 1}},
             {{1,  -1, 0}, {1, 1, 1}}
     };
-    vector <Index> pointIndices = {
+    vector<Index> pointIndices = {
             0, 1, 2, 3, 0, 2, 1, 3
     };
     m_pointVertexBuffer = m_device.CreateVertexBuffer(pointVertices);

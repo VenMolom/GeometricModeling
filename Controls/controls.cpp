@@ -189,6 +189,7 @@ void Controls::updateCurvePoints() {
             if (auto pp = point.lock()) {
                 auto item = make_unique<QTableWidgetItem>(pp->name());
                 auto button = make_unique<QPushButton>("Delete");
+                button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
                 int index = static_cast<int>(points.size());
                 ui->pointsList->setItem(index, 0, item.get());
                 ui->pointsList->setCellWidget(index, 1, button.get());
