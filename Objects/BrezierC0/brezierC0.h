@@ -46,8 +46,17 @@ public:
 
 private:
     std::vector<std::weak_ptr<Point>> _points;
+    std::vector<QPropertyNotifier> pointsHandlers{};
     QProperty<int> pointsChanged{};
     bool polygonal{false};
+
+    std::vector<VertexPositionColor> vertices;
+    std::vector<Index> indices;
+    DirectX::XMFLOAT3 min{INFINITY, INFINITY, INFINITY};
+    DirectX::XMFLOAT3 max{-INFINITY, -INFINITY, -INFINITY};
+    int lastPatchSize;
+
+    void updatePoints();
 
     static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
 

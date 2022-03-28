@@ -13,6 +13,7 @@ using namespace DirectX;
 BrezierC0::BrezierC0(vector<weak_ptr<Point>> points)
         : Object("Brezier C0", {0, 0, 0}),
           _points(std::move(points)) {
+    updatePoints();
 }
 
 void BrezierC0::addPoint(weak_ptr<Point> point) {
@@ -23,7 +24,7 @@ void BrezierC0::addPoint(weak_ptr<Point> point) {
     }
 
     _points.push_back(point);
-    pointsChanged.setValue(pointsChanged.value() + 1);
+    updatePoints();
 }
 
 void BrezierC0::movePoint(int index, Direction direction) {
@@ -32,29 +33,56 @@ void BrezierC0::movePoint(int index, Direction direction) {
     if (index + move >= _points.size()) return;
 
     swap(_points[index], _points[index + move]);
-    pointsChanged.setValue(pointsChanged.value() + 1);
+    updatePoints();
 }
 
 void BrezierC0::removePoint(int index) {
     _points.erase(next(_points.begin(), index));
-    pointsChanged.setValue(pointsChanged.value() + 1);
+    updatePoints();
 }
 
 void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
     if (_points.size() < 2) return;
 
-    vector<VertexPositionColor> vertices{};
-    vector<Index> indices{};
-    std::shared_ptr<Point> point;
-    XMFLOAT3 min{INFINITY, INFINITY, INFINITY}, max{-INFINITY, -INFINITY, -INFINITY};
-
+    for (auto &point : _points) {
+        if (!point.lock()) {
+            updatePoints();
+            break;
+        }
+    }
     auto mvp = modelMatrix() * view * projection;
+    renderer.drawCurve4(vertices, indices, lastPatchSize,
+                        XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
+                        drawType != DEFAULT);
+
+    if (polygonal) {
+        renderer.drawLineStrip(vertices, mvp, drawType != DEFAULT);
+    }
+}
+
+Type BrezierC0::type() const {
+    return BREZIERC0;
+}
+
+BoundingOrientedBox BrezierC0::boundingBox() const {
+    return {{},
+            {},
+            {0, 0, 0, 1.f}};
+}
+
+void BrezierC0::updatePoints() {
+    vertices.clear();
+    indices.clear();
+    pointsHandlers.clear();
+    std::shared_ptr<Point> point;
     for (int i = 0; i < _points.size(); ++i) {
         if (!(point = _points[i].lock())) {
-            removePoint(i);
+            _points.erase(next(_points.begin(), i));
             --i;
             continue;
         }
+
+        pointsHandlers.push_back(point->bindablePosition().addNotifier([&] { updatePoints(); }));
 
         if (indices.size() > 0 && indices.size() % 4 == 0) {
             indices.push_back(i - 1);
@@ -68,28 +96,13 @@ void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, Dra
     }
 
     if (vertices.size() > 1) {
-        int lastPatchSize = indices.size() % 4;
+        lastPatchSize = indices.size() % 4;
         if (lastPatchSize == 0) lastPatchSize = 4;
 
         while (indices.size() % 4 != 0) indices.push_back(vertices.size() - 1);
-
-        renderer.drawCurve4(vertices, indices, lastPatchSize, XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
-                            drawType != DEFAULT);
     }
 
-    if (polygonal && drawType != DEFAULT) {
-        renderer.drawLineStrip(vertices, mvp, true);
-    }
-}
-
-Type BrezierC0::type() const {
-    return BREZIERC0;
-}
-
-BoundingOrientedBox BrezierC0::boundingBox() const {
-    return {{},
-            {},
-            {0, 0, 0, 1.f}};
+    pointsChanged.setValue(pointsChanged.value() + 1);
 }
 
 XMFLOAT3 BrezierC0::newMax(XMFLOAT3 oldMax, XMFLOAT3 candidate) {
