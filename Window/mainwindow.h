@@ -47,9 +47,6 @@ private:
 
     void updateSelection();
 
-    // IN PROGRESS:
-    // TODO: add existing point(s) from list to curve
-
     // TODO: look into reducing complexity / interlocking
     // TODO: add grid (if possible)
 };
