@@ -94,18 +94,26 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
 
     if (auto object = findIntersectingObject(ray)) {
         shared_ptr<Object> sel;
-        if (multiple && (sel = _selected.value().lock()) && sel->type() != CURSOR && sel.get() != object.get()) {
-            if (composite) {
-                auto comp = dynamic_cast<CompositeObject *>(composite.get());
 
-                if (comp->contains(object)) return;
+        if (multiple && (sel = _selected.value().lock())) {
+            if (sel->type() == BREZIERC0 && object->type() == POINT3D) {
+                auto *c = dynamic_cast<BrezierC0 *>(sel.get());
+                shared_ptr<Point> p = dynamic_pointer_cast<Point>(object);
 
-                auto obs = comp->release();
-                obs.push_back(object);
-                addComposite(std::move(obs));
-            } else {
-                list<shared_ptr<Object>> obs = {sel, object};
-                addComposite(std::move(obs));
+                c->addPoint(p);
+            } else if (sel->type() != CURSOR && sel.get() != object.get()) {
+                if (composite) {
+                    auto comp = dynamic_cast<CompositeObject *>(composite.get());
+
+                    if (comp->contains(object)) return;
+
+                    auto obs = comp->release();
+                    obs.push_back(object);
+                    addComposite(std::move(obs));
+                } else {
+                    list<shared_ptr<Object>> obs = {sel, object};
+                    addComposite(std::move(obs));
+                }
             }
         } else {
             setSelected(object);

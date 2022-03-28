@@ -111,7 +111,26 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
             o->select();
         }
     } else {
-        std::list<shared_ptr<Object>> objects{};
+        shared_ptr <Object> sel;
+        QListWidgetItem *newSelected;
+        if ((sel = scene->selected().lock()) && sel->type() == BREZIERC0) {
+            auto *b = dynamic_cast<BrezierC0 *>(sel.get());
+            for (auto &select: selected) {
+                auto ob = dynamic_cast<ObjectListItem *>(select)->object();
+                if (ob->type() == POINT3D) {
+                    shared_ptr <Point> p = dynamic_pointer_cast<Point>(ob);
+                    b->addPoint(p);
+                } else if (ob->type() == BREZIERC0) {
+                    newSelected = select;
+                }
+            }
+            QSignalBlocker blocker(ui->objectsList);
+            ui->objectsList->setCurrentItem(newSelected,  {QItemSelectionModel::SelectionFlag::ClearAndSelect});
+            return;
+        }
+
+        std::list<shared_ptr < Object>>
+        objects{};
         for (auto &select: selected) {
             objects.push_back(dynamic_cast<ObjectListItem *>(select)->object());
         }
