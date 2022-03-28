@@ -38,6 +38,7 @@ public:
     void drawPoint(const DirectX::XMMATRIX &mvp, bool selected) override;
 
     void drawCurve4(const std::vector<VertexPositionColor> &controlPoints,
+                    const std::vector<Index> &indices, int lastPatchSize,
                     DirectX::XMVECTOR min, DirectX::XMVECTOR max,
                     const DirectX::XMMATRIX &mvp, bool selected) override;
 
@@ -93,7 +94,6 @@ private:
 
     mini::dx_ptr<ID3D11Buffer> m_cbMVP;
     mini::dx_ptr<ID3D11Buffer> m_cbColor;
-    mini::dx_ptr<ID3D11Buffer> m_cbPoints;
     mini::dx_ptr<ID3D11Buffer> m_cbTesselation;
 
     LARGE_INTEGER currentTicks, ticksPerSecond;

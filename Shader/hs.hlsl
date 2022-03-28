@@ -1,7 +1,7 @@
 #include "Header.hlsl"
 
 cbuffer cbTesselation: register(b0) {
-	float4 tesselationAmount;
+	int4 tesselationSetting;
 }
 
 HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
@@ -10,7 +10,7 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 {
 	HS_CONSTANT_DATA_OUTPUT output;
 
-    output.edges[0] = tesselationAmount.x;
+    output.edges[0] = tesselationSetting.x;
     output.edges[1] = 64.0f;
 
 	return output;
@@ -30,6 +30,10 @@ VSOut main(
 
 	output.pos = ip[i].pos;
 	output.col = ip[i].col;
+
+    if (PatchID == tesselationSetting.y && i >= tesselationSetting.z) {
+        output.pos.w = 0.0f;
+    }
 
 	return output;
 }

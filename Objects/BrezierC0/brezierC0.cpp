@@ -44,11 +44,9 @@ void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, Dra
     if (_points.size() < 2) return;
 
     vector<VertexPositionColor> vertices{};
-    vector<VertexPositionColor> segments{};
+    vector<Index> indices{};
     std::shared_ptr<Point> point;
     XMFLOAT3 min{INFINITY, INFINITY, INFINITY}, max{-INFINITY, -INFINITY, -INFINITY};
-
-    // TODO: maybe one buffer with indices?
 
     auto mvp = modelMatrix() * view * projection;
     for (int i = 0; i < _points.size(); ++i) {
@@ -58,27 +56,29 @@ void BrezierC0::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, Dra
             continue;
         }
 
-        VertexPositionColor vert = {point->position(), {1, 1, 1}};
-        vertices.push_back(vert);
-        segments.push_back(vert);
+        if (indices.size() > 0 && indices.size() % 4 == 0) {
+            indices.push_back(i - 1);
+        }
+
+        vertices.push_back({point->position(), {1, 1, 1}});
+        indices.push_back(i);
 
         min = newMin(min, point->position());
         max = newMax(max, point->position());
-
-        if (vertices.size() == 4) {
-            renderer.drawCurve4(vertices, XMLoadFloat3(&min), XMLoadFloat3(&max), mvp, drawType != DEFAULT);
-            vertices.erase(vertices.begin(), next(vertices.begin(), 3));
-            max = {-INFINITY, -INFINITY, -INFINITY};
-            min = {INFINITY, INFINITY, INFINITY};
-        }
     }
 
     if (vertices.size() > 1) {
-        renderer.drawCurve4(vertices, XMLoadFloat3(&min), XMLoadFloat3(&max), mvp, drawType != DEFAULT);
+        int lastPatchSize = indices.size() % 4;
+        if (lastPatchSize == 0) lastPatchSize = 4;
+
+        while (indices.size() % 4 != 0) indices.push_back(vertices.size() - 1);
+
+        renderer.drawCurve4(vertices, indices, lastPatchSize, XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
+                            drawType != DEFAULT);
     }
 
     if (polygonal && drawType != DEFAULT) {
-        renderer.drawLineStrip(segments, mvp, true);
+        renderer.drawLineStrip(vertices, mvp, true);
     }
 }
 

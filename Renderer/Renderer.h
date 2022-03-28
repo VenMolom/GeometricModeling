@@ -18,11 +18,12 @@ public:
     virtual void drawPoint(const DirectX::XMMATRIX &mvp, bool selected) = 0;
 
     virtual void drawCurve4(const std::vector<VertexPositionColor> &controlPoints,
+                            const std::vector<Index> &indices, int lastPatchSize,
                             DirectX::XMVECTOR min, DirectX::XMVECTOR max,
-                            const DirectX::XMMATRIX & mvp, bool selected) = 0;
+                            const DirectX::XMMATRIX &mvp, bool selected) = 0;
 
-    virtual void drawLineStrip(const std::vector<VertexPositionColor> & points,
-                               const DirectX::XMMATRIX & mvp, bool selected) = 0;
+    virtual void drawLineStrip(const std::vector<VertexPositionColor> &points,
+                               const DirectX::XMMATRIX &mvp, bool selected) = 0;
 };
 
 #endif //MG1_RENDERER_H

@@ -23,11 +23,9 @@ void DxRenderer::renderScene() {
 
     ID3D11Buffer *vsCbs[] = {m_cbMVP.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get()};
-    ID3D11Buffer *dsCbs[] = {m_cbPoints.get(), m_cbTesselation.get()};
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
     m_device.context()->VSSetConstantBuffers(0, 1, vsCbs);
     m_device.context()->PSSetConstantBuffers(0, 1, psCbs);
-    m_device.context()->DSSetConstantBuffers(0, 2, dsCbs);
     m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
     m_device.context()->IASetInputLayout(m_layout.get());
 
@@ -96,6 +94,7 @@ void DxRenderer::drawPoint(const DirectX::XMMATRIX &mvp, bool selected) {
 }
 
 void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
+                            const std::vector<Index> &indices, int lastPatchSize,
                             XMVECTOR min, XMVECTOR max,
                             const DirectX::XMMATRIX &mvp, bool selected) {
     updateBuffer(m_cbMVP, mvp);
@@ -103,11 +102,12 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
 
     // set vertex buffer
     m_vertexBuffer = m_device.CreateVertexBuffer(controlPoints);
+    m_indexBuffer = m_device.CreateIndexBuffer(indices);
     ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
     UINT strides[] = {sizeof(VertexPositionColor)};
     UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(
-            0, 1, vbs, strides, offsets);
+    m_device.context()->IASetVertexBuffers(0, 1, vbs, strides, offsets);
+    m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
 
     m_device.context()->HSSetShader(m_hullShader.get(), nullptr, 0);
     m_device.context()->DSSetShader(m_domainShader.get(), nullptr, 0);
@@ -123,18 +123,15 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
                                           scene->camera().nearZ(), scene->camera().farZ(),
                                           mvp, XMMatrixIdentity(), XMMatrixIdentity()));
 
-    XMFLOAT4 tesselationAmount = {ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f), 0, 0, 0};
-    XMFLOAT4 points = {static_cast<float>(controlPoints.size()), 0, 0, 0};
-    updateBuffer(m_cbPoints, points);
+    // tesselationAmount, lastPatchID, lastPatchPoints
+    XMINT4 tesselationAmount = {static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)),
+                                static_cast<int>((indices.size() - 1) / 4),
+                                lastPatchSize, 0};
     updateBuffer(m_cbTesselation, tesselationAmount);
 
     // draw lines
-    auto topology = controlPoints.size() == 4
-                    ? D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST : controlPoints.size() == 3
-                                                                           ? D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST
-                                                                           : D3D11_PRIMITIVE_TOPOLOGY_2_CONTROL_POINT_PATCHLIST;
-    m_device.context()->IASetPrimitiveTopology(topology);
-    m_device.context()->Draw(controlPoints.size(), 0);
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+    m_device.context()->DrawIndexed(indices.size(), 0, 0);
 
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
@@ -253,7 +250,7 @@ void DxRenderer::init3D3() {
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 
-    vector<D3D11_INPUT_ELEMENT_DESC> elements{
+    vector <D3D11_INPUT_ELEMENT_DESC> elements{
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
                     D3D11_INPUT_PER_VERTEX_DATA, 0},
             {"COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
@@ -264,10 +261,9 @@ void DxRenderer::init3D3() {
 
     m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
-    m_cbPoints = m_device.CreateConstantBuffer<XMFLOAT4>();
-    m_cbTesselation = m_device.CreateConstantBuffer<XMFLOAT4>();
+    m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
 
-    std::vector<VertexPositionColor> cursorVertices = {
+    std::vector <VertexPositionColor> cursorVertices = {
             {{0, 0, 0}, {1, 0, 0}},
             {{1, 0, 0}, {1, 0, 0}},
             {{0, 0, 0}, {0, 1, 0}},
@@ -278,13 +274,13 @@ void DxRenderer::init3D3() {
     m_cursorBuffer = m_device.CreateVertexBuffer(cursorVertices);
     cursorBufferSize = cursorVertices.size();
 
-    vector<VertexPositionColor> pointVertices = {
+    vector <VertexPositionColor> pointVertices = {
             {{1,  1,  0}, {1, 1, 1}},
             {{-1, 1,  0}, {1, 1, 1}},
             {{-1, -1, 0}, {1, 1, 1}},
             {{1,  -1, 0}, {1, 1, 1}}
     };
-    vector<Index> pointIndices = {
+    vector <Index> pointIndices = {
             0, 1, 2, 3, 0, 2, 1, 3
     };
     m_pointVertexBuffer = m_device.CreateVertexBuffer(pointVertices);
