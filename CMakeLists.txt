@@ -15,8 +15,6 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# set(FXC_EXE "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22000.0/x64/fxc.exe")
-
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 find_library(D3D11_LIBRARY d3d11.lib)
@@ -41,7 +39,8 @@ set(PROJECT_SOURCES
         Utils/Utils3D.h Utils/Utils3D.cpp
         Objects/Point/point.cpp Objects/Point/point.h
         Objects/ObjectListItem/objectListItem.cpp Objects/ObjectListItem/objectListItem.h
-        Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h Objects/BrezierC0/brezierC0.cpp Objects/BrezierC0/brezierC0.h)
+        Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h
+        Objects/BrezierC0/brezierC0.cpp Objects/BrezierC0/brezierC0.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
