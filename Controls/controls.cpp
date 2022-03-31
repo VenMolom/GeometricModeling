@@ -183,7 +183,7 @@ void Controls::updateCurvePoints() {
     deletePointButtons.clear();
     ui->pointsList->clearContents();
 
-    if (auto *c = dynamic_cast<BrezierC0 *>(object.get())) {
+    if (auto *c = dynamic_cast<BrezierCurve *>(object.get())) {
         ui->pointsList->setRowCount(c->points().size());
         for (auto &point: c->points()) {
             if (auto pp = point.lock()) {
@@ -285,7 +285,7 @@ void Controls::on_nameEdit_editingFinished() {
 }
 
 void Controls::on_polygonalCheckBox_stateChanged(int arg1) {
-    if (auto *b = dynamic_cast<BrezierC0 *>(object.get())) {
+    if (auto *b = dynamic_cast<BrezierCurve *>(object.get())) {
         b->setDrawPolygonal(Qt::Checked == (Qt::CheckState) arg1);
     }
 }
@@ -301,7 +301,7 @@ void Controls::on_movePointUp_clicked() {
     auto selected = ui->pointsList->selectedItems();
     if (selected.empty()) return;
 
-    if (auto *b = dynamic_cast<BrezierC0 *>(object.get())) {
+    if (auto *b = dynamic_cast<BrezierCurve *>(object.get())) {
         b->movePoint(selected[0]->row(), Direction::UP);
     }
 }
@@ -310,13 +310,13 @@ void Controls::on_movePointDown_clicked() {
     auto selected = ui->pointsList->selectedItems();
     if (selected.empty()) return;
 
-    if (auto *b = dynamic_cast<BrezierC0 *>(object.get())) {
+    if (auto *b = dynamic_cast<BrezierCurve *>(object.get())) {
         b->movePoint(selected[0]->row(), Direction::DOWN);
     }
 }
 
 void Controls::onDeletePointButtonClicked() {
-    if (auto *c = dynamic_cast<BrezierC0 *>(object.get())) {
+    if (auto *c = dynamic_cast<BrezierCurve *>(object.get())) {
         auto index = ui->pointsList->currentRow();
         c->removePoint(index);
     }

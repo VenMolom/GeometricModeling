@@ -30,13 +30,11 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_addPoint_clicked() {
-    shared_ptr<Object> point = make_shared<Point>(XMFLOAT3(0, 0, 0));
-    scene->addObject(std::move(point));
+    scene->addObject(std::move(make_shared<Point>(XMFLOAT3(0, 0, 0))));
 }
 
 void MainWindow::on_addTorus_clicked() {
-    shared_ptr<Object> torus = make_shared<Torus>(XMFLOAT3(0, 0, 0));
-    scene->addObject(std::move(torus));
+    scene->addObject(std::move(make_shared<Torus>(XMFLOAT3(0, 0, 0))));
 }
 
 
@@ -113,14 +111,14 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
     } else {
         shared_ptr <Object> sel;
         QListWidgetItem *newSelected;
-        if ((sel = scene->selected().lock()) && sel->type() == BREZIERC0) {
-            auto *b = dynamic_cast<BrezierC0 *>(sel.get());
+        if ((sel = scene->selected().lock()) && sel->type() & BREZIERCURVE) {
+            auto *b = dynamic_cast<BrezierCurve *>(sel.get());
             for (auto &select: selected) {
                 auto ob = dynamic_cast<ObjectListItem *>(select)->object();
                 if (ob->type() == POINT3D) {
                     shared_ptr <Point> p = dynamic_pointer_cast<Point>(ob);
                     b->addPoint(p);
-                } else if (ob->type() == BREZIERC0) {
+                } else if (ob->type() & BREZIERCURVE) {
                     newSelected = select;
                 }
             }

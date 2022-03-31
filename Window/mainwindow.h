@@ -47,6 +47,11 @@ private:
 
     void updateSelection();
 
+    // TODO: Brezier C2
+    // TODO: B-Spline and Bernstein (virtual points) representation
+    // TODO: change displayed base
+    // TODO: edition of de Boore points
+
     // TODO: look into reducing complexity / interlocking
     // TODO: add grid (if possible)
 };

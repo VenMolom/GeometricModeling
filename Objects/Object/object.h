@@ -16,12 +16,24 @@
 #include "Camera/camera.h"
 
 enum Type {
-    CURSOR,
-    POINT3D,
-    TORUS,
-    COMPOSITE,
-    BREZIERC0
+    CURSOR = 1 << 0,
+    POINT3D = 1 << 1,
+    TORUS = 1 << 2,
+    COMPOSITE = 1 << 3,
+    BREZIERC0 = 1 << 4,
+    BREZIERC2 = 1 << 5,
+    BREZIERCURVE = BREZIERC0 | BREZIERC2
 };
+
+inline Type operator|(Type a, Type b)
+{
+    return static_cast<Type>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline Type operator&(Type a, Type b)
+{
+    return static_cast<Type>(static_cast<int>(a) & static_cast<int>(b));
+}
 
 enum DrawType {
     SELECTED,
