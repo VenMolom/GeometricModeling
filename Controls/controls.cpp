@@ -80,8 +80,9 @@ void Controls::updateSelected() {
                 ui->vDensity->setValue(t->density()[1]);
                 break;
             }
-            case BREZIERC0: {
-                auto *b = dynamic_cast<BrezierC0 *>(object.get());
+            case BREZIERC0:
+            case BREZIERC2: {
+                auto *b = dynamic_cast<BrezierCurve *>(object.get());
                 ui->positionFrame->hide();
                 ui->rotationFrame->hide();
                 ui->scaleFrame->hide();
