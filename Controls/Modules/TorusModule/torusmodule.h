@@ -2,6 +2,7 @@
 #define TORUSMODULE_H
 
 #include <QWidget>
+#include "Objects/Torus/torus.h"
 
 namespace Ui {
 class TorusModule;
@@ -12,10 +13,17 @@ class TorusModule : public QWidget
     Q_OBJECT
 
 public:
-    explicit TorusModule(QWidget *parent = nullptr);
+    explicit TorusModule(std::shared_ptr<Torus> torus, QWidget *parent = nullptr);
     ~TorusModule();
 
+private slots:
+    void on_majorRadius_valueChanged(double arg1);
+
+    void on_minorRadius_valueChanged(double arg1);
+
 private:
+    std::shared_ptr<Torus> torus;
+
     Ui::TorusModule *ui;
 };
 

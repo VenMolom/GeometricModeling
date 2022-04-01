@@ -76,3 +76,9 @@ void InputHandler::keyReleaseEvent(QKeyEvent *event) {
 void InputHandler::setScene(std::shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
 }
+
+void InputHandler::focusLost() {
+    actionKeyPressed = false;
+    subactionKeyPressed = false;
+    moveable = false;
+}

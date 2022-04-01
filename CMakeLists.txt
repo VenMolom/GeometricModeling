@@ -52,7 +52,11 @@ set(PROJECT_SOURCES
         Controls/Modules/BrezierCurveModule/breziercurvemodule.h Controls/Modules/BrezierCurveModule/breziercurvemodule.cpp
         Controls/Modules/BrezierCurveModule/breziercurvemodule.ui
         Controls/Modules/MoveModule/movemodule.h Controls/Modules/MoveModule/movemodule.cpp
-        Controls/Modules/MoveModule/movemodule.ui)
+        Controls/Modules/MoveModule/movemodule.ui
+        Controls/Modules/TransformModule/transformmodule.h Controls/Modules/TransformModule/transformmodule.cpp
+        Controls/Modules/TransformModule/transformmodule.ui
+        Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
+        Controls/Modules/ScreenMoveModule/screenmovemodule.ui Controls/Modules/ParametricModule/parametricmodule.cpp)
 
 # Build HLSL shaders
 add_custom_target(shaders)

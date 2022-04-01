@@ -18,6 +18,8 @@ Type BrezierC2::type() const {
 }
 
 void BrezierC2::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
+    if (_points.size() < 4) return;
+
     BrezierCurve::draw(renderer, view, projection, drawType);
 
     if (bSplinePolygonal) {

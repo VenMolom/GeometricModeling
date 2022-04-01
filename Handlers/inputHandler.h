@@ -33,6 +33,8 @@ public:
 
     void setScene(std::shared_ptr<Scene> scenePtr);
 
+    void focusLost();
+
 private:
     std::shared_ptr<Scene> scene;
 

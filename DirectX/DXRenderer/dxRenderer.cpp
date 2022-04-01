@@ -238,6 +238,22 @@ void DxRenderer::keyReleaseEvent(QKeyEvent *event) {
     inputHandler.keyReleaseEvent(event);
 }
 
+void DxRenderer::focusOutEvent(QFocusEvent *event) {
+    QWidget::focusOutEvent(event);
+    inputHandler.focusLost();
+}
+
+void DxRenderer::handleKeyEvent(QKeyEvent *event) {
+    switch (event->type()) {
+        case QEvent::KeyPress:
+            keyPressEvent(event);
+            break;
+        case QEvent::KeyRelease:
+            keyReleaseEvent(event);
+            break;
+    }
+}
+
 #pragma endregion Event_Handlers
 
 #pragma region Init
@@ -313,17 +329,6 @@ void DxRenderer::setupViewport() {
                                            &backBuffer, m_depthBuffer.get());
     Viewport viewport{wndSize};
     m_device.context()->RSSetViewports(1, &viewport);
-}
-
-void DxRenderer::handleKeyEvent(QKeyEvent *event) {
-    switch (event->type()) {
-        case QEvent::KeyPress:
-            keyPressEvent(event);
-            break;
-        case QEvent::KeyRelease:
-            keyReleaseEvent(event);
-            break;
-    }
 }
 
 #pragma endregion Init

@@ -56,7 +56,6 @@ private:
     // TODO: change displayed base
     // TODO: edition of de Boore points
 
-    // TODO: look into reducing complexity / interlocking
     // TODO: add grid (if possible)
 };
 
