@@ -9,17 +9,12 @@
 
 class BrezierC0 : public BrezierCurve {
 public:
-    explicit BrezierC0(std::vector<std::weak_ptr<Point>> points);
+    explicit BrezierC0(std::vector<std::weak_ptr<Point>> &&points);
 
     Type type() const override;
 
 protected:
     void updatePoints() override;
-
-private:
-    static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
-
-    static DirectX::XMFLOAT3 newMax(DirectX::XMFLOAT3 oldMax, DirectX::XMFLOAT3 candidate);
 };
 
 

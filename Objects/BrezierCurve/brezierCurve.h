@@ -16,7 +16,7 @@ enum Direction {
 
 class BrezierCurve : public Object {
 public:
-    explicit BrezierCurve(QString name, std::vector<std::weak_ptr<Point>> points);
+    explicit BrezierCurve(QString name, std::vector<std::weak_ptr<Point>> &&points);
 
     void addPoint(std::weak_ptr<Point> point);
 
@@ -54,6 +54,10 @@ protected:
     int lastPatchSize;
 
     virtual void updatePoints() = 0;
+
+    static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
+
+    static DirectX::XMFLOAT3 newMax(DirectX::XMFLOAT3 oldMax, DirectX::XMFLOAT3 candidate);
 };
 
 

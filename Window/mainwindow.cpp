@@ -39,18 +39,11 @@ void MainWindow::on_addTorus_clicked() {
 
 
 void MainWindow::on_addBrezierC0_clicked() {
-    auto selected = ui->objectsList->selectedItems();
+    scene->addObject(std::move(make_shared<BrezierC0>(getSelectedPoints())));
+}
 
-    std::vector<weak_ptr<Point>> objects{};
-    for (auto &select: selected) {
-        auto ob = dynamic_cast<ObjectListItem *>(select)->object();
-        weak_ptr<Point> p = dynamic_pointer_cast<Point>(ob);
-        if (p.lock()) {
-            objects.push_back(p);
-        }
-    }
-
-    scene->addObject(std::move(make_shared<BrezierC0>(objects)));
+void MainWindow::on_addBrezierC2_clicked() {
+    scene->addObject(std::move(make_shared<BrezierC0>(getSelectedPoints())));
 }
 
 
@@ -93,6 +86,21 @@ void MainWindow::updateSelection() {
             return;
         }
     }
+}
+
+std::vector<std::weak_ptr<Point>> &&MainWindow::getSelectedPoints() {
+    auto selected = ui->objectsList->selectedItems();
+
+    std::vector<weak_ptr<Point>> objects{};
+    for (auto &select: selected) {
+        auto ob = dynamic_cast<ObjectListItem *>(select)->object();
+        weak_ptr<Point> p = dynamic_pointer_cast<Point>(ob);
+        if (p.lock()) {
+            objects.push_back(p);
+        }
+    }
+
+    return std::move(objects);
 }
 
 void MainWindow::on_objectsList_itemSelectionChanged() {

@@ -25,6 +25,8 @@ private slots:
 
     void on_addBrezierC0_clicked();
 
+    void on_addBrezierC2_clicked();
+
     void on_objectsList_itemSelectionChanged();
 
     void on_deleteObject_clicked();
@@ -46,6 +48,8 @@ private:
     QPropertyNotifier selectedHandler;
 
     void updateSelection();
+
+    std::vector<std::weak_ptr<Point>> &&getSelectedPoints();
 
     // TODO: Brezier C2
     // TODO: B-Spline and Bernstein (virtual points) representation

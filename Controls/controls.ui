@@ -912,6 +912,28 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>posX</tabstop>
+  <tabstop>posY</tabstop>
+  <tabstop>posZ</tabstop>
+  <tabstop>rotX</tabstop>
+  <tabstop>rotY</tabstop>
+  <tabstop>rotZ</tabstop>
+  <tabstop>scaleX</tabstop>
+  <tabstop>scaleY</tabstop>
+  <tabstop>scaleZ</tabstop>
+  <tabstop>screenPosX</tabstop>
+  <tabstop>screenPosY</tabstop>
+  <tabstop>nameEdit</tabstop>
+  <tabstop>uDensity</tabstop>
+  <tabstop>vDensity</tabstop>
+  <tabstop>majorRadius</tabstop>
+  <tabstop>minorRadius</tabstop>
+  <tabstop>polygonalCheckBox</tabstop>
+  <tabstop>pointsList</tabstop>
+  <tabstop>movePointUp</tabstop>
+  <tabstop>movePointDown</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

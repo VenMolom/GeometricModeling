@@ -1,22 +1,22 @@
 //
-// Created by Molom on 2022-03-25.
+// Created by Molom on 2022-04-01.
 //
 
-#include "brezierC0.h"
+#include "brezierC2.h"
 
 using namespace std;
 using namespace DirectX;
 
-BrezierC0::BrezierC0(vector<weak_ptr<Point>> &&points)
-        : BrezierCurve("Brezier C0", std::move(points)) {
+BrezierC2::BrezierC2(vector<weak_ptr<Point>> &&points)
+        : BrezierCurve("Brezier C2", std::move(points)) {
     updatePoints();
 }
 
-Type BrezierC0::type() const {
-    return BREZIERC0;
+Type BrezierC2::type() const {
+    return BREZIERC2;
 }
 
-void BrezierC0::updatePoints() {
+void BrezierC2::updatePoints() {
     vertices.clear();
     indices.clear();
     pointsHandlers.clear();

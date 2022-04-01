@@ -9,9 +9,9 @@
 using namespace std;
 using namespace DirectX;
 
-BrezierCurve::BrezierCurve(QString name, std::vector<std::weak_ptr<Point>> points)
+BrezierCurve::BrezierCurve(QString name, std::vector<std::weak_ptr<Point>> &&points)
         : Object(std::move(name), {0, 0, 0}),
-          _points(std::move(points)) {
+          _points(points) {
 
 }
 
@@ -62,4 +62,12 @@ void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, 
 
 BoundingOrientedBox BrezierCurve::boundingBox() const {
     return {{}, {}, {0, 0, 0, 1.f}};
+}
+
+XMFLOAT3 BrezierCurve::newMax(XMFLOAT3 oldMax, XMFLOAT3 candidate) {
+    return {max(oldMax.x, candidate.x), max(oldMax.y, candidate.y), max(oldMax.z, candidate.z)};
+}
+
+XMFLOAT3 BrezierCurve::newMin(XMFLOAT3 oldMin, XMFLOAT3 candidate) {
+    return {min(oldMin.x, candidate.x), min(oldMin.y, candidate.y), min(oldMin.z, candidate.z)};
 }

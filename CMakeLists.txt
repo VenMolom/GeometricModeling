@@ -41,7 +41,7 @@ set(PROJECT_SOURCES
         Objects/ObjectListItem/objectListItem.cpp Objects/ObjectListItem/objectListItem.h
         Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h
         Objects/BrezierC0/brezierC0.cpp Objects/BrezierC0/brezierC0.h
-        Objects/BrezierCurve/brezierCurve.cpp Objects/BrezierCurve/brezierCurve.h)
+        Objects/BrezierCurve/brezierCurve.cpp Objects/BrezierCurve/brezierCurve.h Objects/BrezierC2/brezierC2.cpp Objects/BrezierC2/brezierC2.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
