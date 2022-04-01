@@ -128,11 +128,17 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
             clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
             static_cast<int>((indices.size() - 1) / 4),
             lastPatchSize, 0};
+    int indexCount = indices.size();
+    if (lastPatchSize == 0) {
+        tesselationAmount.z = 4;
+        tesselationAmount.y--;
+        indexCount -= 4;
+    }
     updateBuffer(m_cbTesselation, tesselationAmount);
 
     // draw lines
     m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
-    m_device.context()->DrawIndexed(indices.size(), 0, 0);
+    m_device.context()->DrawIndexed(indexCount, 0, 0);
 
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
     m_device.context()->DSSetShader(nullptr, nullptr, 0);

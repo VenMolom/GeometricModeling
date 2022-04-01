@@ -3,6 +3,7 @@
 #include "Objects/Torus/torus.h"
 #include "Objects/Point/point.h"
 #include "Objects/BrezierC0/brezierC0.h"
+#include "Objects/BrezierC2/brezierC2.h"
 #include "Objects/CompositeObject/compositeObject.h"
 
 using namespace std;
@@ -39,11 +40,11 @@ void MainWindow::on_addTorus_clicked() {
 
 
 void MainWindow::on_addBrezierC0_clicked() {
-    scene->addObject(std::move(make_shared<BrezierC0>(getSelectedPoints())));
+    scene->addObject(std::move(make_shared<BrezierC0>(std::move(getSelectedPoints()))));
 }
 
 void MainWindow::on_addBrezierC2_clicked() {
-    scene->addObject(std::move(make_shared<BrezierC0>(getSelectedPoints())));
+    scene->addObject(std::move(make_shared<BrezierC2>(std::move(getSelectedPoints()))));
 }
 
 
@@ -88,7 +89,7 @@ void MainWindow::updateSelection() {
     }
 }
 
-std::vector<std::weak_ptr<Point>> &&MainWindow::getSelectedPoints() {
+std::vector<std::weak_ptr<Point>> MainWindow::getSelectedPoints() {
     auto selected = ui->objectsList->selectedItems();
 
     std::vector<weak_ptr<Point>> objects{};

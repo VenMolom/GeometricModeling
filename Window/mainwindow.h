@@ -49,7 +49,7 @@ private:
 
     void updateSelection();
 
-    std::vector<std::weak_ptr<Point>> &&getSelectedPoints();
+    std::vector<std::weak_ptr<Point>> getSelectedPoints();
 
     // TODO: Brezier C2
     // TODO: B-Spline and Bernstein (virtual points) representation

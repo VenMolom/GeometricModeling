@@ -12,9 +12,6 @@ public:
     explicit BrezierC0(std::vector<std::weak_ptr<Point>> &&points);
 
     Type type() const override;
-
-protected:
-    void updatePoints() override;
 };
 
 

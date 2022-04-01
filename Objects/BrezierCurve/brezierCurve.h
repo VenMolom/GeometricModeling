@@ -53,7 +53,13 @@ protected:
     DirectX::XMFLOAT3 max{-INFINITY, -INFINITY, -INFINITY};
     int lastPatchSize;
 
-    virtual void updatePoints() = 0;
+    void updatePoints();
+
+    void virtual preUpdate();
+
+    void virtual pointUpdate(const std::shared_ptr<Point> &point, int index);
+
+    void virtual postUpdate();
 
     static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
 
