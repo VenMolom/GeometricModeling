@@ -8,8 +8,7 @@ namespace Ui {
 class TorusModule;
 }
 
-class TorusModule : public QWidget
-{
+class TorusModule : public QWidget {
     Q_OBJECT
 
 public:

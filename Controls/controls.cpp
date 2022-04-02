@@ -3,10 +3,12 @@
 
 #include "Objects/Torus/torus.h"
 #include "Objects/Cursor/cursor.h"
+#include "Objects/BrezierC2/brezierC2.h"
 
 #include "Controls/Modules/MoveModule/movemodule.h"
 #include "Controls/Modules/TorusModule/torusmodule.h"
 #include "Controls/Modules/ObjectModule/objectmodule.h"
+#include "Controls/Modules/BSplineModule/bsplinemodule.h"
 #include "Controls/Modules/TransformModule/transformmodule.h"
 #include "Controls/Modules/ScreenMoveModule/screenmovemodule.h"
 #include "Controls/Modules/ParametricModule/parametricmodule.h"
@@ -68,11 +70,15 @@ void Controls::updateSelected() {
         ui->modulesLayout->addWidget(modules.back().get(), 5, 0, 1, 1);
     }
 
-    // TODO: add BrezierC2 controls
+    if (object->type() & BREZIERC2) {
+        auto curve = dynamic_pointer_cast<BrezierC2>(object);
+        modules.push_back(std::move(make_unique<BSplineModule>(curve, this)));
+        ui->modulesLayout->addWidget(modules.back().get(), 6, 0, 1, 1);
+    }
 
     if (object->type() & BREZIERCURVE) {
         auto curve = dynamic_pointer_cast<BrezierCurve>(object);
         modules.push_back(std::move(make_unique<BrezierCurveModule>(curve, this)));
-        ui->modulesLayout->addWidget(modules.back().get(), 6, 0, 1, 1);
+        ui->modulesLayout->addWidget(modules.back().get(), 7, 0, 1, 1);
     }
 }

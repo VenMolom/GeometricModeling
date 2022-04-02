@@ -12,15 +12,19 @@ class BrezierC2 : public BrezierCurve {
 public:
     explicit BrezierC2(std::vector<std::weak_ptr<Point>> &&points);
 
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+    boolean bothPolygonals() const { return _bothPolygonals; }
 
-    boolean drawBSplinePolygonal() { return bSplinePolygonal; }
+    void setBothPolygonals(bool both) { _bothPolygonals = both; }
 
-    void setDrawBSplinePolygonal(bool draw) { bSplinePolygonal = draw; }
+    boolean bernsteinBase() const { return _bernsteinBase; }
+
+    void setBernsteinBase(bool use) { _bernsteinBase = use; }
 
     Type type() const override;
 
 protected:
+    void drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType) override;
+
     void preUpdate() override;
 
     void pointUpdate(const std::shared_ptr<Point> &point, int index) override;
@@ -29,7 +33,8 @@ protected:
 
 private:
     std::vector<VertexPositionColor> bSplineVertices;
-    bool bSplinePolygonal{false};
+    bool _bothPolygonals{false};
+    bool _bernsteinBase{false};
 };
 
 

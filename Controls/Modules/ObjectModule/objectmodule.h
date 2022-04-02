@@ -8,8 +8,7 @@ namespace Ui {
 class ObjectModule;
 }
 
-class ObjectModule : public QWidget
-{
+class ObjectModule : public QWidget {
     Q_OBJECT
 
 public:

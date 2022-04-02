@@ -8,8 +8,7 @@ namespace Ui {
 class TransformModule;
 }
 
-class TransformModule : public QWidget
-{
+class TransformModule : public QWidget {
     Q_OBJECT
 
 public:

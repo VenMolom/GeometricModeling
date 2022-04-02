@@ -14,7 +14,7 @@
 #include "Objects/CompositeObject/compositeObject.h"
 
 class Scene : public QObject {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit Scene() = default;

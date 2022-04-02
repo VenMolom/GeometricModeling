@@ -41,7 +41,7 @@ void BrezierCurve::removePoint(int index) {
 }
 
 void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    if (_points.size() < 2) return;
+    if (!canDraw) return;
 
     for (auto &point: _points) {
         if (!point.lock()) {
@@ -54,11 +54,14 @@ void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, 
                         XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
                         drawType != DEFAULT);
 
-    if (polygonal) {
-        renderer.drawLineStrip(vertices, mvp, drawType != DEFAULT);
+    if (_polygonal) {
+        drawPolygonal(renderer, mvp, drawType);
     }
 }
 
+void BrezierCurve::drawPolygonal(Renderer &renderer, XMMATRIX mvp, DrawType drawType) {
+    renderer.drawLineStrip(vertices, mvp, drawType != DEFAULT);
+}
 
 BoundingOrientedBox BrezierCurve::boundingBox() const {
     return {{}, {}, {0, 0, 0, 1.f}};
@@ -117,4 +120,6 @@ void BrezierCurve::postUpdate() {
 
         while (indices.size() % 4 != 0) indices.push_back(vertices.size() - 1);
     }
+
+    canDraw = vertices.size() >= 2;
 }

@@ -25,7 +25,7 @@ namespace mini
 		 * @param comObject pointer to COM object to be released.
 		 * @remarks The only thing that needs to be done is to call
 		 * IUnknown::Release because all COM object internally implement
-		 * reference counting and delete themseleves if no longer used.
+		 * reference counting and delete themselves if no longer used.
 		 *********************************************************************/
 		void operator () (pointer comObject) { if (comObject) comObject->Release(); }
 	};

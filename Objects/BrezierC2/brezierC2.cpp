@@ -17,15 +17,14 @@ Type BrezierC2::type() const {
     return BREZIERC2;
 }
 
-void BrezierC2::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    if (_points.size() < 4) return;
-
-    BrezierCurve::draw(renderer, view, projection, drawType);
-
-    if (bSplinePolygonal) {
-        auto mvp = projection * view;
+void BrezierC2::drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType) {
+    if (_bernsteinBase || _bothPolygonals) {
+        BrezierCurve::drawPolygonal(renderer, mvp, drawType);
+    }
+    if (!_bernsteinBase || _bothPolygonals) {
         renderer.drawLineStrip(bSplineVertices, mvp, drawType != DEFAULT);
     }
+
 }
 
 void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
@@ -93,4 +92,6 @@ void BrezierC2::postUpdate() {
     if (vertices.size() > 2) {
         vertices.resize(vertices.size() - 2);
     }
+
+    canDraw = _points.size() >= 4;
 }

@@ -195,11 +195,6 @@
     </rect>
    </property>
   </widget>
-  <action name="actionasdsad">
-   <property name="text">
-    <string>asdsad</string>
-   </property>
-  </action>
  </widget>
  <customwidgets>
   <customwidget>

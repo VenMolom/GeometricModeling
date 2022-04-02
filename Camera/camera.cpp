@@ -11,10 +11,6 @@ Camera::Camera() {
     calculateView();
 }
 
-XMMATRIX Camera::cameraMatrix() const {
-    return XMLoadFloat4x4(&view.value()) * XMLoadFloat4x4(&projection.value());
-}
-
 XMMATRIX Camera::viewMatrix() const {
     return XMLoadFloat4x4(&view.value());
 }

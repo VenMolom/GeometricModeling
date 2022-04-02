@@ -61,13 +61,13 @@ void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool selec
 
 void MainWindow::updateSelection() {
     shared_ptr<Object> selected;
-    if (!(selected = scene->selected().lock()) || selected->type() == CURSOR) {
+    if (!(selected = scene->selected().lock()) || selected->type() & CURSOR) {
         ui->objectsList->clearSelection();
         return;
     }
 
     QSignalBlocker blocker(ui->objectsList);
-    if (selected->type() == COMPOSITE) {
+    if (selected->type() & COMPOSITE) {
         auto composite = dynamic_cast<CompositeObject *>(selected.get());
         for (auto &item: items) {
             if (composite->contains(item->object())) {
@@ -124,7 +124,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
             auto *b = dynamic_cast<BrezierCurve *>(sel.get());
             for (auto &select: selected) {
                 auto ob = dynamic_cast<ObjectListItem *>(select)->object();
-                if (ob->type() == POINT3D) {
+                if (ob->type() & POINT3D) {
                     shared_ptr <Point> p = dynamic_pointer_cast<Point>(ob);
                     b->addPoint(p);
                 } else if (ob->type() & BREZIERCURVE) {

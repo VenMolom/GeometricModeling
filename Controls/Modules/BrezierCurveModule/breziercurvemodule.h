@@ -10,8 +10,7 @@ namespace Ui {
 class BrezierCurveModule;
 }
 
-class BrezierCurveModule : public QWidget
-{
+class BrezierCurveModule : public QWidget {
     Q_OBJECT
 
 public:

@@ -28,9 +28,9 @@ public:
 
     QBindable<int> bindablePoints() { return &pointsChanged; }
 
-    boolean drawPolygonal() { return polygonal; }
+    boolean polygonal() const { return _polygonal; }
 
-    void setDrawPolygonal(bool draw) { polygonal = draw; }
+    void setPolygonal(bool draw) { _polygonal = draw; }
 
     void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
 
@@ -45,21 +45,24 @@ protected:
     std::vector<std::weak_ptr<Point>> _points;
     std::vector<QPropertyNotifier> pointsHandlers{};
     QProperty<int> pointsChanged{};
-    bool polygonal{false};
+    bool _polygonal{false};
 
     std::vector<VertexPositionColor> vertices;
     std::vector<Index> indices;
     DirectX::XMFLOAT3 min{INFINITY, INFINITY, INFINITY};
     DirectX::XMFLOAT3 max{-INFINITY, -INFINITY, -INFINITY};
     int lastPatchSize;
+    bool canDraw{false};
+
+    virtual void drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType);
 
     void updatePoints();
 
-    void virtual preUpdate();
+    virtual void preUpdate();
 
-    void virtual pointUpdate(const std::shared_ptr<Point> &point, int index);
+    virtual void pointUpdate(const std::shared_ptr<Point> &point, int index);
 
-    void virtual postUpdate();
+    virtual void postUpdate();
 
     static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
 

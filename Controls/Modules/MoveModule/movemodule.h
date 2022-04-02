@@ -8,8 +8,7 @@ namespace Ui {
 class MoveModule;
 }
 
-class MoveModule : public QWidget
-{
+class MoveModule : public QWidget {
     Q_OBJECT
 
 public:

@@ -32,7 +32,7 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
     boolean select = true;
 
     // add point to selected curve
-    if (_selected.value().lock() && _selected.value().lock()->type() & BREZIERCURVE && object->type() == POINT3D) {
+    if (_selected.value().lock() && _selected.value().lock()->type() & BREZIERCURVE && object->type() & POINT3D) {
         auto *c = dynamic_cast<BrezierCurve *>(_selected.value().lock().get());
         shared_ptr<Point> p = dynamic_pointer_cast<Point>(object);
 
@@ -68,7 +68,7 @@ void Scene::removeSelected() {
 
 void Scene::moveSelected(QPoint screenPosition) {
     shared_ptr<Object> selected;
-    if (!(selected = _selected.value().lock()) || selected->type() == COMPOSITE) return;
+    if (!(selected = _selected.value().lock()) || selected->type() & COMPOSITE) return;
 
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto position = getPositionOnPlane(screenPos, _camera.direction(), selected->position());
@@ -96,7 +96,7 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
         shared_ptr<Object> sel;
 
         if (multiple && (sel = _selected.value().lock())) {
-            if (sel->type() & BREZIERCURVE && object->type() == POINT3D) {
+            if (sel->type() & BREZIERCURVE && object->type() & POINT3D) {
                 auto *c = dynamic_cast<BrezierCurve *>(sel.get());
                 shared_ptr<Point> p = dynamic_pointer_cast<Point>(object);
 
@@ -134,7 +134,7 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         return;
     }
 
-    if (object->type() == COMPOSITE) {
+    if (object->type() & COMPOSITE) {
         composite = std::move(object);
         _selected = composite;
         cursor.reset();

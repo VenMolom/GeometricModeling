@@ -9,8 +9,7 @@ namespace Ui {
 class ParametricModule;
 }
 
-class ParametricModule : public QWidget
-{
+class ParametricModule : public QWidget {
     Q_OBJECT
 
 public:

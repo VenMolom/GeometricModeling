@@ -22,8 +22,6 @@ public:
 
     Camera(Camera &&camera) = default;
 
-    DirectX::XMMATRIX cameraMatrix() const;
-
     DirectX::XMMATRIX viewMatrix() const;
 
     QBindable<DirectX::XMFLOAT4X4> bindableView() { return &view; }

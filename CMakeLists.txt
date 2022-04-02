@@ -56,7 +56,9 @@ set(PROJECT_SOURCES
         Controls/Modules/TransformModule/transformmodule.h Controls/Modules/TransformModule/transformmodule.cpp
         Controls/Modules/TransformModule/transformmodule.ui
         Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
-        Controls/Modules/ScreenMoveModule/screenmovemodule.ui Controls/Modules/ParametricModule/parametricmodule.cpp)
+        Controls/Modules/ScreenMoveModule/screenmovemodule.ui
+        Controls/Modules/BSplineModule/bsplinemodule.h Controls/Modules/BSplineModule/bsplinemodule.cpp
+        Controls/Modules/BSplineModule/bsplinemodule.ui)
 
 # Build HLSL shaders
 add_custom_target(shaders)

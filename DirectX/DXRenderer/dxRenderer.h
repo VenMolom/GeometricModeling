@@ -18,7 +18,7 @@
 #define CLEAR_COLOR {0.5f, 0.5f, 0.5f, 1.0f}
 
 class DxRenderer : public QWidget, public Renderer {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit DxRenderer(QWidget *parent);

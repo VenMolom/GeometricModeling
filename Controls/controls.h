@@ -9,7 +9,7 @@ namespace Ui {
 }
 
 class Controls : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit Controls(QWidget *parent = nullptr);

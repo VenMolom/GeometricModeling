@@ -11,7 +11,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -52,9 +52,8 @@ private:
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
 
     // TODO: Brezier C2
-    // TODO: B-Spline and Bernstein (virtual points) representation
-    // TODO: change displayed base
-    // TODO: edition of de Boore points
+    // TODO: Show virtual points (selectable)
+    // TODO: Edition of virtual Bernstein points
 
     // TODO: add grid (if possible)
 };
