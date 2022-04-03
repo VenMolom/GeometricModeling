@@ -125,7 +125,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
             for (auto &select: selected) {
                 auto ob = dynamic_cast<ObjectListItem *>(select)->object();
                 if (ob->type() & POINT3D) {
-                    shared_ptr <Point> p = dynamic_pointer_cast<Point>(ob);
+                    shared_ptr <Point> p = static_pointer_cast<Point>(ob);
                     b->addPoint(p);
                 } else if (ob->type() & BREZIERCURVE) {
                     newSelected = select;

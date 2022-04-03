@@ -51,7 +51,7 @@ void Controls::updateSelected() {
 
     if (object->type() & SCREENMOVEABLE) {
         // TODO: best add some screenMove base class
-        auto cursor = dynamic_pointer_cast<Cursor>(object);
+        auto cursor = static_pointer_cast<Cursor>(object);
         modules.push_back(std::move(make_unique<ScreenMoveModule>(cursor, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 2, 0, 1, 1);
     }
@@ -62,7 +62,7 @@ void Controls::updateSelected() {
     }
 
     if (object->type() & TORUS) {
-        auto torus = dynamic_pointer_cast<Torus>(object);
+        auto torus = static_pointer_cast<Torus>(object);
         modules.push_back(std::move(make_unique<ParametricModule>(torus, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 4, 0, 1, 1);
 
@@ -71,13 +71,13 @@ void Controls::updateSelected() {
     }
 
     if (object->type() & BREZIERC2) {
-        auto curve = dynamic_pointer_cast<BrezierC2>(object);
+        auto curve = static_pointer_cast<BrezierC2>(object);
         modules.push_back(std::move(make_unique<BSplineModule>(curve, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 6, 0, 1, 1);
     }
 
     if (object->type() & BREZIERCURVE) {
-        auto curve = dynamic_pointer_cast<BrezierCurve>(object);
+        auto curve = static_pointer_cast<BrezierCurve>(object);
         modules.push_back(std::move(make_unique<BrezierCurveModule>(curve, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 7, 0, 1, 1);
     }
