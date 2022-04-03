@@ -16,7 +16,7 @@ BrezierCurve::BrezierCurve(QString name, std::vector<std::weak_ptr<Point>> &&poi
 }
 
 void BrezierCurve::addPoint(weak_ptr<Point> point) {
-    if (std::find_if(_points.begin(), _points.end(), [&](const weak_ptr<Point> &p) {
+    if (std::find_if(_points.begin(), _points.end(), [&point](const weak_ptr<Point> &p) {
         return point.lock().get() == p.lock().get();
     }) != _points.end()) {
         return;
@@ -64,7 +64,9 @@ void BrezierCurve::drawPolygonal(Renderer &renderer, XMMATRIX mvp, DrawType draw
 }
 
 BoundingOrientedBox BrezierCurve::boundingBox() const {
-    return {{}, {}, {0, 0, 0, 1.f}};
+    return {{},
+            {},
+            {0, 0, 0, 1.f}};
 }
 
 XMFLOAT3 BrezierCurve::newMax(XMFLOAT3 oldMax, XMFLOAT3 candidate) {
@@ -100,7 +102,10 @@ void BrezierCurve::preUpdate() {
 }
 
 void BrezierCurve::pointUpdate(const shared_ptr<Point> &point, int index) {
-    pointsHandlers.push_back(point->bindablePosition().addNotifier([&] { updatePoints(); }));
+    weak_ptr<Point> weakPoint = point;
+    pointsHandlers.push_back(point->bindablePosition().addNotifier([this, weakPoint] {
+        pointMoved(weakPoint);
+    }));
 
     if (indices.size() > 0 && indices.size() % 4 == 0) {
         indices.push_back(indices.back());
@@ -122,4 +127,24 @@ void BrezierCurve::postUpdate() {
     }
 
     canDraw = vertices.size() >= 2;
+}
+
+void BrezierCurve::pointMoved(const weak_ptr<Point> &point) {
+    shared_ptr<Point> moved;
+    if (!(moved = point.lock())) {
+        updatePoints();
+        return;
+    }
+
+    auto it = std::find_if(_points.begin(), _points.end(), [&moved](const weak_ptr<Point> &p) {
+        return moved.get() == p.lock().get();
+    });
+
+    if (it == _points.end()) {
+        updatePoints();
+        return;
+    }
+
+    int index = it - _points.begin();
+    vertices[index].position = moved->position();
 }

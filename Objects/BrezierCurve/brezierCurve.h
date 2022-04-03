@@ -44,8 +44,6 @@ public:
 protected:
     std::vector<std::weak_ptr<Point>> _points;
     std::vector<QPropertyNotifier> pointsHandlers{};
-    QProperty<int> pointsChanged{};
-    bool _polygonal{false};
 
     std::vector<VertexPositionColor> vertices;
     std::vector<Index> indices;
@@ -64,9 +62,15 @@ protected:
 
     virtual void postUpdate();
 
+    virtual void pointMoved(const std::weak_ptr<Point> &point);
+
     static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
 
     static DirectX::XMFLOAT3 newMax(DirectX::XMFLOAT3 oldMax, DirectX::XMFLOAT3 candidate);
+
+private:
+    QProperty<int> pointsChanged{};
+    bool _polygonal{false};
 };
 
 
