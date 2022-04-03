@@ -88,6 +88,11 @@ void BrezierCurve::updatePoints() {
             continue;
         }
 
+        weak_ptr<Point> weakPoint = point;
+        pointsHandlers.push_back(point->bindablePosition().addNotifier([this, weakPoint] {
+            pointMoved(weakPoint);
+        }));
+
         pointUpdate(point, i);
     }
 
@@ -102,11 +107,6 @@ void BrezierCurve::preUpdate() {
 }
 
 void BrezierCurve::pointUpdate(const shared_ptr<Point> &point, int index) {
-    weak_ptr<Point> weakPoint = point;
-    pointsHandlers.push_back(point->bindablePosition().addNotifier([this, weakPoint] {
-        pointMoved(weakPoint);
-    }));
-
     if (indices.size() > 0 && indices.size() % 4 == 0) {
         indices.push_back(indices.back());
     }
@@ -130,6 +130,8 @@ void BrezierCurve::postUpdate() {
 }
 
 void BrezierCurve::pointMoved(const weak_ptr<Point> &point) {
+    if (_points.size() < 2) return;
+
     shared_ptr<Point> moved;
     if (!(moved = point.lock())) {
         updatePoints();

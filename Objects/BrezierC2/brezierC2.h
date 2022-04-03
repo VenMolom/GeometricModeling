@@ -31,6 +31,8 @@ protected:
 
     void postUpdate() override;
 
+    void pointMoved(const std::weak_ptr<Point> &point) override;
+
 private:
     std::vector<VertexPositionColor> bSplineVertices;
     bool _bothPolygonals{false};
