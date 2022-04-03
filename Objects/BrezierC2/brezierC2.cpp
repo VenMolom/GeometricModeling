@@ -119,6 +119,8 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
     XMFLOAT3 pointPosition = moved->position();
     int under = (index - 1) * 3;
 
+    // TODO: there are overlaps in calculated points, should use already calculated points where possible
+
     // fix under left neighbour
     if (index > 1) {
         shared_ptr<Point> left = _points[index - 1].lock();
