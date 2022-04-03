@@ -10,8 +10,8 @@ TransformModule::TransformModule(shared_ptr<Object> object, QWidget *parent) :
     ui(new Ui::TransformModule)
 {
     ui->setupUi(this);
-    rotationHandler = this->object->bindableRotation().addNotifier([&] { updateRotation(); });
-    scaleHandler = this->object->bindableScale().addNotifier([&] { updateScale(); });
+    rotationHandler = this->object->bindableRotation().addNotifier([this] { updateRotation(); });
+    scaleHandler = this->object->bindableScale().addNotifier([this] { updateScale(); });
     updateRotation();
     updateScale();
 }

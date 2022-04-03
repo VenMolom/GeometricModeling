@@ -29,7 +29,7 @@ Controls::~Controls() {
 
 void Controls::setScene(shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
-    sceneHandler = scene->bindableSelected().addNotifier([&] { updateSelected(); });
+    sceneHandler = scene->bindableSelected().addNotifier([this] { updateSelected(); });
     updateSelected();
 }
 

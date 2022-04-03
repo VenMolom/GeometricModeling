@@ -9,7 +9,7 @@ ObjectModule::ObjectModule(shared_ptr<Object> object, QWidget *parent) :
     ui(new Ui::ObjectModule)
 {
     ui->setupUi(this);
-    nameHandler = this->object->bindableName().addNotifier([&] { ui->nameEdit->setText(object->name()); });
+    nameHandler = this->object->bindableName().addNotifier([this] { ui->nameEdit->setText(this->object->name()); });
     ui->nameEdit->setText(this->object->name());
 }
 

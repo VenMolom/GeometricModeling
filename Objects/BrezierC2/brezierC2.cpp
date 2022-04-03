@@ -28,7 +28,7 @@ void BrezierC2::drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawTyp
 }
 
 void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
-    pointsHandlers.push_back(point->bindablePosition().addNotifier([&] { updatePoints(); }));
+    pointsHandlers.push_back(point->bindablePosition().addNotifier([this] { updatePoints(); }));
 
     bSplineVertices.push_back({point->position(), {1, 1, 1}});
 

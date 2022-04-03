@@ -11,9 +11,9 @@ Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
         : Object("Cursor", position),
           _screenPosition(screenPosition),
           camera(camera) {
-    positionHandler = this->bindablePosition().addNotifier([&] { updateScreenPosition(); });
-    projectionHandler = camera.bindableProjection().addNotifier([&] { updateScreenPosition(); });
-    viewHandler = camera.bindableView().addNotifier([&] { updateScreenPosition(); });
+    positionHandler = this->bindablePosition().addNotifier([this] { updateScreenPosition(); });
+    projectionHandler = camera.bindableProjection().addNotifier([this] { updateScreenPosition(); });
+    viewHandler = camera.bindableView().addNotifier([this] { updateScreenPosition(); });
 }
 
 void Cursor::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
@@ -42,7 +42,7 @@ void Cursor::setScreenPosition(DirectX::XMINT2 position) {
     // xD
     positionHandler = {};
     setPosition(Utils3D::getRayCrossWithPlane(ray, plane));
-    positionHandler = this->bindablePosition().addNotifier([&] { updateScreenPosition(); });
+    positionHandler = this->bindablePosition().addNotifier([this] { updateScreenPosition(); });
 }
 
 void Cursor::updateScreenPosition() {

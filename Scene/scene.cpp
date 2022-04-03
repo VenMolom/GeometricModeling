@@ -49,9 +49,9 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
 }
 
 void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
-    _objects.remove_if([&](const shared_ptr<Object> &ob) {
+    _objects.remove_if([&objects](const shared_ptr<Object> &ob) {
         return find_if(objects.begin(), objects.end(),
-                       [&](const shared_ptr<Object> &obb) { return ob->equals(obb); }) != objects.end();
+                       [&ob](const shared_ptr<Object> &obb) { return ob->equals(obb); }) != objects.end();
     });
 
     auto comp = make_shared<CompositeObject>(std::move(objects));
@@ -60,7 +60,7 @@ void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
 
 void Scene::removeSelected() {
     if (auto selected = _selected.value().lock()) {
-        _objects.remove_if([&](const shared_ptr<Object> &ob) { return selected->equals(ob); });
+        _objects.remove_if([&selected](const shared_ptr<Object> &ob) { return selected->equals(ob); });
         composite.reset();
         _selected.setValue({});
     }
@@ -140,7 +140,7 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         cursor.reset();
     } else if ((composite && composite->equals(object))
                || find_if(_objects.begin(), _objects.end(),
-                          [&](const shared_ptr<Object> &ob) { return object->equals(ob); }) != _objects.end()) {
+                          [&object](const shared_ptr<Object> &ob) { return object->equals(ob); }) != _objects.end()) {
         _selected = object;
         removeComposite();
         cursor.reset();

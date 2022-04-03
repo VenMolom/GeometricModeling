@@ -8,7 +8,7 @@ BrezierCurveModule::BrezierCurveModule(shared_ptr<BrezierCurve> curve, QWidget *
         curve(std::move(curve)),
         ui(new Ui::BrezierCurveModule) {
     ui->setupUi(this);
-    pointsHandler = this->curve->bindablePoints().addNotifier([&] { updateCurvePoints(); });
+    pointsHandler = this->curve->bindablePoints().addNotifier([this] { updateCurvePoints(); });
     updateCurvePoints();
     ui->polygonalCheckBox->setCheckState(this->curve->polygonal() ? Qt::Checked : Qt::Unchecked);
     ui->pointsList->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);

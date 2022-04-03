@@ -9,7 +9,7 @@ MoveModule::MoveModule(shared_ptr<Object> object, QWidget *parent) :
     ui(new Ui::MoveModule)
 {
     ui->setupUi(this);
-    positionHandler = this->object->bindablePosition().addNotifier([&] { updatePosition(); });
+    positionHandler = this->object->bindablePosition().addNotifier([this] { updatePosition(); });
     updatePosition();
 }
 

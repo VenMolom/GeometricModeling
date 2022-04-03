@@ -41,7 +41,7 @@ void CompositeObject::calculateCenter() {
 
 bool CompositeObject::contains(const shared_ptr<Object> &object) const {
     return find_if(objects.begin(), objects.end(),
-                   [&](const shared_ptr<Object> &ob) { return object->equals(ob); }) != objects.end();
+                   [&object](const shared_ptr<Object> &ob) { return object->equals(ob); }) != objects.end();
 }
 
 std::list<std::shared_ptr<Object>> &&CompositeObject::release() {

@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(scene.get(), &Scene::objectAdded, this, &MainWindow::onObjectAdded);
 
-    selectedHandler = scene->bindableSelected().addNotifier([&] { updateSelection(); });
+    selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
 
     setMouseTracking(true);
     ui->controlsWidget->setScene(scene);
@@ -144,7 +144,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
 
         selectedHandler = {};
         scene->addComposite(std::move(objects));
-        selectedHandler = scene->bindableSelected().addNotifier([&] { updateSelection(); });
+        selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
     }
     ui->deleteObject->setEnabled(true);
     ui->centerObject->setEnabled(true);
@@ -155,7 +155,7 @@ void MainWindow::on_deleteObject_clicked() {
     if (selected.empty()) return;
 
     scene->removeSelected();
-    items.remove_if([&](const unique_ptr<ObjectListItem> &ob) {
+    items.remove_if([&selected](const unique_ptr<ObjectListItem> &ob) {
         return selected.contains(ob.get());
     });
 }

@@ -10,7 +10,7 @@ ScreenMoveModule::ScreenMoveModule(shared_ptr<Cursor> cursor, QWidget *parent) :
         cursor(std::move(cursor)),
         ui(new Ui::ScreenMoveModule) {
     ui->setupUi(this);
-    screenPosHandler = this->cursor->bindableScreenPosition().addNotifier([&] { updateScreenPosition(); });
+    screenPosHandler = this->cursor->bindableScreenPosition().addNotifier([this] { updateScreenPosition(); });
     updateScreenPosition();
 }
 

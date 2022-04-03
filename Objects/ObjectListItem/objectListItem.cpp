@@ -7,7 +7,7 @@
 ObjectListItem::ObjectListItem(std::shared_ptr<Object> object, std::shared_ptr<Scene> scene)
     : _object(object), scene(scene) {
     updateText();
-    nameHandler = _object->bindableName().addNotifier([&] { updateText(); });
+    nameHandler = _object->bindableName().addNotifier([this] { updateText(); });
 }
 
 void ObjectListItem::select() {
