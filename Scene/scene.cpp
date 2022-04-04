@@ -2,7 +2,6 @@
 // Created by Molom on 2022-02-27.
 //
 
-#include <DirectXMath.h>
 #include "scene.h"
 
 using namespace DirectX;

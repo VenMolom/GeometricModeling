@@ -2,11 +2,11 @@
 // Created by Molom on 2022-04-01.
 //
 
-#include <DirectXMath.h>
 #include "brezierC2.h"
 
 using namespace std;
 using namespace DirectX;
+using namespace Utils3D;
 
 BrezierC2::BrezierC2(vector<weak_ptr<Point>> &&points)
         : BrezierCurve("Brezier C2", std::move(points)) {
@@ -40,19 +40,9 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
     }
     if (!right) return;
 
-    XMFLOAT3 pointPosition = point->position();
-    XMFLOAT3 rightPosition = right->position();
     XMFLOAT3 b1{}, b2{};
-    XMStoreFloat3(&b1, XMVectorLerp(
-            XMLoadFloat3(&pointPosition),
-            XMLoadFloat3(&rightPosition),
-            1.0f / 3.0f)
-    );
-    XMStoreFloat3(&b2, XMVectorLerp(
-            XMLoadFloat3(&pointPosition),
-            XMLoadFloat3(&rightPosition),
-            2.0f / 3.0f)
-    );
+    Utils3D::storeFloat3Lerp(b1, point->position(), right->position(), 1.0f / 3.0f);
+    Utils3D::storeFloat3Lerp(b2, point->position(), right->position(), 2.0f / 3.0f);
 
     if (index == 0) {
         vertices.push_back({b2, {1, 1, 1}});
@@ -60,11 +50,7 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
     }
 
     XMFLOAT3 b0{};
-    XMStoreFloat3(&b0, XMVectorLerp(
-            XMLoadFloat3(&vertices.back().position),
-            XMLoadFloat3(&b1),
-            0.5f)
-    );
+    Utils3D::storeFloat3Lerp(b0, vertices.back().position, b1, 0.5f);
     if (index == 1) {
         vertices[0].position = b0;
     } else {
@@ -113,140 +99,109 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
     }
 
     int index = it - _points.begin();
+    int under = (index - 1) * 3;
+    bool fixedLeft{false}, fixedRight{false};
 
     bSplineVertices[index].position = moved->position();
 
-    XMFLOAT3 pointPosition = moved->position();
-    int under = (index - 1) * 3;
-
-    // TODO: there are overlaps in calculated points, should use already calculated points where possible
-
-    // fix under left neighbour
-    if (index > 1) {
-        shared_ptr<Point> left = _points[index - 1].lock();
-        shared_ptr<Point> leftLeft = _points[index - 2].lock();
-        if (!left || !leftLeft) {
-            updatePoints();
-            return;
-        }
-
-        XMFLOAT3 leftPosition = left->position();
-        XMFLOAT3 leftLeftPosition = leftLeft->position();
-        XMFLOAT3 b1{}, b2{};
-        XMStoreFloat3(&b1, XMVectorLerp(
-                XMLoadFloat3(&leftPosition),
-                XMLoadFloat3(&pointPosition),
-                1.0f / 3.0f)
-        );
-        XMStoreFloat3(&b2, XMVectorLerp(
-                XMLoadFloat3(&leftLeftPosition),
-                XMLoadFloat3(&leftPosition),
-                2.0f / 3.0f)
-        );
-        XMStoreFloat3(&vertices[under - 3].position, XMVectorLerp(
-                XMLoadFloat3(&b1),
-                XMLoadFloat3(&b2),
-                0.5f)
-        );
-    }
-
-    // fix between self and left neighbour
-    if (index > 1 && index < _points.size() - 1) {
-        shared_ptr<Point> left = _points[index - 1].lock();
+    shared_ptr<Point> left{}, right{};
+    // should have left
+    if (index > 0) {
+        left = _points[index - 1].lock();
         if (!left) {
             updatePoints();
             return;
         }
-
-        XMFLOAT3 leftPosition = left->position();
-        XMStoreFloat3(&vertices[under - 2].position, XMVectorLerp(
-                XMLoadFloat3(&leftPosition),
-                XMLoadFloat3(&pointPosition),
-                1.0f / 3.0f)
-        );
-        XMStoreFloat3(&vertices[under - 1].position, XMVectorLerp(
-                XMLoadFloat3(&leftPosition),
-                XMLoadFloat3(&pointPosition),
-                2.0f / 3.0f)
-        );
     }
 
-    // fix under yourself
-    if (index > 0 && index < _points.size() - 1) {
-        shared_ptr<Point> left = _points[index - 1].lock();
-        shared_ptr<Point> right = _points[index + 1].lock();
-        if (!left || !right) {
-            updatePoints();
-            return;
-        }
-
-        XMFLOAT3 leftPosition = left->position();
-        XMFLOAT3 rightPosition = right->position();
-        XMFLOAT3 b1{}, b2{};
-        XMStoreFloat3(&b1, XMVectorLerp(
-                XMLoadFloat3(&leftPosition),
-                XMLoadFloat3(&pointPosition),
-                2.0f / 3.0f)
-        );
-        XMStoreFloat3(&b2, XMVectorLerp(
-                XMLoadFloat3(&pointPosition),
-                XMLoadFloat3(&rightPosition),
-                1.0f / 3.0f)
-        );
-        XMStoreFloat3(&vertices[under].position, XMVectorLerp(
-                XMLoadFloat3(&b1),
-                XMLoadFloat3(&b2),
-                0.5f)
-        );
-    }
-
-    // fix between self and right neighbour
-    if (index > 0 && index < _points.size() - 2) {
-        shared_ptr<Point> right = _points[index + 1].lock();
+    // should have right
+    if (index < _points.size() - 1) {
+        right = _points[index + 1].lock();
         if (!right) {
             updatePoints();
             return;
         }
+    }
 
-        XMFLOAT3 rightPosition = right->position();
-        XMStoreFloat3(&vertices[under + 1].position, XMVectorLerp(
-                XMLoadFloat3(&pointPosition),
-                XMLoadFloat3(&rightPosition),
-                1.0f / 3.0f)
-        );
-        XMStoreFloat3(&vertices[under + 2].position, XMVectorLerp(
-                XMLoadFloat3(&pointPosition),
-                XMLoadFloat3(&rightPosition),
-                2.0f / 3.0f)
-        );
+    // fix between self and left neighbour
+    if (index > 1 && index < _points.size() - 1) {
+        Utils3D::storeFloat3Lerp(vertices[under - 2].position, left->position(), moved->position(), 1.0f / 3.0f);
+        Utils3D::storeFloat3Lerp(vertices[under - 1].position, left->position(), moved->position(), 2.0f / 3.0f);
+        fixedLeft = true;
+    }
+
+    // fix between self and right neighbour
+    if (index > 0 && index < _points.size() - 2) {
+        Utils3D::storeFloat3Lerp(vertices[under + 1].position, moved->position(), right->position(), 1.0f / 3.0f);
+        Utils3D::storeFloat3Lerp(vertices[under + 2].position, moved->position(), right->position(), 2.0f / 3.0f);
+        fixedRight = true;
+    }
+
+    // fix under left neighbour
+    if (index > 1) {
+        XMFLOAT3 b1{}, b2{};
+
+        // second left neighbour is not border
+        if (index > 2) {
+            b2 = vertices[under - 4].position;
+        } else {
+            shared_ptr<Point> leftLeft = _points[index - 2].lock();
+            if (!leftLeft) {
+                updatePoints();
+                return;
+            }
+            Utils3D::storeFloat3Lerp(b2, leftLeft->position(), left->position(), 2.0f / 3.0f);
+        }
+
+        if (fixedLeft) {
+            b1 = vertices[under - 2].position;
+        } else {
+            Utils3D::storeFloat3Lerp(b1, left->position(), moved->position(), 1.0f / 3.0f);
+        }
+
+        Utils3D::storeFloat3Lerp(vertices[under - 3].position, b1, b2, 0.5f);
     }
 
     // fix under right neighbour
     if (index < _points.size() - 2) {
-        shared_ptr<Point> right = _points[index + 1].lock();
-        shared_ptr<Point> rightRight = _points[index + 2].lock();
-        if (!right || !rightRight) {
-            updatePoints();
-            return;
+        XMFLOAT3 b1{}, b2{};
+
+        // second right neighbour is not border
+        if (index < _points.size() - 3) {
+            b2 = vertices[under + 4].position;
+        } else {
+            shared_ptr<Point> rightRight = _points[index + 2].lock();
+            if (!rightRight) {
+                updatePoints();
+                return;
+            }
+            Utils3D::storeFloat3Lerp(b2, right->position(), rightRight->position(), 1.0f / 3.0f);
         }
 
-        XMFLOAT3 rightPosition = right->position();
-        XMFLOAT3 rightRightPosition = rightRight->position();
+        if (fixedRight) {
+            b1 = vertices[under + 2].position;
+        } else {
+            Utils3D::storeFloat3Lerp(b1, moved->position(), right->position(), 2.0f / 3.0f);
+        }
+
+        Utils3D::storeFloat3Lerp(vertices[under + 3].position, b1, b2, 0.5f);
+    }
+
+    // fix under yourself
+    if (index > 0 && index < _points.size() - 1) {
         XMFLOAT3 b1{}, b2{};
-        XMStoreFloat3(&b1, XMVectorLerp(
-                XMLoadFloat3(&pointPosition),
-                XMLoadFloat3(&rightPosition),
-                2.0f / 3.0f)
-        );
-        XMStoreFloat3(&b2, XMVectorLerp(
-                XMLoadFloat3(&rightPosition),
-                XMLoadFloat3(&rightRightPosition),
-                1.0f / 3.0f)
-        );
-        XMStoreFloat3(&vertices[under + 3].position, XMVectorLerp(
-                XMLoadFloat3(&b1),
-                XMLoadFloat3(&b2),
-                0.5f)
-        );
+        if (fixedLeft) {
+            b1 = vertices[under - 1].position;
+        } else {
+            Utils3D::storeFloat3Lerp(b1, left->position(), moved->position(), 2.0f/ 3.0f);
+        }
+
+        if (fixedRight) {
+            b2 = vertices[under + 1].position;
+        } else {
+            Utils3D::storeFloat3Lerp(b2, moved->position(), right->position(), 1.0f/ 3.0f);
+        }
+
+        Utils3D::storeFloat3Lerp(vertices[under].position, b1, b2, 0.5f);
     }
 }

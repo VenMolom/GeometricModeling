@@ -6,6 +6,7 @@
 #define MG1_BREZIERC2_H
 
 #include <DirectXMath.h>
+#include "Utils/Utils3D.h"
 #include "Objects/BrezierCurve/brezierCurve.h"
 
 class BrezierC2 : public BrezierCurve {

@@ -47,3 +47,7 @@ XMFLOAT3 Utils3D::getRayCrossWithPlane(XMFLOAT3RAY ray, XMFLOAT4 plane) {
     );
     return result;
 }
+
+void Utils3D::storeFloat3Lerp(DirectX::XMFLOAT3 &target, const DirectX::XMFLOAT3 &v1, const DirectX::XMFLOAT3 &v2, float t) {
+    XMStoreFloat3(&target, XMVectorLerp(XMLoadFloat3(&v1), XMLoadFloat3(&v2), t));
+}
