@@ -8,6 +8,7 @@
 #include <DirectXMath.h>
 #include "Utils/Utils3D.h"
 #include "Objects/BrezierCurve/brezierCurve.h"
+#include "Objects/VirtualPoint/virtualPoint.h"
 
 class BrezierC2 : public BrezierCurve {
 public:
@@ -24,6 +25,11 @@ public:
     Type type() const override;
 
 protected:
+public:
+    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+
+protected:
+
     void drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType) override;
 
     void preUpdate() override;
@@ -35,9 +41,12 @@ protected:
     void pointMoved(const std::weak_ptr<Point> &point) override;
 
 private:
+    std::vector<std::shared_ptr<VirtualPoint>> bernsteinPoints;
     std::vector<VertexPositionColor> bSplineVertices;
     bool _bothPolygonals{false};
     bool _bernsteinBase{false};
+
+    void setBernsteinPointFromVertex(int index);
 };
 
 

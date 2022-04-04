@@ -17,6 +17,16 @@ Type BrezierC2::type() const {
     return BREZIERC2;
 }
 
+void BrezierC2::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
+    if (_bernsteinBase) {
+        for (auto &point : bernsteinPoints) {
+            point->draw(renderer, view, projection, DEFAULT);
+        }
+    }
+
+    BrezierCurve::draw(renderer, view, projection, drawType);
+}
+
 void BrezierC2::drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType) {
     if (_bernsteinBase || _bothPolygonals) {
         BrezierCurve::drawPolygonal(renderer, mvp, drawType);
@@ -46,6 +56,7 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
 
     if (index == 0) {
         vertices.push_back({b2, {1, 1, 1}});
+        bernsteinPoints.push_back(make_shared<VirtualPoint>(b2));
         return;
     }
 
@@ -53,11 +64,15 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
     Utils3D::storeFloat3Lerp(b0, vertices.back().position, b1, 0.5f);
     if (index == 1) {
         vertices[0].position = b0;
+        bernsteinPoints[0]->setPosition(b0);
     } else {
         vertices.push_back({b0, {1, 1, 1}});
+        bernsteinPoints.push_back(make_shared<VirtualPoint>(b0));
     }
     vertices.push_back({b1, {1, 1, 1}});
+    bernsteinPoints.push_back(make_shared<VirtualPoint>(b1));
     vertices.push_back({b2, {1, 1, 1}});
+    bernsteinPoints.push_back(make_shared<VirtualPoint>(b2));
 
     auto size = vertices.size();
     indices.push_back(size - 3);
@@ -68,6 +83,7 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
 
 void BrezierC2::preUpdate() {
     BrezierCurve::preUpdate();
+    bernsteinPoints.clear();
     bSplineVertices.clear();
 }
 
@@ -75,6 +91,7 @@ void BrezierC2::postUpdate() {
     lastPatchSize = 0;
     if (vertices.size() > 2) {
         vertices.resize(vertices.size() - 2);
+        bernsteinPoints.resize(vertices.size());
     }
 
     canDraw = _points.size() >= 4;
@@ -126,14 +143,18 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
     // fix between self and left neighbour
     if (index > 1 && index < _points.size() - 1) {
         Utils3D::storeFloat3Lerp(vertices[under - 2].position, left->position(), moved->position(), 1.0f / 3.0f);
+        setBernsteinPointFromVertex(under - 2);
         Utils3D::storeFloat3Lerp(vertices[under - 1].position, left->position(), moved->position(), 2.0f / 3.0f);
+        setBernsteinPointFromVertex(under - 1);
         fixedLeft = true;
     }
 
     // fix between self and right neighbour
     if (index > 0 && index < _points.size() - 2) {
         Utils3D::storeFloat3Lerp(vertices[under + 1].position, moved->position(), right->position(), 1.0f / 3.0f);
+        setBernsteinPointFromVertex(under + 1);
         Utils3D::storeFloat3Lerp(vertices[under + 2].position, moved->position(), right->position(), 2.0f / 3.0f);
+        setBernsteinPointFromVertex(under + 2);
         fixedRight = true;
     }
 
@@ -160,6 +181,7 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         }
 
         Utils3D::storeFloat3Lerp(vertices[under - 3].position, b1, b2, 0.5f);
+        setBernsteinPointFromVertex(under - 3);
     }
 
     // fix under right neighbour
@@ -185,6 +207,7 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         }
 
         Utils3D::storeFloat3Lerp(vertices[under + 3].position, b1, b2, 0.5f);
+        setBernsteinPointFromVertex(under + 3);
     }
 
     // fix under yourself
@@ -203,5 +226,10 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         }
 
         Utils3D::storeFloat3Lerp(vertices[under].position, b1, b2, 0.5f);
+        setBernsteinPointFromVertex(under);
     }
+}
+
+void BrezierC2::setBernsteinPointFromVertex(int index) {
+    bernsteinPoints[index]->setPosition(vertices[index].position);
 }

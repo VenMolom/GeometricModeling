@@ -58,7 +58,7 @@ set(PROJECT_SOURCES
         Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
         Controls/Modules/ScreenMoveModule/screenmovemodule.ui
         Controls/Modules/BSplineModule/bsplinemodule.h Controls/Modules/BSplineModule/bsplinemodule.cpp
-        Controls/Modules/BSplineModule/bsplinemodule.ui)
+        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/VirtualPoint/virtualPoint.cpp Objects/VirtualPoint/virtualPoint.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
