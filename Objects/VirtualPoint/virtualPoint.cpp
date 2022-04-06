@@ -4,8 +4,14 @@
 
 #include "virtualPoint.h"
 
-VirtualPoint::VirtualPoint(const DirectX::XMFLOAT3 &position) : Point(position) {}
+using namespace DirectX;
+
+VirtualPoint::VirtualPoint(const XMFLOAT3 &position) : Point(position) {}
 
 Type VirtualPoint::type() const {
     return VIRTUALPOINT3D;
+}
+
+void VirtualPoint::setPositionSilently(XMFLOAT3 position) {
+    _position.setValueBypassingBindings(position);
 }

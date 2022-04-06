@@ -46,10 +46,15 @@ protected:
 private:
     std::vector<std::shared_ptr<VirtualPoint>> bernsteinPoints;
     std::vector<VertexPositionColor> bSplineVertices;
+    std::vector<QPropertyNotifier> bernsteinPointsHandlers{};
     bool _bothPolygonals{false};
     bool _bernsteinBase{false};
 
-    void setBernsteinPointFromVertex(int index);
+    void synchroniseBernsteinPositions(int start, int end);
+
+    void addBernsteinPoint(const DirectX::XMFLOAT3 &position);
+
+    void bernsteinMoved(const std::weak_ptr<VirtualPoint> &point);
 };
 
 

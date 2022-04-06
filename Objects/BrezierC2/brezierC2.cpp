@@ -19,7 +19,7 @@ Type BrezierC2::type() const {
 
 void BrezierC2::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
     if (_bernsteinBase) {
-        for (auto &point : bernsteinPoints) {
+        for (auto &point: bernsteinPoints) {
             point->draw(renderer, view, projection, DEFAULT);
         }
     }
@@ -56,7 +56,7 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
 
     if (index == 0) {
         vertices.push_back({b2, {1, 1, 1}});
-        bernsteinPoints.push_back(make_shared<VirtualPoint>(b2));
+        addBernsteinPoint(b2);
         return;
     }
 
@@ -64,15 +64,15 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
     Utils3D::storeFloat3Lerp(b0, vertices.back().position, b1, 0.5f);
     if (index == 1) {
         vertices[0].position = b0;
-        bernsteinPoints[0]->setPosition(b0);
+        bernsteinPoints[0]->setPositionSilently(b0);
     } else {
         vertices.push_back({b0, {1, 1, 1}});
-        bernsteinPoints.push_back(make_shared<VirtualPoint>(b0));
+        addBernsteinPoint(b0);
     }
     vertices.push_back({b1, {1, 1, 1}});
-    bernsteinPoints.push_back(make_shared<VirtualPoint>(b1));
+    addBernsteinPoint(b1);
     vertices.push_back({b2, {1, 1, 1}});
-    bernsteinPoints.push_back(make_shared<VirtualPoint>(b2));
+    addBernsteinPoint(b2);
 
     auto size = vertices.size();
     indices.push_back(size - 3);
@@ -143,18 +143,14 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
     // fix between self and left neighbour
     if (index > 1 && index < _points.size() - 1) {
         Utils3D::storeFloat3Lerp(vertices[under - 2].position, left->position(), moved->position(), 1.0f / 3.0f);
-        setBernsteinPointFromVertex(under - 2);
         Utils3D::storeFloat3Lerp(vertices[under - 1].position, left->position(), moved->position(), 2.0f / 3.0f);
-        setBernsteinPointFromVertex(under - 1);
         fixedLeft = true;
     }
 
     // fix between self and right neighbour
     if (index > 0 && index < _points.size() - 2) {
         Utils3D::storeFloat3Lerp(vertices[under + 1].position, moved->position(), right->position(), 1.0f / 3.0f);
-        setBernsteinPointFromVertex(under + 1);
         Utils3D::storeFloat3Lerp(vertices[under + 2].position, moved->position(), right->position(), 2.0f / 3.0f);
-        setBernsteinPointFromVertex(under + 2);
         fixedRight = true;
     }
 
@@ -181,7 +177,6 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         }
 
         Utils3D::storeFloat3Lerp(vertices[under - 3].position, b1, b2, 0.5f);
-        setBernsteinPointFromVertex(under - 3);
     }
 
     // fix under right neighbour
@@ -207,7 +202,6 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         }
 
         Utils3D::storeFloat3Lerp(vertices[under + 3].position, b1, b2, 0.5f);
-        setBernsteinPointFromVertex(under + 3);
     }
 
     // fix under yourself
@@ -216,24 +210,81 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         if (fixedLeft) {
             b1 = vertices[under - 1].position;
         } else {
-            Utils3D::storeFloat3Lerp(b1, left->position(), moved->position(), 2.0f/ 3.0f);
+            Utils3D::storeFloat3Lerp(b1, left->position(), moved->position(), 2.0f / 3.0f);
         }
 
         if (fixedRight) {
             b2 = vertices[under + 1].position;
         } else {
-            Utils3D::storeFloat3Lerp(b2, moved->position(), right->position(), 1.0f/ 3.0f);
+            Utils3D::storeFloat3Lerp(b2, moved->position(), right->position(), 1.0f / 3.0f);
         }
 
         Utils3D::storeFloat3Lerp(vertices[under].position, b1, b2, 0.5f);
-        setBernsteinPointFromVertex(under);
     }
-}
 
-void BrezierC2::setBernsteinPointFromVertex(int index) {
-    bernsteinPoints[index]->setPosition(vertices[index].position);
+    synchroniseBernsteinPositions(max(0, under - 3), min(vertices.size() - 1, under + 3));
 }
 
 const vector<shared_ptr<VirtualPoint>> &BrezierC2::virtualPoints() {
     return bernsteinPoints;
+}
+
+void BrezierC2::synchroniseBernsteinPositions(int start, int end) {
+    for (; start <= end; ++start) {
+        bernsteinPoints[start]->setPositionSilently(vertices[start].position);
+    }
+}
+
+void BrezierC2::addBernsteinPoint(const DirectX::XMFLOAT3 &position) {
+    auto point = make_shared<VirtualPoint>(position);
+    weak_ptr<VirtualPoint> weakPoint = point;
+    bernsteinPointsHandlers.push_back(point->bindablePosition().addNotifier([this, weakPoint] {
+        bernsteinMoved(weakPoint);
+    }));
+    bernsteinPoints.push_back(std::move(point));
+}
+
+void BrezierC2::bernsteinMoved(const weak_ptr<VirtualPoint> &point) {
+    if (_points.size() < 4) return;
+
+    shared_ptr<VirtualPoint> moved;
+    if (!(moved = point.lock())) {
+        updatePoints();
+        return;
+    }
+
+    auto it = std::find_if(bernsteinPoints.begin(), bernsteinPoints.end(),
+                           [&moved](const weak_ptr<VirtualPoint> &p) {
+                               return moved.get() == p.lock().get();
+                           });
+
+    if (it == bernsteinPoints.end()) {
+        updatePoints();
+        return;
+    }
+
+    int index = it - bernsteinPoints.begin();
+    int over = (index + 1) / 3 + 1;
+    shared_ptr<Point> deBoorOver;
+    if (!(deBoorOver = _points[over].lock())) {
+        updatePoints();
+        return;
+    }
+
+    auto oldPosition = vertices[index].position;
+    auto newPosition = moved->position();
+    auto value = index % 3 == 0 ? 3.0f / 2.0f : 54.0f / 31.0f;
+
+    auto deBoorOverPosition = deBoorOver->position();
+    XMStoreFloat3(&deBoorOverPosition,
+                  XMVectorAdd(
+                          XMLoadFloat3(&deBoorOverPosition),
+                          XMVectorScale(
+                                  XMVectorSubtract(XMLoadFloat3(&newPosition),
+                                                   XMLoadFloat3(&oldPosition)
+                                  ), value
+                          )
+                  )
+    );
+    deBoorOver->setPosition(deBoorOverPosition);
 }
