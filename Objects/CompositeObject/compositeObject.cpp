@@ -12,12 +12,15 @@ using namespace DirectX;
 
 CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
         : Object("Composite", {0, 0, 0}),
-          objects(objects) {
+          objects() {
 
     for (auto &object : objects) {
+        if (!(object->type() & COMPOSABLE)) continue;
+
         XMFLOAT4X4 model{};
         XMStoreFloat4x4(&model, object->modelMatrix());
         startingMatrices.push_back(model);
+        this->objects.push_back(object);
     }
 
     calculateCenter();

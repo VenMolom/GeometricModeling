@@ -233,3 +233,7 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
 void BrezierC2::setBernsteinPointFromVertex(int index) {
     bernsteinPoints[index]->setPosition(vertices[index].position);
 }
+
+const vector<shared_ptr<VirtualPoint>> &BrezierC2::virtualPoints() {
+    return bernsteinPoints;
+}

@@ -12,7 +12,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
@@ -58,7 +58,7 @@ set(PROJECT_SOURCES
         Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
         Controls/Modules/ScreenMoveModule/screenmovemodule.ui
         Controls/Modules/BSplineModule/bsplinemodule.h Controls/Modules/BSplineModule/bsplinemodule.cpp
-        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/VirtualPoint/virtualPoint.cpp Objects/VirtualPoint/virtualPoint.h)
+        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/VirtualPoint/virtualPoint.cpp Objects/VirtualPoint/virtualPoint.h Objects/VirtualPointsHolder/virtualPointsHolder.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

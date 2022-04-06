@@ -9,8 +9,9 @@
 #include "Utils/Utils3D.h"
 #include "Objects/BrezierCurve/brezierCurve.h"
 #include "Objects/VirtualPoint/virtualPoint.h"
+#include "Objects/VirtualPointsHolder/virtualPointsHolder.h"
 
-class BrezierC2 : public BrezierCurve {
+class BrezierC2 : public BrezierCurve, public VirtualPointsHolder {
 public:
     explicit BrezierC2(std::vector<std::weak_ptr<Point>> &&points);
 
@@ -23,6 +24,8 @@ public:
     void setBernsteinBase(bool use) { _bernsteinBase = use; }
 
     Type type() const override;
+
+    const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints() override;
 
 protected:
 public:

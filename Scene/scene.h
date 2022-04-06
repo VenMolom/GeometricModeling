@@ -12,6 +12,7 @@
 #include "Objects/Point/point.h"
 #include "Objects/BrezierC0/brezierC0.h"
 #include "Objects/CompositeObject/compositeObject.h"
+#include "Objects/VirtualPointsHolder/virtualPointsHolder.h"
 
 class Scene : public QObject {
     Q_OBJECT
@@ -51,12 +52,13 @@ private:
     std::list<std::shared_ptr<Object>> _objects;
     std::shared_ptr<Cursor> cursor;
     std::shared_ptr<Object> composite;
+    std::list<std::weak_ptr<VirtualPointsHolder>> virtualPointsHolders;
     // TODO: look into removing composite to reduce complexity
     Camera _camera;
 
     Utils3D::XMFLOAT3RAY getRayFromScreenPosition(DirectX::XMINT2 screenPosition) const;
 
-    std::shared_ptr<Object> findIntersectingObject(Utils3D::XMFLOAT3RAY ray) const;
+    std::shared_ptr<Object> findIntersectingObject(Utils3D::XMFLOAT3RAY ray);
 
     DirectX::XMFLOAT3 getPositionOnPlane(DirectX::XMINT2 screenPosition,
                                          DirectX::XMFLOAT3 normal, DirectX::XMFLOAT3 point) const;

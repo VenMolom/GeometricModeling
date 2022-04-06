@@ -43,6 +43,10 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
         _selected = object;
     }
 
+    if (object->type() & VIRTUALPOINTSHOLDER) {
+        virtualPointsHolders.push_back(dynamic_pointer_cast<VirtualPointsHolder>(object));
+    }
+
     _objects.push_back(std::move(object));
     emit objectAdded(_objects.back(), select);
 }
@@ -94,7 +98,7 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
     if (auto object = findIntersectingObject(ray)) {
         shared_ptr<Object> sel;
 
-        if (multiple && (sel = _selected.value().lock())) {
+        if (multiple && (sel = _selected.value().lock()) && object->type() & COMPOSABLE) {
             if (sel->type() & BREZIERCURVE && object->type() & POINT3D) {
                 auto *c = dynamic_cast<BrezierCurve *>(sel.get());
                 shared_ptr<Point> p = static_pointer_cast<Point>(object);
@@ -137,6 +141,7 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         _selected = composite;
         cursor.reset();
     } else if ((composite && composite->equals(object))
+               || object->type() & VIRTUALPOINT3D
                || find_if(_objects.begin(), _objects.end(),
                           [&object](const shared_ptr<Object> &ob) { return object->equals(ob); }) != _objects.end()) {
         _selected = object;
@@ -151,7 +156,7 @@ Utils3D::XMFLOAT3RAY Scene::getRayFromScreenPosition(XMINT2 screenPosition) cons
                             _camera.projectionMatrix(), _camera.viewMatrix());
 }
 
-shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) const {
+shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
     shared_ptr<Object> closest{nullptr};
     float closestDistance = INFINITY;
 
@@ -161,6 +166,19 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) const {
             distance < closestDistance) {
             closest = object;
             closestDistance = distance;
+        }
+    }
+
+    virtualPointsHolders.remove_if([] (weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
+    for (auto &holder : virtualPointsHolders) {
+        auto points = holder.lock()->virtualPoints();
+        for (auto &point : points) {
+            float distance{};
+            if (point->boundingBox().Intersects(XMLoadFloat3(&ray.position), XMLoadFloat3(&ray.direction), distance) &&
+                distance < closestDistance) {
+                closest = point;
+                closestDistance = distance;
+            }
         }
     }
 
