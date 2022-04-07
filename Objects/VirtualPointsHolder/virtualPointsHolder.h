@@ -9,8 +9,23 @@
 
 class VirtualPointsHolder {
 public:
-    virtual const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints() = 0;
-};
+    VirtualPointsHolder() = delete;
 
+    explicit VirtualPointsHolder(QBindable<std::weak_ptr<Object>> bindableSelected)
+            : bindableSelected(bindableSelected) {
+        selectedHandler = bindableSelected.addNotifier([this] {
+            this->selected = this->bindableSelected.value();
+        });
+    }
+
+    virtual const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints() = 0;
+
+protected:
+    std::weak_ptr<Object> selected;
+
+private:
+    QPropertyNotifier selectedHandler;
+    QBindable<std::weak_ptr<Object>> bindableSelected;
+};
 
 #endif //MG1_VIRTUALPOINTSHOLDER_H

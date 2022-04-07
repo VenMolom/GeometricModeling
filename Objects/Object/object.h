@@ -29,7 +29,8 @@ enum Type {
     TRANSFORMABLE = TORUS | COMPOSITE,
     SCREENMOVEABLE = CURSOR,
     VIRTUALPOINTSHOLDER = BREZIERC2,
-    COMPOSABLE = POINT3D | TORUS
+    COMPOSABLE = POINT3D | TORUS | COMPOSITE,
+    VIRTUAL = CURSOR | VIRTUALPOINT3D
 };
 
 inline Type operator|(Type a, Type b)
@@ -42,7 +43,8 @@ inline Type operator&(Type a, Type b)
     return static_cast<Type>(static_cast<int>(a) & static_cast<int>(b));
 }
 
-enum DrawType {
+enum
+DrawType {
     SELECTED,
     NO_CURSOR,
     DEFAULT

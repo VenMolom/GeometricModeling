@@ -66,6 +66,8 @@ private:
     void addCursor(Utils3D::XMFLOAT3RAY ray, DirectX::XMINT2 screenPos);
 
     void removeComposite();
+
+    void updateVirtualPointsHolders();
 };
 
 

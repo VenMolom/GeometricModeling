@@ -13,7 +13,7 @@
 
 class BrezierC2 : public BrezierCurve, public VirtualPointsHolder {
 public:
-    explicit BrezierC2(std::vector<std::weak_ptr<Point>> &&points);
+    BrezierC2(std::vector<std::weak_ptr<Point>> &&points, QBindable<std::weak_ptr<Object>> bindableSelected);
 
     boolean bothPolygonals() const { return _bothPolygonals; }
 

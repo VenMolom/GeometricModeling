@@ -44,7 +44,7 @@ void MainWindow::on_addBrezierC0_clicked() {
 }
 
 void MainWindow::on_addBrezierC2_clicked() {
-    scene->addObject(std::move(make_shared<BrezierC2>(std::move(getSelectedPoints()))));
+    scene->addObject(std::move(make_shared<BrezierC2>(std::move(getSelectedPoints()), scene->bindableSelected())));
 }
 
 
@@ -61,7 +61,7 @@ void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool selec
 
 void MainWindow::updateSelection() {
     shared_ptr<Object> selected;
-    if (!(selected = scene->selected().lock()) || selected->type() & CURSOR) {
+    if (!(selected = scene->selected().lock()) || selected->type() & VIRTUAL) {
         ui->objectsList->clearSelection();
         return;
     }
@@ -139,7 +139,9 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
         std::list<shared_ptr < Object>>
         objects{};
         for (auto &select: selected) {
-            objects.push_back(dynamic_cast<ObjectListItem *>(select)->object());
+            auto object = dynamic_cast<ObjectListItem *>(select)->object();
+            if (!(object->type() & COMPOSABLE)) continue;
+            objects.push_back(std::move(object));
         }
 
         selectedHandler = {};

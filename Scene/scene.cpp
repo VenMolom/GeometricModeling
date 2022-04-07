@@ -98,12 +98,12 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
     if (auto object = findIntersectingObject(ray)) {
         shared_ptr<Object> sel;
 
-        if (multiple && (sel = _selected.value().lock()) && object->type() & COMPOSABLE) {
+        if (multiple && (sel = _selected.value().lock()) && object->type() & COMPOSABLE && sel->type() & COMPOSABLE) {
             if (sel->type() & BREZIERCURVE && object->type() & POINT3D) {
                 auto *c = dynamic_cast<BrezierCurve *>(sel.get());
                 shared_ptr<Point> p = static_pointer_cast<Point>(object);
                 c->addPoint(p);
-            } else if (sel->type() != CURSOR && sel.get() != object.get()) {
+            } else if (sel.get() != object.get()) {
                 if (composite) {
                     auto comp = dynamic_cast<CompositeObject *>(composite.get());
 

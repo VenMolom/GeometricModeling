@@ -8,8 +8,9 @@ using namespace std;
 using namespace DirectX;
 using namespace Utils3D;
 
-BrezierC2::BrezierC2(vector<weak_ptr<Point>> &&points)
-        : BrezierCurve("Brezier C2", std::move(points)) {
+BrezierC2::BrezierC2(vector<weak_ptr<Point>> &&points, QBindable<std::weak_ptr<Object>> bindableSelected)
+        : BrezierCurve("Brezier C2", std::move(points)),
+          VirtualPointsHolder(bindableSelected) {
     updatePoints();
 }
 
@@ -20,7 +21,8 @@ Type BrezierC2::type() const {
 void BrezierC2::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
     if (_bernsteinBase) {
         for (auto &point: bernsteinPoints) {
-            point->draw(renderer, view, projection, DEFAULT);
+            auto isSelected = !selected.expired() && point->equals(selected.lock());
+            point->draw(renderer, view, projection, isSelected ? SELECTED : DEFAULT);
         }
     }
 
