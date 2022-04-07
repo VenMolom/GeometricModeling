@@ -61,12 +61,17 @@ void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool selec
 
 void MainWindow::updateSelection() {
     shared_ptr<Object> selected;
-    if (!(selected = scene->selected().lock()) || selected->type() & VIRTUAL) {
+    if (!(selected = scene->selected().lock())) {
         ui->objectsList->clearSelection();
         return;
     }
 
     QSignalBlocker blocker(ui->objectsList);
+    if (selected->type() & VIRTUAL) {
+        ui->objectsList->clearSelection();
+        return;
+    }
+
     if (selected->type() & COMPOSITE) {
         auto composite = dynamic_cast<CompositeObject *>(selected.get());
         for (auto &item: items) {
