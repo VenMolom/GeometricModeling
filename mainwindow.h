@@ -50,8 +50,6 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
-
-    // TODO: add grid (if possible)
 };
 
 #endif // MAINWINDOW_H
