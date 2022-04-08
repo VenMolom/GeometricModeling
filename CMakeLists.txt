@@ -40,9 +40,9 @@ set(PROJECT_SOURCES
         Objects/Point/point.cpp Objects/Point/point.h
         Objects/ObjectListItem/objectListItem.cpp Objects/ObjectListItem/objectListItem.h
         Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h
-        Objects/BrezierC0/brezierC0.cpp Objects/BrezierC0/brezierC0.h
-        Objects/BrezierCurve/brezierCurve.cpp Objects/BrezierCurve/brezierCurve.h
-        Objects/BrezierC2/brezierC2.cpp Objects/BrezierC2/brezierC2.h
+        Objects/Brezier/brezierC0.cpp Objects/Brezier/brezierC0.h
+        Objects/Brezier/brezierCurve.cpp Objects/Brezier/brezierCurve.h
+        Objects/Brezier/brezierC2.cpp Objects/Brezier/brezierC2.h
         Controls/Modules/ObjectModule/objectmodule.h Controls/Modules/ObjectModule/objectmodule.cpp
         Controls/Modules/ObjectModule/objectmodule.ui
         Controls/Modules/ParametricModule/parametricmodule.h Controls/Modules/ParametricModule/parametricmodule.cpp

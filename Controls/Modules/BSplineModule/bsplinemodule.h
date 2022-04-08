@@ -2,7 +2,7 @@
 #define BSPLINEMODULE_H
 
 #include <QWidget>
-#include "Objects/BrezierC2/brezierC2.h"
+#include "Objects/Brezier/brezierC2.h"
 
 namespace Ui {
 class BSplineModule;

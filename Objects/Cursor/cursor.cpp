@@ -7,6 +7,19 @@
 
 using namespace DirectX;
 
+const std::vector<VertexPositionColor> Cursor::cursorVertices = {
+        {{0, 0, 0}, {1, 0, 0}},
+        {{1, 0, 0}, {1, 0, 0}},
+        {{0, 0, 0}, {0, 1, 0}},
+        {{0, 1, 0}, {0, 1, 0}},
+        {{0, 0, 0}, {0, 0, 1}},
+        {{0, 0, 1}, {0, 0, 1}}
+};
+
+void Cursor::drawCursor(Renderer &renderer, const DirectX::XMMATRIX &mvp) {
+    renderer.draw(cursorVertices, LineList, mvp, DEFAULT_COLOR);
+}
+
 Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
         : Object("Cursor", position),
           _screenPosition(screenPosition),
@@ -18,7 +31,7 @@ Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
 
 void Cursor::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
     auto mvp = modelMatrix() * view * projection;
-    renderer.drawCursor(mvp);
+    renderer.draw(cursorVertices, LineList, mvp, DEFAULT_COLOR);
 }
 
 Type Cursor::type() const {
@@ -57,5 +70,7 @@ void Cursor::updateScreenPosition() {
 }
 
 BoundingOrientedBox Cursor::boundingBox() const {
-    return {{}, {}, {0, 0, 0, 1.f}};
+    return {{},
+            {},
+            {0, 0, 0, 1.f}};
 }

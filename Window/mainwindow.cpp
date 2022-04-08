@@ -2,8 +2,8 @@
 #include "./ui_mainwindow.h"
 #include "Objects/Torus/torus.h"
 #include "Objects/Point/point.h"
-#include "Objects/BrezierC0/brezierC0.h"
-#include "Objects/BrezierC2/brezierC2.h"
+#include "Objects/Brezier/brezierC0.h"
+#include "Objects/Brezier/brezierC2.h"
 #include "Objects/CompositeObject/compositeObject.h"
 
 using namespace std;

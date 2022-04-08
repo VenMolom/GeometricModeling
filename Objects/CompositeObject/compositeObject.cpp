@@ -5,7 +5,7 @@
 #include "compositeObject.h"
 
 #include <utility>
-#include <DirectXMath.h>
+#include <Objects/Cursor/cursor.h>
 
 using namespace std;
 using namespace DirectX;
@@ -57,7 +57,7 @@ CompositeObject::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMAT
     for (auto &object: objects) {
         object->draw(renderer, view, projection, NO_CURSOR);
     }
-    renderer.drawCursor(XMLoadFloat4x4(&noScaleMatrix) * view * projection);
+    Cursor::drawCursor(renderer, XMLoadFloat4x4(&noScaleMatrix) * view * projection);
 }
 
 Type CompositeObject::type() const {

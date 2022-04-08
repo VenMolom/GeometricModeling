@@ -6,9 +6,5 @@ cbuffer cbColor: register(b0) {
 
 float4 main(VSOut i) : SV_TARGET
 {
-    if (color.w != 0.0f) {
-        return color;
-    } else {
-	    return i.col;
-    }
+    return float4(color.rgb * color.a + i.col.rgb * (1 - color.a), 1.0f);
 }

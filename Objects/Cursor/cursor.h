@@ -12,6 +12,8 @@
 
 class Cursor : public Object {
 public:
+    static void drawCursor(Renderer &renderer, const DirectX::XMMATRIX &mvp);
+
     Cursor(DirectX::XMFLOAT3 position, DirectX::XMINT2 screenPosition, Camera &camera);
 
     void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
@@ -27,6 +29,8 @@ public:
     DirectX::BoundingOrientedBox boundingBox() const override;
 
 private:
+    const static std::vector<VertexPositionColor> cursorVertices;
+
     Camera &camera;
 
     QProperty<DirectX::XMINT2> _screenPosition;

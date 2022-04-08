@@ -15,8 +15,6 @@
 #undef max
 #undef min
 
-#define CLEAR_COLOR {0.2f, 0.2f, 0.2f, 1.0f}
-
 class DxRenderer : public QWidget, public Renderer {
     Q_OBJECT
 
@@ -29,21 +27,16 @@ public:
 
     void setStatusBar(QStatusBar *bar) { statusBar = bar; }
 
-    void drawLines(const std::vector<VertexPositionColor> &vertices,
-                   const std::vector<Index> &indices,
-                   const DirectX::XMMATRIX &mvp, bool selected) override;
+    void drawIndexed(const std::vector<VertexPositionColor> &vertices, const std::vector<Index> &indices,
+                     Topology topology, const DirectX::XMMATRIX &mvp, DirectX::XMFLOAT4 colorOverride) override;
 
-    void drawCursor(const DirectX::XMMATRIX &mvp) override;
-
-    void drawPoint(const DirectX::XMMATRIX &mvp, bool selected) override;
+    void draw(const std::vector<VertexPositionColor> &points, Topology topology,
+              const DirectX::XMMATRIX &mvp, DirectX::XMFLOAT4 colorOverride) override;
 
     void drawCurve4(const std::vector<VertexPositionColor> &controlPoints,
                     const std::vector<Index> &indices, int lastPatchSize,
                     DirectX::XMVECTOR min, DirectX::XMVECTOR max,
-                    const DirectX::XMMATRIX &mvp, bool selected) override;
-
-    void
-    drawLineStrip(const std::vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp, bool selected) override;
+                    const DirectX::XMMATRIX &mvp, DirectX::XMFLOAT4 colorOverride) override;
 
     QPaintEngine *paintEngine() const override;
 
@@ -81,13 +74,6 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_vertexBuffer;
     mini::dx_ptr<ID3D11Buffer> m_indexBuffer;
 
-    mini::dx_ptr<ID3D11Buffer> m_pointVertexBuffer;
-    mini::dx_ptr<ID3D11Buffer> m_pointIndexBuffer;
-    size_t pointBufferSize;
-
-    mini::dx_ptr<ID3D11Buffer> m_cursorBuffer;
-    size_t cursorBufferSize;
-
     mini::dx_ptr<ID3D11VertexShader> m_vertexShader;
     mini::dx_ptr<ID3D11HullShader> m_hullShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainShader;
@@ -100,9 +86,7 @@ private:
 
     LARGE_INTEGER currentTicks, ticksPerSecond;
 
-    const DirectX::XMFLOAT4 SELECTED_COLOR{1.0f, 0.4f, 0.0f, 1.0f};
-    const DirectX::XMFLOAT4 DEFAULT_COLOR{0.0f, 0.0f, 0.0f, 0.0f};
-    const DirectX::XMFLOAT4 POLYGONAL_COLOR{0.0f, 1.0f, 1.0f, 1.0f};
+    const float CLEAR_COLOR[4] {0.2f, 0.2f, 0.2f, 1.0f};
 
     void init3D3();
 

@@ -7,7 +7,7 @@
 
 #include <DirectXMath.h>
 #include "Utils/Utils3D.h"
-#include "Objects/BrezierCurve/brezierCurve.h"
+#include "brezierCurve.h"
 #include "Objects/VirtualPoint/virtualPoint.h"
 #include "Objects/VirtualPointsHolder/virtualPointsHolder.h"
 

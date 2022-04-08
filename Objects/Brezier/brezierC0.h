@@ -5,7 +5,7 @@
 #ifndef MG1_BREZIERC0_H
 #define MG1_BREZIERC0_H
 
-#include "Objects/BrezierCurve/brezierCurve.h"
+#include "brezierCurve.h"
 
 class BrezierC0 : public BrezierCurve {
 public:

@@ -51,10 +51,6 @@ private:
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
 
-    // TODO: Brezier C2
-    // TODO: Show virtual points (selectable)
-    // TODO: Edition of virtual Bernstein points
-
     // TODO: add grid (if possible)
 };
 

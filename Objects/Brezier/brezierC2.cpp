@@ -34,7 +34,8 @@ void BrezierC2::drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawTyp
         BrezierCurve::drawPolygonal(renderer, mvp, drawType);
     }
     if (!_bernsteinBase || _bothPolygonals) {
-        renderer.drawLineStrip(bSplineVertices, mvp, drawType != DEFAULT);
+        renderer.draw(bSplineVertices, LineStrip, mvp,
+                      drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
     }
 
 }

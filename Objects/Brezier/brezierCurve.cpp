@@ -52,7 +52,7 @@ void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, 
     auto mvp = view * projection;
     renderer.drawCurve4(vertices, indices, lastPatchSize,
                         XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
-                        drawType != DEFAULT);
+                        drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 
     if (_polygonal) {
         drawPolygonal(renderer, mvp, drawType);
@@ -60,7 +60,7 @@ void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, 
 }
 
 void BrezierCurve::drawPolygonal(Renderer &renderer, XMMATRIX mvp, DrawType drawType) {
-    renderer.drawLineStrip(vertices, mvp, drawType != DEFAULT);
+    renderer.draw(vertices, LineStrip, mvp, drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
 }
 
 BoundingOrientedBox BrezierCurve::boundingBox() const {

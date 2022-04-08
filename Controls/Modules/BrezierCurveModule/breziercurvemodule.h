@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QTableWidgetItem>
-#include "Objects/BrezierCurve/brezierCurve.h"
+#include "Objects/Brezier/brezierCurve.h"
 
 namespace Ui {
 class BrezierCurveModule;

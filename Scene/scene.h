@@ -10,7 +10,7 @@
 #include <DirectXMath.h>
 #include "Objects/Cursor/cursor.h"
 #include "Objects/Point/point.h"
-#include "Objects/BrezierC0/brezierC0.h"
+#include "Objects/Brezier/brezierC0.h"
 #include "Objects/CompositeObject/compositeObject.h"
 #include "Objects/VirtualPointsHolder/virtualPointsHolder.h"
 

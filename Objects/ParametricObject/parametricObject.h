@@ -10,6 +10,7 @@
 #include <functional>
 #include <DirectXMath.h>
 #include "Objects/Object/object.h"
+#include "Objects/Cursor/cursor.h"
 
 template<size_t Dim>
 class ParametricObject : public Object {
@@ -61,8 +62,11 @@ template<size_t Dim>
 void ParametricObject<Dim>::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
                                  DrawType drawType) {
     auto mvp = modelMatrix() * view * projection;
-    renderer.drawLines(vertices, indices, mvp, drawType != DEFAULT);
-    if (drawType == SELECTED) renderer.drawCursor(DirectX::XMLoadFloat4x4(&noScaleMatrix) * view * projection);
+    renderer.drawIndexed(vertices, indices, LineList, mvp,
+                         drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+    if (drawType == SELECTED) {
+        Cursor::drawCursor(renderer, DirectX::XMLoadFloat4x4(&noScaleMatrix) * view * projection);
+    }
 }
 
 template<size_t Dim>

@@ -3,7 +3,7 @@
 
 #include "Objects/Torus/torus.h"
 #include "Objects/Cursor/cursor.h"
-#include "Objects/BrezierC2/brezierC2.h"
+#include "Objects/Brezier/brezierC2.h"
 
 #include "Controls/Modules/MoveModule/movemodule.h"
 #include "Controls/Modules/TorusModule/torusmodule.h"

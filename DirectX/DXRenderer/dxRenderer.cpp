@@ -14,8 +14,7 @@ DxRenderer::DxRenderer(QWidget *parent) : m_device(this),
 }
 
 void DxRenderer::renderScene() {
-    float clearColor[] = CLEAR_COLOR;
-    m_device.context()->ClearRenderTargetView(m_backBuffer.get(), clearColor);
+    m_device.context()->ClearRenderTargetView(m_backBuffer.get(), CLEAR_COLOR);
 
     m_device.context()->ClearDepthStencilView(
             m_depthBuffer.get(),
@@ -34,16 +33,33 @@ void DxRenderer::renderScene() {
     }
 }
 
-void DxRenderer::setScene(std::shared_ptr<Scene> scenePtr) {
+void DxRenderer::setScene(shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
     this->inputHandler.setScene(scene);
 }
 
-void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
-                           const vector<Index> &indices,
-                           const DirectX::XMMATRIX &mvp, bool selected) {
+void DxRenderer::draw(const vector<VertexPositionColor> &points, Topology topology,
+                      const XMMATRIX &mvp, XMFLOAT4 colorOverride) {
     updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, selected ? SELECTED_COLOR : DEFAULT_COLOR);
+    updateBuffer(m_cbColor, colorOverride);
+
+    // set vertex buffer
+    m_vertexBuffer = m_device.CreateVertexBuffer(points);
+    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+    UINT strides[] = {sizeof(VertexPositionColor)};
+    UINT offsets[] = {0};
+    m_device.context()->IASetVertexBuffers(
+            0, 1, vbs, strides, offsets);
+
+    // draw topology
+    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)topology);
+    m_device.context()->Draw(points.size(), 0);
+}
+
+void DxRenderer::drawIndexed(const vector<VertexPositionColor> &vertices, const vector<Index> &indices,
+                             Topology topology, const XMMATRIX &mvp, XMFLOAT4 colorOverride) {
+    updateBuffer(m_cbMVP, mvp);
+    updateBuffer(m_cbColor, colorOverride);
 
     // set vertex and index buffers
     m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
@@ -55,50 +71,17 @@ void DxRenderer::drawLines(const vector<VertexPositionColor> &vertices,
             0, 1, vbs, strides, offsets);
     m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
 
-    // draw lines
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    // draw topology
+    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)topology);
     m_device.context()->DrawIndexed(indices.size(), 0, 0);
 }
 
-void DxRenderer::drawCursor(const DirectX::XMMATRIX &mvp) {
-    updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, DEFAULT_COLOR);
-
-    // set vertex
-    ID3D11Buffer *vbs[] = {m_cursorBuffer.get()};
-    UINT strides[] = {sizeof(VertexPositionColor)};
-    UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(
-            0, 1, vbs, strides, offsets);
-
-    // draw lines
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    m_device.context()->Draw(cursorBufferSize, 0);
-}
-
-void DxRenderer::drawPoint(const DirectX::XMMATRIX &mvp, bool selected) {
-    updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, selected ? SELECTED_COLOR : DEFAULT_COLOR);
-
-    // set vertex
-    ID3D11Buffer *vbs[] = {m_pointVertexBuffer.get()};
-    UINT strides[] = {sizeof(VertexPositionColor)};
-    UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(
-            0, 1, vbs, strides, offsets);
-    m_device.context()->IASetIndexBuffer(m_pointIndexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
-
-    // draw lines
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-    m_device.context()->DrawIndexed(pointBufferSize, 0, 0);
-}
-
 void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
-                            const std::vector<Index> &indices, int lastPatchSize,
+                            const vector<Index> &indices, int lastPatchSize,
                             XMVECTOR min, XMVECTOR max,
-                            const DirectX::XMMATRIX &mvp, bool selected) {
+                            const XMMATRIX &mvp, XMFLOAT4 colorOverride) {
     updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, selected ? SELECTED_COLOR : DEFAULT_COLOR);
+    updateBuffer(m_cbColor, colorOverride);
 
     // set vertex buffer
     m_vertexBuffer = m_device.CreateVertexBuffer(controlPoints);
@@ -136,30 +119,12 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
     }
     updateBuffer(m_cbTesselation, tesselationAmount);
 
-    // draw lines
+    // draw patches
     m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
     m_device.context()->DrawIndexed(indexCount, 0, 0);
 
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
-}
-
-void DxRenderer::drawLineStrip(const vector<VertexPositionColor> &points,
-                               const DirectX::XMMATRIX &mvp, bool selected) {
-    updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, selected ? POLYGONAL_COLOR : DEFAULT_COLOR);
-
-    // set vertex buffer
-    m_vertexBuffer = m_device.CreateVertexBuffer(points);
-    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
-    UINT strides[] = {sizeof(VertexPositionColor)};
-    UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(
-            0, 1, vbs, strides, offsets);
-
-    // draw lines
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-    m_device.context()->Draw(points.size(), 0);
 }
 
 template<typename T>
@@ -285,30 +250,6 @@ void DxRenderer::init3D3() {
     m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
-
-    std::vector<VertexPositionColor> cursorVertices = {
-            {{0, 0, 0}, {1, 0, 0}},
-            {{1, 0, 0}, {1, 0, 0}},
-            {{0, 0, 0}, {0, 1, 0}},
-            {{0, 1, 0}, {0, 1, 0}},
-            {{0, 0, 0}, {0, 0, 1}},
-            {{0, 0, 1}, {0, 0, 1}}
-    };
-    m_cursorBuffer = m_device.CreateVertexBuffer(cursorVertices);
-    cursorBufferSize = cursorVertices.size();
-
-    vector<VertexPositionColor> pointVertices = {
-            {{1,  1,  0}, {1, 1, 1}},
-            {{-1, 1,  0}, {1, 1, 1}},
-            {{-1, -1, 0}, {1, 1, 1}},
-            {{1,  -1, 0}, {1, 1, 1}}
-    };
-    vector<Index> pointIndices = {
-            0, 1, 2, 3, 0, 2, 1, 3
-    };
-    m_pointVertexBuffer = m_device.CreateVertexBuffer(pointVertices);
-    m_pointIndexBuffer = m_device.CreateIndexBuffer(pointIndices);
-    pointBufferSize = pointIndices.size();
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);
