@@ -2,7 +2,7 @@
 #define TORUSMODULE_H
 
 #include <QWidget>
-#include "Objects/Torus/torus.h"
+#include "Objects/Parametric/torus.h"
 
 namespace Ui {
 class TorusModule;

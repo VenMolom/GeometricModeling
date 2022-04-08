@@ -38,6 +38,8 @@ public:
                     DirectX::XMVECTOR min, DirectX::XMVECTOR max,
                     const DirectX::XMMATRIX &mvp, DirectX::XMFLOAT4 colorOverride) override;
 
+    void drawGrid(const std::vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp) override;
+
     QPaintEngine *paintEngine() const override;
 
     void handleKeyEvent(QKeyEvent *event);
@@ -78,11 +80,13 @@ private:
     mini::dx_ptr<ID3D11HullShader> m_hullShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
+    mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
     mini::dx_ptr<ID3D11InputLayout> m_layout;
 
     mini::dx_ptr<ID3D11Buffer> m_cbMVP;
     mini::dx_ptr<ID3D11Buffer> m_cbColor;
     mini::dx_ptr<ID3D11Buffer> m_cbTesselation;
+    mini::dx_ptr<ID3D11Buffer> m_cbFarPlane;
 
     LARGE_INTEGER currentTicks, ticksPerSecond;
 

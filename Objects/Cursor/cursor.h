@@ -6,8 +6,8 @@
 #define MG1_CURSOR_H
 
 #include <DirectXMath.h>
-#include "Objects/Object/object.h"
-#include "Camera/camera.h"
+#include "Objects/object.h"
+#include "camera.h"
 #include "Utils/Utils3D.h"
 
 class Cursor : public Object {

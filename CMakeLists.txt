@@ -21,19 +21,19 @@ find_library(D3D11_LIBRARY d3d11.lib)
 
 set(PROJECT_SOURCES
         main.cpp
-        Window/mainwindow.cpp Window/mainwindow.h Window/mainwindow.ui
-        Scene/scene.cpp Scene/scene.h
-        Objects/Object/object.cpp Objects/Object/object.h
-        Camera/camera.cpp Camera/camera.h
+        mainwindow.cpp mainwindow.h mainwindow.ui
+        scene.cpp scene.h
+        Objects/object.cpp Objects/object.h
+        camera.cpp camera.h
         Controls/controls.h Controls/controls.cpp Controls/controls.ui
         DirectX/DXRenderer/dxRenderer.cpp DirectX/DXRenderer/dxRenderer.h
         DirectX/DXDevice/dxDevice.cpp DirectX/DXDevice/dxDevice.h
         DirectX/DXDevice/dxptr.h
         DirectX/DXStructures/dxStructures.cpp DirectX/DXStructures/dxStructures.h
         DirectX/DXDevice/exceptions.cpp DirectX/DXDevice/exceptions.h
-        Renderer/Renderer.h
-        Objects/ParametricObject/parametricObject.h
-        Objects/Torus/torus.cpp Objects/Torus/torus.h
+        DirectX/Renderer.h
+        Objects/Parametric/parametricObject.h
+        Objects/Parametric/torus.cpp Objects/Parametric/torus.h
         Resources.qrc Handlers/inputHandler.cpp Handlers/inputHandler.h
         Objects/Cursor/cursor.cpp Objects/Cursor/cursor.h
         Utils/Utils3D.h Utils/Utils3D.cpp
@@ -58,15 +58,16 @@ set(PROJECT_SOURCES
         Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
         Controls/Modules/ScreenMoveModule/screenmovemodule.ui
         Controls/Modules/BSplineModule/bsplinemodule.h Controls/Modules/BSplineModule/bsplinemodule.cpp
-        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/VirtualPoint/virtualPoint.cpp Objects/VirtualPoint/virtualPoint.h Objects/VirtualPointsHolder/virtualPointsHolder.h)
+        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h Objects/Point/virtualPointsHolder.h Objects/Grid/grid.cpp Objects/Grid/grid.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
 
-set(HLSL_SHADER_FILES Shader/ps.hlsl Shader/vs.hlsl Shader/hs.hlsl Shader/ds.hlsl)
+set(HLSL_SHADER_FILES Shader/ps.hlsl Shader/vs.hlsl Shader/hs.hlsl Shader/ds.hlsl Shader/psCameraFade.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
+set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hs.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/ds.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")

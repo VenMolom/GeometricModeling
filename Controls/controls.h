@@ -2,7 +2,7 @@
 #define CONTROLLS_H
 
 #include <QPushButton>
-#include "Scene/scene.h"
+#include "scene.h"
 
 namespace Ui {
     class Controls;

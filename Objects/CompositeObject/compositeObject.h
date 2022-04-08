@@ -6,7 +6,7 @@
 #define MG1_COMPOSITEOBJECT_H
 
 #include <DirectXMath.h>
-#include "Objects/Object/object.h"
+#include "Objects/object.h"
 
 class CompositeObject : public Object{
 public:

@@ -8,7 +8,12 @@ using namespace DirectX;
 using namespace Utils3D;
 using namespace std;
 
-void Scene::draw(Renderer &renderer) const {
+Scene::Scene()
+        : _camera(), grid(100), virtualPointsHolders(), _objects(), _selected() {
+    camera().rotate({0, 200.0f});
+}
+
+void Scene::draw(Renderer &renderer) {
     if (composite) {
         composite->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), SELECTED);
     }
@@ -20,7 +25,7 @@ void Scene::draw(Renderer &renderer) const {
         object->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(),
                      a == object.get() ? SELECTED : DEFAULT);
     }
-
+    grid.draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), DEFAULT);
 }
 
 void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
@@ -51,7 +56,7 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
     emit objectAdded(_objects.back(), select);
 }
 
-void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
+void Scene::addComposite(list <shared_ptr<Object>> &&objects) {
     _objects.remove_if([&objects](const shared_ptr<Object> &ob) {
         return find_if(objects.begin(), objects.end(),
                        [&ob](const shared_ptr<Object> &obb) { return ob->equals(obb); }) != objects.end();
@@ -113,7 +118,7 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
                     obs.push_back(object);
                     addComposite(std::move(obs));
                 } else {
-                    list<shared_ptr<Object>> obs = {sel, object};
+                    list <shared_ptr<Object>> obs = {sel, object};
                     addComposite(std::move(obs));
                 }
             }
@@ -169,10 +174,10 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
         }
     }
 
-    virtualPointsHolders.remove_if([] (weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
-    for (auto &holder : virtualPointsHolders) {
+    virtualPointsHolders.remove_if([](weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
+    for (auto &holder: virtualPointsHolders) {
         auto points = holder.lock()->virtualPoints();
-        for (auto &point : points) {
+        for (auto &point: points) {
             float distance{};
             if (point->boundingBox().Intersects(XMLoadFloat3(&ray.position), XMLoadFloat3(&ray.direction), distance) &&
                 distance < closestDistance) {

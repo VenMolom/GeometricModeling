@@ -6,7 +6,7 @@
 #define MG1_BREZIERCURVE_H
 
 #include <DirectXMath.h>
-#include "Objects/Object/object.h"
+#include "Objects/object.h"
 #include "Objects/Point/point.h"
 
 enum Direction {

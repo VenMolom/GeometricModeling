@@ -6,7 +6,7 @@
 #define MG1_INPUTHANDLER_H
 
 #include <QWheelEvent>
-#include "Scene/scene.h"
+#include "scene.h"
 
 #define PAN_BUTTON Qt::MouseButton::MiddleButton
 #define MAIN_BUTTON Qt::MouseButton::LeftButton

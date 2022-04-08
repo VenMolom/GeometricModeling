@@ -29,6 +29,8 @@ public:
                       const DirectX::XMMATRIX &mvp,
                       DirectX::XMFLOAT4 colorOverride) = 0;
 
+    virtual void drawGrid(const std::vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp) = 0;
+
     virtual void drawCurve4(const std::vector<VertexPositionColor> &controlPoints,
                             const std::vector<Index> &indices, int lastPatchSize,
                             DirectX::XMVECTOR min, DirectX::XMVECTOR max,

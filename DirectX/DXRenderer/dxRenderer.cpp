@@ -21,10 +21,10 @@ void DxRenderer::renderScene() {
             D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     ID3D11Buffer *vsCbs[] = {m_cbMVP.get()};
-    ID3D11Buffer *psCbs[] = {m_cbColor.get()};
+    ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
     m_device.context()->VSSetConstantBuffers(0, 1, vsCbs);
-    m_device.context()->PSSetConstantBuffers(0, 1, psCbs);
+    m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
     m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
     m_device.context()->IASetInputLayout(m_layout.get());
 
@@ -125,6 +125,28 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
 
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
+}
+
+void DxRenderer::drawGrid(const vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp) {
+    updateBuffer(m_cbMVP, mvp);
+    updateBuffer(m_cbColor, CLEAR_COLOR);
+    updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera().farZ(), 0, 0, 0});
+
+    m_device.context()->PSSetShader(m_pixelFadeShader.get(), nullptr, 0);
+
+    // set vertex buffer
+    m_vertexBuffer = m_device.CreateVertexBuffer(points);
+    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+    UINT strides[] = {sizeof(VertexPositionColor)};
+    UINT offsets[] = {0};
+    m_device.context()->IASetVertexBuffers(
+            0, 1, vbs, strides, offsets);
+
+    // draw topology
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    m_device.context()->Draw(points.size(), 0);
+
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
 template<typename T>
@@ -230,10 +252,12 @@ void DxRenderer::init3D3() {
     const auto hsBytes = DxDevice::LoadByteCode(L"hs.cso");
     const auto dsBytes = DxDevice::LoadByteCode(L"ds.cso");
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
+    const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
     m_hullShader = m_device.CreateHullShader(hsBytes);
     m_domainShader = m_device.CreateDomainShader(dsBytes);
     m_pixelShader = m_device.CreatePixelShader(psBytes);
+    m_pixelFadeShader = m_device.CreatePixelShader(psFadeBytes);
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
@@ -250,6 +274,7 @@ void DxRenderer::init3D3() {
     m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
+    m_cbFarPlane = m_device.CreateConstantBuffer<XMFLOAT4>();
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);

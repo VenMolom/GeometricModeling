@@ -7,8 +7,8 @@
 
 
 #include <qlistwidget.h>
-#include "Objects/Object/object.h"
-#include "Scene/scene.h"
+#include "Objects/object.h"
+#include "scene.h"
 
 class ObjectListItem : public QListWidgetItem {
 public:

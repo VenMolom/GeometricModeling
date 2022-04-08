@@ -2,7 +2,7 @@
 #define PARAMETRICMODULE_H
 
 #include <QWidget>
-#include "Objects/ParametricObject/parametricObject.h"
+#include "Objects/Parametric/parametricObject.h"
 #include "ui_parametricmodule.h"
 
 namespace Ui {

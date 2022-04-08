@@ -9,7 +9,7 @@
 #include <array>
 #include <functional>
 #include <DirectXMath.h>
-#include "Objects/Object/object.h"
+#include "Objects/object.h"
 #include "Objects/Cursor/cursor.h"
 
 template<size_t Dim>

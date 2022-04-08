@@ -1,7 +1,7 @@
 #include "controls.h"
 #include "ui_controls.h"
 
-#include "Objects/Torus/torus.h"
+#include "Objects/Parametric/torus.h"
 #include "Objects/Cursor/cursor.h"
 #include "Objects/Brezier/brezierC2.h"
 

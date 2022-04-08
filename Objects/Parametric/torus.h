@@ -5,7 +5,7 @@
 #ifndef MG1_TORUS_H
 #define MG1_TORUS_H
 
-#include "Objects/ParametricObject/parametricObject.h"
+#include "parametricObject.h"
 
 #define DIM 2
 

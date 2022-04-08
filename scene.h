@@ -12,13 +12,14 @@
 #include "Objects/Point/point.h"
 #include "Objects/Brezier/brezierC0.h"
 #include "Objects/CompositeObject/compositeObject.h"
-#include "Objects/VirtualPointsHolder/virtualPointsHolder.h"
+#include "Objects/Point/virtualPointsHolder.h"
+#include "Objects/Grid/grid.h"
 
 class Scene : public QObject {
     Q_OBJECT
 
 public:
-    explicit Scene() = default;
+    explicit Scene();
 
     void addObject(std::shared_ptr<Object> &&object, bool overrideCursor = false);
 
@@ -34,7 +35,7 @@ public:
 
     void centerSelected();
 
-    void draw(Renderer &renderer) const;
+    void draw(Renderer &renderer);
 
     Camera &camera() { return _camera; }
 
@@ -55,6 +56,7 @@ private:
     std::list<std::weak_ptr<VirtualPointsHolder>> virtualPointsHolders;
     // TODO: look into removing composite to reduce complexity
     Camera _camera;
+    Grid grid;
 
     Utils3D::XMFLOAT3RAY getRayFromScreenPosition(DirectX::XMINT2 screenPosition) const;
 

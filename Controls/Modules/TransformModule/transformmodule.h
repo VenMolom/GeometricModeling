@@ -2,7 +2,7 @@
 #define TRANSFORMMODULE_H
 
 #include <QWidget>
-#include "Objects/Object/object.h"
+#include "Objects/object.h"
 
 namespace Ui {
 class TransformModule;

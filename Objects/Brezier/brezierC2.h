@@ -8,8 +8,8 @@
 #include <DirectXMath.h>
 #include "Utils/Utils3D.h"
 #include "brezierCurve.h"
-#include "Objects/VirtualPoint/virtualPoint.h"
-#include "Objects/VirtualPointsHolder/virtualPointsHolder.h"
+#include "Objects/Point/virtualPoint.h"
+#include "Objects/Point/virtualPointsHolder.h"
 
 class BrezierC2 : public BrezierCurve, public VirtualPointsHolder {
 public:

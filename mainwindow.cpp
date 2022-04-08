@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "Objects/Torus/torus.h"
+#include "Objects/Parametric/torus.h"
 #include "Objects/Point/point.h"
 #include "Objects/Brezier/brezierC0.h"
 #include "Objects/Brezier/brezierC2.h"

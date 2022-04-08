@@ -6,7 +6,7 @@
 #define MG1_POINT_H
 
 #include <DirectXMath.h>
-#include "Objects/Object/object.h"
+#include "Objects/object.h"
 
 class Point : public Object {
 public:

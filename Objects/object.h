@@ -12,8 +12,8 @@
 #include <DirectXMath.h>
 #include "DirectX/DXDevice/dxptr.h"
 #include "DirectX/DXStructures/dxStructures.h"
-#include "Renderer/Renderer.h"
-#include "Camera/camera.h"
+#include "DirectX/Renderer.h"
+#include "camera.h"
 
 enum Type {
     CURSOR = 1 << 0,
@@ -23,6 +23,7 @@ enum Type {
     BREZIERC0 = 1 << 4,
     BREZIERC2 = 1 << 5,
     VIRTUALPOINT3D = 1 << 6,
+    GRID = 1 << 7,
     BREZIERCURVE = BREZIERC0 | BREZIERC2,
     MOVEABLE = POINT3D | TORUS | COMPOSITE | CURSOR | VIRTUALPOINT3D,
     NAMEABLE = POINT3D | TORUS | BREZIERCURVE,

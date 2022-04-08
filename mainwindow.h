@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QModelIndexList>
-#include "Scene/scene.h"
+#include "scene.h"
 #include "Objects/ObjectListItem/objectListItem.h"
 
 QT_BEGIN_NAMESPACE

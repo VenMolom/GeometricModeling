@@ -5,7 +5,7 @@
 #ifndef MG1_VIRTUALPOINTSHOLDER_H
 #define MG1_VIRTUALPOINTSHOLDER_H
 
-#include "Objects/VirtualPoint/virtualPoint.h"
+#include "virtualPoint.h"
 
 class VirtualPointsHolder {
 public:
