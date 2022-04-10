@@ -52,18 +52,6 @@ DrawType {
 };
 
 class Object {
-protected:
-    QProperty<DirectX::XMFLOAT3> _position;
-    QProperty<DirectX::XMFLOAT3> _rotation{{0, 0, 0}};
-    QProperty<DirectX::XMFLOAT3> _scale{{1, 1, 1}};
-    QProperty<QString> _name;
-
-    DirectX::XMFLOAT4X4 noScaleMatrix;
-    DirectX::XMFLOAT4X4 rotationMatrix;
-    DirectX::XMFLOAT4X4 scaleMatrix;
-
-    Object(QString name, DirectX::XMFLOAT3 position);
-
 public:
     Object(Object &object) = default;
 
@@ -102,6 +90,18 @@ public:
     virtual Type type() const = 0;
 
     virtual DirectX::BoundingOrientedBox boundingBox() const = 0;
+
+protected:
+    QProperty<DirectX::XMFLOAT3> _position;
+    QProperty<DirectX::XMFLOAT3> _rotation{{0, 0, 0}};
+    QProperty<DirectX::XMFLOAT3> _scale{{1, 1, 1}};
+    QProperty<QString> _name;
+
+    DirectX::XMFLOAT4X4 noScaleMatrix;
+    DirectX::XMFLOAT4X4 rotationMatrix;
+    DirectX::XMFLOAT4X4 scaleMatrix;
+
+    Object(QString name, DirectX::XMFLOAT3 position);
 
 private:
     DirectX::XMFLOAT4X4 model;
