@@ -21,10 +21,12 @@ Grid::Grid(int n) : Object("Grid", {0, 0, 0}) {
         vertices.push_back({{x, 0.0f, -0.5f}, color});
         vertices.push_back({{x, 0.0f, 0.5f}, color});
     }
+    auto size = static_cast<float>(n);
+    Object::setScale({size, 1, size});
 }
 
 void Grid::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    renderer.drawGrid(vertices, XMMatrixScaling(500.0f, 0, 500.0f) * view * projection);
+    renderer.drawGrid(vertices, modelMatrix() * view * projection);
 }
 
 Type Grid::type() const {

@@ -41,8 +41,6 @@ void BrezierCurve::removePoint(int index) {
 }
 
 void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    if (!canDraw) return;
-
     for (auto &point: _points) {
         if (!point.lock()) {
             updatePoints();
@@ -50,13 +48,15 @@ void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, 
         }
     }
     auto mvp = view * projection;
-    renderer.drawCurve4(vertices, indices, lastPatchSize,
-                        XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
-                        drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 
     if (_polygonal) {
         drawPolygonal(renderer, mvp, drawType);
     }
+
+    if (!canDraw) return;
+    renderer.drawCurve4(vertices, indices, lastPatchSize,
+                        XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
+                        drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 }
 
 void BrezierCurve::drawPolygonal(Renderer &renderer, XMMATRIX mvp, DrawType drawType) {

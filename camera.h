@@ -67,7 +67,7 @@ private:
     float yaw{DirectX::XM_PIDIV2};
     float pitch{0};
     float _near{0.1f};
-    float _far{200.0f};
+    float _far{100.0f};
 
     void calculateView();
 

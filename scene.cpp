@@ -9,7 +9,7 @@ using namespace Utils3D;
 using namespace std;
 
 Scene::Scene()
-        : _camera(), grid(100), virtualPointsHolders(), _objects(), _selected() {
+        : _camera(), grid(500), virtualPointsHolders(), _objects(), _selected() {
     camera().rotate({0, 200.0f});
 }
 
