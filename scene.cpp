@@ -14,6 +14,7 @@ Scene::Scene()
 }
 
 void Scene::draw(Renderer &renderer) {
+    grid.draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), DEFAULT);
     if (composite) {
         composite->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), SELECTED);
     }
@@ -25,7 +26,6 @@ void Scene::draw(Renderer &renderer) {
         object->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(),
                      a == object.get() ? SELECTED : DEFAULT);
     }
-    grid.draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), DEFAULT);
 }
 
 void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
@@ -103,12 +103,12 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
     if (auto object = findIntersectingObject(ray)) {
         shared_ptr<Object> sel;
 
-        if (multiple && (sel = _selected.value().lock()) && object->type() & COMPOSABLE && sel->type() & COMPOSABLE) {
+        if (multiple && (sel = _selected.value().lock()) && object->type() & COMPOSABLE) {
             if (sel->type() & BREZIERCURVE && object->type() & POINT3D) {
                 auto *c = dynamic_cast<BrezierCurve *>(sel.get());
                 shared_ptr<Point> p = static_pointer_cast<Point>(object);
                 c->addPoint(p);
-            } else if (sel.get() != object.get()) {
+            } else if (sel->type() & COMPOSABLE && sel.get() != object.get()) {
                 if (composite) {
                     auto comp = dynamic_cast<CompositeObject *>(composite.get());
 
@@ -121,6 +121,8 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
                     list <shared_ptr<Object>> obs = {sel, object};
                     addComposite(std::move(obs));
                 }
+            } else {
+                setSelected(object);
             }
         } else {
             setSelected(object);

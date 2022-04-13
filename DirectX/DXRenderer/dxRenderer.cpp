@@ -128,6 +128,7 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
 }
 
 void DxRenderer::drawGrid(const vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp) {
+    // TODO: disable depth write
     updateBuffer(m_cbMVP, mvp);
     updateBuffer(m_cbColor, CLEAR_COLOR);
     updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera().farZ(), 0, 0, 0});
