@@ -60,16 +60,19 @@ void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool selec
 }
 
 void MainWindow::updateSelection() {
-    // TODO: delete is not being disabled in all cases
     shared_ptr<Object> selected;
     if (!(selected = scene->selected().lock())) {
         ui->objectsList->clearSelection();
+        ui->deleteObject->setEnabled(false);
+        ui->centerObject->setEnabled(false);
         return;
     }
 
     QSignalBlocker blocker(ui->objectsList);
     if (selected->type() & VIRTUAL) {
         ui->objectsList->clearSelection();
+        ui->deleteObject->setEnabled(false);
+        ui->centerObject->setEnabled(false);
         return;
     }
 
