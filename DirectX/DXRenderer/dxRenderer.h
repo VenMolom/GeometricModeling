@@ -88,6 +88,8 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_cbTesselation;
     mini::dx_ptr<ID3D11Buffer> m_cbFarPlane;
 
+    mini::dx_ptr<ID3D11DepthStencilState> m_dssNoDepthWrite;
+
     LARGE_INTEGER currentTicks, ticksPerSecond;
 
     const float CLEAR_COLOR[4] {0.2f, 0.2f, 0.2f, 1.0f};

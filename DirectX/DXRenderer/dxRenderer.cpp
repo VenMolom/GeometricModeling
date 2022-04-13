@@ -128,7 +128,6 @@ void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
 }
 
 void DxRenderer::drawGrid(const vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp) {
-    // TODO: disable depth write
     updateBuffer(m_cbMVP, mvp);
     updateBuffer(m_cbColor, CLEAR_COLOR);
     updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera().farZ(), 0, 0, 0});
@@ -144,10 +143,12 @@ void DxRenderer::drawGrid(const vector<VertexPositionColor> &points, const Direc
             0, 1, vbs, strides, offsets);
 
     // draw topology
+    m_device.context()->OMSetDepthStencilState(m_dssNoDepthWrite.get(), 0);
     m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
     m_device.context()->Draw(points.size(), 0);
 
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+    m_device.context()->OMSetDepthStencilState(nullptr, 0);
 }
 
 template<typename T>
@@ -276,6 +277,10 @@ void DxRenderer::init3D3() {
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
     m_cbFarPlane = m_device.CreateConstantBuffer<XMFLOAT4>();
+
+    DepthStencilDescription dssDesc;
+    dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    m_dssNoDepthWrite = m_device.CreateDepthStencilState(dssDesc);
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);

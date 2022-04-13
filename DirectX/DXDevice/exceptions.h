@@ -183,6 +183,11 @@ namespace mini
 #define THROW_WINAPI throw mini::WinAPIException(__AT__)
 
 /**************************************************************************//*!
+ * Throws a WinAPIException.
+ *****************************************************************************/
+#define THROW_DX(hr) throw mini::WinAPIException(__AT__, hr)
+
+/**************************************************************************//*!
  * Throws a CustomException with a given message.
  *****************************************************************************/
 #define THROW(message) throw mini::CustomException(__AT__, message)
