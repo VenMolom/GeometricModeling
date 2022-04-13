@@ -49,7 +49,7 @@ void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, 
     }
     auto mvp = view * projection;
 
-    if (_polygonal) {
+    if (_polygonal && !vertices.empty()) {
         drawPolygonal(renderer, mvp, drawType);
     }
 

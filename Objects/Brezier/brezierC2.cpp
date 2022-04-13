@@ -33,7 +33,7 @@ void BrezierC2::drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawTyp
     if (_bernsteinBase || _bothPolygonals) {
         BrezierCurve::drawPolygonal(renderer, mvp, drawType);
     }
-    if (!_bernsteinBase || _bothPolygonals) {
+    if ((!_bernsteinBase || _bothPolygonals) && !bSplineVertices.empty()) {
         renderer.draw(bSplineVertices, LineStrip, mvp,
                       drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
     }
@@ -88,6 +88,7 @@ void BrezierC2::preUpdate() {
     BrezierCurve::preUpdate();
     bernsteinPoints.clear();
     bSplineVertices.clear();
+    bernsteinPointsHandlers.clear();
 }
 
 void BrezierC2::postUpdate() {
