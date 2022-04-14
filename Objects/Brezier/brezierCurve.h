@@ -32,7 +32,7 @@ public:
 
     void setPolygonal(bool draw) { _polygonal = draw; }
 
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+    void draw(Renderer &renderer, DrawType drawType) override;
 
     DirectX::BoundingOrientedBox boundingBox() const override;
 
@@ -47,8 +47,8 @@ protected:
 
     std::vector<VertexPositionColor> vertices;
     std::vector<Index> indices;
-    DirectX::XMFLOAT3 min{INFINITY, INFINITY, INFINITY};
-    DirectX::XMFLOAT3 max{-INFINITY, -INFINITY, -INFINITY};
+    DirectX::XMFLOAT3 minPos{INFINITY, INFINITY, INFINITY};
+    DirectX::XMFLOAT3 maxPos{-INFINITY, -INFINITY, -INFINITY};
     int lastPatchSize;
     bool canDraw{false};
 

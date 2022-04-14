@@ -25,6 +25,7 @@ Grid::Grid(int n) : Object("Grid", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINELIST)
     }
     auto size = static_cast<float>(n);
     Object::setScale({size, 1, size});
+    updateBuffers();
 }
 
 void Grid::draw(Renderer &renderer, DrawType drawType) {

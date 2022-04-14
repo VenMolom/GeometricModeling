@@ -27,18 +27,13 @@ public:
 
     void setStatusBar(QStatusBar *bar) { statusBar = bar; }
 
-    void drawIndexed(const std::vector<VertexPositionColor> &vertices, const std::vector<Index> &indices,
-                     Topology topology, const DirectX::XMMATRIX &mvp, DirectX::XMFLOAT4 colorOverride) override;
+    void draw(const Object &object, DirectX::XMFLOAT4 color) override;
 
-    void draw(const std::vector<VertexPositionColor> &points, Topology topology,
-              const DirectX::XMMATRIX &mvp, DirectX::XMFLOAT4 colorOverride) override;
+    void draw(const BrezierCurve &curve, DirectX::XMFLOAT4 color) override;
 
-    void drawCurve4(const std::vector<VertexPositionColor> &controlPoints,
-                    const std::vector<Index> &indices, int lastPatchSize,
-                    DirectX::XMVECTOR min, DirectX::XMVECTOR max,
-                    const DirectX::XMMATRIX &mvp, DirectX::XMFLOAT4 colorOverride) override;
+    void draw(const Grid &grid, DirectX::XMFLOAT4 color) override;
 
-    void drawGrid(const std::vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp) override;
+    void draw(const Point &point, DirectX::XMFLOAT4 color) override;
 
     QPaintEngine *paintEngine() const override;
 
@@ -73,17 +68,19 @@ private:
     mini::dx_ptr<ID3D11RenderTargetView> m_backBuffer;
     mini::dx_ptr<ID3D11DepthStencilView> m_depthBuffer;
 
-    mini::dx_ptr<ID3D11Buffer> m_vertexBuffer;
-    mini::dx_ptr<ID3D11Buffer> m_indexBuffer;
-
     mini::dx_ptr<ID3D11VertexShader> m_vertexShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexBillboardShader;
     mini::dx_ptr<ID3D11HullShader> m_hullShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
-    mini::dx_ptr<ID3D11InputLayout> m_layout;
 
-    mini::dx_ptr<ID3D11Buffer> m_cbMVP;
+    mini::dx_ptr<ID3D11InputLayout> m_layout;
+    mini::dx_ptr<ID3D11InputLayout> m_billboardLayout;
+
+    mini::dx_ptr<ID3D11Buffer> m_cbModel;
+    mini::dx_ptr<ID3D11Buffer> m_cbView;
+    mini::dx_ptr<ID3D11Buffer> m_cbProj;
     mini::dx_ptr<ID3D11Buffer> m_cbColor;
     mini::dx_ptr<ID3D11Buffer> m_cbTesselation;
     mini::dx_ptr<ID3D11Buffer> m_cbFarPlane;
@@ -102,4 +99,6 @@ private:
     void updateBuffer(const mini::dx_ptr<ID3D11Buffer> &buffer, const T &data);
 
     float frameTime();
+
+    void updateCameraCB();
 };

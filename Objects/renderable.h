@@ -11,7 +11,7 @@
 
 class Renderable {
 public:
-    virtual void render(const mini::dx_ptr<ID3D11DeviceContext> &context);
+    virtual void render(const mini::dx_ptr<ID3D11DeviceContext> &context) const;
 
 protected:
     std::vector<VertexPositionColor> vertices;

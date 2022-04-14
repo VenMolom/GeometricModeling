@@ -67,9 +67,10 @@ set(PROJECT_SOURCES
 # Build HLSL shaders
 add_custom_target(shaders)
 
-set(HLSL_SHADER_FILES Shader/ps.hlsl Shader/vs.hlsl Shader/hs.hlsl Shader/ds.hlsl Shader/psCameraFade.hlsl)
+set(HLSL_SHADER_FILES Shader/ps.hlsl Shader/vs.hlsl Shader/hs.hlsl Shader/ds.hlsl Shader/psCameraFade.hlsl Shader/vsBillboard.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties(Shader/vsBillboard.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hs.hlsl PROPERTIES ShaderType "hs")

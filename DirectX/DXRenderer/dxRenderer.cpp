@@ -1,5 +1,6 @@
 #include <DirectXMath.h>
 #include "dxRenderer.h"
+#include "DirectX/DXDevice/exceptions.h"
 
 using namespace mini;
 using namespace std;
@@ -20,142 +21,111 @@ void DxRenderer::renderScene() {
             m_depthBuffer.get(),
             D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    ID3D11Buffer *vsCbs[] = {m_cbMVP.get()};
-    ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
-    ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
-    m_device.context()->VSSetConstantBuffers(0, 1, vsCbs);
-    m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
-    m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
     m_device.context()->IASetInputLayout(m_layout.get());
+
+    updateCameraCB();
 
     if (scene) {
         scene->draw(*this);
     }
 }
 
-void DxRenderer::setScene(shared_ptr <Scene> scenePtr) {
+void DxRenderer::setScene(shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
     this->inputHandler.setScene(scene);
+
+    updateBuffer(m_cbProj, scene->camera().projectionMatrix());
+    updateCameraCB();
 }
 
-void DxRenderer::draw(const vector<VertexPositionColor> &points, Topology topology,
-                      const XMMATRIX &mvp, XMFLOAT4 colorOverride) {
-    updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, colorOverride);
+void DxRenderer::draw(const Object &object, DirectX::XMFLOAT4 color) {
+    updateBuffer(m_cbModel, object.modelMatrix());
+    updateBuffer(m_cbColor, color);
 
-    // set vertex buffer
-    m_vertexBuffer = m_device.CreateVertexBuffer(points);
-    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
-    UINT strides[] = {sizeof(VertexPositionColor)};
-    UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(
-            0, 1, vbs, strides, offsets);
-
-    // draw topology
-    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY) topology);
-    m_device.context()->Draw(points.size(), 0);
+    object.render(m_device.context());
 }
 
-void DxRenderer::drawIndexed(const vector<VertexPositionColor> &vertices, const vector<Index> &indices,
-                             Topology topology, const XMMATRIX &mvp, XMFLOAT4 colorOverride) {
-    updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, colorOverride);
-
-    // set vertex and index buffers
-    m_vertexBuffer = m_device.CreateVertexBuffer(vertices);
-    m_indexBuffer = m_device.CreateIndexBuffer(indices);
-    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
-    UINT strides[] = {sizeof(VertexPositionColor)};
-    UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(
-            0, 1, vbs, strides, offsets);
-    m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
-
-    // draw topology
-    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY) topology);
-    m_device.context()->DrawIndexed(indices.size(), 0, 0);
+void DxRenderer::draw(const BrezierCurve &curve, DirectX::XMFLOAT4 color) {
+//    updateBuffer(m_cbMVP, mvp);
+//    updateBuffer(m_cbColor, colorOverride);
+//
+//    // set vertex buffer
+//    m_vertexBuffer = m_device.CreateVertexBuffer(controlPoints);
+//    m_indexBuffer = m_device.CreateIndexBuffer(indices);
+//    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
+//    UINT strides[] = {sizeof(VertexPositionColor)};
+//    UINT offsets[] = {0};
+//    m_device.context()->IASetVertexBuffers(0, 1, vbs, strides, offsets);
+//    m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
+//
+//    m_device.context()->HSSetShader(m_hullShader.get(), nullptr, 0);
+//    m_device.context()->DSSetShader(m_domainShader.get(), nullptr, 0);
+//
+//    XMFLOAT2 vmin, vmax;
+//    auto viewport = scene->camera().viewport();
+//    XMStoreFloat2(&vmin, XMVector3Project(min, 0, 0,
+//                                          viewport.width(), viewport.height(),
+//                                          scene->camera().nearZ(), scene->camera().farZ(),
+//                                          mvp, XMMatrixIdentity(), XMMatrixIdentity()));
+//    XMStoreFloat2(&vmax, XMVector3Project(max, 0, 0,
+//                                          viewport.width(), viewport.height(),
+//                                          scene->camera().nearZ(), scene->camera().farZ(),
+//                                          mvp, XMMatrixIdentity(), XMMatrixIdentity()));
+//
+//    // tesselationAmount, lastPatchID, lastPatchPoints
+//    XMINT4 tesselationAmount = {
+//            clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
+//            static_cast<int>((indices.size() - 1) / 4),
+//            lastPatchSize, 0};
+//    int indexCount = indices.size();
+//    if (lastPatchSize == 0) {
+//        tesselationAmount.z = 4;
+//        tesselationAmount.y--;
+//        indexCount -= 4;
+//    }
+//    updateBuffer(m_cbTesselation, tesselationAmount);
+//
+//    // draw patches
+//    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+//    m_device.context()->DrawIndexed(indexCount, 0, 0);
+//
+//    m_device.context()->HSSetShader(nullptr, nullptr, 0);
+//    m_device.context()->DSSetShader(nullptr, nullptr, 0);
 }
 
-void DxRenderer::drawCurve4(const vector<VertexPositionColor> &controlPoints,
-                            const vector<Index> &indices, int lastPatchSize,
-                            XMVECTOR min, XMVECTOR max,
-                            const XMMATRIX &mvp, XMFLOAT4 colorOverride) {
-    updateBuffer(m_cbMVP, mvp);
-    updateBuffer(m_cbColor, colorOverride);
-
-    // set vertex buffer
-    m_vertexBuffer = m_device.CreateVertexBuffer(controlPoints);
-    m_indexBuffer = m_device.CreateIndexBuffer(indices);
-    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
-    UINT strides[] = {sizeof(VertexPositionColor)};
-    UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(0, 1, vbs, strides, offsets);
-    m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
-
-    m_device.context()->HSSetShader(m_hullShader.get(), nullptr, 0);
-    m_device.context()->DSSetShader(m_domainShader.get(), nullptr, 0);
-
-    XMFLOAT2 vmin, vmax;
-    auto viewport = scene->camera().viewport();
-    XMStoreFloat2(&vmin, XMVector3Project(min, 0, 0,
-                                          viewport.width(), viewport.height(),
-                                          scene->camera().nearZ(), scene->camera().farZ(),
-                                          mvp, XMMatrixIdentity(), XMMatrixIdentity()));
-    XMStoreFloat2(&vmax, XMVector3Project(max, 0, 0,
-                                          viewport.width(), viewport.height(),
-                                          scene->camera().nearZ(), scene->camera().farZ(),
-                                          mvp, XMMatrixIdentity(), XMMatrixIdentity()));
-
-    // tesselationAmount, lastPatchID, lastPatchPoints
-    XMINT4 tesselationAmount = {
-            clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
-            static_cast<int>((indices.size() - 1) / 4),
-            lastPatchSize, 0};
-    int indexCount = indices.size();
-    if (lastPatchSize == 0) {
-        tesselationAmount.z = 4;
-        tesselationAmount.y--;
-        indexCount -= 4;
-    }
-    updateBuffer(m_cbTesselation, tesselationAmount);
-
-    // draw patches
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
-    m_device.context()->DrawIndexed(indexCount, 0, 0);
-
-    m_device.context()->HSSetShader(nullptr, nullptr, 0);
-    m_device.context()->DSSetShader(nullptr, nullptr, 0);
-}
-
-void DxRenderer::drawGrid(const vector<VertexPositionColor> &points, const DirectX::XMMATRIX &mvp) {
-    updateBuffer(m_cbMVP, mvp);
+void DxRenderer::draw(const Grid &grid, DirectX::XMFLOAT4 color) {
+    updateBuffer(m_cbModel, grid.modelMatrix());
     updateBuffer(m_cbColor, CLEAR_COLOR);
     updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera().farZ(), 0, 0, 0});
 
     m_device.context()->PSSetShader(m_pixelFadeShader.get(), nullptr, 0);
-
-    // set vertex buffer
-    m_vertexBuffer = m_device.CreateVertexBuffer(points);
-    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
-    UINT strides[] = {sizeof(VertexPositionColor)};
-    UINT offsets[] = {0};
-    m_device.context()->IASetVertexBuffers(
-            0, 1, vbs, strides, offsets);
-
-    // draw topology
     m_device.context()->OMSetDepthStencilState(m_dssNoDepthWrite.get(), 0);
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    m_device.context()->Draw(points.size(), 0);
 
-    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+    grid.render(m_device.context());
+
     m_device.context()->OMSetDepthStencilState(nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+}
+
+void DxRenderer::draw(const Point &point, DirectX::XMFLOAT4 color) {
+    updateBuffer(m_cbModel, point.modelMatrix());
+    updateBuffer(m_cbColor, color);
+
+    m_device.context()->IASetInputLayout(m_billboardLayout.get());
+    m_device.context()->VSSetShader(m_vertexBillboardShader.get(), nullptr, 0);
+
+    point.render(m_device.context());
+
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->IASetInputLayout(m_layout.get());
 }
 
 template<typename T>
 void DxRenderer::updateBuffer(const dx_ptr<ID3D11Buffer> &buffer, const T &data) {
     D3D11_MAPPED_SUBRESOURCE res;
-    m_device.context()->Map(buffer.get(), 0,
-                            D3D11_MAP_WRITE_DISCARD, 0, &res);
+    auto hr = m_device.context()->Map(buffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
+    if (FAILED(hr))
+        THROW_DX(hr);
     memcpy(res.pData, &data, sizeof(T));
     m_device.context()->Unmap(buffer.get(), 0);
 }
@@ -165,6 +135,14 @@ float DxRenderer::frameTime() {
     QueryPerformanceCounter(&currentTicks);
     auto countDelta = currentTicks.QuadPart - oldTicks.QuadPart;
     return (static_cast<float>(countDelta) / static_cast<float>(ticksPerSecond.QuadPart));
+}
+
+void DxRenderer::updateCameraCB() {
+    auto invView = XMMatrixInverse(nullptr, scene->camera().viewMatrix());
+    XMFLOAT4X4 view[2];
+    XMStoreFloat4x4(view, scene->camera().viewMatrix());
+    XMStoreFloat4x4(view + 1, invView);
+    updateBuffer(m_cbView, view);
 }
 
 QPaintEngine *DxRenderer::paintEngine() const {
@@ -251,11 +229,13 @@ void DxRenderer::init3D3() {
     setupViewport();
 
     const auto vsBytes = DxDevice::LoadByteCode(L"vs.cso");
+    const auto vsBillboardBytes = DxDevice::LoadByteCode(L"vsBillboard.cso");
     const auto hsBytes = DxDevice::LoadByteCode(L"hs.cso");
     const auto dsBytes = DxDevice::LoadByteCode(L"ds.cso");
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
     const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
+    m_vertexBillboardShader = m_device.CreateVertexShader(vsBillboardBytes);
     m_hullShader = m_device.CreateHullShader(hsBytes);
     m_domainShader = m_device.CreateDomainShader(dsBytes);
     m_pixelShader = m_device.CreatePixelShader(psBytes);
@@ -272,11 +252,21 @@ void DxRenderer::init3D3() {
                     D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_layout = m_device.CreateInputLayout(elements, vsBytes);
+    m_billboardLayout = m_device.CreateInputLayout(elements, vsBillboardBytes);
 
-    m_cbMVP = m_device.CreateConstantBuffer<XMFLOAT4X4>();
+    m_cbModel = m_device.CreateConstantBuffer<XMFLOAT4X4>();
+    m_cbView = m_device.CreateConstantBuffer<XMFLOAT4X4, 2>();
+    m_cbProj = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
     m_cbFarPlane = m_device.CreateConstantBuffer<XMFLOAT4>();
+
+    ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
+    ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
+    ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
+    m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
+    m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
+    m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
 
     DepthStencilDescription dssDesc;
     dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;

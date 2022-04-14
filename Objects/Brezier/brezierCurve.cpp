@@ -10,7 +10,7 @@ using namespace std;
 using namespace DirectX;
 
 BrezierCurve::BrezierCurve(QString name, std::vector<std::weak_ptr<Point>> &&points)
-        : Object(std::move(name), {0, 0, 0}),
+        : Object(std::move(name), {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST),
           _points(points) {
 
 }
@@ -40,27 +40,26 @@ void BrezierCurve::removePoint(int index) {
     updatePoints();
 }
 
-void BrezierCurve::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    for (auto &point: _points) {
-        if (!point.lock()) {
-            updatePoints();
-            break;
-        }
-    }
-    auto mvp = view * projection;
-
-    if (_polygonal && !vertices.empty()) {
-        drawPolygonal(renderer, mvp, drawType);
-    }
-
-    if (!canDraw) return;
-    renderer.drawCurve4(vertices, indices, lastPatchSize,
-                        XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
-                        drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+void BrezierCurve::draw(Renderer &renderer, DrawType drawType) {
+//    for (auto &point: _points) {
+//        if (!point.lock()) {
+//            updatePoints();
+//            break;
+//        }
+//    }
+//
+//    if (_polygonal && !vertices.empty()) {
+//        drawPolygonal(renderer, mvp, drawType);
+//    }
+//
+//    if (!canDraw) return;
+//    renderer.drawCurve4(vertices, indices, lastPatchSize,
+//                        XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
+//                        drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 }
 
 void BrezierCurve::drawPolygonal(Renderer &renderer, XMMATRIX mvp, DrawType drawType) {
-    renderer.draw(vertices, LineStrip, mvp, drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
+    //renderer.draw(vertices, LineStrip, mvp, drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
 }
 
 BoundingOrientedBox BrezierCurve::boundingBox() const {
@@ -114,8 +113,8 @@ void BrezierCurve::pointUpdate(const shared_ptr<Point> &point, int index) {
     vertices.push_back({point->position(), {1, 1, 1}});
     indices.push_back(index);
 
-    min = newMin(min, point->position());
-    max = newMax(max, point->position());
+    minPos = newMin(minPos, point->position());
+    maxPos = newMax(maxPos, point->position());
 }
 
 void BrezierCurve::postUpdate() {

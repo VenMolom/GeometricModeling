@@ -18,33 +18,33 @@ Type BrezierC2::type() const {
     return BREZIERC2;
 }
 
-void BrezierC2::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
-    if (_bernsteinBase) {
-        for (auto &point: bernsteinPoints) {
-            auto isSelected = !selected.expired() && point->equals(selected.lock());
-            point->draw(renderer, view, projection, isSelected ? SELECTED : DEFAULT);
-        }
-    }
+void BrezierC2::draw(Renderer &renderer, DrawType drawType) {
+//    if (_bernsteinBase) {
+//        for (auto &point: bernsteinPoints) {
+//            auto isSelected = !selected.expired() && point->equals(selected.lock());
+//            point->draw(renderer, view, projection, isSelected ? SELECTED : DEFAULT);
+//        }
+//    }
 
-    BrezierCurve::draw(renderer, view, projection, drawType);
+    //BrezierCurve::draw(renderer,, drawType);
 }
 
 void BrezierC2::drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType) {
-    if (_bernsteinBase || _bothPolygonals) {
-        BrezierCurve::drawPolygonal(renderer, mvp, drawType);
-    }
-    if ((!_bernsteinBase || _bothPolygonals) && !bSplineVertices.empty()) {
-        renderer.draw(bSplineVertices, LineStrip, mvp,
-                      drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
-    }
+//    if (_bernsteinBase || _bothPolygonals) {
+//        BrezierCurve::drawPolygonal(renderer, mvp, drawType);
+//    }
+//    if ((!_bernsteinBase || _bothPolygonals) && !bSplineVertices.empty()) {
+//        renderer.draw(bSplineVertices, LineStrip, mvp,
+//                      drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
+//    }
 
 }
 
 void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
     bSplineVertices.push_back({point->position(), {1, 1, 1}});
 
-    min = newMin(min, point->position());
-    max = newMax(max, point->position());
+    minPos = newMin(minPos, point->position());
+    maxPos = newMax(maxPos, point->position());
 
     shared_ptr<Point> right;
     // get next de Boor point
@@ -226,7 +226,7 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         Utils3D::storeFloat3Lerp(vertices[under].position, b1, b2, 0.5f);
     }
 
-    synchroniseBernsteinPositions(max(0, under - 3), min(vertices.size() - 1, under + 3));
+    synchroniseBernsteinPositions(max(0, under - 3), min(static_cast<int>(vertices.size()) - 1, under + 3));
 }
 
 const vector<shared_ptr<VirtualPoint>> &BrezierC2::virtualPoints() {

@@ -46,7 +46,7 @@ void Renderable::setBuffers(vector<VertexPositionColor> vertices,
     }
 }
 
-void Renderable::render(const dx_ptr<ID3D11DeviceContext> &context) {
+void Renderable::render(const dx_ptr<ID3D11DeviceContext> &context) const {
     if (!vertexBuffer) return;
 
     context->IASetPrimitiveTopology(topology);

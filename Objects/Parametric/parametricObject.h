@@ -23,11 +23,10 @@ protected:
     // must be called by derived class constructor
     void calculateVerticesAndIndices();
 
-    virtual std::vector<VertexPositionColor> &&
-    calculateVertices(const std::array<int, Dim> &density,
-                      const std::array<std::tuple<float, float>, Dim> &range) const = 0;
+    virtual void calculateVertices(const std::array<int, Dim> &density,
+                                   const std::array<std::tuple<float, float>, Dim> &range) = 0;
 
-    virtual std::vector<Index> &&calculateIndices(const std::array<int, Dim> &density) const = 0;
+    virtual void calculateIndices(const std::array<int, Dim> &density) = 0;
 
 public:
     void draw(Renderer &renderer, DrawType drawType) final;
@@ -65,8 +64,8 @@ void ParametricObject<Dim>::draw(Renderer &renderer, DrawType drawType) {
 
 template<size_t Dim>
 void ParametricObject<Dim>::calculateVerticesAndIndices() {
-    vertices = calculateVertices(_density, _range);
-    indices = calculateIndices(_density);
+    calculateVertices(_density, _range);
+    calculateIndices(_density);
     updateBuffers();
 }
 

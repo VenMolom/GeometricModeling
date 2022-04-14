@@ -51,17 +51,17 @@ public:
         return CreateBuffer(reinterpret_cast<const void *>(indices.data()), desc);
     }
 
-    template<class T>
+    template<class T, size_t N = 1>
     mini::dx_ptr<ID3D11Buffer> CreateConstantBuffer() const {
-        auto desc = BufferDescription::ConstantBufferDescription(sizeof(T));
+        BufferDescription desc = BufferDescription::ConstantBufferDescription(N * sizeof(T));
         return CreateBuffer(nullptr, desc);
     }
 
-    mini::dx_ptr <ID3D11BlendState> CreateBlendState(const BlendDescription &desc = {}) const;
+    mini::dx_ptr<ID3D11BlendState> CreateBlendState(const BlendDescription &desc = {}) const;
 
-    mini::dx_ptr <ID3D11DepthStencilState> CreateDepthStencilState(const DepthStencilDescription &desc = {}) const;
+    mini::dx_ptr<ID3D11DepthStencilState> CreateDepthStencilState(const DepthStencilDescription &desc = {}) const;
 
-    mini::dx_ptr <ID3D11RasterizerState> CreateRasterizerState(const RasterizerDescription &desc = {}) const;
+    mini::dx_ptr<ID3D11RasterizerState> CreateRasterizerState(const RasterizerDescription &desc = {}) const;
 
     static const DxDevice &Instance() { return *instance; }
 

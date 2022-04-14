@@ -29,7 +29,7 @@ public:
 
 protected:
 public:
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+    void draw(Renderer &renderer, DrawType drawType) override;
 
 protected:
 
