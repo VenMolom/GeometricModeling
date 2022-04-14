@@ -9,7 +9,9 @@ using namespace DirectX;
 
 const XMFLOAT3 Grid::color = {0.5f, 0.5f, 0.7f};
 
-Grid::Grid(int n) : Object("Grid", {0, 0, 0}) {
+Grid::Grid(int n) : Object("Grid", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINELIST) {
+    vertices.clear();
+
     for (int i = 0; i < n; ++i) {
         float z = 1.0f / static_cast<float>(n - 1) * static_cast<float>(i) - 0.5f;
         vertices.push_back({{-0.5f, 0.0f, z}, color});
@@ -25,12 +27,12 @@ Grid::Grid(int n) : Object("Grid", {0, 0, 0}) {
     Object::setScale({size, 1, size});
 }
 
-void Grid::draw(Renderer &renderer, XMMATRIX view, XMMATRIX projection, DrawType drawType) {
-    renderer.drawGrid(vertices, modelMatrix() * view * projection);
+void Grid::draw(Renderer &renderer, DrawType drawType) {
+    renderer.draw(*this, DEFAULT_COLOR);
 }
 
 Type Grid::type() const {
-    return BREZIERCURVE;
+    return GRID;
 }
 
 BoundingOrientedBox Grid::boundingBox() const {

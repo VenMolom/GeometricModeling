@@ -5,15 +5,14 @@
 #ifndef MG1_GRID_H
 #define MG1_GRID_H
 
-
 #include <DirectXMath.h>
 #include "Objects/object.h"
 
 class Grid : public Object {
 public:
-    Grid(int n);
+    explicit Grid(int n);
 
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+    void draw(Renderer &renderer, DrawType drawType) override;
 
     Type type() const override;
 
@@ -26,8 +25,6 @@ public:
     DirectX::BoundingOrientedBox boundingBox() const override;
 
 private:
-    std::vector<VertexPositionColor> vertices;
-
     const static DirectX::XMFLOAT3 color;
 };
 
