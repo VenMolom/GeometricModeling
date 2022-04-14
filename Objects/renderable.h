@@ -21,6 +21,8 @@ protected:
 
     void updateBuffers();
 
+    void setBuffers(std::vector<VertexPositionColor> vertices, std::vector<Index> indices);
+
 private:
     mini::dx_ptr<ID3D11Buffer> indexBuffer{};
     mini::dx_ptr<ID3D11Buffer> vertexBuffer{};

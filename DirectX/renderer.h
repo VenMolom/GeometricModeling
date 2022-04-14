@@ -5,11 +5,12 @@
 #ifndef MG1_RENDERER_H
 #define MG1_RENDERER_H
 
-#include <vector>
-#include "Objects/object.h"
-#include "Objects/Grid/grid.h"
-#include "Objects/Point/point.h"
-#include "Objects/Brezier/brezierCurve.h"
+#include <DirectXMath.h>
+
+class Object;
+class BrezierCurve;
+class Grid;
+class Point;
 
 const DirectX::XMFLOAT4 SELECTED_COLOR{1.0f, 0.4f, 0.0f, 1.0f};
 const DirectX::XMFLOAT4 DEFAULT_COLOR{0.0f, 0.0f, 0.0f, 0.0f};

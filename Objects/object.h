@@ -13,7 +13,6 @@
 #include <DirectXMath.h>
 #include "DirectX/renderer.h"
 #include "Objects/renderable.h"
-#include "camera.h"
 
 enum Type {
     CURSOR = 1 << 0,
@@ -108,6 +107,5 @@ private:
 
     void calculateModel();
 };
-
 
 #endif //MG1_OBJECT_H

@@ -10,13 +10,17 @@
 
 class Point : public Object {
 public:
-    Point(DirectX::XMFLOAT3 position);
+    explicit Point(DirectX::XMFLOAT3 position);
 
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+    void draw(Renderer &renderer, DrawType drawType) override;
 
     Type type() const override;
 
     DirectX::BoundingOrientedBox boundingBox() const override;
+
+    void setRotation(DirectX::XMFLOAT3 rotation) override {}
+
+    void setScale(DirectX::XMFLOAT3 scale) override {}
 
 private:
     static const std::vector<VertexPositionColor> pointVertices;

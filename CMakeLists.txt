@@ -58,7 +58,11 @@ set(PROJECT_SOURCES
         Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
         Controls/Modules/ScreenMoveModule/screenmovemodule.ui
         Controls/Modules/BSplineModule/bsplinemodule.h Controls/Modules/BSplineModule/bsplinemodule.cpp
-        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h Objects/Point/virtualPointsHolder.h Objects/Grid/grid.cpp Objects/Grid/grid.h Objects/renderable.cpp Objects/renderable.h)
+        Controls/Modules/BSplineModule/bsplinemodule.ui
+        Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h
+        Objects/Point/virtualPointsHolder.h
+        Objects/Grid/grid.cpp Objects/Grid/grid.h
+        Objects/renderable.cpp Objects/renderable.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -72,7 +76,7 @@ set_source_files_properties(Shader/hs.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/ds.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
-foreach(FILE ${HLSL_SHADER_FILES})
+foreach (FILE ${HLSL_SHADER_FILES})
     get_filename_component(FILE_WE ${FILE} NAME_WE)
     get_source_file_property(shadertype ${FILE} ShaderType)
     get_source_file_property(shadermodel ${FILE} ShaderModel)
@@ -82,30 +86,30 @@ foreach(FILE ${HLSL_SHADER_FILES})
             COMMENT "HLSL ${FILE}"
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             VERBATIM)
-endforeach(FILE)
+endforeach (FILE)
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if (${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(MG1
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET MG1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
+            MANUAL_FINALIZATION
+            ${PROJECT_SOURCES}
+            )
+    # Define target properties for Android with Qt 6 as:
+    #    set_property(TARGET MG1 APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+    #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
+    # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+else ()
+    if (ANDROID)
         add_library(MG1 SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
+                ${PROJECT_SOURCES}
+                )
+        # Define properties for Android with Qt 5 after find_package() calls as:
+        #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
+    else ()
         add_executable(MG1
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
+                ${PROJECT_SOURCES}
+                )
+    endif ()
+endif ()
 
 target_link_libraries(MG1 PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(MG1 PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
@@ -114,13 +118,13 @@ target_link_libraries(MG1 PRIVATE "${D3D11_LIBRARY}")
 add_dependencies(MG1 shaders)
 
 set_target_properties(MG1 PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
+        MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        MACOSX_BUNDLE TRUE
+        WIN32_EXECUTABLE TRUE
+        )
 
-if(QT_VERSION_MAJOR EQUAL 6)
+if (QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(MG1)
-endif()
+endif ()
