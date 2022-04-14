@@ -23,14 +23,14 @@ protected:
     // must be called by derived class constructor
     void calculateVerticesAndIndices();
 
-    virtual std::vector<VertexPositionColor>
+    virtual std::vector<VertexPositionColor> &&
     calculateVertices(const std::array<int, Dim> &density,
                       const std::array<std::tuple<float, float>, Dim> &range) const = 0;
 
-    virtual std::vector<Index> calculateIndices(const std::array<int, Dim> &density) const = 0;
+    virtual std::vector<Index> &&calculateIndices(const std::array<int, Dim> &density) const = 0;
 
 public:
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) final;
+    void draw(Renderer &renderer, DrawType drawType) final;
 
     const std::array<int, Dim> &density() const { return _density; }
 
@@ -43,9 +43,6 @@ public:
 private:
     std::array<int, Dim> _density;
     std::array<std::tuple<float, float>, Dim> _range;
-
-    std::vector<VertexPositionColor> vertices;
-    std::vector<Index> indices;
 };
 
 template<size_t Dim>
@@ -53,19 +50,16 @@ ParametricObject<Dim>::ParametricObject(QString name,
                                         DirectX::XMFLOAT3 position,
                                         std::array<int, Dim> density,
                                         std::array<std::tuple<float, float>, Dim> range)
-        : Object(name, position),
+        : Object(name, position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
           _density(density),
           _range(range) {
 }
 
 template<size_t Dim>
-void ParametricObject<Dim>::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
-                                 DrawType drawType) {
-    auto mvp = modelMatrix() * view * projection;
-    renderer.drawIndexed(vertices, indices, LineList, mvp,
-                         drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+void ParametricObject<Dim>::draw(Renderer &renderer, DrawType drawType) {
+    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
     if (drawType == SELECTED) {
-        Cursor::drawCursor(renderer, DirectX::XMLoadFloat4x4(&noScaleMatrix) * view * projection);
+        Cursor::drawCursor(renderer, DirectX::XMLoadFloat4x4(&noScaleMatrix));
     }
 }
 
@@ -73,6 +67,7 @@ template<size_t Dim>
 void ParametricObject<Dim>::calculateVerticesAndIndices() {
     vertices = calculateVertices(_density, _range);
     indices = calculateIndices(_density);
+    updateBuffers();
 }
 
 template<size_t Dim>

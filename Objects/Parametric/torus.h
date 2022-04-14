@@ -28,10 +28,10 @@ public:
     DirectX::BoundingOrientedBox boundingBox() const override;
 
 protected:
-    std::vector<VertexPositionColor> calculateVertices(const std::array<int, DIM> &density,
+    std::vector<VertexPositionColor> &&calculateVertices(const std::array<int, DIM> &density,
                                                        const std::array<std::tuple<float, float>, DIM> &range) const override;
 
-    std::vector<Index> calculateIndices(const std::array<int, DIM> &density) const override;
+    std::vector<Index> &&calculateIndices(const std::array<int, DIM> &density) const override;
 
 private:
     float _minorRadius{1};

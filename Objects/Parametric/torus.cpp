@@ -13,7 +13,7 @@ Torus::Torus(XMFLOAT3 position)
     calculateVerticesAndIndices();
 }
 
-vector<VertexPositionColor>
+vector<VertexPositionColor> &&
 Torus::calculateVertices(const array<int, DIM> &density, const array<tuple<float, float>, DIM> &range) const {
     auto[startU, endU] = range[0];
     auto deltaU = (endU - startU) / static_cast<float>(density[0]);
@@ -37,10 +37,10 @@ Torus::calculateVertices(const array<int, DIM> &density, const array<tuple<float
         }
     }
     // major _rotation first
-    return vertices;
+    return std::move(vertices);
 }
 
-vector<Index> Torus::calculateIndices(const array<int, DIM> &density) const {
+vector<Index> &&Torus::calculateIndices(const array<int, DIM> &density) const {
     vector<Index> indices;
     auto verticesSize = density[0] * density[1];
     for (auto i = 0; i < density[1]; ++i) { // major _rotation
@@ -54,7 +54,7 @@ vector<Index> Torus::calculateIndices(const array<int, DIM> &density) const {
             indices.push_back((index + 1) % density[1] + j * density[1]);
         }
     }
-    return indices;
+    return std::move(indices);
 }
 
 array<bool, 2> Torus::looped() const {
