@@ -33,7 +33,7 @@ void DxRenderer::renderScene() {
     }
 }
 
-void DxRenderer::setScene(shared_ptr<Scene> scenePtr) {
+void DxRenderer::setScene(shared_ptr <Scene> scenePtr) {
     scene = std::move(scenePtr);
     this->inputHandler.setScene(scene);
 }
@@ -52,7 +52,7 @@ void DxRenderer::draw(const vector<VertexPositionColor> &points, Topology topolo
             0, 1, vbs, strides, offsets);
 
     // draw topology
-    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)topology);
+    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY) topology);
     m_device.context()->Draw(points.size(), 0);
 }
 
@@ -72,7 +72,7 @@ void DxRenderer::drawIndexed(const vector<VertexPositionColor> &vertices, const 
     m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
 
     // draw topology
-    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)topology);
+    m_device.context()->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY) topology);
     m_device.context()->DrawIndexed(indices.size(), 0, 0);
 }
 

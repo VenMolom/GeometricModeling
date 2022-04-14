@@ -6,6 +6,8 @@
 using namespace mini;
 using namespace std;
 
+DxDevice *DxDevice::instance = nullptr;
+
 DxDevice::DxDevice(const QWidget *parent) {
     SwapChainDescription desc{(HWND) parent->winId(), {parent->width(), parent->height()}};
     ID3D11Device *device = nullptr;
@@ -22,6 +24,10 @@ DxDevice::DxDevice(const QWidget *parent) {
 
     if (FAILED(hr))
         THROW_DX(hr);
+
+    if(!DxDevice::instance) {
+        DxDevice::instance = this;
+    }
 }
 
 dx_ptr<ID3D11RenderTargetView> DxDevice::CreateRenderTargetView(const dx_ptr<ID3D11Texture2D> &texture) const {

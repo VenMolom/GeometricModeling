@@ -63,7 +63,10 @@ public:
 
     mini::dx_ptr <ID3D11RasterizerState> CreateRasterizerState(const RasterizerDescription &desc = {}) const;
 
+    static const DxDevice &Instance() { return *instance; }
+
 private:
+    static DxDevice *instance;
 
     mini::dx_ptr<ID3D11Device> m_device;
     mini::dx_ptr<ID3D11DeviceContext> m_context;

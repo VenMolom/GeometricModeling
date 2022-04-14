@@ -5,14 +5,14 @@
 #ifndef MG1_OBJECT_H
 #define MG1_OBJECT_H
 
+#include <d3d11.h>
 #include <qstring.h>
 #include <utility>
 #include <QProperty>
 #include <DirectXCollision.h>
 #include <DirectXMath.h>
-#include "DirectX/DXDevice/dxptr.h"
-#include "DirectX/DXStructures/dxStructures.h"
-#include "DirectX/Renderer.h"
+#include "DirectX/renderer.h"
+#include "Objects/renderable.h"
 #include "camera.h"
 
 enum Type {
@@ -51,7 +51,7 @@ DrawType {
     DEFAULT
 };
 
-class Object {
+class Object : public Renderable {
 public:
     Object(Object &object) = default;
 
@@ -85,7 +85,7 @@ public:
 
     virtual bool equals(const std::shared_ptr<Object> &other) const;
 
-    virtual void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) = 0;
+    virtual void draw(Renderer &renderer, DrawType drawType) = 0;
 
     virtual Type type() const = 0;
 
@@ -101,7 +101,7 @@ protected:
     DirectX::XMFLOAT4X4 rotationMatrix;
     DirectX::XMFLOAT4X4 scaleMatrix;
 
-    Object(QString name, DirectX::XMFLOAT3 position);
+    Object(QString name, DirectX::XMFLOAT3 position, D3D11_PRIMITIVE_TOPOLOGY topology);
 
 private:
     DirectX::XMFLOAT4X4 model;

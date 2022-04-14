@@ -31,7 +31,7 @@ set(PROJECT_SOURCES
         DirectX/DXDevice/dxptr.h
         DirectX/DXStructures/dxStructures.cpp DirectX/DXStructures/dxStructures.h
         DirectX/DXDevice/exceptions.cpp DirectX/DXDevice/exceptions.h
-        DirectX/Renderer.h
+        DirectX/renderer.h
         Objects/Parametric/parametricObject.h
         Objects/Parametric/torus.cpp Objects/Parametric/torus.h
         Resources.qrc Handlers/inputHandler.cpp Handlers/inputHandler.h
@@ -58,7 +58,7 @@ set(PROJECT_SOURCES
         Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
         Controls/Modules/ScreenMoveModule/screenmovemodule.ui
         Controls/Modules/BSplineModule/bsplinemodule.h Controls/Modules/BSplineModule/bsplinemodule.cpp
-        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h Objects/Point/virtualPointsHolder.h Objects/Grid/grid.cpp Objects/Grid/grid.h)
+        Controls/Modules/BSplineModule/bsplinemodule.ui Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h Objects/Point/virtualPointsHolder.h Objects/Grid/grid.cpp Objects/Grid/grid.h Objects/renderable.cpp Objects/renderable.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

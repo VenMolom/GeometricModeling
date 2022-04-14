@@ -8,8 +8,9 @@
 
 using namespace DirectX;
 
-Object::Object(QString name, XMFLOAT3 position)
-        : _position(position),
+Object::Object(QString name, XMFLOAT3 position, D3D11_PRIMITIVE_TOPOLOGY topology)
+        : Renderable(topology),
+          _position(position),
           _name(name) {
     calculateModel();
 }

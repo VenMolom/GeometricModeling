@@ -14,17 +14,16 @@ Scene::Scene()
 }
 
 void Scene::draw(Renderer &renderer) {
-    grid.draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), DEFAULT);
+    grid.draw(renderer, DEFAULT);
     if (composite) {
-        composite->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), SELECTED);
+        composite->draw(renderer, SELECTED);
     }
     if (cursor) {
-        cursor->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(), DEFAULT);
+        cursor->draw(renderer, DEFAULT);
     }
     for (auto &object: _objects) {
-        auto a = _selected.value().lock().get();
-        object->draw(renderer, _camera.viewMatrix(), _camera.projectionMatrix(),
-                     a == object.get() ? SELECTED : DEFAULT);
+        auto selected = _selected.value().lock().get();
+        object->draw(renderer, selected == object.get() ? SELECTED : DEFAULT);
     }
 }
 
