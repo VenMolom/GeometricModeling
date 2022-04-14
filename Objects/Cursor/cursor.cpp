@@ -17,21 +17,23 @@ const std::vector<VertexPositionColor> Cursor::cursorVertices = {
 };
 
 void Cursor::drawCursor(Renderer &renderer, const DirectX::XMMATRIX &mvp) {
-    renderer.draw(cursorVertices, LineList, mvp, DEFAULT_COLOR);
+    // TODO: fix static cursor draw
+//    renderer.draw(cursorVertices, LineList, mvp, DEFAULT_COLOR);
 }
 
 Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
-        : Object("Cursor", position),
+        : Object("Cursor", position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
           _screenPosition(screenPosition),
           camera(camera) {
     positionHandler = this->bindablePosition().addNotifier([this] { updateScreenPosition(); });
     projectionHandler = camera.bindableProjection().addNotifier([this] { updateScreenPosition(); });
     viewHandler = camera.bindableView().addNotifier([this] { updateScreenPosition(); });
+
+    setBuffers(cursorVertices, {});
 }
 
-void Cursor::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) {
-    auto mvp = modelMatrix() * view * projection;
-    renderer.draw(cursorVertices, LineList, mvp, DEFAULT_COLOR);
+void Cursor::draw(Renderer &renderer, DrawType drawType) {
+    renderer.draw(*this, DEFAULT_COLOR);
 }
 
 Type Cursor::type() const {

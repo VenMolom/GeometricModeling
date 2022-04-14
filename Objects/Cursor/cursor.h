@@ -16,7 +16,7 @@ public:
 
     Cursor(DirectX::XMFLOAT3 position, DirectX::XMINT2 screenPosition, Camera &camera);
 
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+    void draw(Renderer &renderer, DrawType drawType) override;
 
     Type type() const override;
 
@@ -27,6 +27,10 @@ public:
     QBindable<DirectX::XMINT2> bindableScreenPosition() { return &_screenPosition; }
 
     DirectX::BoundingOrientedBox boundingBox() const override;
+
+    void setRotation(DirectX::XMFLOAT3 rotation) override {}
+
+    void setScale(DirectX::XMFLOAT3 scale) override {}
 
 private:
     const static std::vector<VertexPositionColor> cursorVertices;
