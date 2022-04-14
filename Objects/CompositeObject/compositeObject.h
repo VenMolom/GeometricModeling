@@ -18,7 +18,7 @@ public:
 
     std::list<std::shared_ptr<Object>> &&release();
 
-    void draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, DrawType drawType) override;
+    void draw(Renderer &renderer, DrawType drawType) override;
 
     Type type() const override;
 
@@ -38,8 +38,6 @@ private:
     DirectX::XMFLOAT3 startingPosition;
 
     void calculateCenter();
-
-    void updateMatrix();
 
     void updateChildren();
 

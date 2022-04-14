@@ -11,7 +11,7 @@ using namespace std;
 using namespace DirectX;
 
 CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
-        : Object("Composite", {0, 0, 0}),
+        : Object("Composite", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED),
           objects() {
 
     for (auto &object : objects) {
@@ -51,13 +51,11 @@ std::list<std::shared_ptr<Object>> &&CompositeObject::release() {
     return std::move(objects);
 }
 
-void
-CompositeObject::draw(Renderer &renderer, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,
-                      DrawType drawType) {
+void CompositeObject::draw(Renderer &renderer, DrawType drawType) {
     for (auto &object: objects) {
-        object->draw(renderer, view, projection, NO_CURSOR);
+        object->draw(renderer, NO_CURSOR);
     }
-    Cursor::drawCursor(renderer, XMLoadFloat4x4(&noScaleMatrix) * view * projection);
+    Cursor::drawCursor(renderer, XMLoadFloat4x4(&noScaleMatrix));
 }
 
 Type CompositeObject::type() const {
@@ -125,21 +123,6 @@ DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix
     euler.z = (float) atan2(XMFLOAT4X4_Values._21, XMFLOAT4X4_Values._22);
 
     return euler;
-
-//    float c2 = sqrt(rotationMatrix.r[0].m128_f32[0] * rotationMatrix.r[0].m128_f32[0]
-//            + rotationMatrix.r[0].m128_f32[1] * rotationMatrix.r[0].m128_f32[1]);
-//
-//    XMFLOAT3 euler{};
-//    euler.x = atan2(rotationMatrix.r[1].m128_f32[2], rotationMatrix.r[2].m128_f32[2]);
-//    euler.y = atan2(-rotationMatrix.r[0].m128_f32[2], c2);
-//
-//    float s1 = sin(euler.x);
-//    float c1 = cos(euler.x);
-//
-//    euler.z = atan2(s1 * rotationMatrix.r[2].m128_f32[0] - c1 * rotationMatrix.r[1].m128_f32[0],
-//                    c1 * rotationMatrix.r[1].m128_f32[1] - s1 * rotationMatrix.r[2].m128_f32[1]);
-//
-//    return euler;
 }
 
 bool CompositeObject::equals(const shared_ptr<Object> &other) const {
