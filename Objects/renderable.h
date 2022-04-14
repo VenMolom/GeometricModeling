@@ -11,7 +11,7 @@
 
 class Renderable {
 public:
-    virtual void render(const mini::dx_ptr<ID3D11DeviceContext> &context) const;
+    void render(const mini::dx_ptr<ID3D11DeviceContext> &context) const;
 
 protected:
     std::vector<VertexPositionColor> vertices;
@@ -23,12 +23,18 @@ protected:
 
     void setBuffers(std::vector<VertexPositionColor> vertices, std::vector<Index> indices);
 
+    void setTopology(D3D11_PRIMITIVE_TOPOLOGY topology) { this->topology = topology; }
+
+    void switchIndexed(bool enabled) { this->indexed = enabled; }
+
 private:
     mini::dx_ptr<ID3D11Buffer> indexBuffer{};
     mini::dx_ptr<ID3D11Buffer> vertexBuffer{};
     unsigned int stride = sizeof(VertexPositionColor);
     unsigned int offset = 0;
     unsigned int indexCount = 0;
+    unsigned int vertexCount = 0;
+    bool indexed = true;
     D3D11_PRIMITIVE_TOPOLOGY topology;
 };
 

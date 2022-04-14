@@ -102,10 +102,9 @@ protected:
 
     Object(QString name, DirectX::XMFLOAT3 position, D3D11_PRIMITIVE_TOPOLOGY topology);
 
+    void calculateModel();
 private:
     DirectX::XMFLOAT4X4 model;
-
-    void calculateModel();
 };
 
 #endif //MG1_OBJECT_H

@@ -50,8 +50,6 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
-
-    // TODO: refactor shaders and renderer (full visitor?)
 };
 
 #endif // MAINWINDOW_H

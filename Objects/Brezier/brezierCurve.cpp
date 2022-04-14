@@ -41,25 +41,29 @@ void BrezierCurve::removePoint(int index) {
 }
 
 void BrezierCurve::draw(Renderer &renderer, DrawType drawType) {
-//    for (auto &point: _points) {
-//        if (!point.lock()) {
-//            updatePoints();
-//            break;
-//        }
-//    }
-//
-//    if (_polygonal && !vertices.empty()) {
-//        drawPolygonal(renderer, mvp, drawType);
-//    }
-//
-//    if (!canDraw) return;
-//    renderer.drawCurve4(vertices, indices, lastPatchSize,
-//                        XMLoadFloat3(&min), XMLoadFloat3(&max), mvp,
-//                        drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+    for (auto &point: _points) {
+        if (!point.lock()) {
+            updatePoints();
+            break;
+        }
+    }
+
+    if (_polygonal) {
+        drawPolygonal(renderer, drawType);
+    }
+
+    if (!canDraw) return;
+    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 }
 
-void BrezierCurve::drawPolygonal(Renderer &renderer, XMMATRIX mvp, DrawType drawType) {
-    //renderer.draw(vertices, LineStrip, mvp, drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
+void BrezierCurve::drawPolygonal(Renderer &renderer, DrawType drawType) {
+    if (vertices.empty()) return;
+
+    setTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+    switchIndexed(false);
+    renderer.draw(*((Object*)this), drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
+    setTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+    switchIndexed(true);
 }
 
 BoundingOrientedBox BrezierCurve::boundingBox() const {
@@ -119,13 +123,14 @@ void BrezierCurve::pointUpdate(const shared_ptr<Point> &point, int index) {
 
 void BrezierCurve::postUpdate() {
     if (vertices.size() > 1) {
-        lastPatchSize = indices.size() % 4;
-        if (lastPatchSize == 0) lastPatchSize = 4;
+        _lastPatchSize = indices.size() % 4;
+        if (_lastPatchSize == 0) _lastPatchSize = 4;
 
         while (indices.size() % 4 != 0) indices.push_back(vertices.size() - 1);
     }
 
     canDraw = vertices.size() >= 2;
+    updateBuffers();
 }
 
 void BrezierCurve::pointMoved(const weak_ptr<Point> &point) {
@@ -148,4 +153,5 @@ void BrezierCurve::pointMoved(const weak_ptr<Point> &point) {
 
     int index = it - _points.begin();
     vertices[index].position = moved->position();
+    updateBuffers();
 }

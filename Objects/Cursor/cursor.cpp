@@ -17,8 +17,7 @@ const std::vector<VertexPositionColor> Cursor::cursorVertices = {
 };
 
 void Cursor::drawCursor(Renderer &renderer, const DirectX::XMMATRIX &model) {
-    // TODO: fix static cursor draw
-//    renderer.draw(cursorVertices, LineList, mvp, DEFAULT_COLOR);
+    renderer.draw(cursorVertices, model, DEFAULT_COLOR);
 }
 
 Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)

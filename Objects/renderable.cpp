@@ -19,7 +19,7 @@ void Renderable::updateBuffers() {
     }
 
     vertexBuffer = DxDevice::Instance().CreateVertexBuffer(vertices);
-    indexCount = vertices.size();
+    vertexCount = vertices.size();
     indexBuffer.reset();
 
     if (!indices.empty()) {
@@ -37,7 +37,7 @@ void Renderable::setBuffers(vector<VertexPositionColor> vertices,
     }
 
     vertexBuffer = DxDevice::Instance().CreateVertexBuffer(vertices);
-    indexCount = vertices.size();
+    vertexCount = vertices.size();
     indexBuffer.reset();
 
     if (!indices.empty()) {
@@ -53,10 +53,10 @@ void Renderable::render(const dx_ptr<ID3D11DeviceContext> &context) const {
     ID3D11Buffer *vb = vertexBuffer.get();
     context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
 
-    if (indexBuffer) {
+    if (indexBuffer && indexed) {
         context->IASetIndexBuffer(indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
         context->DrawIndexed(indexCount, 0, 0);
     } else {
-        context->Draw(indexCount, 0);
+        context->Draw(vertexCount, 0);
     }
 }

@@ -14,4 +14,5 @@ Type VirtualPoint::type() const {
 
 void VirtualPoint::setPositionSilently(XMFLOAT3 position) {
     _position.setValueBypassingBindings(position);
+    calculateModel();
 }

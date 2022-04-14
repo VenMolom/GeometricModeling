@@ -38,62 +38,47 @@ void DxRenderer::setScene(shared_ptr<Scene> scenePtr) {
     updateCameraCB();
 }
 
-void DxRenderer::draw(const Object &object, DirectX::XMFLOAT4 color) {
+void DxRenderer::draw(const Object &object, XMFLOAT4 color) {
     updateBuffer(m_cbModel, object.modelMatrix());
     updateBuffer(m_cbColor, color);
 
     object.render(m_device.context());
 }
 
-void DxRenderer::draw(const BrezierCurve &curve, DirectX::XMFLOAT4 color) {
-//    updateBuffer(m_cbMVP, mvp);
-//    updateBuffer(m_cbColor, colorOverride);
-//
-//    // set vertex buffer
-//    m_vertexBuffer = m_device.CreateVertexBuffer(controlPoints);
-//    m_indexBuffer = m_device.CreateIndexBuffer(indices);
-//    ID3D11Buffer *vbs[] = {m_vertexBuffer.get()};
-//    UINT strides[] = {sizeof(VertexPositionColor)};
-//    UINT offsets[] = {0};
-//    m_device.context()->IASetVertexBuffers(0, 1, vbs, strides, offsets);
-//    m_device.context()->IASetIndexBuffer(m_indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
-//
-//    m_device.context()->HSSetShader(m_hullShader.get(), nullptr, 0);
-//    m_device.context()->DSSetShader(m_domainShader.get(), nullptr, 0);
-//
-//    XMFLOAT2 vmin, vmax;
-//    auto viewport = scene->camera().viewport();
-//    XMStoreFloat2(&vmin, XMVector3Project(min, 0, 0,
-//                                          viewport.width(), viewport.height(),
-//                                          scene->camera().nearZ(), scene->camera().farZ(),
-//                                          mvp, XMMatrixIdentity(), XMMatrixIdentity()));
-//    XMStoreFloat2(&vmax, XMVector3Project(max, 0, 0,
-//                                          viewport.width(), viewport.height(),
-//                                          scene->camera().nearZ(), scene->camera().farZ(),
-//                                          mvp, XMMatrixIdentity(), XMMatrixIdentity()));
-//
-//    // tesselationAmount, lastPatchID, lastPatchPoints
-//    XMINT4 tesselationAmount = {
-//            clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
-//            static_cast<int>((indices.size() - 1) / 4),
-//            lastPatchSize, 0};
-//    int indexCount = indices.size();
-//    if (lastPatchSize == 0) {
-//        tesselationAmount.z = 4;
-//        tesselationAmount.y--;
-//        indexCount -= 4;
-//    }
-//    updateBuffer(m_cbTesselation, tesselationAmount);
-//
-//    // draw patches
-//    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
-//    m_device.context()->DrawIndexed(indexCount, 0, 0);
-//
-//    m_device.context()->HSSetShader(nullptr, nullptr, 0);
-//    m_device.context()->DSSetShader(nullptr, nullptr, 0);
+void DxRenderer::draw(const BrezierCurve &curve, XMFLOAT4 color) {
+    updateBuffer(m_cbModel, XMMatrixIdentity());
+    updateBuffer(m_cbColor, color);
+
+    m_device.context()->HSSetShader(m_hullShader.get(), nullptr, 0);
+    m_device.context()->DSSetShader(m_domainShader.get(), nullptr, 0);
+
+    XMFLOAT2 vmin, vmax;
+    auto viewport = scene->camera().viewport();
+    XMStoreFloat2(&vmin, XMVector3Project(curve.minPosition(), 0, 0,
+                                          viewport.width(), viewport.height(),
+                                          scene->camera().nearZ(), scene->camera().farZ(),
+                                          scene->camera().projectionMatrix(), scene->camera().viewMatrix(),
+                                          XMMatrixIdentity()));
+    XMStoreFloat2(&vmax, XMVector3Project(curve.maxPosition(), 0, 0,
+                                          viewport.width(), viewport.height(),
+                                          scene->camera().nearZ(), scene->camera().farZ(),
+                                          scene->camera().projectionMatrix(), scene->camera().viewMatrix(),
+                                          XMMatrixIdentity()));
+
+    // tesselationAmount, lastPatchID, lastPatchPoints
+    XMINT4 tesselationAmount = {
+            clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
+            curve.patchesCount() - 1,
+            curve.lastPatchSize(), 0};
+    updateBuffer(m_cbTesselation, tesselationAmount);
+
+    curve.render(m_device.context());
+
+    m_device.context()->HSSetShader(nullptr, nullptr, 0);
+    m_device.context()->DSSetShader(nullptr, nullptr, 0);
 }
 
-void DxRenderer::draw(const Grid &grid, DirectX::XMFLOAT4 color) {
+void DxRenderer::draw(const Grid &grid, XMFLOAT4 color) {
     updateBuffer(m_cbModel, grid.modelMatrix());
     updateBuffer(m_cbColor, CLEAR_COLOR);
     updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera().farZ(), 0, 0, 0});
@@ -107,7 +92,7 @@ void DxRenderer::draw(const Grid &grid, DirectX::XMFLOAT4 color) {
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
-void DxRenderer::draw(const Point &point, DirectX::XMFLOAT4 color) {
+void DxRenderer::draw(const Point &point, XMFLOAT4 color) {
     updateBuffer(m_cbModel, point.modelMatrix());
     updateBuffer(m_cbColor, color);
 
@@ -118,6 +103,19 @@ void DxRenderer::draw(const Point &point, DirectX::XMFLOAT4 color) {
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->IASetInputLayout(m_layout.get());
+}
+
+void DxRenderer::draw(const vector<VertexPositionColor> &vertices, XMMATRIX model, XMFLOAT4 color) {
+    updateBuffer(m_cbModel, model);
+    updateBuffer(m_cbColor, color);
+
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    auto vertexBuffer = DxDevice::Instance().CreateVertexBuffer(vertices);
+    unsigned int stride = sizeof(VertexPositionColor);
+    unsigned int offset = 0;
+    ID3D11Buffer *vb = vertexBuffer.get();
+    m_device.context()->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+    m_device.context()->Draw(vertices.size(), 0);
 }
 
 template<typename T>

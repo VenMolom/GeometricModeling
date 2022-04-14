@@ -41,18 +41,24 @@ public:
     void setRotation(DirectX::XMFLOAT3 rotation) override {};
 
     void setScale(DirectX::XMFLOAT3 scale) override {};
+
+    DirectX::XMVECTOR maxPosition() const { return DirectX::XMLoadFloat3(&maxPos); }
+
+    DirectX::XMVECTOR minPosition() const { return DirectX::XMLoadFloat3(&minPos); }
+
+    int patchesCount() const { return static_cast<int>(indices.size() + 3) / 4; }
+
+    int lastPatchSize() const { return _lastPatchSize; }
 protected:
     std::vector<std::weak_ptr<Point>> _points;
     std::vector<QPropertyNotifier> pointsHandlers{};
 
-    std::vector<VertexPositionColor> vertices;
-    std::vector<Index> indices;
     DirectX::XMFLOAT3 minPos{INFINITY, INFINITY, INFINITY};
     DirectX::XMFLOAT3 maxPos{-INFINITY, -INFINITY, -INFINITY};
-    int lastPatchSize;
+    int _lastPatchSize;
     bool canDraw{false};
 
-    virtual void drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType);
+    virtual void drawPolygonal(Renderer &renderer, DrawType drawType);
 
     void updatePoints();
 

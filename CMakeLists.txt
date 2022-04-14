@@ -62,7 +62,7 @@ set(PROJECT_SOURCES
         Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h
         Objects/Point/virtualPointsHolder.h
         Objects/Grid/grid.cpp Objects/Grid/grid.h
-        Objects/renderable.cpp Objects/renderable.h)
+        Objects/renderable.cpp Objects/renderable.h Objects/linestrip.cpp Objects/linestrip.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

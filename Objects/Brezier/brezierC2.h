@@ -9,6 +9,7 @@
 #include "Utils/Utils3D.h"
 #include "brezierCurve.h"
 #include "Objects/Point/virtualPoint.h"
+#include "Objects/linestrip.h"
 #include "Objects/Point/virtualPointsHolder.h"
 
 class BrezierC2 : public BrezierCurve, public VirtualPointsHolder {
@@ -33,7 +34,7 @@ public:
 
 protected:
 
-    void drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType) override;
+    void drawPolygonal(Renderer &renderer, DrawType drawType) override;
 
     void preUpdate() override;
 
@@ -45,7 +46,7 @@ protected:
 
 private:
     std::vector<std::shared_ptr<VirtualPoint>> bernsteinPoints;
-    std::vector<VertexPositionColor> bSplineVertices;
+    Linestrip deBoorPoints;
     std::vector<QPropertyNotifier> bernsteinPointsHandlers{};
     bool _bothPolygonals{false};
     bool _bernsteinBase{false};

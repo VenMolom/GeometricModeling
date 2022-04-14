@@ -16,7 +16,7 @@
 #undef min
 
 class DxRenderer : public QWidget, public Renderer {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     explicit DxRenderer(QWidget *parent);
@@ -34,6 +34,9 @@ public:
     void draw(const Grid &grid, DirectX::XMFLOAT4 color) override;
 
     void draw(const Point &point, DirectX::XMFLOAT4 color) override;
+
+    void draw(const std::vector<VertexPositionColor> &vertices,
+              DirectX::XMMATRIX model, DirectX::XMFLOAT4 color) override;
 
     QPaintEngine *paintEngine() const override;
 
@@ -89,7 +92,7 @@ private:
 
     LARGE_INTEGER currentTicks, ticksPerSecond;
 
-    const float CLEAR_COLOR[4] {0.2f, 0.2f, 0.2f, 1.0f};
+    const float CLEAR_COLOR[4]{0.2f, 0.2f, 0.2f, 1.0f};
 
     void init3D3();
 

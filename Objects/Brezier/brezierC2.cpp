@@ -10,7 +10,8 @@ using namespace Utils3D;
 
 BrezierC2::BrezierC2(vector<weak_ptr<Point>> &&points, QBindable<std::weak_ptr<Object>> bindableSelected)
         : BrezierCurve("Brezier C2", std::move(points)),
-          VirtualPointsHolder(bindableSelected) {
+          VirtualPointsHolder(bindableSelected),
+          deBoorPoints() {
     updatePoints();
 }
 
@@ -19,29 +20,27 @@ Type BrezierC2::type() const {
 }
 
 void BrezierC2::draw(Renderer &renderer, DrawType drawType) {
-//    if (_bernsteinBase) {
-//        for (auto &point: bernsteinPoints) {
-//            auto isSelected = !selected.expired() && point->equals(selected.lock());
-//            point->draw(renderer, view, projection, isSelected ? SELECTED : DEFAULT);
-//        }
-//    }
+    if (_bernsteinBase) {
+        for (auto &point: bernsteinPoints) {
+            auto isSelected = !selected.expired() && point->equals(selected.lock());
+            point->draw(renderer, isSelected ? SELECTED : DEFAULT);
+        }
+    }
 
-    //BrezierCurve::draw(renderer,, drawType);
+    BrezierCurve::draw(renderer, drawType);
 }
 
-void BrezierC2::drawPolygonal(Renderer &renderer, DirectX::XMMATRIX mvp, DrawType drawType) {
-//    if (_bernsteinBase || _bothPolygonals) {
-//        BrezierCurve::drawPolygonal(renderer, mvp, drawType);
-//    }
-//    if ((!_bernsteinBase || _bothPolygonals) && !bSplineVertices.empty()) {
-//        renderer.draw(bSplineVertices, LineStrip, mvp,
-//                      drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
-//    }
-
+void BrezierC2::drawPolygonal(Renderer &renderer, DrawType drawType) {
+    if (_bernsteinBase || _bothPolygonals) {
+        BrezierCurve::drawPolygonal(renderer, drawType);
+    }
+    if ((!_bernsteinBase || _bothPolygonals) && !deBoorPoints.vertices().empty()) {
+        deBoorPoints.draw(renderer, drawType);
+    }
 }
 
 void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
-    bSplineVertices.push_back({point->position(), {1, 1, 1}});
+    deBoorPoints.vertices().push_back({point->position(), {1, 1, 1}});
 
     minPos = newMin(minPos, point->position());
     maxPos = newMax(maxPos, point->position());
@@ -87,18 +86,21 @@ void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
 void BrezierC2::preUpdate() {
     BrezierCurve::preUpdate();
     bernsteinPoints.clear();
-    bSplineVertices.clear();
+    deBoorPoints.vertices().clear();
     bernsteinPointsHandlers.clear();
 }
 
 void BrezierC2::postUpdate() {
-    lastPatchSize = 0;
+    _lastPatchSize = 4;
     if (vertices.size() > 2) {
         vertices.resize(vertices.size() - 2);
         bernsteinPoints.resize(vertices.size());
+        indices.resize(indices.size() - 4);
     }
 
     canDraw = _points.size() >= 4;
+    updateBuffers();
+    deBoorPoints.update();
 }
 
 void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
@@ -123,7 +125,7 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
     int under = (index - 1) * 3;
     bool fixedLeft{false}, fixedRight{false};
 
-    bSplineVertices[index].position = moved->position();
+    deBoorPoints.vertices()[index].position = moved->position();
 
     shared_ptr<Point> left{}, right{};
     // should have left
@@ -227,6 +229,8 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
     }
 
     synchroniseBernsteinPositions(max(0, under - 3), min(static_cast<int>(vertices.size()) - 1, under + 3));
+    updateBuffers();
+    deBoorPoints.update();
 }
 
 const vector<shared_ptr<VirtualPoint>> &BrezierC2::virtualPoints() {
