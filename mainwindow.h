@@ -50,6 +50,16 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
+
+    /* Interpolation Curve C2
+     * TODO: new Curve type
+     * TODO: extract functionality from BrezierCurve to Curve
+     * TODO: add InterpolationCurveC2 class inheriting from Curve
+     * TODO: topology is 2_CONTROL_POINTS_PATCHLIST (c and distance to next node) (c_0 is 0)
+     * TODO: tesselation shader calculating polynomial value from c and distance (from tau = 0 to d_i)
+     * TODO: distance is chord length
+     * TODO: solve equations in O(n) time and memory (moves will need to only recalculate up to 3 c) !This is hardest part
+     */
 };
 
 #endif // MAINWINDOW_H
