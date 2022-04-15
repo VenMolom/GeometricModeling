@@ -12,6 +12,8 @@ class Object;
 
 class BrezierCurve;
 
+class InterpolationCurveC2;
+
 class Grid;
 
 class Point;
@@ -25,6 +27,8 @@ public:
     virtual void draw(const Object &object, DirectX::XMFLOAT4 color) = 0;
 
     virtual void draw(const BrezierCurve &curve, DirectX::XMFLOAT4 color) = 0;
+
+    virtual void draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color) = 0;
 
     virtual void draw(const Grid &grid, DirectX::XMFLOAT4 color) = 0;
 

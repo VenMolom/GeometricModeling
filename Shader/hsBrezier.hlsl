@@ -5,7 +5,7 @@ cbuffer cbTesselation: register(b0) {
 }
 
 HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
-	InputPatch<VSOut, NUM_CONTROL_POINTS> ip,
+	InputPatch<VSOut, CONTROL_POINTS_BREZIER> ip,
 	uint PatchID : SV_PrimitiveID)
 {
 	HS_CONSTANT_DATA_OUTPUT output;
@@ -19,10 +19,10 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 [domain("isoline")]
 [partitioning("integer")]
 [outputtopology("line")]
-[outputcontrolpoints(NUM_CONTROL_POINTS)]
+[outputcontrolpoints(CONTROL_POINTS_BREZIER)]
 [patchconstantfunc("CalcHSPatchConstants")]
 VSOut main(
-	InputPatch<VSOut, NUM_CONTROL_POINTS> ip,
+	InputPatch<VSOut, CONTROL_POINTS_BREZIER> ip,
 	uint i : SV_OutputControlPointID,
 	uint PatchID : SV_PrimitiveID )
 {

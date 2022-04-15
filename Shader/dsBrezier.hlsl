@@ -1,6 +1,6 @@
 #include "Header.hlsl"
 
-float4 deCastillo(OutputPatch<VSOut, NUM_CONTROL_POINTS> patch, float t)
+float4 deCastillo(OutputPatch<VSOut, CONTROL_POINTS_BREZIER> patch, float t)
 {
     float4 b[4] = {patch[0].pos, patch[1].pos, patch[2].pos, patch[3].pos};
     float t1 = 1.0f - t;
@@ -21,7 +21,7 @@ float4 deCastillo(OutputPatch<VSOut, NUM_CONTROL_POINTS> patch, float t)
 VSOut main(
 	HS_CONSTANT_DATA_OUTPUT input,
 	float2 uv : SV_DomainLocation,
-	const OutputPatch<VSOut, NUM_CONTROL_POINTS> patch)
+	const OutputPatch<VSOut, CONTROL_POINTS_BREZIER> patch)
 {
 	VSOut output;
 

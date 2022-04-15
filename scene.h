@@ -10,7 +10,7 @@
 #include <DirectXMath.h>
 #include "Objects/Cursor/cursor.h"
 #include "Objects/Point/point.h"
-#include "Objects/Curve/brezierC0.h"
+#include "Objects/Curve/curve.h"
 #include "Objects/CompositeObject/compositeObject.h"
 #include "Objects/Point/virtualPointsHolder.h"
 #include "Objects/Grid/grid.h"

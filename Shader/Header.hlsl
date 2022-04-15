@@ -12,4 +12,5 @@ struct HS_CONSTANT_DATA_OUTPUT {
 	float edges[2] : SV_TessFactor;
 };
 
-#define NUM_CONTROL_POINTS 4
+#define CONTROL_POINTS_BREZIER 4
+#define CONTROL_POINTS_INTERPOLATION 4

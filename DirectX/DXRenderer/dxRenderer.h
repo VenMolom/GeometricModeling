@@ -31,6 +31,8 @@ public:
 
     void draw(const BrezierCurve &curve, DirectX::XMFLOAT4 color) override;
 
+    void draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color) override;
+
     void draw(const Grid &grid, DirectX::XMFLOAT4 color) override;
 
     void draw(const Point &point, DirectX::XMFLOAT4 color) override;
@@ -73,8 +75,14 @@ private:
 
     mini::dx_ptr<ID3D11VertexShader> m_vertexShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexBillboardShader;
-    mini::dx_ptr<ID3D11HullShader> m_hullShader;
-    mini::dx_ptr<ID3D11DomainShader> m_domainShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexNoProjectionShader;
+
+    mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
+    mini::dx_ptr<ID3D11DomainShader> m_domainBrezierShader;
+
+    mini::dx_ptr<ID3D11HullShader> m_hullInterpolationShader;
+    mini::dx_ptr<ID3D11DomainShader> m_domainInterpolationShader;
+
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
 

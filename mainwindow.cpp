@@ -1,11 +1,11 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "Objects/Parametric/torus.h"
 #include "Objects/Point/point.h"
+#include "Objects/Parametric/torus.h"
 #include "Objects/Curve/brezierC0.h"
 #include "Objects/Curve/brezierC2.h"
-#include "Objects/CompositeObject/compositeObject.h"
 #include "Objects/Curve/interpolationCurveC2.h"
+#include "Objects/CompositeObject/compositeObject.h"
 
 using namespace std;
 using namespace DirectX;
@@ -134,7 +134,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
         shared_ptr<Object> sel;
         QListWidgetItem *newSelected;
         if ((sel = scene->selected().lock()) && sel->type() & CURVE) {
-            auto *b = dynamic_cast<BrezierCurve *>(sel.get());
+            auto *b = dynamic_cast<Curve *>(sel.get());
             for (auto &select: selected) {
                 auto ob = dynamic_cast<ObjectListItem *>(select)->object();
                 if (ob->type() & POINT3D) {

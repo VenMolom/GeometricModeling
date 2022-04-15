@@ -62,7 +62,7 @@ set(PROJECT_SOURCES
         Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h
         Objects/Point/virtualPointsHolder.h
         Objects/Grid/grid.cpp Objects/Grid/grid.h
-        Objects/renderable.h
+        Objects/renderable.cpp Objects/renderable.h
         Objects/linestrip.cpp Objects/linestrip.h
         Objects/Curve/curve.cpp Objects/Curve/curve.h
         Objects/Curve/interpolationCurveC2.cpp Objects/Curve/interpolationCurveC2.h)
@@ -70,14 +70,26 @@ set(PROJECT_SOURCES
 # Build HLSL shaders
 add_custom_target(shaders)
 
-set(HLSL_SHADER_FILES Shader/ps.hlsl Shader/vs.hlsl Shader/hs.hlsl Shader/ds.hlsl Shader/psCameraFade.hlsl Shader/vsBillboard.hlsl)
+set(HLSL_SHADER_FILES
+        Shader/ps.hlsl
+        Shader/vs.hlsl
+        Shader/hsBrezier.hlsl
+        Shader/dsBrezier.hlsl
+        Shader/hsInterpolation.hlsl
+        Shader/dsInterpolation.hlsl
+        Shader/psCameraFade.hlsl
+        Shader/vsBillboard.hlsl
+        Shader/vsNoProjection.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsBillboard.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties(Shader/vsNoProjection.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
-set_source_files_properties(Shader/hs.hlsl PROPERTIES ShaderType "hs")
-set_source_files_properties(Shader/ds.hlsl PROPERTIES ShaderType "ds")
+set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
+set_source_files_properties(Shader/dsBrezier.hlsl PROPERTIES ShaderType "ds")
+set_source_files_properties(Shader/hsInterpolation.hlsl PROPERTIES ShaderType "hs")
+set_source_files_properties(Shader/dsInterpolation.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
 foreach (FILE ${HLSL_SHADER_FILES})
