@@ -26,8 +26,8 @@ VSOut main(
 
     float segmentLength = patch[3].col.x;
     float t = segmentLength * (1.0f/input.edges[0] * uv.x + uv.y);
-    //output.pos = mul(projMatrix, mul(viewMatrix, horner(patch, t)));
-    output.pos = horner(patch, t);
+    output.pos = mul(projMatrix, mul(viewMatrix, horner(patch, t)));
+    //output.pos = horner(patch, t);
     output.col = patch[0].col;
 
 	return output;
