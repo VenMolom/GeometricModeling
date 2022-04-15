@@ -62,21 +62,27 @@
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
         <widget class="QGroupBox" name="addObjectsGroupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Add object</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
+          <item row="3" column="0">
+           <widget class="QPushButton" name="addBrezierC2">
+            <property name="text">
+             <string>Brezier C2</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QPushButton" name="addPoint">
             <property name="text">
              <string>Point</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="addTorus">
-            <property name="text">
-             <string>Torus</string>
             </property>
            </widget>
           </item>
@@ -87,10 +93,17 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QPushButton" name="addBrezierC2">
+          <item row="1" column="0">
+           <widget class="QPushButton" name="addTorus">
             <property name="text">
-             <string>Brezier C2</string>
+             <string>Torus</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QPushButton" name="addInterpolationC2">
+            <property name="text">
+             <string>Interpolation C2</string>
             </property>
            </widget>
           </item>
@@ -215,6 +228,7 @@
   <tabstop>addTorus</tabstop>
   <tabstop>addBrezierC0</tabstop>
   <tabstop>addBrezierC2</tabstop>
+  <tabstop>addInterpolationC2</tabstop>
   <tabstop>objectsList</tabstop>
   <tabstop>deleteObject</tabstop>
   <tabstop>centerObject</tabstop>

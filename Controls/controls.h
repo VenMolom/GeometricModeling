@@ -1,5 +1,5 @@
-#ifndef CONTROLLS_H
-#define CONTROLLS_H
+#ifndef CONTROLS_H
+#define CONTROLS_H
 
 #include <QPushButton>
 #include "scene.h"
@@ -29,4 +29,4 @@ private:
     Ui::Controls *ui;
 };
 
-#endif // CONTROLLS_H
+#endif // CONTROLS_H

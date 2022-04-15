@@ -2,9 +2,10 @@
 #include "./ui_mainwindow.h"
 #include "Objects/Parametric/torus.h"
 #include "Objects/Point/point.h"
-#include "Objects/Brezier/brezierC0.h"
-#include "Objects/Brezier/brezierC2.h"
+#include "Objects/Curve/brezierC0.h"
+#include "Objects/Curve/brezierC2.h"
 #include "Objects/CompositeObject/compositeObject.h"
+#include "Objects/Curve/interpolationCurveC2.h"
 
 using namespace std;
 using namespace DirectX;
@@ -47,6 +48,9 @@ void MainWindow::on_addBrezierC2_clicked() {
     scene->addObject(std::move(make_shared<BrezierC2>(std::move(getSelectedPoints()), scene->bindableSelected())));
 }
 
+void MainWindow::on_addInterpolationC2_clicked() {
+    scene->addObject(std::move(make_shared<InterpolationCurveC2>(std::move(getSelectedPoints()))));
+}
 
 void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool select) {
     auto item = std::make_unique<ObjectListItem>(object, scene);
@@ -127,26 +131,26 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
             o->select();
         }
     } else {
-        shared_ptr <Object> sel;
+        shared_ptr<Object> sel;
         QListWidgetItem *newSelected;
-        if ((sel = scene->selected().lock()) && sel->type() & BREZIERCURVE) {
+        if ((sel = scene->selected().lock()) && sel->type() & CURVE) {
             auto *b = dynamic_cast<BrezierCurve *>(sel.get());
             for (auto &select: selected) {
                 auto ob = dynamic_cast<ObjectListItem *>(select)->object();
                 if (ob->type() & POINT3D) {
-                    shared_ptr <Point> p = static_pointer_cast<Point>(ob);
+                    shared_ptr<Point> p = static_pointer_cast<Point>(ob);
                     b->addPoint(p);
-                } else if (ob->type() & BREZIERCURVE) {
+                } else if (ob->type() & CURVE) {
                     newSelected = select;
                 }
             }
             QSignalBlocker blocker(ui->objectsList);
-            ui->objectsList->setCurrentItem(newSelected,  {QItemSelectionModel::SelectionFlag::ClearAndSelect});
+            ui->objectsList->setCurrentItem(newSelected, {QItemSelectionModel::SelectionFlag::ClearAndSelect});
             return;
         }
 
-        std::list<shared_ptr < Object>>
-        objects{};
+        std::list<shared_ptr<Object>>
+                objects{};
         for (auto &select: selected) {
             auto object = dynamic_cast<ObjectListItem *>(select)->object();
             if (!(object->type() & COMPOSABLE)) continue;

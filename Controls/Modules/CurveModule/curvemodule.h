@@ -1,21 +1,21 @@
-#ifndef BREZIERCURVEMODULE_H
-#define BREZIERCURVEMODULE_H
+#ifndef CURVEMODULE_H
+#define CURVEMODULE_H
 
 #include <QWidget>
 #include <QPushButton>
 #include <QTableWidgetItem>
-#include "Objects/Brezier/brezierCurve.h"
+#include "Objects/Curve/curve.h"
 
 namespace Ui {
-class BrezierCurveModule;
+class CurveModule;
 }
 
-class BrezierCurveModule : public QWidget {
+class CurveModule : public QWidget {
     Q_OBJECT
 
 public:
-    explicit BrezierCurveModule(std::shared_ptr<BrezierCurve> curve, QWidget *parent = nullptr);
-    ~BrezierCurveModule();
+    explicit CurveModule(std::shared_ptr<Curve> curve, QWidget *parent = nullptr);
+    ~CurveModule();
 
 private slots:
     void on_polygonalCheckBox_stateChanged(int arg1);
@@ -29,14 +29,14 @@ private slots:
     void onDeletePointButtonClicked();
 
 private:
-    std::shared_ptr<BrezierCurve> curve;
+    std::shared_ptr<Curve> curve;
     std::list<std::unique_ptr<QTableWidgetItem>> points;
     std::list<std::unique_ptr<QPushButton>> deletePointButtons;
     QPropertyNotifier pointsHandler;
 
-    Ui::BrezierCurveModule *ui;
+    Ui::CurveModule *ui;
 
     void updateCurvePoints();
 };
 
-#endif // BREZIERCURVEMODULE_H
+#endif // CURVEMODULE_H

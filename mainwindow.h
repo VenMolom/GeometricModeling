@@ -11,7 +11,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
@@ -19,6 +19,7 @@ public:
     ~MainWindow() override;
 
 private slots:
+
     void on_addPoint_clicked();
 
     void on_addTorus_clicked();
@@ -27,13 +28,15 @@ private slots:
 
     void on_addBrezierC2_clicked();
 
+    void on_addInterpolationC2_clicked();
+
     void on_objectsList_itemSelectionChanged();
 
     void on_deleteObject_clicked();
 
     void on_centerObject_clicked();
 
-    void onObjectAdded(const std::shared_ptr<Object>& object, bool select);
+    void onObjectAdded(const std::shared_ptr<Object> &object, bool select);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -53,8 +56,6 @@ private:
 
     /* Interpolation Curve C2
      * TODO: new Curve type
-     * TODO: extract functionality from BrezierCurve to Curve
-     * TODO: add InterpolationCurveC2 class inheriting from Curve
      * TODO: topology is 2_CONTROL_POINTS_PATCHLIST (c and distance to next node) (c_0 is 0)
      * TODO: tesselation shader calculating polynomial value from c and distance (from tau = 0 to d_i)
      * TODO: distance is chord length

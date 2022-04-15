@@ -1,12 +1,12 @@
-#include "breziercurvemodule.h"
-#include "ui_breziercurvemodule.h"
+#include "curvemodule.h"
+#include "ui_curvemodule.h"
 
 using namespace std;
 
-BrezierCurveModule::BrezierCurveModule(shared_ptr<BrezierCurve> curve, QWidget *parent) :
+CurveModule::CurveModule(shared_ptr<Curve> curve, QWidget *parent) :
         QWidget(parent),
         curve(std::move(curve)),
-        ui(new Ui::BrezierCurveModule) {
+        ui(new Ui::CurveModule) {
     ui->setupUi(this);
     pointsHandler = this->curve->bindablePoints().addNotifier([this] { updateCurvePoints(); });
     updateCurvePoints();
@@ -14,11 +14,11 @@ BrezierCurveModule::BrezierCurveModule(shared_ptr<BrezierCurve> curve, QWidget *
     ui->pointsList->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
-BrezierCurveModule::~BrezierCurveModule() {
+CurveModule::~CurveModule() {
     delete ui;
 }
 
-void BrezierCurveModule::updateCurvePoints() {
+void CurveModule::updateCurvePoints() {
     points.clear();
     deletePointButtons.clear();
     ui->pointsList->clearContents();
@@ -33,7 +33,7 @@ void BrezierCurveModule::updateCurvePoints() {
             ui->pointsList->setItem(index, 0, item.get());
             ui->pointsList->setCellWidget(index, 1, button.get());
 
-            connect(button.get(), &QPushButton::clicked, this, &BrezierCurveModule::onDeletePointButtonClicked);
+            connect(button.get(), &QPushButton::clicked, this, &CurveModule::onDeletePointButtonClicked);
 
             points.push_back(std::move(item));
             deletePointButtons.push_back(std::move(button));
@@ -42,32 +42,32 @@ void BrezierCurveModule::updateCurvePoints() {
     ui->pointsList->setRowCount(points.size());
 }
 
-void BrezierCurveModule::on_polygonalCheckBox_stateChanged(int arg1) {
+void CurveModule::on_polygonalCheckBox_stateChanged(int arg1) {
     curve->setPolygonal(Qt::Checked == (Qt::CheckState) arg1);
 }
 
-void BrezierCurveModule::on_pointsList_itemSelectionChanged() {
+void CurveModule::on_pointsList_itemSelectionChanged() {
     auto selected = ui->pointsList->selectedItems();
     auto disable = selected.empty();
     ui->movePointUp->setDisabled(disable);
     ui->movePointDown->setDisabled(disable);
 }
 
-void BrezierCurveModule::on_movePointUp_clicked() {
+void CurveModule::on_movePointUp_clicked() {
     auto selected = ui->pointsList->selectedItems();
     if (selected.empty()) return;
 
     curve->movePoint(selected[0]->row(), Direction::UP);
 }
 
-void BrezierCurveModule::on_movePointDown_clicked() {
+void CurveModule::on_movePointDown_clicked() {
     auto selected = ui->pointsList->selectedItems();
     if (selected.empty()) return;
 
     curve->movePoint(selected[0]->row(), Direction::DOWN);
 }
 
-void BrezierCurveModule::onDeletePointButtonClicked() {
+void CurveModule::onDeletePointButtonClicked() {
     auto index = ui->pointsList->currentRow();
     curve->removePoint(index);
 }

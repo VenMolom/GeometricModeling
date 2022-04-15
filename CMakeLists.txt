@@ -40,17 +40,17 @@ set(PROJECT_SOURCES
         Objects/Point/point.cpp Objects/Point/point.h
         Objects/ObjectListItem/objectListItem.cpp Objects/ObjectListItem/objectListItem.h
         Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h
-        Objects/Brezier/brezierC0.cpp Objects/Brezier/brezierC0.h
-        Objects/Brezier/brezierCurve.cpp Objects/Brezier/brezierCurve.h
-        Objects/Brezier/brezierC2.cpp Objects/Brezier/brezierC2.h
+        Objects/Curve/brezierC0.cpp Objects/Curve/brezierC0.h
+        Objects/Curve/brezierCurve.cpp Objects/Curve/brezierCurve.h
+        Objects/Curve/brezierC2.cpp Objects/Curve/brezierC2.h
         Controls/Modules/ObjectModule/objectmodule.h Controls/Modules/ObjectModule/objectmodule.cpp
         Controls/Modules/ObjectModule/objectmodule.ui
         Controls/Modules/ParametricModule/parametricmodule.h Controls/Modules/ParametricModule/parametricmodule.cpp
         Controls/Modules/ParametricModule/parametricmodule.ui
         Controls/Modules/TorusModule/torusmodule.h Controls/Modules/TorusModule/torusmodule.cpp
         Controls/Modules/TorusModule/torusmodule.ui
-        Controls/Modules/BrezierCurveModule/breziercurvemodule.h Controls/Modules/BrezierCurveModule/breziercurvemodule.cpp
-        Controls/Modules/BrezierCurveModule/breziercurvemodule.ui
+        Controls/Modules/CurveModule/curvemodule.h Controls/Modules/CurveModule/curvemodule.cpp
+        Controls/Modules/CurveModule/curvemodule.ui
         Controls/Modules/MoveModule/movemodule.h Controls/Modules/MoveModule/movemodule.cpp
         Controls/Modules/MoveModule/movemodule.ui
         Controls/Modules/TransformModule/transformmodule.h Controls/Modules/TransformModule/transformmodule.cpp
@@ -62,7 +62,10 @@ set(PROJECT_SOURCES
         Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h
         Objects/Point/virtualPointsHolder.h
         Objects/Grid/grid.cpp Objects/Grid/grid.h
-        Objects/renderable.cpp Objects/renderable.h Objects/linestrip.cpp Objects/linestrip.h)
+        Objects/renderable.h
+        Objects/linestrip.cpp Objects/linestrip.h
+        Objects/Curve/curve.cpp Objects/Curve/curve.h
+        Objects/Curve/interpolationCurveC2.cpp Objects/Curve/interpolationCurveC2.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

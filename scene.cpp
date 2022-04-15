@@ -36,7 +36,7 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
 
     // add point to selected curve
     shared_ptr<Object> sel;
-    if ((sel = _selected.value().lock()) && sel->type() & BREZIERCURVE && object->type() & POINT3D) {
+    if ((sel = _selected.value().lock()) && sel->type() & CURVE && object->type() & POINT3D) {
         auto *c = dynamic_cast<BrezierCurve *>(sel.get());
         shared_ptr<Point> p = static_pointer_cast<Point>(object);
         c->addPoint(p);
@@ -103,7 +103,7 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
         shared_ptr<Object> sel;
 
         if (multiple && (sel = _selected.value().lock()) && object->type() & COMPOSABLE) {
-            if (sel->type() & BREZIERCURVE && object->type() & POINT3D) {
+            if (sel->type() & CURVE && object->type() & POINT3D) {
                 auto *c = dynamic_cast<BrezierCurve *>(sel.get());
                 shared_ptr<Point> p = static_pointer_cast<Point>(object);
                 c->addPoint(p);

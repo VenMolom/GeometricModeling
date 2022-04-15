@@ -3,7 +3,7 @@
 
 #include "Objects/Parametric/torus.h"
 #include "Objects/Cursor/cursor.h"
-#include "Objects/Brezier/brezierC2.h"
+#include "Objects/Curve/brezierC2.h"
 
 #include "Controls/Modules/MoveModule/movemodule.h"
 #include "Controls/Modules/TorusModule/torusmodule.h"
@@ -12,7 +12,7 @@
 #include "Controls/Modules/TransformModule/transformmodule.h"
 #include "Controls/Modules/ScreenMoveModule/screenmovemodule.h"
 #include "Controls/Modules/ParametricModule/parametricmodule.h"
-#include "Controls/Modules/BrezierCurveModule/breziercurvemodule.h"
+#include "Controls/Modules/CurveModule/curvemodule.h"
 
 using namespace std;
 using namespace DirectX;
@@ -76,9 +76,9 @@ void Controls::updateSelected() {
         ui->modulesLayout->addWidget(modules.back().get(), 6, 0, 1, 1);
     }
 
-    if (object->type() & BREZIERCURVE) {
-        auto curve = static_pointer_cast<BrezierCurve>(object);
-        modules.push_back(std::move(make_unique<BrezierCurveModule>(curve, this)));
+    if (object->type() & CURVE) {
+        auto curve = static_pointer_cast<Curve>(object);
+        modules.push_back(std::move(make_unique<CurveModule>(curve, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 7, 0, 1, 1);
     }
 }

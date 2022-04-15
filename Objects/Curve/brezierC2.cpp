@@ -20,14 +20,14 @@ Type BrezierC2::type() const {
 }
 
 void BrezierC2::draw(Renderer &renderer, DrawType drawType) {
-    if (_bernsteinBase) {
+    BrezierCurve::draw(renderer, drawType);
+
+    if (_bernsteinBase && !bernsteinPoints.empty()) {
         for (auto &point: bernsteinPoints) {
             auto isSelected = !selected.expired() && point->equals(selected.lock());
             point->draw(renderer, isSelected ? SELECTED : DEFAULT);
         }
     }
-
-    BrezierCurve::draw(renderer, drawType);
 }
 
 void BrezierC2::drawPolygonal(Renderer &renderer, DrawType drawType) {

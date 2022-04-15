@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BrezierCurveModule</class>
- <widget class="QWidget" name="BrezierCurveModule">
+ <class>CurveModule</class>
+ <widget class="QWidget" name="CurveModule">
   <property name="geometry">
    <rect>
     <x>0</x>
