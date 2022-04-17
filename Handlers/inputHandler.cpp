@@ -33,10 +33,10 @@ void InputHandler::mouseReleaseEvent(QMouseEvent *event) {
 
 void InputHandler::mouseMoveEvent(QMouseEvent *event) {
     if (event->buttons() & ROTATE_BUTTON) {
-        scene->camera().rotate(event->position() - lastMousePos);
+        scene->camera()->rotate(event->position() - lastMousePos);
     }
     if (event->buttons() & PAN_BUTTON) {
-        scene->camera().move(event->position() - lastMousePos);
+        scene->camera()->move(event->position() - lastMousePos);
     }
     if (event->buttons() & MAIN_BUTTON && moveable) {
         scene->moveSelected(event->position().toPoint());
@@ -48,7 +48,7 @@ void InputHandler::mouseMoveEvent(QMouseEvent *event) {
 void InputHandler::wheelEvent(QWheelEvent *event) {
     if (event->buttons() & PAN_BUTTON) return;
 
-    scene->camera().changeZoom(static_cast<float>(event->angleDelta().y()));
+    scene->camera()->changeZoom(static_cast<float>(event->angleDelta().y()));
 }
 
 void InputHandler::keyPressEvent(QKeyEvent *event) {

@@ -9,8 +9,9 @@ using namespace Utils3D;
 using namespace std;
 
 Scene::Scene()
-        : _camera(), grid(500), virtualPointsHolders(), _objects(), _selected() {
-    camera().rotate({0, 200.0f});
+        : grid(500), virtualPointsHolders(), _objects(), _selected() {
+    _camera = make_shared<Camera>();
+    _camera->rotate({0, 200.0f});
 }
 
 void Scene::draw(Renderer &renderer) {
@@ -78,20 +79,20 @@ void Scene::moveSelected(QPoint screenPosition) {
     if (!(selected = _selected.value().lock()) || selected->type() & COMPOSITE) return;
 
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
-    auto position = getPositionOnPlane(screenPos, _camera.direction(), selected->position());
+    auto position = getPositionOnPlane(screenPos, _camera->direction(), selected->position());
 
     selected->setPosition(position);
 }
 
 void Scene::addPoint(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
-    auto position = getPositionOnPlane(screenPos, _camera.direction(), _camera.center());
+    auto position = getPositionOnPlane(screenPos, _camera->direction(), _camera->center());
     addObject(make_shared<Point>(position), true);
 }
 
 void Scene::centerSelected() {
     if (auto selected = _selected.value().lock()) {
-        _camera.moveTo(selected->position());
+        _camera->moveTo(selected->position());
     }
 }
 
@@ -157,9 +158,9 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
 }
 
 Utils3D::XMFLOAT3RAY Scene::getRayFromScreenPosition(XMINT2 screenPosition) const {
-    auto screenSize = XMFLOAT2(_camera.viewport().width(), _camera.viewport().height());
-    return getRayFromScreen(screenPosition, screenSize, _camera.nearZ(), _camera.farZ(),
-                            _camera.projectionMatrix(), _camera.viewMatrix());
+    auto screenSize = XMFLOAT2(_camera->viewport().width(), _camera->viewport().height());
+    return getRayFromScreen(screenPosition, screenSize, _camera->nearZ(), _camera->farZ(),
+                            _camera->projectionMatrix(), _camera->viewMatrix());
 }
 
 shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
@@ -199,7 +200,7 @@ Scene::getPositionOnPlane(DirectX::XMINT2 screenPosition, DirectX::XMFLOAT3 norm
 }
 
 void Scene::addCursor(XMFLOAT3RAY ray, XMINT2 screenPos) {
-    auto plane = getPerpendicularPlaneThroughPoint(_camera.direction(), _camera.center());
+    auto plane = getPerpendicularPlaneThroughPoint(_camera->direction(), _camera->center());
     auto position = getRayCrossWithPlane(ray, plane);
 
     removeComposite();

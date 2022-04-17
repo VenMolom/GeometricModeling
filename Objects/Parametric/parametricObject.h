@@ -58,7 +58,7 @@ template<size_t Dim>
 void ParametricObject<Dim>::draw(Renderer &renderer, DrawType drawType) {
     renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
     if (drawType == SELECTED) {
-        Cursor::drawCursor(renderer, DirectX::XMLoadFloat4x4(&noScaleMatrix));
+        Cursor::drawCursor(renderer, position(), rotation());
     }
 }
 

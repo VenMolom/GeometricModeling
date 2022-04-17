@@ -12,9 +12,9 @@
 
 class Cursor : public Object {
 public:
-    static void drawCursor(Renderer &renderer, const DirectX::XMMATRIX &mvp);
+    static void drawCursor(Renderer &renderer, const DirectX::XMFLOAT3 &position, const DirectX::XMFLOAT3 &rotation);
 
-    Cursor(DirectX::XMFLOAT3 position, DirectX::XMINT2 screenPosition, Camera &camera);
+    Cursor(DirectX::XMFLOAT3 position, DirectX::XMINT2 screenPosition, std::shared_ptr<Camera> camera);
 
     void draw(Renderer &renderer, DrawType drawType) override;
 
@@ -32,12 +32,12 @@ public:
 
     void setScale(DirectX::XMFLOAT3 scale) override {}
 
-    // TODO: add static instance to draw selected object cursor
-
 private:
     const static std::vector<VertexPositionColor> cursorVertices;
 
-    Camera &camera;
+    static std::unique_ptr<Cursor> instance;
+
+    std::shared_ptr<Camera> camera;
 
     QProperty<DirectX::XMINT2> _screenPosition;
     QPropertyNotifier positionHandler;

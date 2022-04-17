@@ -37,9 +37,6 @@ public:
 
     void draw(const Point &point, DirectX::XMFLOAT4 color) override;
 
-    void draw(const std::vector<VertexPositionColor> &vertices,
-              DirectX::XMMATRIX model, DirectX::XMFLOAT4 color) override;
-
     QPaintEngine *paintEngine() const override;
 
     void handleKeyEvent(QKeyEvent *event);

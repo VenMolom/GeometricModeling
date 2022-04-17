@@ -37,7 +37,7 @@ public:
 
     void draw(Renderer &renderer);
 
-    Camera &camera() { return _camera; }
+    std::shared_ptr<Camera> camera() { return _camera; }
 
     std::weak_ptr<Object> selected() const { return _selected; }
 
@@ -55,7 +55,7 @@ private:
     std::shared_ptr<Object> composite;
     std::list<std::weak_ptr<VirtualPointsHolder>> virtualPointsHolders;
     // TODO: look into removing composite to reduce complexity
-    Camera _camera;
+    std::shared_ptr<Camera> _camera;
     Grid grid;
 
     Utils3D::XMFLOAT3RAY getRayFromScreenPosition(DirectX::XMINT2 screenPosition) const;

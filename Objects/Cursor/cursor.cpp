@@ -16,17 +16,27 @@ const std::vector<VertexPositionColor> Cursor::cursorVertices = {
         {{0, 0, 1}, {0, 0, 1}}
 };
 
-void Cursor::drawCursor(Renderer &renderer, const DirectX::XMMATRIX &model) {
-    renderer.draw(cursorVertices, model, DEFAULT_COLOR);
+std::unique_ptr<Cursor> Cursor::instance = {};
+
+void Cursor::drawCursor(Renderer &renderer, const XMFLOAT3 &position, const XMFLOAT3 &rotation) {
+    if (!instance) {
+        instance = std::make_unique<Cursor>(XMFLOAT3(0, 0, 0), XMINT2(0, 0), std::shared_ptr<Camera>());
+    }
+
+    instance->setPosition(position);
+    instance->setRotation(rotation);
+    renderer.draw(*instance, DEFAULT_COLOR);
 }
 
-Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, Camera &camera)
+Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, std::shared_ptr<Camera> camera)
         : Object("Cursor", position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
           _screenPosition(screenPosition),
-          camera(camera) {
-    positionHandler = this->bindablePosition().addNotifier([this] { updateScreenPosition(); });
-    projectionHandler = camera.bindableProjection().addNotifier([this] { updateScreenPosition(); });
-    viewHandler = camera.bindableView().addNotifier([this] { updateScreenPosition(); });
+          camera(std::move(camera)) {
+    if (camera) {
+        positionHandler = this->bindablePosition().addNotifier([this] { updateScreenPosition(); });
+        projectionHandler = camera->bindableProjection().addNotifier([this] { updateScreenPosition(); });
+        viewHandler = camera->bindableView().addNotifier([this] { updateScreenPosition(); });
+    }
 
     setBuffers(cursorVertices, {});
 }
@@ -47,11 +57,11 @@ void Cursor::setScreenPosition(DirectX::XMINT2 position) {
 
     _screenPosition.setValueBypassingBindings(position);
 
-    auto screenSize = XMFLOAT2(camera.viewport().width(), camera.viewport().height());
-    auto ray = Utils3D::getRayFromScreen(screenPosition(), screenSize, camera.nearZ(), camera.farZ(),
-                                         camera.projectionMatrix(), camera.viewMatrix());
+    auto screenSize = XMFLOAT2(camera->viewport().width(), camera->viewport().height());
+    auto ray = Utils3D::getRayFromScreen(screenPosition(), screenSize, camera->nearZ(), camera->farZ(),
+                                         camera->projectionMatrix(), camera->viewMatrix());
 
-    auto plane = Utils3D::getPerpendicularPlaneThroughPoint(camera.direction(), camera.center());
+    auto plane = Utils3D::getPerpendicularPlaneThroughPoint(camera->direction(), camera->center());
 
     // xD
     positionHandler = {};
@@ -61,10 +71,10 @@ void Cursor::setScreenPosition(DirectX::XMINT2 position) {
 
 void Cursor::updateScreenPosition() {
     auto pos = position();
-    auto viewport = camera.viewport();
+    auto viewport = camera->viewport();
     auto screen = XMVector3Project(XMLoadFloat3(&pos), 0, 0,
-                                   viewport.width(), viewport.height(), camera.nearZ(), camera.farZ(),
-                                   camera.projectionMatrix(), camera.viewMatrix(), XMMatrixIdentity());
+                                   viewport.width(), viewport.height(), camera->nearZ(), camera->farZ(),
+                                   camera->projectionMatrix(), camera->viewMatrix(), XMMatrixIdentity());
     XMFLOAT2 screenPos{};
     XMStoreFloat2(&screenPos, screen);
     _screenPosition = {static_cast<int32_t>(screenPos.x), static_cast<int32_t>(screenPos.y)};

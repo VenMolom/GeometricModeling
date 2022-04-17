@@ -36,7 +36,7 @@ void DxRenderer::setScene(shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
     this->inputHandler.setScene(scene);
 
-    updateBuffer(m_cbProj, scene->camera().projectionMatrix());
+    updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
     updateCameraCB();
 }
 
@@ -56,16 +56,16 @@ void DxRenderer::draw(const BrezierCurve &curve, XMFLOAT4 color) {
 
     // move to hull shader per patch
     XMFLOAT2 vmin, vmax;
-    auto viewport = scene->camera().viewport();
+    auto viewport = scene->camera()->viewport();
     XMStoreFloat2(&vmin, XMVector3Project(curve.minPosition(), 0, 0,
                                           viewport.width(), viewport.height(),
-                                          scene->camera().nearZ(), scene->camera().farZ(),
-                                          scene->camera().projectionMatrix(), scene->camera().viewMatrix(),
+                                          scene->camera()->nearZ(), scene->camera()->farZ(),
+                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
                                           XMMatrixIdentity()));
     XMStoreFloat2(&vmax, XMVector3Project(curve.maxPosition(), 0, 0,
                                           viewport.width(), viewport.height(),
-                                          scene->camera().nearZ(), scene->camera().farZ(),
-                                          scene->camera().projectionMatrix(), scene->camera().viewMatrix(),
+                                          scene->camera()->nearZ(), scene->camera()->farZ(),
+                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
                                           XMMatrixIdentity()));
 
     // tesselationAmount, lastPatchID, lastPatchPoints
@@ -91,16 +91,16 @@ void DxRenderer::draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color
 
     // somehow calculate
     XMFLOAT2 vmin, vmax;
-    auto viewport = scene->camera().viewport();
+    auto viewport = scene->camera()->viewport();
     XMStoreFloat2(&vmin, XMVector3Project(curve.minPosition(), 0, 0,
                                           viewport.width(), viewport.height(),
-                                          scene->camera().nearZ(), scene->camera().farZ(),
-                                          scene->camera().projectionMatrix(), scene->camera().viewMatrix(),
+                                          scene->camera()->nearZ(), scene->camera()->farZ(),
+                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
                                           XMMatrixIdentity()));
     XMStoreFloat2(&vmax, XMVector3Project(curve.maxPosition(), 0, 0,
                                           viewport.width(), viewport.height(),
-                                          scene->camera().nearZ(), scene->camera().farZ(),
-                                          scene->camera().projectionMatrix(), scene->camera().viewMatrix(),
+                                          scene->camera()->nearZ(), scene->camera()->farZ(),
+                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
                                           XMMatrixIdentity()));
 
     // tesselationAmount, lastPatchID, lastPatchPoints
@@ -119,7 +119,7 @@ void DxRenderer::draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color
 void DxRenderer::draw(const Grid &grid, XMFLOAT4 color) {
     updateBuffer(m_cbModel, grid.modelMatrix());
     updateBuffer(m_cbColor, CLEAR_COLOR);
-    updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera().farZ(), 0, 0, 0});
+    updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera()->farZ(), 0, 0, 0});
 
     m_device.context()->PSSetShader(m_pixelFadeShader.get(), nullptr, 0);
     m_device.context()->OMSetDepthStencilState(m_dssNoDepthWrite.get(), 0);
@@ -143,19 +143,6 @@ void DxRenderer::draw(const Point &point, XMFLOAT4 color) {
     m_device.context()->IASetInputLayout(m_layout.get());
 }
 
-void DxRenderer::draw(const vector<VertexPositionColor> &vertices, XMMATRIX model, XMFLOAT4 color) {
-    updateBuffer(m_cbModel, model);
-    updateBuffer(m_cbColor, color);
-
-    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    auto vertexBuffer = DxDevice::Instance().CreateVertexBuffer(vertices);
-    unsigned int stride = sizeof(VertexPositionColor);
-    unsigned int offset = 0;
-    ID3D11Buffer *vb = vertexBuffer.get();
-    m_device.context()->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
-    m_device.context()->Draw(vertices.size(), 0);
-}
-
 template<typename T>
 void DxRenderer::updateBuffer(const dx_ptr<ID3D11Buffer> &buffer, const T &data) {
     D3D11_MAPPED_SUBRESOURCE res;
@@ -174,9 +161,9 @@ float DxRenderer::frameTime() {
 }
 
 void DxRenderer::updateCameraCB() {
-    auto invView = XMMatrixInverse(nullptr, scene->camera().viewMatrix());
+    auto invView = XMMatrixInverse(nullptr, scene->camera()->viewMatrix());
     XMFLOAT4X4 view[2];
-    XMStoreFloat4x4(view, scene->camera().viewMatrix());
+    XMStoreFloat4x4(view, scene->camera()->viewMatrix());
     XMStoreFloat4x4(view + 1, invView);
     updateBuffer(m_cbView, view);
 }
@@ -190,7 +177,7 @@ QPaintEngine *DxRenderer::paintEngine() const {
 void DxRenderer::resizeEvent(QResizeEvent *event) {
     QWidget::resizeEvent(event);
 
-    scene->camera().resize(size());
+    scene->camera()->resize(size());
 
     m_backBuffer.reset();
     m_depthBuffer.reset();

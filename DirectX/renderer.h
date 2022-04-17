@@ -33,9 +33,6 @@ public:
     virtual void draw(const Grid &grid, DirectX::XMFLOAT4 color) = 0;
 
     virtual void draw(const Point &point, DirectX::XMFLOAT4 color) = 0;
-
-    virtual void draw(const std::vector<VertexPositionColor> &vertices,
-                      DirectX::XMMATRIX model, DirectX::XMFLOAT4 color) = 0;
 };
 
 #endif //MG1_RENDERER_H

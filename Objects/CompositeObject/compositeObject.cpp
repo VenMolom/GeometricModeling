@@ -55,7 +55,7 @@ void CompositeObject::draw(Renderer &renderer, DrawType drawType) {
     for (auto &object: objects) {
         object->draw(renderer, NO_CURSOR);
     }
-    Cursor::drawCursor(renderer, XMLoadFloat4x4(&noScaleMatrix));
+    Cursor::drawCursor(renderer, position(), rotation());
 }
 
 Type CompositeObject::type() const {
