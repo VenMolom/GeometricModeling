@@ -38,7 +38,7 @@ set(PROJECT_SOURCES
         Objects/Cursor/cursor.cpp Objects/Cursor/cursor.h
         Utils/Utils3D.h Utils/Utils3D.cpp
         Objects/Point/point.cpp Objects/Point/point.h
-        Objects/ObjectListItem/objectListItem.cpp Objects/ObjectListItem/objectListItem.h
+        ObjectListItem/objectListItem.cpp ObjectListItem/objectListItem.h
         Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h
         Objects/Curve/brezierC0.cpp Objects/Curve/brezierC0.h
         Objects/Curve/brezierCurve.cpp Objects/Curve/brezierCurve.h

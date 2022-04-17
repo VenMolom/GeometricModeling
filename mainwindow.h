@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QModelIndexList>
 #include "scene.h"
-#include "Objects/ObjectListItem/objectListItem.h"
+#include "ObjectListItem/objectListItem.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -53,6 +53,15 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
+
+    // TODO: think about:
+    // * changing renderable to make possible rendering from multiple vertices lists with different topologies
+    // * ?make object not inherit renderable (not all objects have to render, like compositeObject it only renders draws children) draw =/= render
+    // * ?add new baseclass renderable object
+    // * ?remove linestrip
+    // * ?add method renderer.draw(RenderableObject renderableObject, ...)
+
+    // TODO: add objects factory and IDs
 };
 
 #endif // MAINWINDOW_H

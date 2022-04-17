@@ -32,6 +32,8 @@ public:
 
     void setScale(DirectX::XMFLOAT3 scale) override {}
 
+    // TODO: add static instance to draw selected object cursor
+
 private:
     const static std::vector<VertexPositionColor> cursorVertices;
 

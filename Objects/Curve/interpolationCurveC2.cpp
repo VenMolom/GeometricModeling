@@ -8,12 +8,14 @@ using namespace std;
 using namespace DirectX;
 
 InterpolationCurveC2::InterpolationCurveC2(vector<std::weak_ptr<Point>> &&points)
-        : Curve("InterpolationC2", std::move(points), D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST) {
+        : Curve("InterpolationC2", std::move(points), D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST),
+        controlPoints() {
     updatePoints();
 }
 
 void InterpolationCurveC2::drawPolygonal(Renderer &renderer, DrawType drawType) {
-    // TODO: add line strip and draw it as polygonal (similar to brezierC2)
+    if (controlPoints.vertices().empty()) return;
+    controlPoints.draw(renderer, drawType);
 }
 
 void InterpolationCurveC2::drawCurve(Renderer &renderer, DrawType drawType) {
@@ -26,15 +28,20 @@ void InterpolationCurveC2::preUpdate() {
     alpha.clear();
     beta.clear();
     R.clear();
-    // TODO: clear linestrip
+    controlPoints.vertices().clear();
 }
 
 void InterpolationCurveC2::pointUpdate(const shared_ptr<Point> &point, int index) {
+    controlPoints.vertices().push_back({point->position(), {1, 1, 1}});
+
     // since we need next point to calculate difference and R, values are calculated for i = index - 1
     index--;
     if (index < 0) return;
 
-    // TODO: add checks if point locked successfully
+    if (_points[index].expired()) {
+        updatePoints();
+        return;
+    }
     auto position = _points[index].lock()->position();
     auto nextPosition = point->position();
 
@@ -51,7 +58,10 @@ void InterpolationCurveC2::pointUpdate(const shared_ptr<Point> &point, int index
     alpha.push_back(prevD / dSum);
     beta.push_back(d / dSum);
 
-    // TODO: add checks if point locked successfully
+    if (_points[index - 1].expired()) {
+        updatePoints();
+        return;
+    }
     auto prevPosition = _points[index - 1].lock()->position();
     auto prevPositionDiff = XMVectorSubtract(XMLoadFloat3(&position),
                                              XMLoadFloat3(&prevPosition));
@@ -98,7 +108,7 @@ void InterpolationCurveC2::postUpdate() {
     }
 
     Curve::postUpdate();
-    // TODO: linestrip update
+    controlPoints.update();
 }
 
 void InterpolationCurveC2::pointMoved(const weak_ptr<Point> &point) {
