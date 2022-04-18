@@ -54,25 +54,13 @@ void DxRenderer::draw(const BrezierCurve &curve, XMFLOAT4 color) {
     m_device.context()->HSSetShader(m_hullBrezierShader.get(), nullptr, 0);
     m_device.context()->DSSetShader(m_domainBrezierShader.get(), nullptr, 0);
 
-    // move to hull shader per patch
-    XMFLOAT2 vmin, vmax;
     auto viewport = scene->camera()->viewport();
-    XMStoreFloat2(&vmin, XMVector3Project(curve.minPosition(), 0, 0,
-                                          viewport.width(), viewport.height(),
-                                          scene->camera()->nearZ(), scene->camera()->farZ(),
-                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
-                                          XMMatrixIdentity()));
-    XMStoreFloat2(&vmax, XMVector3Project(curve.maxPosition(), 0, 0,
-                                          viewport.width(), viewport.height(),
-                                          scene->camera()->nearZ(), scene->camera()->farZ(),
-                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
-                                          XMMatrixIdentity()));
-
-    // tesselationAmount, lastPatchID, lastPatchPoints
+    // viewport.xy, lastPatchID, lastPatchPoints
     XMINT4 tesselationAmount = {
-            clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
+            static_cast<int32_t>(viewport.width()),
+            static_cast<int32_t>(viewport.height()),
             curve.patchesCount() - 1,
-            curve.lastPatchSize(), 0};
+            curve.lastPatchSize()};
     updateBuffer(m_cbTesselation, tesselationAmount);
 
     curve.render(m_device.context());
@@ -89,24 +77,12 @@ void DxRenderer::draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color
     m_device.context()->HSSetShader(m_hullInterpolationShader.get(), nullptr, 0);
     m_device.context()->DSSetShader(m_domainInterpolationShader.get(), nullptr, 0);
 
-    // somehow calculate
-    XMFLOAT2 vmin, vmax;
     auto viewport = scene->camera()->viewport();
-    XMStoreFloat2(&vmin, XMVector3Project(curve.minPosition(), 0, 0,
-                                          viewport.width(), viewport.height(),
-                                          scene->camera()->nearZ(), scene->camera()->farZ(),
-                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
-                                          XMMatrixIdentity()));
-    XMStoreFloat2(&vmax, XMVector3Project(curve.maxPosition(), 0, 0,
-                                          viewport.width(), viewport.height(),
-                                          scene->camera()->nearZ(), scene->camera()->farZ(),
-                                          scene->camera()->projectionMatrix(), scene->camera()->viewMatrix(),
-                                          XMMatrixIdentity()));
-
-    // tesselationAmount, lastPatchID, lastPatchPoints
+    // viewport.xy
     XMINT4 tesselationAmount = {
-            clamp(static_cast<int>(ceil(fmax(abs(vmax.x - vmin.x), abs(vmax.y - vmin.y)) / 64.0f)), 1, 64),
-            0, 0, 0};
+            static_cast<int32_t>(viewport.width()),
+            static_cast<int32_t>(viewport.height()),
+            0, 0};
     updateBuffer(m_cbTesselation, tesselationAmount);
 
     curve.render(m_device.context());
@@ -292,11 +268,11 @@ void DxRenderer::init3D3() {
 
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
-    ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
+    ID3D11Buffer *hsCbs[] = {m_cbTesselation.get(), m_cbView.get(), m_cbProj.get()};
     ID3D11Buffer *dsCbs[] = {m_cbView.get(), m_cbProj.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
     m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
-    m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
+    m_device.context()->HSSetConstantBuffers(0, 3, hsCbs);
     m_device.context()->DSSetConstantBuffers(0, 2, dsCbs);
 
     DepthStencilDescription dssDesc;

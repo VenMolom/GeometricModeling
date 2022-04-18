@@ -4,13 +4,35 @@ cbuffer cbTesselation: register(b0) {
 	int4 tesselationSetting;
 }
 
+cbuffer cbView : register(b1) {
+	matrix viewMatrix;
+	matrix invViewMatrix;
+};
+
+cbuffer cbProj : register(b2) {
+	matrix projMatrix;
+};
+
 HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 	InputPatch<VSOut, CONTROL_POINTS_BREZIER> ip,
 	uint PatchID : SV_PrimitiveID)
 {
 	HS_CONSTANT_DATA_OUTPUT output;
 
-    output.edges[0] = tesselationSetting.x;
+	float4 maxx = max(ip[0].pos, max(ip[1].pos, max(ip[2].pos, ip[3].pos)));
+	float4 minn = min(ip[0].pos, min(ip[1].pos, min(ip[2].pos, ip[3].pos)));
+
+    float2 start = clamp(mul(projMatrix, mul(viewMatrix, minn)).xy, float2(-1, -1), float2(1, 1));
+    float2 end = clamp(mul(projMatrix, mul(viewMatrix, maxx)).xy, float2(-1, -1), float2(1, 1));
+
+    float2 scale = float2(tesselationSetting.x * 0.5f, tesselationSetting.y * 0.5f);
+
+    float2 startViewport = mad(scale, start, scale);
+    float2 endViewport = mad(scale, end, scale);
+
+    float tesselationAmount = clamp(ceil(distance(startViewport, endViewport) / 64.0f), 1.0f, 64.0f);
+
+    output.edges[0] = tesselationAmount;
     output.edges[1] = 64.0f;
 
 	return output;
@@ -31,7 +53,7 @@ VSOut main(
 	output.pos = ip[i].pos;
 	output.col = ip[i].col;
 
-    if (PatchID == tesselationSetting.y && i >= tesselationSetting.z) {
+    if (PatchID == tesselationSetting.z && i >= tesselationSetting.w) {
         output.pos.w = 0.0f;
     }
 

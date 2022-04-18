@@ -130,6 +130,10 @@ void InterpolationCurveC2::calculateControlPoints(const vector<DirectX::XMFLOAT3
     XMStoreFloat3(&d, XMVectorScale(XMVectorSubtract(nextC, currentC),
                                     1.0f / (3.0f * knotDistances[index])));
 
+    if (_points[index].expired() || _points[index + 1].expired()) {
+        updatePoints();
+        return;
+    }
     auto position = _points[index].lock()->position();
     auto positionNext = _points[index + 1].lock()->position();
     XMVECTOR left = XMVectorScale(
@@ -144,6 +148,6 @@ void InterpolationCurveC2::calculateControlPoints(const vector<DirectX::XMFLOAT3
 
     vertices.push_back({d, {1.0f, 1.0f, 1.0f}});
     vertices.push_back({c[index], {1.0f, 1.0f, 1.0f}});
-    vertices.push_back({b, {1.0f, 1.0f, 1.0f}});
-    vertices.push_back({a, {knotDistances[index], 0, 0}});
+    vertices.push_back({b, {knotDistances[index], 0, 0}});
+    vertices.push_back({a, positionNext});
 }
