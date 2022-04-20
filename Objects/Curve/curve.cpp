@@ -9,8 +9,8 @@
 using namespace std;
 using namespace DirectX;
 
-Curve::Curve(QString name, vector<std::weak_ptr<Point>> &&points, D3D11_PRIMITIVE_TOPOLOGY topology)
-        : Object(std::move(name), {0, 0, 0}, topology),
+Curve::Curve(uint id, QString name, vector<std::weak_ptr<Point>> &&points, D3D11_PRIMITIVE_TOPOLOGY topology)
+        : Object(id, std::move(name), {0, 0, 0}, topology),
           _points(points) {
 
 }

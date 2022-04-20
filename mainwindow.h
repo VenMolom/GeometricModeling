@@ -19,7 +19,6 @@ public:
     ~MainWindow() override;
 
 private slots:
-
     void on_addPoint_clicked();
 
     void on_addTorus_clicked();
@@ -53,15 +52,6 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
-
-    // TODO: think about:
-    // * changing renderable to make possible rendering from multiple vertices lists with different topologies
-    // * ?make object not inherit renderable (not all objects have to render, like compositeObject it only renders draws children) draw =/= render
-    // * ?add new baseclass renderable object
-    // * ?remove linestrip
-    // * ?add method renderer.draw(RenderableObject renderableObject, ...)
-
-    // TODO: add objects factory and IDs
 };
 
 #endif // MAINWINDOW_H

@@ -6,7 +6,7 @@
 
 using namespace DirectX;
 
-VirtualPoint::VirtualPoint(const XMFLOAT3 &position) : Point(position) {}
+VirtualPoint::VirtualPoint(const XMFLOAT3 &position) : Point(0, position) {}
 
 Type VirtualPoint::type() const {
     return VIRTUALPOINT3D;

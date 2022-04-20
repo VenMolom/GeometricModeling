@@ -9,11 +9,10 @@
 #include <QObject>
 #include <DirectXMath.h>
 #include "Objects/Cursor/cursor.h"
-#include "Objects/Point/point.h"
-#include "Objects/Curve/curve.h"
 #include "Objects/CompositeObject/compositeObject.h"
 #include "Objects/Point/virtualPointsHolder.h"
 #include "Objects/Grid/grid.h"
+#include "Objects/objectFactory.h"
 
 class Scene : public QObject {
     Q_OBJECT
@@ -41,6 +40,8 @@ public:
 
     std::weak_ptr<Object> selected() const { return _selected; }
 
+    ObjectFactory &objectFactory() { return factory; }
+
     void setSelected (std::shared_ptr<Object> object);
 
     QBindable<std::weak_ptr<Object>> bindableSelected() { return &_selected; }
@@ -56,6 +57,7 @@ private:
     std::list<std::weak_ptr<VirtualPointsHolder>> virtualPointsHolders;
     // TODO: look into removing composite to reduce complexity
     std::shared_ptr<Camera> _camera;
+    ObjectFactory factory;
     Grid grid;
 
     Utils3D::XMFLOAT3RAY getRayFromScreenPosition(DirectX::XMINT2 screenPosition) const;

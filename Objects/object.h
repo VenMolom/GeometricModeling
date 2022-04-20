@@ -77,9 +77,11 @@ public:
 
     QBindable<DirectX::XMFLOAT3> bindableScale() { return &_scale; }
 
-    QString name() { return _name; }
+    QString name() const { return _name; }
 
     void setName(QString name);
+
+    uint id() const { return _id; }
 
     QBindable<QString> bindableName() { return &_name; }
 
@@ -95,17 +97,18 @@ protected:
     QProperty<DirectX::XMFLOAT3> _position;
     QProperty<DirectX::XMFLOAT3> _rotation{{0, 0, 0}};
     QProperty<DirectX::XMFLOAT3> _scale{{1, 1, 1}};
-    QProperty<QString> _name;
 
     DirectX::XMFLOAT4X4 noScaleMatrix;
     DirectX::XMFLOAT4X4 rotationMatrix;
     DirectX::XMFLOAT4X4 scaleMatrix;
 
-    Object(QString name, DirectX::XMFLOAT3 position, D3D11_PRIMITIVE_TOPOLOGY topology);
+    Object(uint id, QString name, DirectX::XMFLOAT3 position, D3D11_PRIMITIVE_TOPOLOGY topology);
 
     void calculateModel();
 private:
     DirectX::XMFLOAT4X4 model;
+    QProperty<QString> _name;
+    uint _id;
 };
 
 #endif //MG1_OBJECT_H

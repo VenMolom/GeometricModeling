@@ -17,7 +17,7 @@ const std::vector<Index> Point::pointIndices = {
         0, 1, 2, 3, 0
 };
 
-Point::Point(DirectX::XMFLOAT3 position) : Object("Point", position, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP) {
+Point::Point(uint id, DirectX::XMFLOAT3 position) : Object(id, "Point", position, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP) {
     Object::setScale(size);
     setBuffers(pointVertices, pointIndices);
 }

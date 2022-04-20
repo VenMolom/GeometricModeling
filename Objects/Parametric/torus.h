@@ -11,7 +11,7 @@
 
 class Torus : public ParametricObject<DIM> {
 public:
-    Torus(DirectX::XMFLOAT3 position);
+    Torus(uint id, DirectX::XMFLOAT3 position);
 
     float majorRadius() const { return _majorRadius; }
 

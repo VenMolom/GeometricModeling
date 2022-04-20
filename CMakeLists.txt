@@ -65,7 +65,8 @@ set(PROJECT_SOURCES
         Objects/renderable.cpp Objects/renderable.h
         Objects/linestrip.cpp Objects/linestrip.h
         Objects/Curve/curve.cpp Objects/Curve/curve.h
-        Objects/Curve/interpolationCurveC2.cpp Objects/Curve/interpolationCurveC2.h)
+        Objects/Curve/interpolationCurveC2.cpp Objects/Curve/interpolationCurveC2.h
+        Objects/objectFactory.cpp Objects/objectFactory.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

@@ -9,7 +9,7 @@ using namespace DirectX;
 
 const XMFLOAT3 Grid::color = {0.5f, 0.5f, 0.7f};
 
-Grid::Grid(int n) : Object("Grid", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINELIST) {
+Grid::Grid(int n) : Object(0, "Grid", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINELIST) {
     vertices.clear();
 
     for (int i = 0; i < n; ++i) {

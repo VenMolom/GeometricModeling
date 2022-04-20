@@ -15,7 +15,8 @@
 template<size_t Dim>
 class ParametricObject : public Object {
 protected:
-    ParametricObject(QString name,
+    ParametricObject(uint id,
+                     QString name,
                      DirectX::XMFLOAT3 position,
                      std::array<int, Dim> density,
                      std::array<std::tuple<float, float>, Dim> range);
@@ -45,11 +46,12 @@ private:
 };
 
 template<size_t Dim>
-ParametricObject<Dim>::ParametricObject(QString name,
+ParametricObject<Dim>::ParametricObject(uint id,
+                                        QString name,
                                         DirectX::XMFLOAT3 position,
                                         std::array<int, Dim> density,
                                         std::array<std::tuple<float, float>, Dim> range)
-        : Object(name, position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
+        : Object(id, name, position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
           _density(density),
           _range(range) {
 }

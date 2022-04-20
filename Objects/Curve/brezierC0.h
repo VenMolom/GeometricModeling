@@ -9,7 +9,7 @@
 
 class BrezierC0 : public BrezierCurve {
 public:
-    explicit BrezierC0(std::vector<std::weak_ptr<Point>> &&points);
+    BrezierC0(uint id, std::vector<std::weak_ptr<Point>> &&points);
 
     Type type() const override;
 };

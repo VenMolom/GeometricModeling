@@ -4,7 +4,7 @@
 
 #include "linestrip.h"
 
-Linestrip::Linestrip() : Object("", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP) {
+Linestrip::Linestrip() : Object(0, "", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP) {
 
 }
 

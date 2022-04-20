@@ -5,7 +5,6 @@
 #ifndef MG1_CURSOR_H
 #define MG1_CURSOR_H
 
-#include <DirectXMath.h>
 #include "Objects/object.h"
 #include "camera.h"
 #include "Utils/Utils3D.h"

@@ -10,7 +10,7 @@
 
 class Point : public Object {
 public:
-    explicit Point(DirectX::XMFLOAT3 position);
+    Point(uint id, DirectX::XMFLOAT3 position);
 
     void draw(Renderer &renderer, DrawType drawType) override;
 

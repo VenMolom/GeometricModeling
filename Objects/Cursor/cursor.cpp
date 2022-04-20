@@ -2,7 +2,6 @@
 // Created by Molom on 2022-03-18.
 //
 
-#include <DirectXMath.h>
 #include "cursor.h"
 
 using namespace DirectX;
@@ -29,7 +28,7 @@ void Cursor::drawCursor(Renderer &renderer, const XMFLOAT3 &position, const XMFL
 }
 
 Cursor::Cursor(XMFLOAT3 position, XMINT2 screenPosition, std::shared_ptr<Camera> camera)
-        : Object("Cursor", position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
+        : Object(0, "Cursor", position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
           _screenPosition(screenPosition),
           camera(std::move(camera)) {
     if (camera) {

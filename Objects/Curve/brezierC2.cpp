@@ -8,8 +8,8 @@ using namespace std;
 using namespace DirectX;
 using namespace Utils3D;
 
-BrezierC2::BrezierC2(vector<weak_ptr<Point>> &&points, QBindable<std::weak_ptr<Object>> bindableSelected)
-        : BrezierCurve("Brezier C2", std::move(points)),
+BrezierC2::BrezierC2(uint id, vector<weak_ptr<Point>> &&points, QBindable<std::weak_ptr<Object>> bindableSelected)
+        : BrezierCurve(id, "Brezier C2", std::move(points)),
           VirtualPointsHolder(bindableSelected),
           deBoorPoints() {
     updatePoints();

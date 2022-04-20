@@ -7,8 +7,8 @@
 using namespace std;
 using namespace DirectX;
 
-InterpolationCurveC2::InterpolationCurveC2(vector<std::weak_ptr<Point>> &&points)
-        : Curve("InterpolationC2", std::move(points), D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST),
+InterpolationCurveC2::InterpolationCurveC2(uint id, vector<std::weak_ptr<Point>> &&points)
+        : Curve(id, "InterpolationC2", std::move(points), D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST),
         controlPoints() {
     updatePoints();
 }

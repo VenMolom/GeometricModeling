@@ -9,7 +9,7 @@ using namespace Utils3D;
 using namespace std;
 
 Scene::Scene()
-        : grid(500), virtualPointsHolders(), _objects(), _selected() {
+        : grid(500), virtualPointsHolders(), _objects(), _selected(), factory() {
     _camera = make_shared<Camera>();
     _camera->rotate({0, 200.0f});
 }
@@ -87,7 +87,7 @@ void Scene::moveSelected(QPoint screenPosition) {
 void Scene::addPoint(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto position = getPositionOnPlane(screenPos, _camera->direction(), _camera->center());
-    addObject(make_shared<Point>(position), true);
+    addObject(factory.createPoint(position), true);
 }
 
 void Scene::centerSelected() {

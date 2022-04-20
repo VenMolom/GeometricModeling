@@ -10,7 +10,7 @@
 
 class InterpolationCurveC2 : public Curve {
 public:
-    explicit InterpolationCurveC2(std::vector<std::weak_ptr<Point>> &&points);
+    explicit InterpolationCurveC2(uint id, std::vector<std::weak_ptr<Point>> &&points);
 
     Type type() const override;
 

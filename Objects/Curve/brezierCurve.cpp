@@ -9,8 +9,8 @@
 using namespace std;
 using namespace DirectX;
 
-BrezierCurve::BrezierCurve(QString name, vector<std::weak_ptr<Point>> &&points)
-        : Curve(std::move(name), std::move(points),
+BrezierCurve::BrezierCurve(uint id, QString name, vector<std::weak_ptr<Point>> &&points)
+        : Curve(id, std::move(name), std::move(points),
                 D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST) {
 
 }

@@ -19,7 +19,7 @@ protected:
     int _lastPatchSize{0};
     bool canDraw{false};
 
-    BrezierCurve(QString name, std::vector<std::weak_ptr<Point>> &&points);
+    BrezierCurve(uint id, QString name, std::vector<std::weak_ptr<Point>> &&points);
 
     void drawPolygonal(Renderer &renderer, DrawType drawType) override;
 

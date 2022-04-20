@@ -50,7 +50,7 @@ protected:
     DirectX::XMFLOAT3 minPos{INFINITY, INFINITY, INFINITY};
     DirectX::XMFLOAT3 maxPos{-INFINITY, -INFINITY, -INFINITY};
 
-    Curve(QString name, std::vector<std::weak_ptr<Point>> &&points, D3D11_PRIMITIVE_TOPOLOGY topology);
+    Curve(uint id, QString name, std::vector<std::weak_ptr<Point>> &&points, D3D11_PRIMITIVE_TOPOLOGY topology);
 
     virtual void drawPolygonal(Renderer &renderer, DrawType drawType) = 0;
 

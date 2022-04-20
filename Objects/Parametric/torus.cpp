@@ -8,8 +8,8 @@
 using namespace std;
 using namespace DirectX;
 
-Torus::Torus(XMFLOAT3 position)
-        : ParametricObject<DIM>("Torus", position, {15, 15}, {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)}) {
+Torus::Torus(uint id, XMFLOAT3 position)
+        : ParametricObject<DIM>(id, "Torus", position, {15, 15}, {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)}) {
     calculateVerticesAndIndices();
 }
 

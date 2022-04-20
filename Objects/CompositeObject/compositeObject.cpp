@@ -11,7 +11,7 @@ using namespace std;
 using namespace DirectX;
 
 CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
-        : Object("Composite", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED),
+        : Object(0, "Composite", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED),
           objects() {
 
     for (auto &object : objects) {

@@ -7,8 +7,8 @@
 using namespace std;
 using namespace DirectX;
 
-BrezierC0::BrezierC0(vector<weak_ptr<Point>> &&points)
-        : BrezierCurve("Brezier C0", std::move(points)) {
+BrezierC0::BrezierC0(uint id, vector<weak_ptr<Point>> &&points)
+        : BrezierCurve(id, "Brezier C0", std::move(points)) {
     updatePoints();
 }
 

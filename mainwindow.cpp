@@ -32,24 +32,23 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_addPoint_clicked() {
-    scene->addObject(std::move(make_shared<Point>(XMFLOAT3(0, 0, 0))));
+    scene->addObject(std::move(scene->objectFactory().createPoint(XMFLOAT3(0, 0, 0))));
 }
 
 void MainWindow::on_addTorus_clicked() {
-    scene->addObject(std::move(make_shared<Torus>(XMFLOAT3(0, 0, 0))));
+    scene->addObject(std::move(scene->objectFactory().createTorus(XMFLOAT3(0, 0, 0))));
 }
 
-
 void MainWindow::on_addBrezierC0_clicked() {
-    scene->addObject(std::move(make_shared<BrezierC0>(std::move(getSelectedPoints()))));
+    scene->addObject(std::move(scene->objectFactory().createBrezierC0(std::move(getSelectedPoints()))));
 }
 
 void MainWindow::on_addBrezierC2_clicked() {
-    scene->addObject(std::move(make_shared<BrezierC2>(std::move(getSelectedPoints()), scene->bindableSelected())));
+    scene->addObject(std::move(scene->objectFactory().createBrezierC2(std::move(getSelectedPoints()), scene->bindableSelected())));
 }
 
 void MainWindow::on_addInterpolationC2_clicked() {
-    scene->addObject(std::move(make_shared<InterpolationCurveC2>(std::move(getSelectedPoints()))));
+    scene->addObject(std::move(scene->objectFactory().createInterpolationCurveC2(std::move(getSelectedPoints()))));
 }
 
 void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool select) {
