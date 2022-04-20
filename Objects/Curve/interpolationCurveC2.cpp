@@ -121,7 +121,7 @@ Type InterpolationCurveC2::type() const {
 }
 
 void InterpolationCurveC2::calculateControlPoints(const vector<DirectX::XMFLOAT3> &c, int index) {
-    // TODO: there is probably better evaluation method than Horner
+    // TODO: redo to use Bernstein basis (Horner -> Bernstein)
     XMFLOAT3 a{}, b{}, d{};
 
     auto currentC = XMLoadFloat3(&c[index]);
