@@ -8,14 +8,18 @@ using namespace std;
 using namespace DirectX;
 
 InterpolationCurveC2::InterpolationCurveC2(uint id, vector<std::weak_ptr<Point>> &&points)
-        : Curve(id, "InterpolationC2", std::move(points), D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST),
-        controlPoints() {
+        : Curve(id, "InterpolationC2", std::move(points), D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST) {
     updatePoints();
 }
 
 void InterpolationCurveC2::drawPolygonal(Renderer &renderer, DrawType drawType) {
-    if (controlPoints.vertices().empty()) return;
-    controlPoints.draw(renderer, drawType);
+    if (vertices.empty()) return;
+
+    setTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+    switchIndexed(false);
+    renderer.draw(*((Object *) this), drawType != DEFAULT ? POLYGONAL_COLOR : DEFAULT_COLOR);
+    setTopology(D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST);
+    switchIndexed(true);
 }
 
 void InterpolationCurveC2::drawCurve(Renderer &renderer, DrawType drawType) {
@@ -28,12 +32,11 @@ void InterpolationCurveC2::preUpdate() {
     alpha.clear();
     beta.clear();
     R.clear();
-    controlPoints.vertices().clear();
+    c.clear();
+    b.clear();
 }
 
 void InterpolationCurveC2::pointUpdate(const shared_ptr<Point> &point, int index) {
-    controlPoints.vertices().push_back({point->position(), {1, 1, 1}});
-
     // since we need next point to calculate difference and R, values are calculated for i = index - 1
     index--;
     if (index < 0) return;
@@ -80,35 +83,61 @@ void InterpolationCurveC2::postUpdate() {
     }
 
     int size = _points.size() - 2;
-    vector<float> b(size, 2);
-    vector<XMFLOAT3> c(size + 1);
+    vector<float> mid(size, 2);
+    c.resize(_points.size() - 1);
+    b.resize(_points.size());
     c[0] = {0, 0, 0};
 
     for (int i = 1; i < size; ++i) {
-        auto w = alpha[i] / b[i - 1];
-        b[i] = b[i] - w * beta[i - 1];
+        auto w = alpha[i] / mid[i - 1];
+        mid[i] = mid[i] - w * beta[i - 1];
         XMStoreFloat3(&R[i], XMVectorSubtract(XMLoadFloat3(&R[i]),
                                               XMVectorScale(XMLoadFloat3(&R[i - 1]), w)));
     }
 
     if (_points.size() > 2) {
-        XMStoreFloat3(&c.back(), XMVectorScale(XMLoadFloat3(&R.back()), 1.0f / b.back()));
+        XMStoreFloat3(&c.back(), XMVectorScale(XMLoadFloat3(&R.back()), 1.0f / mid.back()));
     }
 
     for (int i = size - 1; i > 0; --i) {
         XMStoreFloat3(&c[i], XMVectorScale(
                 XMVectorSubtract(XMLoadFloat3(&R[i - 1]),
                                  XMVectorScale(XMLoadFloat3(&c[i + 1]), beta[i - 1])),
-                1.0f / b[i - 1]));
+                1.0f / mid[i - 1]));
     }
     c.emplace_back(0, 0, 0);
 
+    // calculate b (first derrivative) for all knots except last
     for (int i = 0; i < _points.size() - 1; ++i) {
-        calculateControlPoints(c, i);
+        auto currentC = XMLoadFloat3(&c[i]);
+        auto nextC = XMLoadFloat3(&c[i + 1]);
+
+        if (_points[i].expired() || _points[i + 1].expired()) {
+            updatePoints();
+            return;
+        }
+        auto position = _points[i].lock()->position();
+        auto positionNext = _points[i + 1].lock()->position();
+        XMVECTOR left = XMVectorScale(
+                XMVectorSubtract(XMLoadFloat3(&positionNext), XMLoadFloat3(&position)),
+                1.0f / knotDistances[i]);
+        XMVECTOR right = XMVectorScale(XMVectorAdd(nextC, XMVectorScale(currentC, 2.0f)),
+                                       knotDistances[i] / 3.0f);
+
+        XMStoreFloat3(&b[i], XMVectorSubtract(left, right));
     }
 
+    // calculate last b
+    {
+        auto prevC = XMLoadFloat3(&c[c.size() - 2]);
+        auto prevB = XMLoadFloat3(&b[b.size() - 2]);
+        XMStoreFloat3(&b.back(),
+                      XMVectorAdd(prevB,XMVectorScale(prevC, knotDistances.back())));
+    }
+
+    calculateControlPoints();
+
     Curve::postUpdate();
-    controlPoints.update();
 }
 
 void InterpolationCurveC2::pointMoved(const weak_ptr<Point> &point) {
@@ -120,34 +149,34 @@ Type InterpolationCurveC2::type() const {
     return INTERPOLATIONC2;
 }
 
-void InterpolationCurveC2::calculateControlPoints(const vector<DirectX::XMFLOAT3> &c, int index) {
-    // TODO: redo to use Bernstein basis (Horner -> Bernstein)
-    XMFLOAT3 a{}, b{}, d{};
+void InterpolationCurveC2::calculateControlPoints() {
+    for (int i = 0; i < _points.size() - 1; ++i) {
+        if (_points[i].expired() || _points[i + 1].expired()) {
+            updatePoints();
+            return;
+        }
+        auto position = _points[i].lock()->position();
+        auto positionNext = _points[i + 1].lock()->position();
 
-    auto currentC = XMLoadFloat3(&c[index]);
-    auto nextC = XMLoadFloat3(&c[index + 1]);
+        float scale = knotDistances[i] / 3.0f;
+        XMFLOAT3 left{}, right{};
+        XMStoreFloat3(&left, XMVectorAdd(XMLoadFloat3(&position), XMVectorScale(XMLoadFloat3(&b[i]), scale)));
+        XMStoreFloat3(&right, XMVectorSubtract(XMLoadFloat3(&positionNext), XMVectorScale(XMLoadFloat3(&b[i + 1]), scale)));
 
-    XMStoreFloat3(&d, XMVectorScale(XMVectorSubtract(nextC, currentC),
-                                    1.0f / (3.0f * knotDistances[index])));
+        if (i == 0) {
+            vertices.push_back({position, {1.0f, 1.0f, 1.0f}});
+        }
+        vertices.push_back({left, {1.0f, 1.0f, 1.0f}});
+        vertices.push_back({right, {1.0f, 1.0f, 1.0f}});
+        vertices.push_back({positionNext, {1.0f, 1.0f, 1.0f}});
 
-    if (_points[index].expired() || _points[index + 1].expired()) {
-        updatePoints();
-        return;
+        if (i == 0) {
+            indices.push_back(0);
+        } else {
+            indices.push_back(indices.back());
+        }
+        indices.push_back(indices.back() + 1);
+        indices.push_back(indices.back() + 1);
+        indices.push_back(indices.back() + 1);
     }
-    auto position = _points[index].lock()->position();
-    auto positionNext = _points[index + 1].lock()->position();
-    XMVECTOR left = XMVectorScale(
-            XMVectorSubtract(XMLoadFloat3(&positionNext), XMLoadFloat3(&position)),
-            1.0f / knotDistances[index]);
-    XMVECTOR right = XMVectorScale(XMVectorAdd(nextC, XMVectorScale(currentC, 2.0f)),
-                                   knotDistances[index] / 3.0f);
-
-    XMStoreFloat3(&b, XMVectorSubtract(left, right));
-
-    a = position;
-
-    vertices.push_back({d, {1.0f, 1.0f, 1.0f}});
-    vertices.push_back({c[index], {1.0f, 1.0f, 1.0f}});
-    vertices.push_back({b, {knotDistances[index], 0, 0}});
-    vertices.push_back({a, positionNext});
 }

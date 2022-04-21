@@ -33,9 +33,9 @@ private:
     std::vector<float> beta;
     std::vector<DirectX::XMFLOAT3> R;
 
-    Linestrip controlPoints;
+    std::vector<DirectX::XMFLOAT3> c, b;
 
-    void calculateControlPoints(const std::vector<DirectX::XMFLOAT3> &c, int index);
+    void calculateControlPoints();
 };
 
 

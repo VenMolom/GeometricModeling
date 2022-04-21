@@ -1,19 +1,17 @@
 #include "Header.hlsl"
 
-cbuffer cbView : register(b0)
+float4 deCastillo(OutputPatch<VSOut, CONTROL_POINTS_INTERPOLATION> patch, float t)
 {
-	matrix viewMatrix;
-	matrix invViewMatrix;
-};
+    float4 b[4] = {patch[0].pos, patch[1].pos, patch[2].pos, patch[3].pos};
+    float t1 = 1.0f - t;
 
-cbuffer cbProj : register(b1)
-{
-	matrix projMatrix;
-};
+    for (int j = 3; j > 0; --j) {
+        for (int i = 0; i < j; ++i) {
+            b[i] = b[i] * t1 + b[i + 1] * t;
+        }
+    }
 
-float4 horner(OutputPatch<VSOut, CONTROL_POINTS_INTERPOLATION> patch, float t)
-{
-    return float4(((patch[0].pos.xyz * t + patch[1].pos.xyz) * t + patch[2].pos.xyz) * t + patch[3].pos.xyz, 1.0f);
+    return b[0];
 }
 
 [domain("isoline")]
@@ -24,10 +22,8 @@ VSOut main(
 {
 	VSOut output;
 
-    float segmentLength = patch[2].col.x;
-    float t = segmentLength * (1.0f/input.edges[0] * uv.x + uv.y);
-    output.pos = mul(projMatrix, mul(viewMatrix, horner(patch, t)));
-    //output.pos = horner(patch, t);
+    float t = 1.0f/input.edges[0] * uv.x + uv.y;
+    output.pos = deCastillo(patch, t);
     output.col = patch[0].col;
 
 	return output;

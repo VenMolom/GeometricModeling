@@ -19,8 +19,11 @@ HS_CONSTANT_DATA_OUTPUT CalcHSPatchConstants(
 {
 	HS_CONSTANT_DATA_OUTPUT output;
 
-	float2 start = clamp(mul(projMatrix, mul(viewMatrix, ip[3].pos)).xy, float2(-1, -1), float2(1, 1));
-    float2 end = clamp(mul(projMatrix, mul(viewMatrix, ip[3].col)).xy, float2(-1, -1), float2(1, 1));
+	float4 maxx = max(ip[0].pos, max(ip[1].pos, max(ip[2].pos, ip[3].pos)));
+    float4 minn = min(ip[0].pos, min(ip[1].pos, min(ip[2].pos, ip[3].pos)));
+
+    float2 start = clamp(mul(projMatrix, mul(viewMatrix, minn)).xy, float2(-1, -1), float2(1, 1));
+    float2 end = clamp(mul(projMatrix, mul(viewMatrix, maxx)).xy, float2(-1, -1), float2(1, 1));
 
     float2 scale = float2(tesselationSetting.x * 0.5f, tesselationSetting.y * 0.5f);
 
