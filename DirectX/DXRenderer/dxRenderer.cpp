@@ -51,6 +51,18 @@ void DxRenderer::draw(const BrezierCurve &curve, XMFLOAT4 color) {
     updateBuffer(m_cbModel, XMMatrixIdentity());
     updateBuffer(m_cbColor, color);
 
+    drawCurve(curve, curve.patchesCount() - 1, curve.lastPatchSize());
+}
+
+void DxRenderer::draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color) {
+    updateBuffer(m_cbModel, XMMatrixIdentity());
+    updateBuffer(m_cbColor, color);
+
+    // lastPatchId = -1 to set same size for all patches
+    drawCurve(curve, 0, 4);
+}
+
+void DxRenderer::drawCurve(const Curve &curve, int lastPatchId, int lastPatchSize) {
     m_device.context()->HSSetShader(m_hullBrezierShader.get(), nullptr, 0);
     m_device.context()->DSSetShader(m_domainBrezierShader.get(), nullptr, 0);
 
@@ -59,29 +71,9 @@ void DxRenderer::draw(const BrezierCurve &curve, XMFLOAT4 color) {
     XMINT4 tesselationAmount = {
             static_cast<int32_t>(viewport.width()),
             static_cast<int32_t>(viewport.height()),
-            curve.patchesCount() - 1,
-            curve.lastPatchSize()};
-    updateBuffer(m_cbTesselation, tesselationAmount);
-
-    curve.render(m_device.context());
-
-    m_device.context()->HSSetShader(nullptr, nullptr, 0);
-    m_device.context()->DSSetShader(nullptr, nullptr, 0);
-}
-
-void DxRenderer::draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color) {
-    updateBuffer(m_cbModel, XMMatrixIdentity());
-    updateBuffer(m_cbColor, color);
-
-    m_device.context()->HSSetShader(m_hullInterpolationShader.get(), nullptr, 0);
-    m_device.context()->DSSetShader(m_domainInterpolationShader.get(), nullptr, 0);
-
-    auto viewport = scene->camera()->viewport();
-    // viewport.xy
-    XMINT4 tesselationAmount = {
-            static_cast<int32_t>(viewport.width()),
-            static_cast<int32_t>(viewport.height()),
-            0, 0};
+            lastPatchId,
+            lastPatchSize
+    };
     updateBuffer(m_cbTesselation, tesselationAmount);
 
     curve.render(m_device.context());
@@ -230,8 +222,6 @@ void DxRenderer::init3D3() {
     const auto vsNoProjectionBytes = DxDevice::LoadByteCode(L"vsNoProjection.cso");
     const auto hsBrezierBytes = DxDevice::LoadByteCode(L"hsBrezier.cso");
     const auto dsBrezierBytes = DxDevice::LoadByteCode(L"dsBrezier.cso");
-    const auto hsInterpolationBytes = DxDevice::LoadByteCode(L"hsInterpolation.cso");
-    const auto dsInterpolationBytes = DxDevice::LoadByteCode(L"dsInterpolation.cso");
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
     const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
@@ -239,8 +229,6 @@ void DxRenderer::init3D3() {
     m_vertexNoProjectionShader = m_device.CreateVertexShader(vsNoProjectionBytes);
     m_hullBrezierShader = m_device.CreateHullShader(hsBrezierBytes);
     m_domainBrezierShader = m_device.CreateDomainShader(dsBrezierBytes);
-    m_hullInterpolationShader = m_device.CreateHullShader(hsInterpolationBytes);
-    m_domainInterpolationShader = m_device.CreateDomainShader(dsInterpolationBytes);
     m_pixelShader = m_device.CreatePixelShader(psBytes);
     m_pixelFadeShader = m_device.CreatePixelShader(psFadeBytes);
 

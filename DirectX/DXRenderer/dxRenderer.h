@@ -77,9 +77,6 @@ private:
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainBrezierShader;
 
-    mini::dx_ptr<ID3D11HullShader> m_hullInterpolationShader;
-    mini::dx_ptr<ID3D11DomainShader> m_domainInterpolationShader;
-
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
 
@@ -109,4 +106,6 @@ private:
     float frameTime();
 
     void updateCameraCB();
+
+    void drawCurve(const Curve &curve, int lastPatchId, int lastPatchSize);
 };

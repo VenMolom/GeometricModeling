@@ -16,9 +16,9 @@ cbuffer cbProj : register(b2)
 	matrix projMatrix;
 };
 
-VSOut main( VSIn i )
+PSIn main( VSIn i )
 {
-	VSOut o;
+	PSIn o;
 	o.pos = mul(projMatrix, mul(viewMatrix, mul(worldMatrix, float4(i.pos, 1.0f))));
 	o.col = float4(i.col, 1.0f);
 	return o;

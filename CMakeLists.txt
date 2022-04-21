@@ -76,8 +76,6 @@ set(HLSL_SHADER_FILES
         Shader/vs.hlsl
         Shader/hsBrezier.hlsl
         Shader/dsBrezier.hlsl
-        Shader/hsInterpolation.hlsl
-        Shader/dsInterpolation.hlsl
         Shader/psCameraFade.hlsl
         Shader/vsBillboard.hlsl
         Shader/vsNoProjection.hlsl)
@@ -89,8 +87,6 @@ set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/dsBrezier.hlsl PROPERTIES ShaderType "ds")
-set_source_files_properties(Shader/hsInterpolation.hlsl PROPERTIES ShaderType "hs")
-set_source_files_properties(Shader/dsInterpolation.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
 foreach (FILE ${HLSL_SHADER_FILES})

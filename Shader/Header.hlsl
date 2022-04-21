@@ -3,14 +3,19 @@ struct VSIn {
 	float3 col : COLOR;
 };
 
-struct VSOut {
+struct PSIn {
 	float4 pos : SV_POSITION;
-	float4 col: COLOR;
+	float4 col : COLOR;
 };
 
-struct HS_CONSTANT_DATA_OUTPUT {
+struct DSIn {
+	float4 pos : SV_POSITION;
+	float4 col : COLOR;
+};
+
+struct HSBrezierConstOutput {
 	float edges[2] : SV_TessFactor;
+	int patchSize : PATCHSIZE;
 };
 
 #define CONTROL_POINTS_BREZIER 4
-#define CONTROL_POINTS_INTERPOLATION 4
