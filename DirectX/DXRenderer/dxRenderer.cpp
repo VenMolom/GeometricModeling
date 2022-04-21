@@ -266,10 +266,10 @@ void DxRenderer::init3D3() {
 
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
-    ID3D11Buffer *hsCbs[] = {m_cbTesselation.get(), m_cbView.get(), m_cbProj.get()};
+    ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
     m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
-    m_device.context()->HSSetConstantBuffers(0, 3, hsCbs);
+    m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
 
     DepthStencilDescription dssDesc;
     dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
