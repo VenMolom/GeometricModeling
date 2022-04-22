@@ -7,10 +7,10 @@
 using namespace DirectX;
 
 const std::vector<VertexPositionColor> Point::pointVertices = {
-        {{1,  1,  0}, {1, 1, 1}},
-        {{-1, 1,  0}, {1, 1, 1}},
-        {{-1, -1, 0}, {1, 1, 1}},
-        {{1,  -1, 0}, {1, 1, 1}}
+        {{0.5,  0.5,  0}, {1, 1, 1}},
+        {{-0.5, 0.5,  0}, {1, 1, 1}},
+        {{-0.5, -0.5, 0}, {1, 1, 1}},
+        {{0.5,  -0.5, 0}, {1, 1, 1}}
 };
 
 const std::vector<Index> Point::pointIndices = {
