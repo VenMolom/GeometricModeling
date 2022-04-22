@@ -26,7 +26,8 @@ HSBrezierConstOutput CalcHSPatchConstants(
     float2 startViewport = mad(scale, start, scale);
     float2 endViewport = mad(scale, end, scale);
 
-    float tesselationAmount = clamp(ceil(distance(startViewport, endViewport) / 64.0f), 1.0f, 64.0f);
+    float2 dist = abs(endViewport - startViewport);
+    float tesselationAmount = clamp(ceil((dist.x + dist.y) / 64.0f), 1.0f, 64.0f);
 
     output.edges[0] = tesselationAmount;
     output.edges[1] = 64.0f;

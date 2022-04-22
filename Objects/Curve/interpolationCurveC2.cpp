@@ -59,8 +59,16 @@ void InterpolationCurveC2::pointUpdate(const shared_ptr<Point> &point, int index
 
     auto prevD = knotDistances[index - 1];
     auto dSum = prevD + d;
-    alpha.push_back(prevD / dSum);
-    beta.push_back(d / dSum);
+    if (abs(dSum) <= FLT_EPSILON) {
+        alpha.push_back(0.0f);
+    } else {
+        alpha.push_back(prevD / dSum);
+    }
+    if (abs(dSum) <= FLT_EPSILON) {
+        beta.push_back(0.0f);
+    } else {
+        beta.push_back(d / dSum);
+    }
 
     if (_points[index - 1].expired()) {
         updatePoints();
@@ -70,11 +78,15 @@ void InterpolationCurveC2::pointUpdate(const shared_ptr<Point> &point, int index
     auto prevPositionDiff = XMVectorSubtract(XMLoadFloat3(&position),
                                              XMLoadFloat3(&prevPosition));
     XMFLOAT3 r{};
-    XMStoreFloat3(&r, XMVectorScale(
-            XMVectorSubtract(XMVectorScale(positionDiff, 1 / d),
-                             XMVectorScale(prevPositionDiff, 1 / prevD)),
-            3.0f / dSum));
-    R.push_back(r);
+    if (abs(dSum) <= FLT_EPSILON) {
+        R.emplace_back(0.0f, 0.0f, 0.0f);
+    } else {
+        XMStoreFloat3(&r, XMVectorScale(
+                XMVectorSubtract(XMVector3Normalize(positionDiff),
+                                 XMVector3Normalize(prevPositionDiff)),
+                3.0f / dSum));
+        R.push_back(r);
+    }
 }
 
 void InterpolationCurveC2::postUpdate() {
@@ -119,9 +131,8 @@ void InterpolationCurveC2::postUpdate() {
         }
         auto position = _points[i].lock()->position();
         auto positionNext = _points[i + 1].lock()->position();
-        XMVECTOR left = XMVectorScale(
-                XMVectorSubtract(XMLoadFloat3(&positionNext), XMLoadFloat3(&position)),
-                1.0f / knotDistances[i]);
+        XMVECTOR left = XMVector3Normalize(
+                    XMVectorSubtract(XMLoadFloat3(&positionNext), XMLoadFloat3(&position)));
         XMVECTOR right = XMVectorScale(XMVectorAdd(nextC, XMVectorScale(currentC, 2.0f)),
                                        knotDistances[i] / 3.0f);
 
