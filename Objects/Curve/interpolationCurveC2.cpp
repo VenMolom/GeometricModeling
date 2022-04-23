@@ -52,7 +52,6 @@ void InterpolationCurveC2::pointUpdate(const shared_ptr<Point> &point, int index
                                          XMLoadFloat3(&position));
     auto d = XMVector3Length(positionDiff).m128_f32[0];
     knotDistances.push_back(d);
-    // TODO: handle knotDistance = 0
 
     // calculate alpha, beta and R for i = index - 1
     if (index == 0) return;
