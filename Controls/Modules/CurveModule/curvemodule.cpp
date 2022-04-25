@@ -26,7 +26,7 @@ void CurveModule::updateCurvePoints() {
     ui->pointsList->setRowCount(curve->points().size());
     for (auto &point: curve->points()) {
         if (auto pp = point.lock()) {
-            auto item = make_unique<QTableWidgetItem>(pp->name());
+            auto item = make_unique<QTableWidgetItem>(pp->nameId());
             auto button = make_unique<QPushButton>("Delete");
             button->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
             int index = static_cast<int>(points.size());

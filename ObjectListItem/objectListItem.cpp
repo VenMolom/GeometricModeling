@@ -17,5 +17,5 @@ void ObjectListItem::select() {
 }
 
 void ObjectListItem::updateText() {
-    setText(_object->name() + " (" + QString::fromStdString(std::to_string(_object->id())) + ")");
+    setText(_object->nameId());
 }

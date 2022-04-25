@@ -16,12 +16,6 @@ Curve::Curve(uint id, QString name, vector<std::weak_ptr<Point>> &&points, D3D11
 }
 
 void Curve::addPoint(weak_ptr<Point> point) {
-    if (std::find_if(_points.begin(), _points.end(), [&point](const weak_ptr<Point> &p) {
-        return point.lock().get() == p.lock().get();
-    }) != _points.end()) {
-        return;
-    }
-
     _points.push_back(point);
     updatePoints();
 }

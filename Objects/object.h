@@ -79,6 +79,8 @@ public:
 
     QString name() const { return _name; }
 
+    QString nameId() const { return _name + " (" + QString::fromStdString(std::to_string(_id)) + ")"; }
+
     void setName(QString name);
 
     uint id() const { return _id; }
