@@ -52,6 +52,11 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
+
+    // TODO: move collision checking to object's method
+    // TODO: make point use geometry shader
+    // TODO: make point constant size on screen
+    // TODO: use camera position and direction when checking collision
 };
 
 #endif // MAINWINDOW_H
