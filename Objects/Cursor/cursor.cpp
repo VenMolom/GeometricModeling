@@ -78,9 +78,3 @@ void Cursor::updateScreenPosition() {
     XMStoreFloat2(&screenPos, screen);
     _screenPosition = {static_cast<int32_t>(screenPos.x), static_cast<int32_t>(screenPos.y)};
 }
-
-BoundingOrientedBox Cursor::boundingBox() const {
-    return {{},
-            {},
-            {0, 0, 0, 1.f}};
-}

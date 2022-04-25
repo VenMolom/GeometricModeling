@@ -17,9 +17,3 @@ void Linestrip::draw(Renderer &renderer, DrawType drawType) {
 Type Linestrip::type() const {
     return VIRTUAL;
 }
-
-DirectX::BoundingOrientedBox Linestrip::boundingBox() const {
-    return {{},
-            {},
-            {0, 0, 0, 1.f}};
-}

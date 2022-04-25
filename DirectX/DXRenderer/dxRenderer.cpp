@@ -85,7 +85,6 @@ void DxRenderer::drawCurve(const Curve &curve, int lastPatchId, int lastPatchSiz
 void DxRenderer::draw(const Grid &grid, XMFLOAT4 color) {
     updateBuffer(m_cbModel, grid.modelMatrix());
     updateBuffer(m_cbColor, CLEAR_COLOR);
-    updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera()->farZ(), 0, 0, 0});
 
     m_device.context()->PSSetShader(m_pixelFadeShader.get(), nullptr, 0);
     m_device.context()->OMSetDepthStencilState(m_dssNoDepthWrite.get(), 0);
@@ -100,13 +99,11 @@ void DxRenderer::draw(const Point &point, XMFLOAT4 color) {
     updateBuffer(m_cbModel, point.modelMatrix());
     updateBuffer(m_cbColor, color);
 
-    m_device.context()->IASetInputLayout(m_billboardLayout.get());
-    m_device.context()->VSSetShader(m_vertexBillboardShader.get(), nullptr, 0);
+    m_device.context()->GSSetShader(m_geometryPointShader.get(), nullptr, 0);
 
     point.render(m_device.context());
 
-    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
-    m_device.context()->IASetInputLayout(m_layout.get());
+    m_device.context()->GSSetShader(nullptr, nullptr, 0);
 }
 
 template<typename T>
@@ -132,6 +129,7 @@ void DxRenderer::updateCameraCB() {
     XMStoreFloat4x4(view, scene->camera()->viewMatrix());
     XMStoreFloat4x4(view + 1, invView);
     updateBuffer(m_cbView, view);
+    updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera()->nearZ(), scene->camera()->farZ(), 0, 0});
 }
 
 QPaintEngine *DxRenderer::paintEngine() const {
@@ -222,6 +220,7 @@ void DxRenderer::init3D3() {
     const auto vsNoProjectionBytes = DxDevice::LoadByteCode(L"vsNoProjection.cso");
     const auto hsBrezierBytes = DxDevice::LoadByteCode(L"hsBrezier.cso");
     const auto dsBrezierBytes = DxDevice::LoadByteCode(L"dsBrezier.cso");
+    const auto gsPointBytes = DxDevice::LoadByteCode(L"gsPoint.cso");
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
     const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
@@ -229,6 +228,7 @@ void DxRenderer::init3D3() {
     m_vertexNoProjectionShader = m_device.CreateVertexShader(vsNoProjectionBytes);
     m_hullBrezierShader = m_device.CreateHullShader(hsBrezierBytes);
     m_domainBrezierShader = m_device.CreateDomainShader(dsBrezierBytes);
+    m_geometryPointShader = m_device.CreateGeometryShader(gsPointBytes);
     m_pixelShader = m_device.CreatePixelShader(psBytes);
     m_pixelFadeShader = m_device.CreatePixelShader(psFadeBytes);
 
@@ -255,9 +255,11 @@ void DxRenderer::init3D3() {
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
+    ID3D11Buffer *gsCbs[] = {m_cbFarPlane.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
     m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
     m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
+    m_device.context()->GSSetConstantBuffers(0, 1, gsCbs);
 
     DepthStencilDescription dssDesc;
     dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;

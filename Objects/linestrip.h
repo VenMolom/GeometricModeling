@@ -19,8 +19,6 @@ public:
     void draw(Renderer &renderer, DrawType drawType) override;
 
     Type type() const override;
-
-    DirectX::BoundingOrientedBox boundingBox() const override;
 };
 
 

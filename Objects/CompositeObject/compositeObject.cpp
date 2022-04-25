@@ -62,10 +62,6 @@ Type CompositeObject::type() const {
     return COMPOSITE;
 }
 
-DirectX::BoundingOrientedBox CompositeObject::boundingBox() const {
-    return {{}, {}, {0, 0, 0, 1.f}};
-}
-
 void CompositeObject::setPosition(DirectX::XMFLOAT3 position) {
     Object::setPosition(position);
     updateChildren();

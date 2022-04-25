@@ -19,6 +19,10 @@ XMMATRIX Camera::projectionMatrix() const {
     return XMLoadFloat4x4(&projection.value());
 }
 
+XMMATRIX Camera::cameraMatrix() const {
+    return XMLoadFloat4x4(&view.value()) * XMLoadFloat4x4(&projection.value());
+}
+
 void Camera::resize(QSizeF newSize) {
     viewportSize = newSize;
     calculateProjection(newSize.width() / newSize.height());
