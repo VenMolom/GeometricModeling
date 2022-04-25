@@ -77,6 +77,8 @@ private:
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainBrezierShader;
 
+    mini::dx_ptr<ID3D11GeometryShader> m_geometryPointShader;
+
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
 

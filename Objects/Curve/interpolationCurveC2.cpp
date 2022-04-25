@@ -119,7 +119,7 @@ void InterpolationCurveC2::postUpdate() {
     }
     c.emplace_back(0, 0, 0);
 
-    // calculate b (first derrivative) for all knots except last
+    // calculate b (first derivative) for all knots except last
     for (int i = 0; i < _points.size() - 1; ++i) {
         auto currentC = XMLoadFloat3(&c[i]);
         auto nextC = XMLoadFloat3(&c[i + 1]);

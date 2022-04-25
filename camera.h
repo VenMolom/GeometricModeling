@@ -30,6 +30,8 @@ public:
 
     QBindable<DirectX::XMFLOAT4X4> bindableProjection() { return &projection; }
 
+    DirectX::XMMATRIX cameraMatrix() const;
+
     QSizeF viewport() const { return viewportSize; }
 
     DirectX::XMFLOAT3 center() const { return _center; }
