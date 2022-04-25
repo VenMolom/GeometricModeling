@@ -35,9 +35,3 @@ void Grid::draw(Renderer &renderer, DrawType drawType) {
 Type Grid::type() const {
     return GRID;
 }
-
-BoundingOrientedBox Grid::boundingBox() const {
-    return {{},
-            {},
-            {0, 0, 0, 1.f}};
-}

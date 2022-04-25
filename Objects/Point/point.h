@@ -16,7 +16,7 @@ public:
 
     Type type() const override;
 
-    DirectX::BoundingOrientedBox boundingBox() const override;
+    bool intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, float &distance) const override;
 
     void setRotation(DirectX::XMFLOAT3 rotation) override {}
 

@@ -32,8 +32,6 @@ public:
 
     void setPolygonal(bool draw) { _polygonal = draw; }
 
-    DirectX::BoundingOrientedBox boundingBox() const override;
-
     void setPosition(DirectX::XMFLOAT3 position) final {};
 
     void setRotation(DirectX::XMFLOAT3 rotation) final {};

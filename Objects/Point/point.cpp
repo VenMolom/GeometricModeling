@@ -30,7 +30,8 @@ Type Point::type() const {
     return POINT3D;
 }
 
-BoundingOrientedBox Point::boundingBox() const {
-    auto pos = _position.value();
-    return {pos, boundingBoxSize, rot};
+bool Point::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, float &distance) const {
+    // TODO: calculate depending on camera position
+    auto boundingBox = BoundingOrientedBox{_position.value(), boundingBoxSize, rot};
+    return boundingBox.Intersects(XMLoadFloat3(&origin), XMLoadFloat3(&direction), distance);
 }

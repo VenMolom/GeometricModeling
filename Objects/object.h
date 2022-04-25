@@ -91,7 +91,7 @@ public:
 
     virtual Type type() const = 0;
 
-    virtual DirectX::BoundingOrientedBox boundingBox() const = 0;
+    virtual bool intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, float &distance) const { return false; };
 
 protected:
     QProperty<DirectX::XMFLOAT3> _position;

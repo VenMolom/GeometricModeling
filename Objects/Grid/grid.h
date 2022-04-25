@@ -22,8 +22,6 @@ public:
 
     void setScale(DirectX::XMFLOAT3 scale) override {}
 
-    DirectX::BoundingOrientedBox boundingBox() const override;
-
 private:
     const static DirectX::XMFLOAT3 color;
 };

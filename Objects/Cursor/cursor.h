@@ -25,8 +25,6 @@ public:
 
     QBindable<DirectX::XMINT2> bindableScreenPosition() { return &_screenPosition; }
 
-    DirectX::BoundingOrientedBox boundingBox() const override;
-
     void setScale(DirectX::XMFLOAT3 scale) override {}
 
 private:

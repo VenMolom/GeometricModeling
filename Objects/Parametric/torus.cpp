@@ -65,12 +65,14 @@ void Torus::setMinorRadius(float radius) {
     calculateVerticesAndIndices();
 }
 
-BoundingOrientedBox Torus::boundingBox() const {
+bool Torus::intersects(XMFLOAT3 origin, XMFLOAT3 direction, float &distance) const {
     auto pos = _position.value();
     auto size = XMFLOAT3(_scale.value().x * (_majorRadius + _minorRadius), _scale.value().y * _minorRadius,
                          _scale.value().z * (_majorRadius + _minorRadius));
     XMFLOAT4 rotation{};
     XMStoreFloat4(&rotation,
                   XMQuaternionRotationRollPitchYaw(_rotation.value().x, _rotation.value().y, _rotation.value().z));
-    return {pos, size, rotation};
+    auto boundingBox =  BoundingOrientedBox{pos, size, rotation};
+
+    return boundingBox.Intersects(XMLoadFloat3(&origin), XMLoadFloat3(&direction), distance);
 }

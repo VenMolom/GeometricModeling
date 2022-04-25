@@ -22,8 +22,6 @@ public:
 
     Type type() const override;
 
-    DirectX::BoundingOrientedBox boundingBox() const override;
-
     void setPosition(DirectX::XMFLOAT3 position) override;
 
     void setRotation(DirectX::XMFLOAT3 rotation) override;

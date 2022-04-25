@@ -40,12 +40,6 @@ void Curve::removePoint(int index) {
     updatePoints();
 }
 
-BoundingOrientedBox Curve::boundingBox() const {
-    return {{},
-            {},
-            {0, 0, 0, 1.f}};
-}
-
 void Curve::draw(Renderer &renderer, DrawType drawType) {
     for (auto &point: _points) {
         if (!point.lock()) {
