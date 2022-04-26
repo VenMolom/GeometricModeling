@@ -15,8 +15,8 @@ public:
 
     Type type() const override;
 
-    bool intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX cameraMatrix,
-                    float &distance) const override;
+    bool intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX viewMatrix,
+                    float viewDepth, float &distance) const override;
 
     void setRotation(DirectX::XMFLOAT3 rotation) override {}
 

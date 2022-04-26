@@ -42,6 +42,8 @@ public:
 
     float farZ() const { return _far; }
 
+    float viewDepth() const { return _far - _near; }
+
     void resize(QSizeF newSize);
 
     void changeZoom(float delta);

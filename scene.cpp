@@ -169,7 +169,7 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
 
     for (auto &object: _objects) {
         float distance{};
-        if (object->intersects(ray.position, ray.direction, _camera->cameraMatrix(), distance)
+        if (object->intersects(ray.position, ray.direction, _camera->viewMatrix(), _camera->viewDepth(), distance)
         && distance < closestDistance) {
             closest = object;
             closestDistance = distance;
@@ -181,7 +181,7 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
         auto points = holder.lock()->virtualPoints();
         for (auto &point: points) {
             float distance{};
-            if (point->intersects(ray.position, ray.direction, _camera->cameraMatrix(), distance) &&
+            if (point->intersects(ray.position, ray.direction, _camera->cameraMatrix(), _camera->viewDepth(), distance) &&
                 distance < closestDistance) {
                 closest = point;
                 closestDistance = distance;

@@ -6,7 +6,7 @@
 
 using namespace DirectX;
 
-float POINT_SIZE = 1.f;
+float POINT_SIZE = 1.8f;
 
 Point::Point(uint id, DirectX::XMFLOAT3 position) : Object(id, "Point", position, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST) {
     vertices.push_back({{0, 0, 0}, {1, 1, 1}});
@@ -21,12 +21,12 @@ Type Point::type() const {
     return POINT3D;
 }
 
-bool Point::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX cameraMatrix,
-                       float &distance) const {
-    auto ndc = XMVector3Transform(XMLoadFloat3(&_position.value()), cameraMatrix);
-    auto depth = ndc.m128_f32[2] / ndc.m128_f32[3];
+bool Point::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX viewMatrix,
+                       float viewDepth, float &distance) const {
+    auto ndc = XMVector3Transform(XMLoadFloat3(&_position.value()), viewMatrix);
+    auto depth = abs(ndc.m128_f32[2]) / viewDepth;
 
-    auto size = POINT_SIZE  / depth;
+    auto size = POINT_SIZE * depth;
     auto boundingSphere = BoundingSphere{_position.value(), size};
     return boundingSphere.Intersects(XMLoadFloat3(&origin), XMLoadFloat3(&direction), distance);
 }

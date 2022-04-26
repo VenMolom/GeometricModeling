@@ -94,7 +94,7 @@ public:
     virtual Type type() const = 0;
 
     virtual bool intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction,
-                            DirectX::XMMATRIX cameraMatrix, float &distance) const { return false; };
+                            DirectX::XMMATRIX viewMatrix, float viewDepth, float &distance) const { return false; };
 
 protected:
     QProperty<DirectX::XMFLOAT3> _position;

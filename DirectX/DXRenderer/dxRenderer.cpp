@@ -99,10 +99,12 @@ void DxRenderer::draw(const Point &point, XMFLOAT4 color) {
     updateBuffer(m_cbModel, point.modelMatrix());
     updateBuffer(m_cbColor, color);
 
+    m_device.context()->VSSetShader(m_vertexNoProjectionShader.get(), nullptr, 0);
     m_device.context()->GSSetShader(m_geometryPointShader.get(), nullptr, 0);
 
     point.render(m_device.context());
 
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->GSSetShader(nullptr, nullptr, 0);
 }
 
@@ -255,11 +257,11 @@ void DxRenderer::init3D3() {
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
-    ID3D11Buffer *gsCbs[] = {m_cbFarPlane.get()};
+    ID3D11Buffer *gsCbs[] = {m_cbFarPlane.get(), m_cbProj.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
     m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
     m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
-    m_device.context()->GSSetConstantBuffers(0, 1, gsCbs);
+    m_device.context()->GSSetConstantBuffers(0, 2, gsCbs);
 
     DepthStencilDescription dssDesc;
     dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
