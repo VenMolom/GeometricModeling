@@ -10,6 +10,6 @@ cbuffer cbFar : register(b1) {
 
 float4 main(PSIn i) : SV_TARGET
 {
-    float dist = saturate((i.pos.z * i.pos.w) / (nearFar.y - nearFar.x));
+    float dist = saturate((i.pos.w) / (nearFar.y - nearFar.x));
     return float4(color.rgb * dist + i.col.rgb * (1 - dist), 1.0f);
 }
