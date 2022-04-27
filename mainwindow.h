@@ -53,9 +53,9 @@ private:
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
 
-    // TODO: make point use geometry shader
-    // TODO: make point constant size on screen
-    // TODO: use camera position and direction when checking collision
+    // TODO: switchable modes (move, rotate, scale)
+    // TODO: modifications with mouse (depending on mode)
+    // TODO: lock modifications to specific axis
 };
 
 #endif // MAINWINDOW_H
