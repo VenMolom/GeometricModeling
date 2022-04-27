@@ -22,9 +22,9 @@ Type Point::type() const {
 }
 
 bool Point::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX viewMatrix,
-                       float viewDepth, float &distance) const {
+                       float nearZ, float farZ, float &distance) const {
     auto ndc = XMVector3Transform(XMLoadFloat3(&_position.value()), viewMatrix);
-    auto depth = abs(ndc.m128_f32[2]) / viewDepth;
+    auto depth = (abs(ndc.m128_f32[2]) - nearZ) / (farZ - nearZ);
 
     auto size = POINT_SIZE * depth;
     auto boundingSphere = BoundingSphere{_position.value(), size};

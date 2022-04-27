@@ -18,7 +18,7 @@ void main(point PSIn inArray[1], inout TriangleStream<PSIn> ostream)
 
     if (i.pos.z > 0) return;
 
-    float dist = saturate(abs(i.pos.z) / abs(nearFar.y - nearFar.x));
+    float dist = saturate((abs(i.pos.z) - nearFar.x) / abs(nearFar.y - nearFar.x));
 	float diff = size * dist;
 
 	PSIn o = (PSIn)0;

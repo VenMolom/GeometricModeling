@@ -56,7 +56,7 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
     emit objectAdded(_objects.back(), select);
 }
 
-void Scene::addComposite(list <shared_ptr<Object>> &&objects) {
+void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
     _objects.remove_if([&objects](const shared_ptr<Object> &ob) {
         return find_if(objects.begin(), objects.end(),
                        [&ob](const shared_ptr<Object> &obb) { return ob->equals(obb); }) != objects.end();
@@ -118,7 +118,7 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
                     obs.push_back(object);
                     addComposite(std::move(obs));
                 } else {
-                    list <shared_ptr<Object>> obs = {sel, object};
+                    list<shared_ptr<Object>> obs = {sel, object};
                     addComposite(std::move(obs));
                 }
             } else {
@@ -169,8 +169,9 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
 
     for (auto &object: _objects) {
         float distance{};
-        if (object->intersects(ray.position, ray.direction, _camera->viewMatrix(), _camera->viewDepth(), distance)
-        && distance < closestDistance) {
+        if (object->intersects(ray.position, ray.direction, _camera->viewMatrix(),
+                               _camera->nearZ(), _camera->farZ(), distance)
+            && distance < closestDistance) {
             closest = object;
             closestDistance = distance;
         }
@@ -181,7 +182,8 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
         auto points = holder.lock()->virtualPoints();
         for (auto &point: points) {
             float distance{};
-            if (point->intersects(ray.position, ray.direction, _camera->cameraMatrix(), _camera->viewDepth(), distance) &&
+            if (point->intersects(ray.position, ray.direction, _camera->cameraMatrix(),
+                                  _camera->nearZ(), _camera->farZ(), distance) &&
                 distance < closestDistance) {
                 closest = point;
                 closestDistance = distance;

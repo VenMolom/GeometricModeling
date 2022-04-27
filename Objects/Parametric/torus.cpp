@@ -66,7 +66,7 @@ void Torus::setMinorRadius(float radius) {
 }
 
 bool Torus::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX viewMatrix,
-                       float viewDepth, float &distance) const {
+                       float nearZ, float farZ, float &distance) const {
     auto pos = _position.value();
     auto size = XMFLOAT3(_scale.value().x * (_majorRadius + _minorRadius), _scale.value().y * _minorRadius,
                          _scale.value().z * (_majorRadius + _minorRadius));

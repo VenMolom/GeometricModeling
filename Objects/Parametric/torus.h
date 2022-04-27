@@ -26,7 +26,7 @@ public:
     std::array<bool, 2> looped() const override;
 
     bool intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX viewMatrix,
-                    float viewDepth, float &distance) const override;
+                    float nearZ, float farZ, float &distance) const override;
 
 protected:
     void calculateVertices(const std::array<int, DIM> &density,
