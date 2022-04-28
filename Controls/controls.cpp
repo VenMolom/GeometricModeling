@@ -44,12 +44,12 @@ void Controls::updateSelected() {
         ui->modulesLayout->addWidget(modules.back().get(), 0, 0, 1, 1);
     }
 
-    if (object->type() & MOVEABLE) {
+    if (object->type() & MOVABLE) {
         modules.push_back(std::move(make_unique<MoveModule>(object, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 1, 0, 1, 1);
     }
 
-    if (object->type() & SCREENMOVEABLE) {
+    if (object->type() & SCREENMOVABLE) {
         // TODO: best add some screenMove base class
         auto cursor = static_pointer_cast<Cursor>(object);
         modules.push_back(std::move(make_unique<ScreenMoveModule>(cursor, this)));

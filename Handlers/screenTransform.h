@@ -5,9 +5,9 @@
 #ifndef MG1_SCREENTRANSFORM_H
 #define MG1_SCREENTRANSFORM_H
 
-#include <DirectXMath.h>
 #include "Objects/object.h"
 #include "Utils/utils3D.h"
+#include "camera.h"
 
 class ScreenTransform {
 public:
@@ -25,28 +25,33 @@ public:
         Z,
     };
 
-    ScreenTransform(std::shared_ptr<Object> object);
+    ScreenTransform(std::shared_ptr<Object> object, std::shared_ptr<Camera> camera, Transform mode, Axis axis);
 
-    ~ScreenTransform();
+    void transform(QPoint screenPosition, QPointF delta);
 
-    void release();
+    void changeMode(Transform mode) { this->mode = mode; }
 
-    void transform(QPoint screenPosition, QPointF move);
+    void changeLockAxis(Axis axis) { this->axis = axis;}
 
-    void changeMode(Transform mode);
+private:
+    std::shared_ptr<Object> object;
+    std::shared_ptr<Camera> camera;
 
-    void changeLockAxis(Axis axis);
+    Transform mode;
+    Axis axis;
 
-//    void Scene::moveSelected(QPoint screenPosition) {
-//        shared_ptr<Object> selected;
-//        if (!(selected = _selected.value().lock()) || !selected->type() & MOVEABLE) return;
-//
-//        auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
-//        auto position = getPositionOnPlane(screenPos, _camera->direction(), selected->position());
-//
-//        selected->setPosition(position);
-//    }
-}
+    bool movable{false};
+    bool transformable{false};
+
+    DirectX::XMFLOAT3 startScale;
+    DirectX::XMFLOAT3 startRotation;
+
+    void move(QPoint screenPosition);
+
+    void rotate(QPointF delta);
+
+    void scale(QPointF delta);
+};
 
 
 #endif //MG1_SCREENTRANSFORM_H

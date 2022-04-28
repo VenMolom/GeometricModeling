@@ -23,8 +23,6 @@
 
 class InputHandler {
 public:
-    InputHandler();
-
     void mousePressEvent(QMouseEvent *event);
 
     void mouseReleaseEvent(QMouseEvent *event);
@@ -41,12 +39,13 @@ public:
 
     void focusLost();
 
-    QString currentMode() { return "a"; } // TODO: return proper value
+    QString currentMode();
 
 private:
     std::shared_ptr<Scene> scene;
 
     QPointF lastMousePos{};
+    QPointF clickPos{};
     bool actionKeyPressed{false};
     bool subactionKeyPressed{false};
     ScreenTransform::Transform mode{ScreenTransform::NONE};

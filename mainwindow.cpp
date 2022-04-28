@@ -1,11 +1,5 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "Objects/Point/point.h"
-#include "Objects/Parametric/torus.h"
-#include "Objects/Curve/brezierC0.h"
-#include "Objects/Curve/brezierC2.h"
-#include "Objects/Curve/interpolationCurveC2.h"
-#include "Objects/CompositeObject/compositeObject.h"
 
 using namespace std;
 using namespace DirectX;

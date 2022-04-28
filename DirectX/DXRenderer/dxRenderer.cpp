@@ -171,7 +171,9 @@ void DxRenderer::paintEvent(QPaintEvent *event) {
                                    .append(QString::number(deltaTime * 1000, 'f', 3))
                                    .append(" ms")
                                    .append("\t\t Frame rate: ")
-                                   .append(QString::number(frames)));
+                                   .append(QString::number(frames))
+                                   .append("\t\t Mode: ")
+                                   .append(inputHandler.currentMode()));
 
     renderScene();
     m_device.swapChain()->Present(0, 0);

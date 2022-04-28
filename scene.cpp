@@ -184,11 +184,10 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
     return closest;
 }
 
-XMFLOAT3
-Scene::getPositionOnPlane(DirectX::XMINT2 screenPosition, DirectX::XMFLOAT3 normal, DirectX::XMFLOAT3 point) const {
+XMFLOAT3 Scene::getPositionOnPlane(XMINT2 screenPosition, XMFLOAT3 normal, XMFLOAT3 point) const {
     auto ray = getRayFromScreenPosition(screenPosition);
-    auto plane = Utils3D::getPerpendicularPlaneThroughPoint(normal, point);
-    return Utils3D::getRayCrossWithPlane(ray, plane);
+    auto plane = getPerpendicularPlaneThroughPoint(normal, point);
+    return getRayCrossWithPlane(ray, plane);
 }
 
 void Scene::addCursor(XMFLOAT3RAY ray, XMINT2 screenPos) {
