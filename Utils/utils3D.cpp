@@ -2,15 +2,15 @@
 // Created by Molom on 2022-03-18.
 //
 
-#include "Utils3D.h"
+#include "utils3D.h"
 
 using namespace Utils3D;
 using namespace DirectX;
 
 XMFLOAT3RAY Utils3D::getRayFromScreen(XMINT2 screenPosition, XMFLOAT2 screenSize, float nearZ, float farZ,
                              XMMATRIX projection, XMMATRIX view) {
-    auto mouseNear = XMVectorSet(screenPosition.x, screenPosition.y, 0.0f, 0.0f);
-    auto mouseFar = XMVectorSet(screenPosition.x, screenPosition.y, 1.0f, 0.0f);
+    auto mouseNear = XMVectorSet(screenPosition.x, screenPosition.y, 0.0f, 1.0f);
+    auto mouseFar = XMVectorSet(screenPosition.x, screenPosition.y, 1.0f, 1.0f);
     auto worldNear = XMVector3Unproject(mouseNear, 0, 0,
                                         screenSize.x, screenSize.y,
                                         nearZ, farZ, projection,

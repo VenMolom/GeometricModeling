@@ -6,7 +6,7 @@
 #define MG1_BREZIERC2_H
 
 #include <DirectXMath.h>
-#include "Utils/Utils3D.h"
+#include "Utils/utils3D.h"
 #include "brezierCurve.h"
 #include "Objects/Point/virtualPoint.h"
 #include "Objects/linestrip.h"

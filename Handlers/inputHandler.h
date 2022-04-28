@@ -7,6 +7,7 @@
 
 #include <QWheelEvent>
 #include "scene.h"
+#include "Handlers/screenTransform.h"
 
 #define PAN_BUTTON Qt::MouseButton::MiddleButton
 #define MAIN_BUTTON Qt::MouseButton::LeftButton
@@ -14,6 +15,11 @@
 
 #define ACTION_KEY Qt::Key::Key_Shift
 #define SUBACTION_KEY Qt::Key::Key_Control
+
+#define SELECT_KEY Qt::Key::Key_Q
+#define MOVE_KEY Qt::Key::Key_W
+#define ROTATE_KEY Qt::Key::Key_E
+#define SCALE_KEY Qt::Key::Key_R
 
 class InputHandler {
 public:
@@ -35,13 +41,20 @@ public:
 
     void focusLost();
 
+    QString currentMode() { return "a"; } // TODO: return proper value
+
 private:
     std::shared_ptr<Scene> scene;
 
     QPointF lastMousePos{};
     bool actionKeyPressed{false};
     bool subactionKeyPressed{false};
-    bool moveable{false};
+    ScreenTransform::Transform mode{ScreenTransform::NONE};
+    ScreenTransform::Axis lockAxis{ScreenTransform::FREE};
+    std::unique_ptr<ScreenTransform> transformHandler;
+
+    // TODO: works as before for mode = NONE (select), click selects and can move while holding
+    // TODO: other modes only work on currently selected object
 };
 
 

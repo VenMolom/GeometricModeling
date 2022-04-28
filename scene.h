@@ -26,8 +26,6 @@ public:
 
     void removeSelected();
 
-    void moveSelected(QPoint screenPosition);
-
     void addPoint(QPoint screenPosition);
 
     void selectOrAddCursor(QPoint screenPosition, bool multiple);

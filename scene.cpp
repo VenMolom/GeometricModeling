@@ -74,16 +74,6 @@ void Scene::removeSelected() {
     }
 }
 
-void Scene::moveSelected(QPoint screenPosition) {
-    shared_ptr<Object> selected;
-    if (!(selected = _selected.value().lock()) || selected->type() & COMPOSITE) return;
-
-    auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
-    auto position = getPositionOnPlane(screenPos, _camera->direction(), selected->position());
-
-    selected->setPosition(position);
-}
-
 void Scene::addPoint(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto position = getPositionOnPlane(screenPos, _camera->direction(), _camera->center());

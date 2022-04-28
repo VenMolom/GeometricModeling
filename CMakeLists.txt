@@ -36,7 +36,7 @@ set(PROJECT_SOURCES
         Objects/Parametric/torus.cpp Objects/Parametric/torus.h
         Resources.qrc Handlers/inputHandler.cpp Handlers/inputHandler.h
         Objects/Cursor/cursor.cpp Objects/Cursor/cursor.h
-        Utils/Utils3D.h Utils/Utils3D.cpp
+        Utils/utils3D.h Utils/utils3D.cpp
         Objects/Point/point.cpp Objects/Point/point.h
         ObjectListItem/objectListItem.cpp ObjectListItem/objectListItem.h
         Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h
@@ -66,7 +66,7 @@ set(PROJECT_SOURCES
         Objects/linestrip.cpp Objects/linestrip.h
         Objects/Curve/curve.cpp Objects/Curve/curve.h
         Objects/Curve/interpolationCurveC2.cpp Objects/Curve/interpolationCurveC2.h
-        Objects/objectFactory.cpp Objects/objectFactory.h)
+        Objects/objectFactory.cpp Objects/objectFactory.h Handlers/screenTransform.cpp Handlers/screenTransform.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

@@ -13,10 +13,9 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
         case MAIN_BUTTON:
             if (subactionKeyPressed) {
                 scene->addPoint(event->position().toPoint());
-            } else {
+            } else if (mode == ScreenTransform::NONE) {
                 scene->selectOrAddCursor(event->position().toPoint(), actionKeyPressed);
             }
-            moveable = true;
             break;
     }
 
@@ -25,9 +24,6 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
 
 void InputHandler::mouseReleaseEvent(QMouseEvent *event) {
     switch (event->button()) {
-        case MAIN_BUTTON:
-            moveable = false;
-            break;
     }
 }
 
@@ -38,8 +34,10 @@ void InputHandler::mouseMoveEvent(QMouseEvent *event) {
     if (event->buttons() & PAN_BUTTON) {
         scene->camera()->move(event->position() - lastMousePos);
     }
-    if (event->buttons() & MAIN_BUTTON && moveable) {
-        scene->moveSelected(event->position().toPoint());
+    if (event->buttons() & MAIN_BUTTON) {
+        if (transformHandler) {
+            transformHandler->transform(event->position().toPoint(), event->position() - lastMousePos);
+        }
     }
 
     lastMousePos = event->position();
@@ -59,6 +57,14 @@ void InputHandler::keyPressEvent(QKeyEvent *event) {
         case SUBACTION_KEY:
             subactionKeyPressed = true;
             break;
+        case SELECT_KEY:
+            mode = ScreenTransform::NONE;
+        case MOVE_KEY:
+            mode = ScreenTransform::MOVE;
+        case ROTATE_KEY:
+            mode = ScreenTransform::ROTATE;
+        case SCALE_KEY:
+            mode = ScreenTransform::SCALE;
     }
 }
 
@@ -80,5 +86,4 @@ void InputHandler::setScene(std::shared_ptr<Scene> scenePtr) {
 void InputHandler::focusLost() {
     actionKeyPressed = false;
     subactionKeyPressed = false;
-    moveable = false;
 }
