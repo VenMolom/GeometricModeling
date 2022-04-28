@@ -94,7 +94,8 @@ private:
 
     mini::dx_ptr<ID3D11DepthStencilState> m_dssNoDepthWrite;
 
-    LARGE_INTEGER currentTicks, ticksPerSecond;
+    LARGE_INTEGER currentTicks, ticksPerSecond, lastFrameRateTick;
+    uint frameCount = 0, lastFrameRate = 0;
 
     const float CLEAR_COLOR[4]{0.2f, 0.2f, 0.2f, 1.0f};
 
@@ -106,6 +107,8 @@ private:
     void updateBuffer(const mini::dx_ptr<ID3D11Buffer> &buffer, const T &data);
 
     float frameTime();
+
+    uint frameRate();
 
     void updateCameraCB();
 

@@ -79,7 +79,7 @@ public:
 
     QString name() const { return _name; }
 
-    QString nameId() const { return _name + " (" + QString::fromStdString(std::to_string(_id)) + ")"; }
+    QString nameId() const;
 
     void setName(QString name);
 

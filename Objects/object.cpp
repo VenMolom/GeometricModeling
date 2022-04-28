@@ -47,6 +47,11 @@ void Object::setName(QString name) {
     _name = std::move(name);
 }
 
+QString Object::nameId() const {
+    auto n = _name.value();
+    return n.append(" (").append(QString::number(_id)).append(")");
+}
+
 bool Object::equals(const std::shared_ptr<Object> &other) const {
     return other.get() == this;
 }

@@ -125,6 +125,17 @@ float DxRenderer::frameTime() {
     return (static_cast<float>(countDelta) / static_cast<float>(ticksPerSecond.QuadPart));
 }
 
+uint DxRenderer::frameRate() {
+    frameCount++;
+    if (currentTicks.QuadPart - lastFrameRateTick.QuadPart > ticksPerSecond.QuadPart) {
+        lastFrameRateTick = currentTicks;
+        lastFrameRate = frameCount;
+        frameCount = 0;
+    }
+
+    return lastFrameRate;
+}
+
 void DxRenderer::updateCameraCB() {
     auto invView = XMMatrixInverse(nullptr, scene->camera()->viewMatrix());
     XMFLOAT4X4 view[2];
@@ -154,10 +165,13 @@ void DxRenderer::resizeEvent(QResizeEvent *event) {
 
 void DxRenderer::paintEvent(QPaintEvent *event) {
     auto deltaTime = frameTime();
+    auto frames = frameRate();
 
     statusBar->showMessage(QString("Frame time: ")
                                    .append(QString::number(deltaTime * 1000, 'f', 3))
-                                   .append(" ms"));
+                                   .append(" ms")
+                                   .append("\t\t Frame rate: ")
+                                   .append(QString::number(frames)));
 
     renderScene();
     m_device.swapChain()->Present(0, 0);
@@ -269,6 +283,7 @@ void DxRenderer::init3D3() {
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);
+    QueryPerformanceCounter(&lastFrameRateTick);
 }
 
 void DxRenderer::setupViewport() {
