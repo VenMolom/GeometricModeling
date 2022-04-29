@@ -29,10 +29,6 @@ public:
 
     void transform(QPoint screenPosition, QPointF delta);
 
-    void changeMode(Transform mode) { this->mode = mode; }
-
-    void changeLockAxis(Axis axis) { this->axis = axis;}
-
 private:
     std::shared_ptr<Object> object;
     std::shared_ptr<Camera> camera;

@@ -7,22 +7,24 @@
 using namespace Utils3D;
 using namespace DirectX;
 
-XMFLOAT3RAY Utils3D::getRayFromScreen(XMINT2 screenPosition, XMFLOAT2 screenSize, float nearZ, float farZ,
-                             XMMATRIX projection, XMMATRIX view) {
-    auto mouseNear = XMVectorSet(screenPosition.x, screenPosition.y, 0.0f, 1.0f);
-    auto mouseFar = XMVectorSet(screenPosition.x, screenPosition.y, 1.0f, 1.0f);
-    auto worldNear = XMVector3Unproject(mouseNear, 0, 0,
-                                        screenSize.x, screenSize.y,
-                                        nearZ, farZ, projection,
-                                        view, XMMatrixIdentity());
-    auto worldFar = XMVector3Unproject(mouseFar, 0, 0,
-                                       screenSize.x, screenSize.y,
-                                       nearZ, farZ, projection,
-                                       view, XMMatrixIdentity());
+XMFLOAT3RAY Utils3D::getRayFromScreen(XMINT2 screenPosition, const std::shared_ptr<Camera> &camera) {
+    XMFLOAT3 position = camera->position();
+    XMFLOAT3 right = camera->right();
+    XMFLOAT3 up = camera->up();
+    XMFLOAT3 direction = camera->direction();
+    auto viewport = camera->viewport();
+
+    float scaleX = screenPosition.x / (viewport.width() / 2.0f)- 1.0f;
+    float scaleY = 1.0f - screenPosition.y / (viewport.height() / 2.0f);
+
     XMFLOAT3RAY result{};
-    XMStoreFloat3(&result.position, worldNear);
+    XMStoreFloat3(&result.position, XMLoadFloat3(&position));
     XMStoreFloat3(&result.direction, XMVector3Normalize(
-            XMVectorSubtract(worldFar, worldNear)));
+            XMVectorAdd(
+                    XMVectorAdd(XMVectorScale(XMLoadFloat3(&right), scaleX),
+                                XMVectorScale(XMLoadFloat3(&up), scaleY)),
+            XMVectorScale(XMLoadFloat3(&direction), -camera->z())
+    )));
     return result;
 }
 
@@ -48,6 +50,7 @@ XMFLOAT3 Utils3D::getRayCrossWithPlane(XMFLOAT3RAY ray, XMFLOAT4 plane) {
     return result;
 }
 
-void Utils3D::storeFloat3Lerp(DirectX::XMFLOAT3 &target, const DirectX::XMFLOAT3 &v1, const DirectX::XMFLOAT3 &v2, float t) {
+void
+Utils3D::storeFloat3Lerp(DirectX::XMFLOAT3 &target, const DirectX::XMFLOAT3 &v1, const DirectX::XMFLOAT3 &v2, float t) {
     XMStoreFloat3(&target, XMVectorLerp(XMLoadFloat3(&v1), XMLoadFloat3(&v2), t));
 }

@@ -137,7 +137,7 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         }
     }
 
-    // should have right
+    // should have _right
     if (index < _points.size() - 1) {
         right = _points[index + 1].lock();
         if (!right) {
@@ -153,7 +153,7 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         fixedLeft = true;
     }
 
-    // fix between self and right neighbour
+    // fix between self and _right neighbour
     if (index > 0 && index < _points.size() - 2) {
         Utils3D::storeFloat3Lerp(vertices[under + 1].position, moved->position(), right->position(), 1.0f / 3.0f);
         Utils3D::storeFloat3Lerp(vertices[under + 2].position, moved->position(), right->position(), 2.0f / 3.0f);
@@ -185,11 +185,11 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         Utils3D::storeFloat3Lerp(vertices[under - 3].position, b1, b2, 0.5f);
     }
 
-    // fix under right neighbour
+    // fix under _right neighbour
     if (index < _points.size() - 2) {
         XMFLOAT3 b1{}, b2{};
 
-        // second right neighbour is not border
+        // second _right neighbour is not border
         if (index < _points.size() - 3) {
             b2 = vertices[under + 4].position;
         } else {

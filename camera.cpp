@@ -23,6 +23,14 @@ XMMATRIX Camera::cameraMatrix() const {
     return XMLoadFloat4x4(&view.value()) * XMLoadFloat4x4(&projection.value());
 }
 
+
+DirectX::XMFLOAT3 Camera::position() const {
+    XMFLOAT3 position{};
+    XMStoreFloat3(&position, XMVectorAdd(XMLoadFloat3(&_center),
+                                         XMVectorScale(XMLoadFloat3(&_direction), distance * zoom)));
+    return position;
+}
+
 void Camera::resize(QSizeF newSize) {
     viewportSize = newSize;
     calculateProjection(newSize.width() / newSize.height());
@@ -51,16 +59,16 @@ void Camera::rotate(QPointF angle) {
     };
     XMStoreFloat3(&_direction, XMVector3Normalize(XMLoadFloat3(&_direction)));
 
-    XMStoreFloat3(&right, XMVector3Normalize(
+    XMStoreFloat3(&_right, XMVector3Normalize(
             XMVector3Cross(
                     XMLoadFloat3(&worldUp),
                     XMLoadFloat3(&_direction)
             )
     ));
-    XMStoreFloat3(&up, XMVector3Normalize(
+    XMStoreFloat3(&_up, XMVector3Normalize(
             XMVector3Cross(
                     XMLoadFloat3(&_direction),
-                    XMLoadFloat3(&right)
+                    XMLoadFloat3(&_right)
             )
     ));
 
@@ -68,8 +76,8 @@ void Camera::rotate(QPointF angle) {
 }
 
 void Camera::move(QPointF offset) {
-    auto moveRight = XMVectorScale(XMLoadFloat3(&right), SPEED * offset.x());
-    auto moveUp = XMVectorScale(XMLoadFloat3(&up), -SPEED * offset.y());
+    auto moveRight = XMVectorScale(XMLoadFloat3(&_right), SPEED * offset.x());
+    auto moveUp = XMVectorScale(XMLoadFloat3(&_up), -SPEED * offset.y());
     auto move = XMVectorAdd(moveRight, moveUp);
 
     XMStoreFloat3(&_center, XMVectorAdd(XMLoadFloat3(&_center), move));
@@ -90,14 +98,17 @@ void Camera::calculateView() {
     XMStoreFloat4x4(&v, XMMatrixLookAtRH(
             XMVectorAdd(centerVector, fromCenterVector),
             centerVector,
-            XMLoadFloat3(&up)));
+            XMLoadFloat3(&_up)));
     view.setValue(v);
 }
 
 void Camera::calculateProjection(float aspectRatio) {
     XMFLOAT4X4 proj{};
     XMStoreFloat4x4(&proj, XMMatrixPerspectiveFovRH(
-            XMConvertToRadians(90),
+            FOV,
             aspectRatio, _near, _far));
     projection.setValue(proj);
+
+//    _z = ((viewportSize.height() / 2.0f) / tan(FOV / 2.0f)) / viewport().height();
+    _z = tan(FOV / 2.0f);
 }

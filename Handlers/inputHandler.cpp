@@ -20,7 +20,7 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
             if (!scene->selected().expired()) {
                 transformHandler = make_unique<ScreenTransform>(
                         scene->selected().lock(), scene->camera(),
-                        mode == ScreenTransform::NONE ? ScreenTransform::MOVE : mode, lockAxis);
+                        mode == ScreenTransform::NONE ? ScreenTransform::MOVE : mode, axis);
 
                 if (mode != ScreenTransform::NONE) {
                     transformHandler->transform(event->position().toPoint(), event->position() - clickPos);
@@ -74,6 +74,7 @@ void InputHandler::keyPressEvent(QKeyEvent *event) {
             break;
         case SELECT_KEY:
             mode = ScreenTransform::NONE;
+            axis = ScreenTransform::FREE;
             break;
         case MOVE_KEY:
             mode = ScreenTransform::MOVE;
@@ -84,11 +85,19 @@ void InputHandler::keyPressEvent(QKeyEvent *event) {
         case SCALE_KEY:
             mode = ScreenTransform::SCALE;
             break;
+        case FREE_AXIS_KEY:
+            axis = ScreenTransform::FREE;
+            break;
+        case X_AXIS_KEY:
+            axis = ScreenTransform::X;
+            break;
+        case Y_AXIS_KEY:
+            axis = ScreenTransform::Y;
+            break;
+        case Z_AXIS_KEY:
+            axis = ScreenTransform::Z;
+            break;
     }
-//    if (transformHandler) {
-//        transformHandler->changeMode(mode);
-//        transformHandler->changeLockAxis(lockAxis);
-//    }
 }
 
 void InputHandler::keyReleaseEvent(QKeyEvent *event) {

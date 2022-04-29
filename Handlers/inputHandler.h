@@ -21,6 +21,11 @@
 #define ROTATE_KEY Qt::Key::Key_E
 #define SCALE_KEY Qt::Key::Key_R
 
+#define FREE_AXIS_KEY Qt::Key::Key_V
+#define X_AXIS_KEY Qt::Key::Key_X
+#define Y_AXIS_KEY Qt::Key::Key_C
+#define Z_AXIS_KEY Qt::Key::Key_Z
+
 class InputHandler {
 public:
     void mousePressEvent(QMouseEvent *event);
@@ -41,6 +46,8 @@ public:
 
     QString currentMode();
 
+    ScreenTransform::Axis lockAxis() { return axis; }
+
 private:
     std::shared_ptr<Scene> scene;
 
@@ -49,7 +56,7 @@ private:
     bool actionKeyPressed{false};
     bool subactionKeyPressed{false};
     ScreenTransform::Transform mode{ScreenTransform::NONE};
-    ScreenTransform::Axis lockAxis{ScreenTransform::FREE};
+    ScreenTransform::Axis axis{ScreenTransform::FREE};
     std::unique_ptr<ScreenTransform> transformHandler;
 
     // TODO: works as before for mode = NONE (select), click selects and can move while holding

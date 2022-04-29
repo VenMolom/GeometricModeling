@@ -6,6 +6,7 @@
 #define MG1_UTILS3D_H
 
 #include <DirectXMath.h>
+#include "camera.h"
 
 namespace Utils3D {
     struct XMFLOAT3RAY {
@@ -13,9 +14,7 @@ namespace Utils3D {
         DirectX::XMFLOAT3 direction;
     };
 
-    XMFLOAT3RAY
-    getRayFromScreen(DirectX::XMINT2 screenPosition, DirectX::XMFLOAT2 screenSize, float nearZ, float farZ,
-                     DirectX::XMMATRIX projection, DirectX::XMMATRIX view);
+    XMFLOAT3RAY getRayFromScreen(DirectX::XMINT2 screenPosition, const std::shared_ptr<Camera>& camera);
 
     DirectX::XMFLOAT4 getPerpendicularPlaneThroughPoint(DirectX::XMFLOAT3 direction, DirectX::XMFLOAT3 point);
 

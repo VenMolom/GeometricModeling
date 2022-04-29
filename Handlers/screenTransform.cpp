@@ -43,9 +43,7 @@ void ScreenTransform::move(QPoint screenPosition) {
     if (!movable) return;
 
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
-    auto screenSize = XMFLOAT2(camera->viewport().width(), camera->viewport().height());
-    auto ray = getRayFromScreen(screenPos, screenSize, camera->nearZ(), camera->farZ(),
-                                camera->projectionMatrix(), camera->viewMatrix());
+    auto ray = getRayFromScreen(screenPos, camera);
     auto plane = getPerpendicularPlaneThroughPoint(camera->direction(), object->position());
     auto position = getRayCrossWithPlane(ray, plane);
 

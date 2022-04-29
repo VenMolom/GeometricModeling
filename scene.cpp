@@ -148,9 +148,7 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
 }
 
 Utils3D::XMFLOAT3RAY Scene::getRayFromScreenPosition(XMINT2 screenPosition) const {
-    auto screenSize = XMFLOAT2(_camera->viewport().width(), _camera->viewport().height());
-    return getRayFromScreen(screenPosition, screenSize, _camera->nearZ(), _camera->farZ(),
-                            _camera->projectionMatrix(), _camera->viewMatrix());
+    return getRayFromScreen(screenPosition, _camera);
 }
 
 shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
@@ -161,7 +159,7 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
         float distance{};
         if (object->intersects(ray.position, ray.direction, _camera->viewMatrix(),
                                _camera->nearZ(), _camera->farZ(), distance)
-            && distance < closestDistance) {
+            && distance >= 0 && distance < closestDistance) {
             closest = object;
             closestDistance = distance;
         }

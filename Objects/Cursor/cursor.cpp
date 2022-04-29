@@ -56,9 +56,7 @@ void Cursor::setScreenPosition(DirectX::XMINT2 position) {
 
     _screenPosition.setValueBypassingBindings(position);
 
-    auto screenSize = XMFLOAT2(camera->viewport().width(), camera->viewport().height());
-    auto ray = Utils3D::getRayFromScreen(screenPosition(), screenSize, camera->nearZ(), camera->farZ(),
-                                         camera->projectionMatrix(), camera->viewMatrix());
+    auto ray = Utils3D::getRayFromScreen(screenPosition(), camera);
 
     auto plane = Utils3D::getPerpendicularPlaneThroughPoint(camera->direction(), camera->center());
 
@@ -72,7 +70,7 @@ void Cursor::updateScreenPosition() {
     auto pos = position();
     auto viewport = camera->viewport();
     auto screen = XMVector3Project(XMLoadFloat3(&pos), 0, 0,
-                                   viewport.width(), viewport.height(), camera->nearZ(), camera->farZ(),
+                                   viewport.width(), viewport.height(), 0.0f, 1.0f,
                                    camera->projectionMatrix(), camera->viewMatrix(), XMMatrixIdentity());
     XMFLOAT2 screenPos{};
     XMStoreFloat2(&screenPos, screen);
