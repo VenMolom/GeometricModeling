@@ -52,8 +52,6 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
-
-    // TODO: modifications with mouse (depending on mode)
     // TODO: lock modifications to specific axis
 };
 

@@ -9,6 +9,8 @@
 #include "Utils/utils3D.h"
 #include "camera.h"
 
+#define SCALE_MODIFIER 0.5f
+
 class ScreenTransform {
 public:
     enum Transform {
@@ -25,9 +27,10 @@ public:
         Z,
     };
 
-    ScreenTransform(std::shared_ptr<Object> object, std::shared_ptr<Camera> camera, Transform mode, Axis axis);
+    ScreenTransform(std::shared_ptr<Object> object, QPoint screenPosition,
+                    std::shared_ptr<Camera> camera, Transform mode, Axis axis);
 
-    void transform(QPoint screenPosition, QPointF delta);
+    void transform(QPoint screenPosition);
 
 private:
     std::shared_ptr<Object> object;
@@ -41,12 +44,18 @@ private:
 
     DirectX::XMFLOAT3 startScale;
     DirectX::XMFLOAT3 startRotation;
+    DirectX::XMFLOAT3 startingScenePosition;
+    QPoint startingScreenPosition;
 
     void move(QPoint screenPosition);
 
-    void rotate(QPointF delta);
+    void rotate(QPoint screenPosition);
 
-    void scale(QPointF delta);
+    void scale(QPoint screenPosition);
+
+    DirectX::XMFLOAT3 getPositionFromScreen(QPoint screenPosition);
+
+    // TODO: implement axis lock
 };
 
 

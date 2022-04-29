@@ -19,11 +19,11 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
 
             if (!scene->selected().expired()) {
                 transformHandler = make_unique<ScreenTransform>(
-                        scene->selected().lock(), scene->camera(),
+                        scene->selected().lock(), event->position().toPoint(), scene->camera(),
                         mode == ScreenTransform::NONE ? ScreenTransform::MOVE : mode, axis);
 
                 if (mode != ScreenTransform::NONE) {
-                    transformHandler->transform(event->position().toPoint(), event->position() - clickPos);
+                    transformHandler->transform(event->position().toPoint());
                 }
             } else {
                 transformHandler = {};
@@ -36,7 +36,9 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
 }
 
 void InputHandler::mouseReleaseEvent(QMouseEvent *event) {
-    transformHandler = {};
+    if (!(event->buttons() & MAIN_BUTTON)) {
+        transformHandler = {};
+    }
 
 //    switch (event->button()) {
 //    }
@@ -50,8 +52,8 @@ void InputHandler::mouseMoveEvent(QMouseEvent *event) {
         scene->camera()->move(event->position() - lastMousePos);
     }
     if (event->buttons() & MAIN_BUTTON) {
-        if (transformHandler) {
-            transformHandler->transform(event->position().toPoint(), event->position() - clickPos);
+        if (transformHandler && event->buttons() == MAIN_BUTTON) {
+            transformHandler->transform(event->position().toPoint());
         }
     }
 
@@ -77,15 +79,19 @@ void InputHandler::keyPressEvent(QKeyEvent *event) {
             axis = ScreenTransform::FREE;
             break;
         case MOVE_KEY:
+            if (transformHandler) break;
             mode = ScreenTransform::MOVE;
             break;
         case ROTATE_KEY:
+            if (transformHandler) break;
             mode = ScreenTransform::ROTATE;
             break;
         case SCALE_KEY:
+            if (transformHandler) break;
             mode = ScreenTransform::SCALE;
             break;
         case FREE_AXIS_KEY:
+            if (transformHandler) break;
             axis = ScreenTransform::FREE;
             break;
         case X_AXIS_KEY:
