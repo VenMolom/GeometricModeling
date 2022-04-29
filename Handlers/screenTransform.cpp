@@ -51,9 +51,9 @@ void ScreenTransform::move(QPoint screenPosition) {
 }
 
 void ScreenTransform::rotate(QPointF delta) {
-
+    // TODO: implement
 }
 
 void ScreenTransform::scale(QPointF delta) {
-
+    // TODO: implement
 }

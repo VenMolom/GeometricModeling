@@ -59,8 +59,7 @@ private:
     ScreenTransform::Axis axis{ScreenTransform::FREE};
     std::unique_ptr<ScreenTransform> transformHandler;
 
-    // TODO: works as before for mode = NONE (select), click selects and can move while holding
-    // TODO: other modes only work on currently selected object
+    // TODO: draw current axis lock
 };
 
 
