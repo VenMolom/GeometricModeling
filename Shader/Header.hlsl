@@ -13,6 +13,14 @@ struct DSIn {
 	float4 col : COLOR;
 };
 
+struct PSStereoIn {
+    float4 pos : SV_POSITION;
+};
+
+struct VSStereoIn {
+    float2 pos : POSITION;
+};
+
 struct HSBrezierConstOutput {
 	float edges[2] : SV_TessFactor;
 	int patchSize : PATCHSIZE;

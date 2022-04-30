@@ -14,7 +14,7 @@ XMFLOAT3RAY Utils3D::getRayFromScreen(XMINT2 screenPosition, const std::shared_p
     XMFLOAT3 direction = camera->direction();
     auto viewport = camera->viewport();
 
-    float scaleX = screenPosition.x / (viewport.width() / 2.0f)- 1.0f;
+    float scaleX = screenPosition.x / (viewport.width() / 2.0f) - 1.0f;
     float scaleY = 1.0f - screenPosition.y / (viewport.height() / 2.0f);
 
     XMFLOAT3RAY result{};

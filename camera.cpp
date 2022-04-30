@@ -5,7 +5,6 @@
 #include "camera.h"
 
 using namespace DirectX;
-using namespace std;
 
 Camera::Camera() {
     calculateProjection(1);
@@ -107,7 +106,7 @@ void Camera::calculateProjection(float aspectRatio) {
     _aspectRatio = aspectRatio;
     XMFLOAT4X4 proj{};
     XMStoreFloat4x4(&proj, XMMatrixPerspectiveFovRH(
-            XM_FOV,
+            XMConvertToRadians(FOV),
             _aspectRatio, _near, _far));
     projection.setValue(proj);
 
@@ -115,7 +114,7 @@ void Camera::calculateProjection(float aspectRatio) {
     _z = 1.0f / tan(FOV / 2.0f);
 }
 
-tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicViewMatrix() const {
+std::tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicViewMatrix() const {
     auto center = XMLoadFloat3(&_center);
     auto position = XMVectorAdd(center, XMVectorScale(
             XMLoadFloat3(&_direction), distance * zoom));
@@ -126,10 +125,10 @@ tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicViewMatrix() const {
     auto viewRight = XMMatrixLookAtRH(XMVectorAdd(position, shift),
                                      XMVectorAdd(center, shift), XMLoadFloat3(&_up));
 
-    return make_tuple(viewLeft, viewRight);
+    return std::make_tuple(viewLeft, viewRight);
 }
 
-tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicProjectionMatrix() const {
+std::tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicProjectionMatrix() const {
     float shift = (_eyesDistance / 2.0f) * _near / _focusDistance;
     float top = tan(FOV / 2.0f) * _near;
     float right = _aspectRatio * top;
@@ -139,5 +138,5 @@ tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicProjectionMatrix() const {
     auto projRight = XMMatrixPerspectiveOffCenterRH(-right - shift, right - shift,
                                                     -top, top, _near, _far);
 
-    return make_tuple(projLeft, projRight);
+    return std::make_tuple(projLeft, projRight);
 }

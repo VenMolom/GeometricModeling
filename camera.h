@@ -18,7 +18,6 @@
 #define MIN_ANGLE -(LIMIT)
 
 #define FOV 90.0f
-#define XM_FOV XMConvertToRadians(FOV)
 
 class Camera {
 public:
@@ -95,7 +94,6 @@ private:
 
     float _eyesDistance{1};
     float _focusDistance{10};
-    bool _stereoscopic{false};
 
     DirectX::XMFLOAT3 _leftEyeColor{1, 0, 0};
     DirectX::XMFLOAT3 _rightEyeColor{0, 0, 1};

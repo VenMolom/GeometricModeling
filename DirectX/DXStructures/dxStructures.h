@@ -44,3 +44,12 @@ struct DepthStencilDescription : D3D11_DEPTH_STENCIL_DESC {
 struct RasterizerDescription : D3D11_RASTERIZER_DESC {
     RasterizerDescription();
 };
+
+struct SamplerDescription : D3D11_SAMPLER_DESC {
+    SamplerDescription();
+};
+
+struct ShaderResourceViewDescription : D3D11_SHADER_RESOURCE_VIEW_DESC
+{
+    ShaderResourceViewDescription();
+};

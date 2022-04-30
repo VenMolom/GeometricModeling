@@ -25,7 +25,7 @@ DxDevice::DxDevice(const QWidget *parent) {
     if (FAILED(hr))
         THROW_DX(hr);
 
-    if(!DxDevice::instance) {
+    if (!DxDevice::instance) {
         DxDevice::instance = this;
     }
 }
@@ -122,9 +122,8 @@ dx_ptr<ID3D11DomainShader> DxDevice::CreateDomainShader(std::vector<BYTE> dsCode
     return result;
 }
 
-dx_ptr<ID3D11GeometryShader> DxDevice::CreateGeometryShader(std::vector<BYTE> gsCode) const
-{
-    ID3D11GeometryShader* gs = nullptr;
+dx_ptr<ID3D11GeometryShader> DxDevice::CreateGeometryShader(std::vector<BYTE> gsCode) const {
+    ID3D11GeometryShader *gs = nullptr;
     auto hr = m_device->CreateGeometryShader(gsCode.data(), gsCode.size(), nullptr, &gs);
     dx_ptr<ID3D11GeometryShader> geometryShader(gs);
     if (FAILED(hr))
@@ -174,4 +173,24 @@ dx_ptr<ID3D11RasterizerState> DxDevice::CreateRasterizerState(const RasterizerDe
     if (FAILED(hr))
         THROW_DX(hr);
     return state;
+}
+
+dx_ptr<ID3D11ShaderResourceView> DxDevice::CreateShaderResourceView(const dx_ptr<ID3D11Texture2D> &texture,
+                                                                    const ShaderResourceViewDescription *desc) const {
+    ID3D11ShaderResourceView *srv;
+    auto hr = m_device->CreateShaderResourceView(texture.get(), desc, &srv);
+    dx_ptr<ID3D11ShaderResourceView> resourceView(srv);
+    if (FAILED(hr))
+        THROW_DX(hr);
+    return resourceView;
+}
+
+dx_ptr<ID3D11SamplerState> DxDevice::CreateSamplerState(const SamplerDescription& desc) const
+{
+    ID3D11SamplerState* s = nullptr;
+    auto hr = m_device->CreateSamplerState(&desc, &s);
+    dx_ptr<ID3D11SamplerState> sampler(s);
+    if (FAILED(hr))
+        THROW_DX(hr);
+    return sampler;
 }

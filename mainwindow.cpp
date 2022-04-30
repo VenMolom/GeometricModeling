@@ -40,8 +40,7 @@ void MainWindow::on_addBrezierC0_clicked() {
 }
 
 void MainWindow::on_addBrezierC2_clicked() {
-    scene->addObject(std::move(
-            scene->objectFactory().createBrezierC2(std::move(getSelectedPoints()), scene->bindableSelected())));
+    scene->addObject(std::move(scene->objectFactory().createBrezierC2(std::move(getSelectedPoints()), scene->bindableSelected())));
 }
 
 void MainWindow::on_addInterpolationC2_clicked() {

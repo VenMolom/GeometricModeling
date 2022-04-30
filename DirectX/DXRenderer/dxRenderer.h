@@ -22,8 +22,6 @@ Q_OBJECT
 public:
     explicit DxRenderer(QWidget *parent);
 
-    void renderScene();
-
     void setScene(std::shared_ptr<Scene> scenePtr);
 
     void setStatusBar(QStatusBar *bar) { statusBar = bar; }
@@ -80,6 +78,7 @@ private:
     mini::dx_ptr<ID3D11VertexShader> m_vertexShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexBillboardShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexNoProjectionShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexStereoShader;
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainBrezierShader;
@@ -88,9 +87,10 @@ private:
 
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
+    mini::dx_ptr<ID3D11PixelShader> m_pixelStereoShader;
 
     mini::dx_ptr<ID3D11InputLayout> m_layout;
-    mini::dx_ptr<ID3D11InputLayout> m_billboardLayout;
+    mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
 
     mini::dx_ptr<ID3D11Buffer> m_cbModel;
     mini::dx_ptr<ID3D11Buffer> m_cbView;
@@ -98,6 +98,9 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_cbColor;
     mini::dx_ptr<ID3D11Buffer> m_cbTesselation;
     mini::dx_ptr<ID3D11Buffer> m_cbFarPlane;
+    mini::dx_ptr<ID3D11Buffer> m_cbStereoColor;
+
+    mini::dx_ptr<ID3D11Buffer> m_ndcQuad;
 
     mini::dx_ptr<ID3D11DepthStencilState> m_dssNoDepthWrite;
 
@@ -105,6 +108,23 @@ private:
     uint frameCount = 0, lastFrameRate = 0;
 
     const float CLEAR_COLOR[4]{0.2f, 0.2f, 0.2f, 1.0f};
+    const float STEREO_CLEAR_COLOR[4]{0.f, 0.f, 0.f, 1.f};
+
+    bool stereoscopic{false};
+
+    DirectX::XMFLOAT4 leftEyeColor, rightEyeColor;
+
+    mini::dx_ptr<ID3D11SamplerState> m_sampler;
+
+    mini::dx_ptr<ID3D11RenderTargetView> m_stereoscopicLeftTarget, m_stereoscopicRightTarget;
+    mini::dx_ptr<ID3D11ShaderResourceView> m_stereoscopicLeftTexture, m_stereoscopicRightTexture;
+
+    void renderScene();
+
+    void renderStereoscopic();
+
+    void renderEye(const DirectX::XMMATRIX &projection, const DirectX::XMMATRIX &view,
+                   const mini::dx_ptr<ID3D11RenderTargetView> &target);
 
     void init3D3();
 
@@ -113,11 +133,16 @@ private:
     template<typename T>
     void updateBuffer(const mini::dx_ptr<ID3D11Buffer> &buffer, const T &data);
 
+    void setTextures(std::initializer_list<ID3D11ShaderResourceView*> resList,
+                     const mini::dx_ptr<ID3D11SamplerState>& sampler);
+
     float frameTime();
 
     uint frameRate();
 
-    void updateCameraCB();
+    void updateCameraCB(DirectX::XMMATRIX viewMatrix);
+
+    void updateCameraCB() { updateCameraCB(scene->camera()->viewMatrix()); }
 
     void drawCurve(const Curve &curve, int lastPatchId, int lastPatchSize);
 };

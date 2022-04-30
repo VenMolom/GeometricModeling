@@ -23,7 +23,10 @@ void DxRenderer::renderScene() {
             m_depthBuffer.get(),
             D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    m_device.context()->IASetInputLayout(m_layout.get());
+    if (stereoscopic && scene) {
+        renderStereoscopic();
+        return;
+    }
 
     updateCameraCB();
 
@@ -32,11 +35,60 @@ void DxRenderer::renderScene() {
     }
 }
 
+void DxRenderer::renderStereoscopic() {
+    auto projections = scene->camera()->stereoscopicProjectionMatrix();
+    auto views = scene->camera()->stereoscopicViewMatrix();
+
+    // render left eye
+    m_device.context()->ClearRenderTargetView(m_stereoscopicLeftTarget.get(), STEREO_CLEAR_COLOR);
+    renderEye(get<0>(projections), get<0>(views), m_stereoscopicLeftTarget);
+    m_device.context()->ClearDepthStencilView(m_depthBuffer.get(),
+                                              D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+    // render right eye
+    m_device.context()->ClearRenderTargetView(m_stereoscopicRightTarget.get(), STEREO_CLEAR_COLOR);
+    renderEye(get<1>(projections), get<1>(views), m_stereoscopicRightTarget);
+    m_device.context()->ClearDepthStencilView(m_depthBuffer.get(),
+                                              D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    auto backBuffer = m_backBuffer.get();
+    m_device.context()->OMSetRenderTargets(1, &backBuffer, m_depthBuffer.get());
+
+    m_device.context()->IASetInputLayout(m_stereoLayout.get());
+    m_device.context()->VSSetShader(m_vertexStereoShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelStereoShader.get(), nullptr, 0);
+    setTextures({m_stereoscopicLeftTexture.get(), m_stereoscopicRightTexture.get()}, m_sampler);
+
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    ID3D11Buffer *vb = m_ndcQuad.get();
+    unsigned int stride = sizeof(XMFLOAT2);
+    unsigned int offset = 0;
+    m_device.context()->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+    m_device.context()->Draw(6, 0);
+
+    m_device.context()->IASetInputLayout(m_layout.get());
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+
+    updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
+}
+
+void DxRenderer::renderEye(const XMMATRIX &projection, const XMMATRIX &view,
+                           const dx_ptr<ID3D11RenderTargetView> &target) {
+    updateBuffer(m_cbProj, projection);
+    updateCameraCB(view);
+
+    auto renderTarget = target.get();
+    m_device.context()->OMSetRenderTargets(1, &renderTarget, m_depthBuffer.get());
+
+    scene->draw(*this);
+}
+
 void DxRenderer::setScene(shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
     this->inputHandler.setScene(scene);
 
     updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
+    updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera()->nearZ(), scene->camera()->farZ(), 0, 0});
     updateCameraCB();
 }
 
@@ -108,6 +160,27 @@ void DxRenderer::draw(const Point &point, XMFLOAT4 color) {
     m_device.context()->GSSetShader(nullptr, nullptr, 0);
 }
 
+void DxRenderer::enableStereoscopy(bool enable) {
+    stereoscopic = enable;
+    if (!enable) {
+        updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
+    }
+}
+
+void DxRenderer::setLeftEyeColor(XMFLOAT3 color) {
+    leftEyeColor = XMFLOAT4(color.x, color.y, color.z, 1.f);
+
+    XMFLOAT4 stereoColors[2]{leftEyeColor, rightEyeColor};
+    updateBuffer(m_cbStereoColor, stereoColors);
+}
+
+void DxRenderer::setRightEyeColor(XMFLOAT3 color) {
+    rightEyeColor = XMFLOAT4(color.x, color.y, color.z, 1.f);
+
+    XMFLOAT4 stereoColors[2]{leftEyeColor, rightEyeColor};
+    updateBuffer(m_cbStereoColor, stereoColors);
+}
+
 template<typename T>
 void DxRenderer::updateBuffer(const dx_ptr<ID3D11Buffer> &buffer, const T &data) {
     D3D11_MAPPED_SUBRESOURCE res;
@@ -116,6 +189,13 @@ void DxRenderer::updateBuffer(const dx_ptr<ID3D11Buffer> &buffer, const T &data)
         THROW_DX(hr);
     memcpy(res.pData, &data, sizeof(T));
     m_device.context()->Unmap(buffer.get(), 0);
+}
+
+void DxRenderer::setTextures(initializer_list<ID3D11ShaderResourceView *> resList,
+                             const dx_ptr<ID3D11SamplerState> &sampler) {
+    m_device.context()->PSSetShaderResources(0, resList.size(), resList.begin());
+    auto s_ptr = sampler.get();
+    m_device.context()->PSSetSamplers(0, 1, &s_ptr);
 }
 
 float DxRenderer::frameTime() {
@@ -136,13 +216,12 @@ uint DxRenderer::frameRate() {
     return lastFrameRate;
 }
 
-void DxRenderer::updateCameraCB() {
-    auto invView = XMMatrixInverse(nullptr, scene->camera()->viewMatrix());
+void DxRenderer::updateCameraCB(XMMATRIX viewMatrix) {
+    auto invView = XMMatrixInverse(nullptr, viewMatrix);
     XMFLOAT4X4 view[2];
-    XMStoreFloat4x4(view, scene->camera()->viewMatrix());
+    XMStoreFloat4x4(view, viewMatrix);
     XMStoreFloat4x4(view + 1, invView);
     updateBuffer(m_cbView, view);
-    updateBuffer(m_cbFarPlane, XMFLOAT4{scene->camera()->nearZ(), scene->camera()->farZ(), 0, 0});
 }
 
 QPaintEngine *DxRenderer::paintEngine() const {
@@ -238,19 +317,23 @@ void DxRenderer::init3D3() {
     const auto vsBytes = DxDevice::LoadByteCode(L"vs.cso");
     const auto vsBillboardBytes = DxDevice::LoadByteCode(L"vsBillboard.cso");
     const auto vsNoProjectionBytes = DxDevice::LoadByteCode(L"vsNoProjection.cso");
+    const auto vsStereoBytes = DxDevice::LoadByteCode(L"vsStereo.cso");
     const auto hsBrezierBytes = DxDevice::LoadByteCode(L"hsBrezier.cso");
     const auto dsBrezierBytes = DxDevice::LoadByteCode(L"dsBrezier.cso");
     const auto gsPointBytes = DxDevice::LoadByteCode(L"gsPoint.cso");
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
     const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
+    const auto psStereoBytes = DxDevice::LoadByteCode(L"psStereo.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
     m_vertexBillboardShader = m_device.CreateVertexShader(vsBillboardBytes);
     m_vertexNoProjectionShader = m_device.CreateVertexShader(vsNoProjectionBytes);
+    m_vertexStereoShader = m_device.CreateVertexShader(vsStereoBytes);
     m_hullBrezierShader = m_device.CreateHullShader(hsBrezierBytes);
     m_domainBrezierShader = m_device.CreateDomainShader(dsBrezierBytes);
     m_geometryPointShader = m_device.CreateGeometryShader(gsPointBytes);
     m_pixelShader = m_device.CreatePixelShader(psBytes);
     m_pixelFadeShader = m_device.CreatePixelShader(psFadeBytes);
+    m_pixelStereoShader = m_device.CreatePixelShader(psStereoBytes);
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
@@ -263,7 +346,13 @@ void DxRenderer::init3D3() {
                     D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_layout = m_device.CreateInputLayout(elements, vsBytes);
-    m_billboardLayout = m_device.CreateInputLayout(elements, vsBillboardBytes);
+    m_device.context()->IASetInputLayout(m_layout.get());
+
+    elements = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0,
+             D3D11_INPUT_PER_VERTEX_DATA, 0},
+    };
+    m_stereoLayout = m_device.CreateInputLayout(elements, vsStereoBytes);
 
     m_cbModel = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbView = m_device.CreateConstantBuffer<XMFLOAT4X4, 2>();
@@ -271,9 +360,10 @@ void DxRenderer::init3D3() {
     m_cbColor = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
     m_cbFarPlane = m_device.CreateConstantBuffer<XMFLOAT4>();
+    m_cbStereoColor = m_device.CreateConstantBuffer<XMFLOAT4, 2>();
 
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
-    ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get()};
+    ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get(), m_cbStereoColor.get()};
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
     ID3D11Buffer *gsCbs[] = {m_cbFarPlane.get(), m_cbProj.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
@@ -284,6 +374,20 @@ void DxRenderer::init3D3() {
     DepthStencilDescription dssDesc;
     dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     m_dssNoDepthWrite = m_device.CreateDepthStencilState(dssDesc);
+
+    SamplerDescription samplerDesc;
+    m_sampler = m_device.CreateSamplerState(samplerDesc);
+
+    vector<XMFLOAT2> quad{{
+                                  {-1.f, 1.f},
+                                  {-1.f, -1.f},
+                                  {1.f, -1.f},
+                                  {-1.f, 1.f},
+                                  {1.f, -1.f},
+                                  {1.f, 1.f}
+                          }
+    };
+    m_ndcQuad = m_device.CreateVertexBuffer(quad);
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);
@@ -305,18 +409,23 @@ void DxRenderer::setupViewport() {
                                            &backBuffer, m_depthBuffer.get());
     Viewport viewport{wndSize};
     m_device.context()->RSSetViewports(1, &viewport);
-}
-// TODO: implement
-void DxRenderer::enableStereoscopy(bool enable) {
 
-}
+    Texture2DDescription textureDesc(width(), height());
+    textureDesc.MipLevels = 1;
+    textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    auto leftTexture = m_device.CreateTexture(textureDesc);
+    auto rightTexture = m_device.CreateTexture(textureDesc);
 
-void DxRenderer::setLeftEyeColor(XMFLOAT3 color) {
+    ShaderResourceViewDescription srvd;
+    srvd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvd.Texture2D.MipLevels = 1;
+    srvd.Texture2D.MostDetailedMip = 0;
+    m_stereoscopicLeftTexture = m_device.CreateShaderResourceView(leftTexture, srvd);
+    m_stereoscopicRightTexture = m_device.CreateShaderResourceView(rightTexture, srvd);
 
-}
-
-void DxRenderer::setRightEyeColor(XMFLOAT3 color) {
-
+    m_stereoscopicLeftTarget = m_device.CreateRenderTargetView(leftTexture);
+    m_stereoscopicRightTarget = m_device.CreateRenderTargetView(rightTexture);
 }
 
 #pragma endregion Init

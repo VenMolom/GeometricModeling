@@ -24,6 +24,9 @@ void SceneControls::setScene(shared_ptr<Scene> scenePtr) {
 
 void SceneControls::setRenderer(unique_ptr<StereoscopicRenderer> rendererPtr) {
     renderer = std::move(rendererPtr);
+
+    renderer->setLeftEyeColor({leftColor.redF(), leftColor.greenF(), leftColor.blueF()});
+    renderer->setRightEyeColor({rightColor.redF(), rightColor.greenF(), rightColor.blueF()});
 }
 
 void SceneControls::on_stereoscopicCheckBox_stateChanged(int arg1) {

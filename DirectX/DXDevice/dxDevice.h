@@ -65,6 +65,16 @@ public:
 
     mini::dx_ptr<ID3D11RasterizerState> CreateRasterizerState(const RasterizerDescription &desc = {}) const;
 
+    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const mini::dx_ptr<ID3D11Texture2D>& texture,
+                                                              const ShaderResourceViewDescription *desc = nullptr) const;
+    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const mini::dx_ptr<ID3D11Texture2D>& texture,
+                                                              const ShaderResourceViewDescription& desc) const
+    {
+        return CreateShaderResourceView(texture, &desc);
+    }
+
+    mini::dx_ptr<ID3D11SamplerState> CreateSamplerState(const SamplerDescription& desc) const;
+
     static const DxDevice &Instance() { return *instance; }
 
 private:

@@ -69,7 +69,9 @@ set(PROJECT_SOURCES
         Objects/objectFactory.cpp Objects/objectFactory.h
         Handlers/screenTransform.cpp Handlers/screenTransform.h
         Controls/scenecontrols.h Controls/scenecontrols.cpp
-        Controls/scenecontrols.ui DirectX/stereoscopicRenderer.h)
+        Controls/scenecontrols.ui DirectX/stereoscopicRenderer.h
+        DirectX/DXDevice/ptr_vector.h
+        DirectX/DXDevice/compressed_pair.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -82,13 +84,17 @@ set(HLSL_SHADER_FILES
         Shader/psCameraFade.hlsl
         Shader/vsBillboard.hlsl
         Shader/vsNoProjection.hlsl
-        Shader/gsPoint.hlsl)
+        Shader/gsPoint.hlsl
+        Shader/vsStereo.hlsl
+        Shader/psStereo.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsBillboard.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsNoProjection.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties(Shader/vsStereo.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
+set_source_files_properties(Shader/psStereo.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/dsBrezier.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/gsPoint.hlsl PROPERTIES ShaderType "gs")
