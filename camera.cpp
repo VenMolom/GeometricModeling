@@ -111,7 +111,7 @@ void Camera::calculateProjection(float aspectRatio) {
     projection.setValue(proj);
 
 //    _z = ((viewportSize.height() / 2.0f) / tan(FOV / 2.0f)) / viewport().height();
-    _z = 1.0f / tan(FOV / 2.0f);
+    _z = 1.0f / tan(XMConvertToRadians(FOV) / 2.0f);
 }
 
 std::tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicViewMatrix() const {
@@ -130,7 +130,7 @@ std::tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicViewMatrix() const {
 
 std::tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicProjectionMatrix() const {
     float shift = (_eyesDistance / 2.0f) * _near / _focusDistance;
-    float top = tan(FOV / 2.0f) * _near;
+    float top = tan(XMConvertToRadians(FOV) / 2.0f) * _near;
     float right = _aspectRatio * top;
 
     auto projLeft = XMMatrixPerspectiveOffCenterRH(-right + shift, right + shift,
