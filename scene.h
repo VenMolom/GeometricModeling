@@ -53,7 +53,7 @@ private:
     std::shared_ptr<Cursor> cursor;
     std::shared_ptr<Object> composite;
     std::list<std::weak_ptr<VirtualPointsHolder>> virtualPointsHolders;
-    // TODO: look into removing composite to reduce complexity
+    // TODO: ?? look into removing composite to reduce complexity
     std::shared_ptr<Camera> _camera;
     ObjectFactory factory;
     Grid grid;

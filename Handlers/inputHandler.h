@@ -59,7 +59,7 @@ private:
     ScreenTransform::Axis axis{ScreenTransform::FREE};
     std::unique_ptr<ScreenTransform> transformHandler;
 
-    // TODO: draw current axis lock
+    // TODO: ? draw current axis lock
 };
 
 

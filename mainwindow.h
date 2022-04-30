@@ -52,7 +52,7 @@ private:
     void updateSelection();
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
-    // TODO: lock modifications to specific axis
+    // TODO: ? lock modifications to specific axis
 };
 
 #endif // MAINWINDOW_H

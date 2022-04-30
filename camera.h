@@ -8,6 +8,7 @@
 #include <DirectXMath.h>
 #include <QRect>
 #include <QProperty>
+#include <tuple>
 
 #define STEP 1.1f
 #define SENSITIVITY 0.005f
@@ -16,7 +17,8 @@
 #define MAX_ANGLE  LIMIT
 #define MIN_ANGLE -(LIMIT)
 
-#define FOV XMConvertToRadians(90)
+#define FOV 90.0f
+#define XM_FOV XMConvertToRadians(FOV)
 
 class Camera {
 public:
@@ -32,6 +34,10 @@ public:
 
     QBindable<DirectX::XMFLOAT4X4> bindableProjection() { return &projection; }
 
+    std::tuple<DirectX::XMMATRIX, DirectX::XMMATRIX> stereoscopicProjectionMatrix() const;
+
+    std::tuple<DirectX::XMMATRIX, DirectX::XMMATRIX> stereoscopicViewMatrix() const;
+
     DirectX::XMMATRIX cameraMatrix() const;
 
     QSizeF viewport() const { return viewportSize; }
@@ -45,6 +51,10 @@ public:
     DirectX::XMFLOAT3 center() const { return _center; }
 
     DirectX::XMFLOAT3 direction() const { return _direction; }
+
+    void setEyesDistance(float distance) { _eyesDistance = distance; }
+
+    void setFocusDistance(float distance) { _focusDistance = distance; }
 
     float nearZ() const { return _near; }
 
@@ -81,6 +91,14 @@ private:
     float _near{0.1f};
     float _far{100.0f};
     float _z{0};
+    float _aspectRatio;
+
+    float _eyesDistance{1};
+    float _focusDistance{10};
+    bool _stereoscopic{false};
+
+    DirectX::XMFLOAT3 _leftEyeColor{1, 0, 0};
+    DirectX::XMFLOAT3 _rightEyeColor{0, 0, 1};
 
     void calculateView();
 

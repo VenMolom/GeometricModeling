@@ -152,7 +152,7 @@ void InterpolationCurveC2::postUpdate() {
 }
 
 void InterpolationCurveC2::pointMoved(const weak_ptr<Point> &point) {
-    // TODO: only modify finite amount of control points with single move
+    // TODO: ?? only modify finite amount of control points with single move
     updatePoints();
 }
 

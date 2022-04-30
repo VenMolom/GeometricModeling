@@ -66,7 +66,10 @@ set(PROJECT_SOURCES
         Objects/linestrip.cpp Objects/linestrip.h
         Objects/Curve/curve.cpp Objects/Curve/curve.h
         Objects/Curve/interpolationCurveC2.cpp Objects/Curve/interpolationCurveC2.h
-        Objects/objectFactory.cpp Objects/objectFactory.h Handlers/screenTransform.cpp Handlers/screenTransform.h)
+        Objects/objectFactory.cpp Objects/objectFactory.h
+        Handlers/screenTransform.cpp Handlers/screenTransform.h
+        Controls/scenecontrols.h Controls/scenecontrols.cpp
+        Controls/scenecontrols.ui DirectX/stereoscopicRenderer.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

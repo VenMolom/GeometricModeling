@@ -32,6 +32,8 @@ public:
 
     void transform(QPoint screenPosition);
 
+    void setAxis(Axis axis) { this->axis = axis; }
+
 private:
     std::shared_ptr<Object> object;
     std::shared_ptr<Camera> camera;
@@ -55,7 +57,7 @@ private:
 
     DirectX::XMFLOAT3 getPositionFromScreen(QPoint screenPosition);
 
-    // TODO: implement axis lock
+    // TODO: ? implement axis lock
 };
 
 

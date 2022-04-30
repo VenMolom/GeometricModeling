@@ -104,6 +104,10 @@ void InputHandler::keyPressEvent(QKeyEvent *event) {
             axis = ScreenTransform::Z;
             break;
     }
+
+    if (transformHandler) {
+        transformHandler->setAxis(axis);
+    }
 }
 
 void InputHandler::keyReleaseEvent(QKeyEvent *event) {

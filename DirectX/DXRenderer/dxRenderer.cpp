@@ -160,6 +160,8 @@ void DxRenderer::resizeEvent(QResizeEvent *event) {
     m_depthBuffer.reset();
 
     m_device.swapChain()->ResizeBuffers(1, width(), height(), DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+
+    updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
     setupViewport();
 }
 
@@ -303,6 +305,18 @@ void DxRenderer::setupViewport() {
                                            &backBuffer, m_depthBuffer.get());
     Viewport viewport{wndSize};
     m_device.context()->RSSetViewports(1, &viewport);
+}
+// TODO: implement
+void DxRenderer::enableStereoscopy(bool enable) {
+
+}
+
+void DxRenderer::setLeftEyeColor(XMFLOAT3 color) {
+
+}
+
+void DxRenderer::setRightEyeColor(XMFLOAT3 color) {
+
 }
 
 #pragma endregion Init

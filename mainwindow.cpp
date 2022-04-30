@@ -15,7 +15,9 @@ MainWindow::MainWindow(QWidget *parent)
     selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
 
     setMouseTracking(true);
-    ui->controlsWidget->setScene(scene);
+    ui->selectedControls->setScene(scene);
+    ui->sceneControls->setScene(scene);
+    ui->sceneControls->setRenderer(unique_ptr<DxRenderer>(ui->renderWidget));
     ui->renderWidget->setScene(scene);
     ui->renderWidget->setStatusBar(ui->statusbar);
 }
@@ -38,7 +40,8 @@ void MainWindow::on_addBrezierC0_clicked() {
 }
 
 void MainWindow::on_addBrezierC2_clicked() {
-    scene->addObject(std::move(scene->objectFactory().createBrezierC2(std::move(getSelectedPoints()), scene->bindableSelected())));
+    scene->addObject(std::move(
+            scene->objectFactory().createBrezierC2(std::move(getSelectedPoints()), scene->bindableSelected())));
 }
 
 void MainWindow::on_addInterpolationC2_clicked() {

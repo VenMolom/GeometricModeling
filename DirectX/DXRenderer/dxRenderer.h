@@ -2,6 +2,7 @@
 
 #include "DirectX/DXDevice/dxDevice.h"
 #include "Handlers/inputHandler.h"
+#include "DirectX/stereoscopicRenderer.h"
 #include <windowsx.h>
 #include <string>
 #include <basetsd.h>
@@ -15,7 +16,7 @@
 #undef max
 #undef min
 
-class DxRenderer : public QWidget, public Renderer {
+class DxRenderer : public QWidget, public Renderer, public StereoscopicRenderer {
 Q_OBJECT
 
 public:
@@ -36,6 +37,12 @@ public:
     void draw(const Grid &grid, DirectX::XMFLOAT4 color) override;
 
     void draw(const Point &point, DirectX::XMFLOAT4 color) override;
+
+    void enableStereoscopy(bool enable) override;
+
+    void setLeftEyeColor(DirectX::XMFLOAT3 color) override;
+
+    void setRightEyeColor(DirectX::XMFLOAT3 color) override;
 
     QPaintEngine *paintEngine() const override;
 
