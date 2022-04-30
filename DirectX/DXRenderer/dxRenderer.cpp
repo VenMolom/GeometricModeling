@@ -40,13 +40,11 @@ void DxRenderer::renderStereoscopic() {
     auto views = scene->camera()->stereoscopicViewMatrix();
 
     // render left eye
-    m_device.context()->ClearRenderTargetView(m_stereoscopicLeftTarget.get(), STEREO_CLEAR_COLOR);
     renderEye(get<0>(projections), get<0>(views), m_stereoscopicLeftTarget);
     m_device.context()->ClearDepthStencilView(m_depthBuffer.get(),
                                               D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     // render right eye
-    m_device.context()->ClearRenderTargetView(m_stereoscopicRightTarget.get(), STEREO_CLEAR_COLOR);
     renderEye(get<1>(projections), get<1>(views), m_stereoscopicRightTarget);
     m_device.context()->ClearDepthStencilView(m_depthBuffer.get(),
                                               D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -60,7 +58,7 @@ void DxRenderer::renderStereoscopic() {
 
     m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     ID3D11Buffer *vb = m_ndcQuad.get();
-    unsigned int stride = sizeof(XMFLOAT2);
+    unsigned int stride = sizeof(VertexPositionTex);
     unsigned int offset = 0;
     m_device.context()->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
     m_device.context()->Draw(6, 0);
@@ -79,6 +77,7 @@ void DxRenderer::renderEye(const XMMATRIX &projection, const XMMATRIX &view,
 
     auto renderTarget = target.get();
     m_device.context()->OMSetRenderTargets(1, &renderTarget, m_depthBuffer.get());
+    m_device.context()->ClearRenderTargetView(target.get(), STEREO_CLEAR_COLOR);
 
     scene->draw(*this);
 }
@@ -350,7 +349,10 @@ void DxRenderer::init3D3() {
 
     elements = {
             {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0,
-             D3D11_INPUT_PER_VERTEX_DATA, 0},
+                    D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+                                                         static_cast<UINT>(offsetof(VertexPositionTex, tex)),
+                    D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_stereoLayout = m_device.CreateInputLayout(elements, vsStereoBytes);
 
@@ -367,7 +369,7 @@ void DxRenderer::init3D3() {
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
     ID3D11Buffer *gsCbs[] = {m_cbFarPlane.get(), m_cbProj.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
-    m_device.context()->PSSetConstantBuffers(0, 2, psCbs);
+    m_device.context()->PSSetConstantBuffers(0, 3, psCbs);
     m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
     m_device.context()->GSSetConstantBuffers(0, 2, gsCbs);
 
@@ -378,14 +380,14 @@ void DxRenderer::init3D3() {
     SamplerDescription samplerDesc;
     m_sampler = m_device.CreateSamplerState(samplerDesc);
 
-    vector<XMFLOAT2> quad{{
-                                  {-1.f, 1.f},
-                                  {-1.f, -1.f},
-                                  {1.f, -1.f},
-                                  {-1.f, 1.f},
-                                  {1.f, -1.f},
-                                  {1.f, 1.f}
-                          }
+    vector<VertexPositionTex> quad{{
+                                           {{-1.f, -1.f}, {.0f, 1.f}},
+                                           {{-1.f, 1.f}, {.0f, .0f}},
+                                           {{1.f, -1.f}, {1.f, 1.f}},
+                                           {{1.f, -1.f}, {1.f, 1.f}},
+                                           {{-1.f, 1.f}, {.0f, .0f}},
+                                           {{1.f, 1.f}, {1.f, .0f}}
+                                   }
     };
     m_ndcQuad = m_device.CreateVertexBuffer(quad);
 

@@ -128,6 +128,7 @@ std::tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicViewMatrix() const {
     return std::make_tuple(viewLeft, viewRight);
 }
 
+// TODO: views are not aligned at focus point
 std::tuple<XMMATRIX, XMMATRIX> Camera::stereoscopicProjectionMatrix() const {
     float shift = (_eyesDistance / 2.0f) * _near / _focusDistance;
     float top = tan(XMConvertToRadians(FOV) / 2.0f) * _near;

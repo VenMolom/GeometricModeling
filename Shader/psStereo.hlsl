@@ -11,10 +11,7 @@ cbuffer cbStereoColor: register(b2) {
 
 float4 main(PSStereoIn i) : SV_TARGET
 {
-    float2 texCoords = i.pos.xy * .5f + float2(.5f, .5f);
-    texCoords.y *= -1.f;
-
-    float4 left = leftEye.Sample(colorSampler, texCoords);
-    float4 right = rightEye.Sample(colorSampler, texCoords);
-    return left;
+    float4 left = leftEye.Sample(colorSampler, i.tex);
+    float4 right = rightEye.Sample(colorSampler, i.tex);
+    return .5f * left + .5f * right;
 }

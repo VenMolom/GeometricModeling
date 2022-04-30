@@ -31,6 +31,11 @@ struct VertexPositionColor {
     DirectX::XMFLOAT3 position, color;
 };
 
+struct VertexPositionTex {
+    DirectX::XMFLOAT2 position;
+    DirectX::XMFLOAT2 tex;
+};
+
 typedef unsigned short Index;
 
 struct BlendDescription : D3D11_BLEND_DESC {
