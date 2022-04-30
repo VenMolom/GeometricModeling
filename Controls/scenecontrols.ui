@@ -14,24 +14,36 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="5" column="0">
-    <widget class="QLabel" name="rightEyeLabel">
-     <property name="text">
-      <string>Right Eye Color</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="eyesLabel">
-     <property name="text">
-      <string>Eyes distance</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="0">
     <widget class="QLabel" name="focusLabel">
      <property name="text">
       <string>Focus distance</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QCheckBox" name="stereoscopicCheckBox">
+     <property name="text">
+      <string>Stereoscopic</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QDoubleSpinBox" name="focusDistance">
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="minimum">
+      <double>0.001000000000000</double>
+     </property>
+     <property name="stepType">
+      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
+     </property>
+     <property name="value">
+      <double>10.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -48,6 +60,13 @@
      </property>
     </spacer>
    </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="eyesLabel">
+     <property name="text">
+      <string>Eyes distance</string>
+     </property>
+    </widget>
+   </item>
    <item row="2" column="1">
     <widget class="QDoubleSpinBox" name="eyesDistance">
      <property name="buttonSymbols">
@@ -55,6 +74,9 @@
      </property>
      <property name="decimals">
       <number>3</number>
+     </property>
+     <property name="minimum">
+      <double>0.000000000000000</double>
      </property>
      <property name="stepType">
       <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
@@ -64,33 +86,10 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="leftEyeLabe">
+   <item row="5" column="0">
+    <widget class="QLabel" name="rightEyeLabel">
      <property name="text">
-      <string>Left Eye Color</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QDoubleSpinBox" name="focusDistance">
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="stepType">
-      <enum>QAbstractSpinBox::AdaptiveDecimalStepType</enum>
-     </property>
-     <property name="value">
-      <double>10.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QCheckBox" name="stereoscopicCheckBox">
-     <property name="text">
-      <string>Stereoscopic</string>
+      <string>Right Eye Color</string>
      </property>
     </widget>
    </item>
@@ -107,6 +106,13 @@
      </property>
      <property name="flat">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="leftEyeLabe">
+     <property name="text">
+      <string>Left Eye Color</string>
      </property>
     </widget>
    </item>
