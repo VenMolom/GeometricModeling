@@ -37,7 +37,7 @@ private:
     std::shared_ptr<Scene> scene;
     std::unique_ptr<StereoscopicRenderer> renderer;
 
-    QColor leftColor{Qt::blue}, rightColor{Qt::red};
+    QColor leftColor{0, 255, 255}, rightColor{255, 0, 0};
 
     Ui::SceneControls *ui;
 

@@ -20,6 +20,9 @@ SceneControls::~SceneControls() {
 
 void SceneControls::setScene(shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
+
+    scene->camera()->setEyesDistance(ui->eyesDistance->value());
+    scene->camera()->setFocusDistance(ui->focusDistance->value());
 }
 
 void SceneControls::setRenderer(unique_ptr<StereoscopicRenderer> rendererPtr) {
@@ -48,16 +51,18 @@ void SceneControls::on_leftEyeColor_clicked() {
     auto color = QColorDialog::getColor(leftColor, this);
     if (!color.isValid()) return;
 
-    setColor(ui->leftEyeColor, color);
+    leftColor = color;
+    setColor(ui->leftEyeColor, leftColor);
     renderer->setLeftEyeColor({color.redF(), color.greenF(), color.blueF()});
 }
 
 
 void SceneControls::on_rightEyeColor_clicked() {
-    auto color = QColorDialog::getColor(leftColor, this);
+    auto color = QColorDialog::getColor(rightColor, this);
     if (!color.isValid()) return;
 
-    setColor(ui->rightEyeColor, color);
+    rightColor = color;
+    setColor(ui->rightEyeColor, rightColor);
     renderer->setRightEyeColor({color.redF(), color.greenF(), color.blueF()});
 }
 

@@ -38,6 +38,7 @@ void DxRenderer::renderScene() {
 void DxRenderer::renderStereoscopic() {
     auto projections = scene->camera()->stereoscopicProjectionMatrix();
     auto views = scene->camera()->stereoscopicViewMatrix();
+    clearColor = (float*) STEREO_CLEAR_COLOR;
 
     // render left eye
     renderEye(get<0>(projections), get<0>(views), m_stereoscopicLeftTarget);
@@ -66,6 +67,7 @@ void DxRenderer::renderStereoscopic() {
     m_device.context()->IASetInputLayout(m_layout.get());
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+    clearColor = (float*) CLEAR_COLOR;
 
     updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
 }
@@ -135,7 +137,7 @@ void DxRenderer::drawCurve(const Curve &curve, int lastPatchId, int lastPatchSiz
 
 void DxRenderer::draw(const Grid &grid, XMFLOAT4 color) {
     updateBuffer(m_cbModel, grid.modelMatrix());
-    updateBuffer(m_cbColor, CLEAR_COLOR);
+    updateBuffer(m_cbColor,  *(float(*)[4])clearColor);
 
     m_device.context()->PSSetShader(m_pixelFadeShader.get(), nullptr, 0);
     m_device.context()->OMSetDepthStencilState(m_dssNoDepthWrite.get(), 0);

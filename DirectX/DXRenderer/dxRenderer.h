@@ -105,6 +105,8 @@ private:
     const float CLEAR_COLOR[4]{0.2f, 0.2f, 0.2f, 1.0f};
     const float STEREO_CLEAR_COLOR[4]{0.f, 0.f, 0.f, 1.f};
 
+    float *clearColor = (float *) CLEAR_COLOR;
+
     bool stereoscopic{false};
 
     DirectX::XMFLOAT4 leftEyeColor, rightEyeColor;
