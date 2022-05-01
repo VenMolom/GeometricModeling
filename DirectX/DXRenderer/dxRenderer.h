@@ -4,11 +4,6 @@
 #include "Handlers/inputHandler.h"
 #include "DirectX/stereoscopicRenderer.h"
 #include <windowsx.h>
-#include <string>
-#include <basetsd.h>
-
-#define WIN32_LEAN_AND_MEAN
-
 #include <Windows.h>
 #include <DirectXMath.h>
 #include <QStatusBar>

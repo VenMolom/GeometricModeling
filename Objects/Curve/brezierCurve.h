@@ -30,10 +30,6 @@ protected:
     void postUpdate() override;
 
     void pointMoved(const std::weak_ptr<Point> &point) override;
-
-    static DirectX::XMFLOAT3 newMin(DirectX::XMFLOAT3 oldMin, DirectX::XMFLOAT3 candidate);
-
-    static DirectX::XMFLOAT3 newMax(DirectX::XMFLOAT3 oldMax, DirectX::XMFLOAT3 candidate);
 };
 
 

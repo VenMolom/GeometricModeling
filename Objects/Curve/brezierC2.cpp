@@ -42,9 +42,6 @@ void BrezierC2::drawPolygonal(Renderer &renderer, DrawType drawType) {
 void BrezierC2::pointUpdate(const shared_ptr<Point> &point, int index) {
     deBoorPoints.vertices().push_back({point->position(), {1, 1, 1}});
 
-    minPos = newMin(minPos, point->position());
-    maxPos = newMax(maxPos, point->position());
-
     shared_ptr<Point> right;
     // get next de Boor point
     while (index + 1 < _points.size() && !(right = _points[index + 1].lock())) {

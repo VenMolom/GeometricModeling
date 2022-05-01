@@ -15,11 +15,11 @@ HSBrezierConstOutput CalcHSPatchConstants(
 	float4 p3 = ip[2].pos / ip[2].pos.w;
 	float4 p4 = ip[3].pos / ip[3].pos.w;
 
-	float4 maxx = max(p1, max(p2, max(p3, p4)));
-	float4 minn = min(p1, min(p2, min(p3, p4)));
+	float4 maxPoint = max(p1, max(p2, max(p3, p4)));
+	float4 minPoint = min(p1, min(p2, min(p3, p4)));
 
-    float2 start = clamp(minn.xy, float2(-1, -1), float2(1, 1));
-    float2 end = clamp(maxx.xy, float2(-1, -1), float2(1, 1));
+    float2 start = clamp(minPoint.xy, float2(-1, -1), float2(1, 1));
+    float2 end = clamp(maxPoint.xy, float2(-1, -1), float2(1, 1));
 
     float2 scale = float2(tesselationSetting.x * 0.5f, tesselationSetting.y * 0.5f);
 

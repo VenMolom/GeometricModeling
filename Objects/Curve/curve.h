@@ -37,16 +37,9 @@ public:
     void setRotation(DirectX::XMFLOAT3 rotation) final {};
 
     void setScale(DirectX::XMFLOAT3 scale) final {};
-
-    DirectX::XMVECTOR maxPosition() const { return DirectX::XMLoadFloat3(&maxPos); }
-
-    DirectX::XMVECTOR minPosition() const { return DirectX::XMLoadFloat3(&minPos); }
 protected:
     std::vector<std::weak_ptr<Point>> _points;
     std::vector<QPropertyNotifier> pointsHandlers{};
-
-    DirectX::XMFLOAT3 minPos{INFINITY, INFINITY, INFINITY};
-    DirectX::XMFLOAT3 maxPos{-INFINITY, -INFINITY, -INFINITY};
 
     Curve(uint id, QString name, std::vector<std::weak_ptr<Point>> &&points, D3D11_PRIMITIVE_TOPOLOGY topology);
 

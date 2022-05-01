@@ -23,8 +23,6 @@ class Camera {
 public:
     Camera();
 
-    Camera(Camera &&camera) = default;
-
     DirectX::XMMATRIX viewMatrix() const;
 
     QBindable<DirectX::XMFLOAT4X4> bindableView() { return &view; }
@@ -51,9 +49,9 @@ public:
 
     DirectX::XMFLOAT3 direction() const { return _direction; }
 
-    void setEyesDistance(float distance) { _eyesDistance = distance; }
+    void setEyesDistance(float eyesDistance) { _eyesDistance = eyesDistance; }
 
-    void setFocusDistance(float distance) { _focusDistance = distance; }
+    void setFocusDistance(float focusDistance) { _focusDistance = focusDistance; }
 
     float nearZ() const { return _near; }
 
@@ -90,13 +88,10 @@ private:
     float _near{0.1f};
     float _far{100.0f};
     float _z{0};
-    float _aspectRatio;
+    float _aspectRatio{1};
 
     float _eyesDistance{1};
     float _focusDistance{10};
-
-    DirectX::XMFLOAT3 _leftEyeColor{1, 0, 0};
-    DirectX::XMFLOAT3 _rightEyeColor{0, 0, 1};
 
     void calculateView();
 

@@ -30,14 +30,6 @@ void BrezierCurve::drawCurve(Renderer &renderer, DrawType drawType) {
     renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 }
 
-XMFLOAT3 BrezierCurve::newMax(XMFLOAT3 oldMax, XMFLOAT3 candidate) {
-    return {max(oldMax.x, candidate.x), max(oldMax.y, candidate.y), max(oldMax.z, candidate.z)};
-}
-
-XMFLOAT3 BrezierCurve::newMin(XMFLOAT3 oldMin, XMFLOAT3 candidate) {
-    return {min(oldMin.x, candidate.x), min(oldMin.y, candidate.y), min(oldMin.z, candidate.z)};
-}
-
 void BrezierCurve::pointUpdate(const shared_ptr<Point> &point, int index) {
     if (indices.size() > 0 && indices.size() % 4 == 0) {
         indices.push_back(indices.back());
@@ -45,9 +37,6 @@ void BrezierCurve::pointUpdate(const shared_ptr<Point> &point, int index) {
 
     vertices.push_back({point->position(), {1, 1, 1}});
     indices.push_back(index);
-
-    minPos = newMin(minPos, point->position());
-    maxPos = newMax(maxPos, point->position());
 }
 
 void BrezierCurve::postUpdate() {
