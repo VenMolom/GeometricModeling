@@ -28,3 +28,10 @@ shared_ptr<InterpolationCurveC2>
 ObjectFactory::createInterpolationCurveC2(vector<weak_ptr<Point>> &&points) {
     return make_shared<InterpolationCurveC2>(nextId++, std::move(points));
 }
+
+std::shared_ptr<BicubicC0> ObjectFactory::createBicubicC0(DirectX::XMFLOAT3 position, array<int, PATCH_DIM> segments,
+                                                          array<float, PATCH_DIM> size, bool cylinder,
+                                                          QBindable<weak_ptr<Object>> bindableSelected) {
+    return make_shared<BicubicC0>(nextId++, position, segments, size, cylinder, bindableSelected);
+}
+

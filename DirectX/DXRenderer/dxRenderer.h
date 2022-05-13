@@ -31,6 +31,8 @@ public:
 
     void draw(const Point &point, DirectX::XMFLOAT4 color) override;
 
+    void draw(const Patch &patch, DirectX::XMFLOAT4 color) override;
+
     void enableStereoscopy(bool enable) override;
 
     void setLeftEyeColor(DirectX::XMFLOAT3 color) override;
@@ -76,7 +78,9 @@ private:
     mini::dx_ptr<ID3D11VertexShader> m_vertexStereoShader;
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
+    mini::dx_ptr<ID3D11HullShader> m_hullBicubicShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainBrezierShader;
+    mini::dx_ptr<ID3D11DomainShader> m_domainBicubicShader;
 
     mini::dx_ptr<ID3D11GeometryShader> m_geometryPointShader;
 
@@ -112,6 +116,8 @@ private:
     DirectX::XMFLOAT4 leftEyeColor, rightEyeColor;
 
     mini::dx_ptr<ID3D11SamplerState> m_sampler;
+
+    mini::dx_ptr<ID3D11RasterizerState> m_noCullWireframe;
 
     mini::dx_ptr<ID3D11RenderTargetView> m_stereoscopicLeftTarget, m_stereoscopicRightTarget;
     mini::dx_ptr<ID3D11ShaderResourceView> m_stereoscopicLeftTexture, m_stereoscopicRightTexture;

@@ -71,7 +71,7 @@ set(PROJECT_SOURCES
         Controls/scenecontrols.h Controls/scenecontrols.cpp
         Controls/scenecontrols.ui DirectX/stereoscopicRenderer.h
         DirectX/DXDevice/ptr_vector.h
-        DirectX/DXDevice/compressed_pair.h)
+        DirectX/DXDevice/compressed_pair.h Objects/Patch/bicubicC0.cpp Objects/Patch/bicubicC0.h Objects/Patch/patch.cpp Objects/Patch/patch.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -80,7 +80,9 @@ set(HLSL_SHADER_FILES
         Shader/ps.hlsl
         Shader/vs.hlsl
         Shader/hsBrezier.hlsl
+        Shader/hsBicubic.hlsl
         Shader/dsBrezier.hlsl
+        Shader/dsBicubic.hlsl
         Shader/psCameraFade.hlsl
         Shader/vsBillboard.hlsl
         Shader/vsNoProjection.hlsl
@@ -96,7 +98,9 @@ set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psStereo.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
+set_source_files_properties(Shader/hsBicubic.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/dsBrezier.hlsl PROPERTIES ShaderType "ds")
+set_source_files_properties(Shader/dsBicubic.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/gsPoint.hlsl PROPERTIES ShaderType "gs")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 

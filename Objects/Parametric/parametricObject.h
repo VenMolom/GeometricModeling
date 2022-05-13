@@ -19,30 +19,23 @@ protected:
                      QString name,
                      DirectX::XMFLOAT3 position,
                      std::array<int, Dim> density,
-                     std::array<std::tuple<float, float>, Dim> range);
-
-    // must be called by derived class constructor
-    void calculateVerticesAndIndices();
-
-    virtual void calculateVertices(const std::array<int, Dim> &density,
-                                   const std::array<std::tuple<float, float>, Dim> &range) = 0;
-
-    virtual void calculateIndices(const std::array<int, Dim> &density) = 0;
+                     std::array<std::tuple<float, float>, Dim> range,
+                     D3D11_PRIMITIVE_TOPOLOGY topology);
 
 public:
-    void draw(Renderer &renderer, DrawType drawType) final;
-
     const std::array<int, Dim> &density() const { return _density; }
 
     void setDensity(const std::array<int, Dim> &density);
 
     const std::array<std::tuple<float, float>, Dim> &range() const { return _range; }
 
-    virtual std::array<bool, 2> looped() const = 0;
+    virtual std::array<bool, Dim> looped() const = 0;
 
 private:
     std::array<int, Dim> _density;
     std::array<std::tuple<float, float>, Dim> _range;
+
+    virtual void densityUpdated() = 0;
 };
 
 template<size_t Dim>
@@ -50,31 +43,17 @@ ParametricObject<Dim>::ParametricObject(uint id,
                                         QString name,
                                         DirectX::XMFLOAT3 position,
                                         std::array<int, Dim> density,
-                                        std::array<std::tuple<float, float>, Dim> range)
-        : Object(id, name, position, D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
+                                        std::array<std::tuple<float, float>, Dim> range,
+                                        D3D11_PRIMITIVE_TOPOLOGY topology)
+        : Object(id, name, position, topology),
           _density(density),
           _range(range) {
 }
 
 template<size_t Dim>
-void ParametricObject<Dim>::draw(Renderer &renderer, DrawType drawType) {
-    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
-    if (drawType == SELECTED) {
-        Cursor::drawCursor(renderer, position(), rotation());
-    }
-}
-
-template<size_t Dim>
-void ParametricObject<Dim>::calculateVerticesAndIndices() {
-    calculateVertices(_density, _range);
-    calculateIndices(_density);
-    updateBuffers();
-}
-
-template<size_t Dim>
 void ParametricObject<Dim>::setDensity(const std::array<int, Dim> &density) {
     _density = density;
-    calculateVerticesAndIndices();
+    densityUpdated();
 }
 
 #endif //MG1_PARAMETRICOBJECT_H

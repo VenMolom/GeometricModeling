@@ -28,4 +28,11 @@ struct HSBrezierConstOutput {
 	int patchSize : PATCHSIZE;
 };
 
+struct HSBicubicConstOutput {
+	float edges[4] : SV_TessFactor;
+	float inside[2] : SV_InsideTessFactor;
+};
+
 #define CONTROL_POINTS_BREZIER 4
+
+#define CONTROL_POINTS_PATCH 16

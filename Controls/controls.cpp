@@ -61,11 +61,14 @@ void Controls::updateSelected() {
         ui->modulesLayout->addWidget(modules.back().get(), 3, 0, 1, 1);
     }
 
+    if (object->type() & PARAMETRIC) {
+        auto parametric = static_pointer_cast<ParametricObject<2>>(object);
+        modules.push_back(std::move(make_unique<ParametricModule>(parametric, this)));
+        ui->modulesLayout->addWidget(modules.back().get(), 4, 0, 1, 1);
+    }
+
     if (object->type() & TORUS) {
         auto torus = static_pointer_cast<Torus>(object);
-        modules.push_back(std::move(make_unique<ParametricModule>(torus, this)));
-        ui->modulesLayout->addWidget(modules.back().get(), 4, 0, 1, 1);
-
         modules.push_back(std::move(make_unique<TorusModule>(torus, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 5, 0, 1, 1);
     }

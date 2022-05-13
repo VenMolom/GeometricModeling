@@ -44,11 +44,13 @@ void MainWindow::on_addBrezierC2_clicked() {
 }
 
 void MainWindow::on_addInterpolationC2_clicked() {
-    scene->addObject(std::move(scene->objectFactory().createInterpolationCurveC2(std::move(getSelectedPoints()))));
+    // TODO: remove
+    scene->addObject(std::move(scene->objectFactory().createBicubicC0(XMFLOAT3(0, 0, 0), {2, 2}, {2, 2}, false, scene->bindableSelected())));
+    //scene->addObject(std::move(scene->objectFactory().createInterpolationCurveC2(std::move(getSelectedPoints()))));
 }
 
 void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool select) {
-    auto item = std::make_unique<ObjectListItem>(object, scene);
+    auto item = make_unique<ObjectListItem>(object, scene);
     ui->objectsList->addItem(item.get());
 
     if (select) {

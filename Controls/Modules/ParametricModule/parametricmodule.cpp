@@ -18,14 +18,14 @@ ParametricModule::~ParametricModule()
     delete ui;
 }
 
-void ParametricModule::setDensity() const {
-    object->setDensity(parameters<2>());
-}
-
 void ParametricModule::on_uDensity_valueChanged(int arg1) {
-    setDensity();
+    auto density = object->density();
+    density[0] = arg1;
+    object->setDensity(density);
 }
 
 void ParametricModule::on_vDensity_valueChanged(int arg1) {
-    setDensity();
+    auto density = object->density();
+    density[1] = arg1;
+    object->setDensity(density);
 }

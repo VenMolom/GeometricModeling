@@ -53,6 +53,12 @@ private:
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
+
+    // TODO: GUI dodawania płatka (wybór rozmiaru, położenia, segmentów i czy cylinder)
+    // TODO: siatka płatka
+    // TODO: punkty płatka composable (mechanizm composable, które nie ownuje)
+    // TODO: zaznaczanie obszaru myszką ?
+    // TODO:
 };
 
 #endif // MAINWINDOW_H

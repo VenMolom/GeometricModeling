@@ -9,11 +9,15 @@ using namespace std;
 using namespace DirectX;
 
 Torus::Torus(uint id, XMFLOAT3 position)
-        : ParametricObject<DIM>(id, "Torus", position, {15, 15}, {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)}) {
-    calculateVerticesAndIndices();
+        : ParametricObject<TORUS_DIM>(id, "Torus", position, {15, 15},
+                                      {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)},
+                                      D3D11_PRIMITIVE_TOPOLOGY_LINELIST) {
+    calculateVertices(density(), range());
+    calculateIndices(density());
+    updateBuffers();
 }
 
-void Torus::calculateVertices(const array<int, DIM> &density, const array<tuple<float, float>, DIM> &range) {
+void Torus::calculateVertices(const array<int, TORUS_DIM> &density, const array<tuple<float, float>, TORUS_DIM> &range) {
     auto[startU, endU] = range[0];
     auto deltaU = (endU - startU) / static_cast<float>(density[0]);
 
@@ -36,7 +40,7 @@ void Torus::calculateVertices(const array<int, DIM> &density, const array<tuple<
     }
 }
 
-void Torus::calculateIndices(const array<int, DIM> &density) {
+void Torus::calculateIndices(const array<int, TORUS_DIM> &density) {
     auto verticesSize = density[0] * density[1];
     for (auto i = 0; i < density[1]; ++i) { // major _rotation
         for (auto j = 0; j < density[0]; ++j) { // minor _rotation
@@ -57,12 +61,16 @@ array<bool, 2> Torus::looped() const {
 
 void Torus::setMajorRadius(float radius) {
     _majorRadius = radius;
-    calculateVerticesAndIndices();
+    calculateVertices(density(), range());
+    calculateIndices(density());
+    updateBuffers();
 }
 
 void Torus::setMinorRadius(float radius) {
     _minorRadius = radius;
-    calculateVerticesAndIndices();
+    calculateVertices(density(), range());
+    calculateIndices(density());
+    updateBuffers();
 }
 
 bool Torus::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX viewMatrix,
@@ -76,4 +84,17 @@ bool Torus::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, Di
     auto boundingBox =  BoundingOrientedBox{pos, size, rotation};
 
     return boundingBox.Intersects(XMLoadFloat3(&origin), XMLoadFloat3(&direction), distance);
+}
+
+void Torus::densityUpdated() {
+    calculateVertices(density(), range());
+    calculateIndices(density());
+    updateBuffers();
+}
+
+void Torus::draw(Renderer &renderer, DrawType drawType) {
+    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+    if (drawType == SELECTED) {
+        Cursor::drawCursor(renderer, position(), rotation());
+    }
 }
