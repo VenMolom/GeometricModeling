@@ -20,15 +20,12 @@ BicubicC0::BicubicC0(uint id, XMFLOAT3 position, array<int, PATCH_DIM> segments,
 }
 
 void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
-    // TODO: direction dependent on rotation
-    // TODO: maybe size dependent on scale?
-    auto dens = density();
     auto uDiff = size[0] / 3;
     auto vDiff = size[1] / 3;
 
     XMFLOAT3 startPos = _position;
-    startPos.x -= (uDiff * segments[0]) / 2;
-    startPos.z -= (vDiff * segments[1]) / 2;
+    startPos.x -= uDiff * segments[0] * 1.5f;
+    startPos.z -= vDiff * segments[1] * 1.5f;
 
     auto pos = startPos;
     auto uPoints = (segments[0] * 4 - (segments[0] - 1));

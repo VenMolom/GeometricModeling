@@ -12,7 +12,7 @@
 
 #define STEP 1.1f
 #define SENSITIVITY 0.005f
-#define SPEED 0.1f
+#define SPEED 0.05f
 #define LIMIT DirectX::XM_PIDIV2 - 0.001f
 #define MAX_ANGLE  LIMIT
 #define MIN_ANGLE -(LIMIT)

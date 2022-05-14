@@ -10,7 +10,7 @@
 
 class VirtualPoint : public Point {
 public:
-    VirtualPoint(const DirectX::XMFLOAT3 &position);
+    explicit VirtualPoint(const DirectX::XMFLOAT3 &position);
 
     void setPositionSilently(DirectX::XMFLOAT3 position);
 

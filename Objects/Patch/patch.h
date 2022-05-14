@@ -19,17 +19,16 @@ public:
 
     const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints() override;
 
-    void setPosition(DirectX::XMFLOAT3 position) final {}
+    void setPosition(DirectX::XMFLOAT3 position) override;
 
-    void setRotation(DirectX::XMFLOAT3 rotation) final {}
+    void setRotation(DirectX::XMFLOAT3 rotation) override;
 
-    void setScale(DirectX::XMFLOAT3 scale) final {}
+    void setScale(DirectX::XMFLOAT3 scale) override;
 
     void draw(Renderer &renderer, DrawType drawType) override;
 
 protected:
     std::vector<std::shared_ptr<VirtualPoint>> points;
-    std::vector<QPropertyNotifier> pointsHandlers{};
     bool cylinder;
 
     void densityUpdated() override {}
@@ -37,6 +36,14 @@ protected:
     void pointMoved(const std::weak_ptr<VirtualPoint> &point, int index);
 
     void addPoint(DirectX::XMFLOAT3 position);
+
+    void updatePoints();
+
+private:
+    std::vector<QPropertyNotifier> pointsHandlers{};
+    std::vector<DirectX::XMFLOAT3> startingPositions{};
+    DirectX::XMFLOAT3 startingPosition;
+    DirectX::XMFLOAT4X4 modificationMatrixInverse;
 };
 
 
