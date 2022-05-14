@@ -31,8 +31,8 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
     auto uPoints = (segments[0] * 4 - (segments[0] - 1));
     auto vPoints = (segments[1] * 4 - (segments[1] - 1));
     // vertices
-    for (int i = 0; i < uPoints; ++i) {
-        for (int j = 0; j < vPoints; ++j) {
+    for (int i = 0; i < vPoints; ++i) {
+        for (int j = 0; j < uPoints; ++j) {
             addPoint(pos);
             pos.x += uDiff;
         }
@@ -59,25 +59,23 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
 }
 
 void BicubicC0::createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) {
-    auto dens = density();
     auto uDiff = size[0] / 3;
-    auto vDiff = size[1] / 3;
+    auto radius = size[1];
 
     XMFLOAT3 startPos = _position;
-    startPos.x -= (uDiff * segments[0]) / 2;
-    startPos.z -= (vDiff * segments[1]) / 2;
+    startPos.x -= uDiff * segments[0] * 1.5f;
 
-    auto pos = startPos;
     auto uPoints = (segments[0] * 4 - (segments[0] - 1));
-    auto vPoints = (segments[1] * 4 - (segments[1] - 1));
+    auto vPoints = segments[1] * 3;
+    auto vAngle = XM_2PI / vPoints;
     // vertices
-    for (int i = 0; i < uPoints; ++i) {
-        for (int j = 0; j < vPoints; ++j) {
+    for (int i = 0; i < vPoints; ++i) {
+        auto angle = i * vAngle;
+        auto pos = XMFLOAT3(startPos.x, startPos.y + radius * cos(angle), startPos.z + radius * sin(angle));
+        for (int j = 0; j < uPoints; ++j) {
             addPoint(pos);
             pos.x += uDiff;
         }
-        pos.x = startPos.x;
-        pos.z += vDiff;
     }
 
     //indices
@@ -86,6 +84,10 @@ void BicubicC0::createCylinderSegments(std::array<int, PATCH_DIM> segments, std:
             auto index = j * 3 * uPoints + 3 * i;
 
             for (int k = 0; k < 4; ++k) {
+                if (j == segments[1] - 1 && k == 3) {
+                    index = 3 * i;
+                }
+
                 indices.push_back(index);
                 indices.push_back(index + 1);
                 indices.push_back(index + 2);

@@ -31,7 +31,7 @@ void Patch::draw(Renderer &renderer, DrawType drawType) {
 }
 
 std::array<bool, PATCH_DIM> Patch::looped() const {
-    return {cylinder, false};
+    return {false, cylinder};
 }
 
 const vector<std::shared_ptr<VirtualPoint>> &Patch::virtualPoints() {

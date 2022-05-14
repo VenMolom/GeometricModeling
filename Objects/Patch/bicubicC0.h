@@ -15,7 +15,7 @@ public:
 
     Type type() const override;
 
-private:
+protected:
     void createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);
 
     void createPlaneSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);

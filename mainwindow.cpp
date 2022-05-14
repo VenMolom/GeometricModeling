@@ -45,7 +45,7 @@ void MainWindow::on_addBrezierC2_clicked() {
 
 void MainWindow::on_addInterpolationC2_clicked() {
     // TODO: remove
-    scene->addObject(std::move(scene->objectFactory().createBicubicC0(XMFLOAT3(0, 0, 0), {2, 2}, {2, 2}, false, scene->bindableSelected())));
+    scene->addObject(std::move(scene->objectFactory().createBicubicC0(XMFLOAT3(0, 0, 0), {2, 4}, {2, 2}, true, scene->bindableSelected())));
     //scene->addObject(std::move(scene->objectFactory().createInterpolationCurveC2(std::move(getSelectedPoints()))));
 }
 

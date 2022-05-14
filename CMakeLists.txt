@@ -71,7 +71,7 @@ set(PROJECT_SOURCES
         Controls/scenecontrols.h Controls/scenecontrols.cpp
         Controls/scenecontrols.ui DirectX/stereoscopicRenderer.h
         DirectX/DXDevice/ptr_vector.h
-        DirectX/DXDevice/compressed_pair.h Objects/Patch/bicubicC0.cpp Objects/Patch/bicubicC0.h Objects/Patch/patch.cpp Objects/Patch/patch.h)
+        DirectX/DXDevice/compressed_pair.h Objects/Patch/bicubicC0.cpp Objects/Patch/bicubicC0.h Objects/Patch/patch.cpp Objects/Patch/patch.h Objects/Patch/bicubicC0Creator.cpp Objects/Patch/bicubicC0Creator.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
