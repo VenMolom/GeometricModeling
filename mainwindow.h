@@ -29,6 +29,8 @@ private slots:
 
     void on_addInterpolationC2_clicked();
 
+    void on_addPatchC0_clicked();
+
     void on_objectsList_itemSelectionChanged();
 
     void on_deleteObject_clicked();
@@ -54,11 +56,9 @@ private:
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
 
-    // TODO: GUI dodawania płatka (wybór rozmiaru, położenia, segmentów i czy cylinder)
-    // TODO: siatka płatka
+    // TODO: jakiś przeskok jak się modyfikuje transform w creatorze płatka
     // TODO: punkty płatka composable (mechanizm composable, które nie ownuje)
     // TODO: zaznaczanie obszaru myszką ?
-    // TODO:
 };
 
 #endif // MAINWINDOW_H

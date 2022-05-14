@@ -8,15 +8,11 @@
 using namespace std;
 using namespace DirectX;
 
-BicubicC0::BicubicC0(uint id, XMFLOAT3 position, array<int, PATCH_DIM> segments,
+BicubicC0::BicubicC0(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> segments,
                      array<float, PATCH_DIM> size, bool cylinder,
                      QBindable<weak_ptr<Object>> bindableSelected)
-        : Patch(id, "BicubicC0", position, {3, 3}, cylinder, bindableSelected) {
-    if (cylinder) {
-        createCylinderSegments(segments, size);
-    } else {
-        createPlaneSegments(segments, size);
-    }
+        : Patch(id, name, position, {3, 3}, cylinder, bindableSelected) {
+    createSegments(segments, size);
 }
 
 void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
@@ -58,7 +54,17 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
     updateBuffers();
 }
 
-void BicubicC0::createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) {
+void BicubicC0::createSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
+    clear();
+    // TODO: take scale and rotation into account
+    if (cylinder) {
+        createCylinderSegments(segments, size);
+    } else {
+        createPlaneSegments(segments, size);
+    }
+}
+
+void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
     auto uDiff = size[0] / 3;
     auto radius = size[1];
 

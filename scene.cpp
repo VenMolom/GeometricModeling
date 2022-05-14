@@ -26,6 +26,10 @@ void Scene::draw(Renderer &renderer) {
         auto selected = _selected.value().lock().get();
         object->draw(renderer, selected == object.get() ? SELECTED : DEFAULT);
     }
+
+    if (creator && !_selected.value().expired()) {
+        _selected.value().lock()->draw(renderer, SELECTED);
+    }
 }
 
 void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
@@ -45,7 +49,7 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
     }
 
     if (select) {
-        _selected = object;
+        setSelected(object);
     }
 
     if (object->type() & VIRTUALPOINTSHOLDER) {
@@ -66,11 +70,27 @@ void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
     setSelected(comp);
 }
 
+void Scene::addCreator(shared_ptr<Object> &&creator) {
+    if (cursor) {
+        creator->setPosition(cursor->position());
+        cursor.reset();
+    }
+
+    setSelected(creator);
+    this->creator = creator;
+}
+
+void Scene::createFromCreator() {
+    if (creator) {
+        addObject(dynamic_pointer_cast<Creator>(creator)->create(factory.id()), true);
+    }
+}
+
 void Scene::removeSelected() {
     if (auto selected = _selected.value().lock()) {
         _objects.remove_if([&selected](const shared_ptr<Object> &ob) { return selected->equals(ob); });
         composite.reset();
-        _selected.setValue({});
+        setSelected(nullptr);
     }
 }
 
@@ -127,6 +147,10 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         return;
     }
 
+    if (creator) {
+        creator.reset();
+    }
+
     if (!object) {
         removeComposite();
         _selected.setValue({});
@@ -139,6 +163,7 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         cursor.reset();
     } else if ((composite && composite->equals(object))
                || object->type() & VIRTUALPOINT3D
+               || object->type() & PATCHCREATOR
                || find_if(_objects.begin(), _objects.end(),
                           [&object](const shared_ptr<Object> &ob) { return object->equals(ob); }) != _objects.end()) {
         _selected = object;
@@ -198,7 +223,7 @@ void Scene::addCursor(XMFLOAT3RAY ray, XMINT2 screenPos) {
         cursor->setScreenPosition(screenPos);
     } else {
         cursor = make_shared<Cursor>(position, screenPos, _camera);
-        _selected = cursor;
+        setSelected(cursor);
     }
 }
 

@@ -91,11 +91,20 @@ void Patch::updatePoints() {
 
     int i = 0;
     for (auto &point : points) {
-        auto pos = startingPositions[i++];
+        auto pos = startingPositions[i];
         XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), modifyMatrix));
-        point->setPosition(pos);
+        point->setPositionSilently(pos);
+        vertices[i++].position = pos;
     }
     updateBuffers();
+}
+
+void Patch::clear() {
+    vertices.clear();
+    indices.clear();
+    points.clear();
+    startingPositions.clear();
+    pointsHandlers.clear();
 }
 
 

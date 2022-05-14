@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include "Objects/Parametric/parametricObject.h"
-#include "ui_parametricmodule.h"
 
 namespace Ui {
     class ParametricModule;
@@ -13,7 +12,7 @@ class ParametricModule : public QWidget {
 Q_OBJECT
 
 public:
-    explicit ParametricModule(std::shared_ptr<ParametricObject<2>> object, QWidget *parent = nullptr);
+    ParametricModule(std::shared_ptr<ParametricObject<2>> object, QWidget *parent = nullptr);
 
     ~ParametricModule();
 

@@ -39,6 +39,8 @@ protected:
 
     void updatePoints();
 
+    void clear();
+
 private:
     std::vector<QPropertyNotifier> pointsHandlers{};
     std::vector<DirectX::XMFLOAT3> startingPositions{};

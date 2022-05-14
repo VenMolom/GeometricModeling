@@ -22,10 +22,10 @@ public:
 
 protected:
     std::weak_ptr<Object> selected;
+    QBindable<std::weak_ptr<Object>> bindableSelected;
 
 private:
     QPropertyNotifier selectedHandler;
-    QBindable<std::weak_ptr<Object>> bindableSelected;
 };
 
 #endif //MG1_VIRTUALPOINTSHOLDER_H

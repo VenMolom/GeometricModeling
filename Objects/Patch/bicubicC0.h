@@ -9,13 +9,16 @@
 
 class BicubicC0 : public Patch {
 public:
-    BicubicC0(uint id, DirectX::XMFLOAT3 position, std::array<int, PATCH_DIM> segments,
+    BicubicC0(uint id, QString name, DirectX::XMFLOAT3 position, std::array<int, PATCH_DIM> segments,
               std::array<float, PATCH_DIM> size, bool cylinder,
               QBindable<std::weak_ptr<Object>> bindableSelected);
 
     Type type() const override;
 
 protected:
+    void createSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);
+
+private:
     void createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);
 
     void createPlaneSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);

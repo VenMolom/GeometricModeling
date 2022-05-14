@@ -13,6 +13,7 @@
 #include "Objects/Point/virtualPointsHolder.h"
 #include "Objects/Grid/grid.h"
 #include "Objects/objectFactory.h"
+#include "Objects/creator.h"
 
 class Scene : public QObject {
     Q_OBJECT
@@ -22,7 +23,11 @@ public:
 
     void addObject(std::shared_ptr<Object> &&object, bool overrideCursor = false);
 
-    void addComposite(std::list<std::shared_ptr<Object>>&& objects);
+    void addComposite(std::list<std::shared_ptr<Object>> &&objects);
+
+    void addCreator(std::shared_ptr<Object> &&object);
+
+    void createFromCreator();
 
     void removeSelected();
 
@@ -52,6 +57,7 @@ private:
     std::list<std::shared_ptr<Object>> _objects;
     std::shared_ptr<Cursor> cursor;
     std::shared_ptr<Object> composite;
+    std::shared_ptr<Object> creator;
     std::list<std::weak_ptr<VirtualPointsHolder>> virtualPointsHolders;
     // TODO: ?? look into removing composite to reduce complexity
     std::shared_ptr<Camera> _camera;

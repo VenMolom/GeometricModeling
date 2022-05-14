@@ -7,12 +7,13 @@
 
 #include "Controls/Modules/MoveModule/movemodule.h"
 #include "Controls/Modules/TorusModule/torusmodule.h"
+#include "Controls/Modules/CurveModule/curvemodule.h"
 #include "Controls/Modules/ObjectModule/objectmodule.h"
 #include "Controls/Modules/BSplineModule/bsplinemodule.h"
 #include "Controls/Modules/TransformModule/transformmodule.h"
 #include "Controls/Modules/ScreenMoveModule/screenmovemodule.h"
 #include "Controls/Modules/ParametricModule/parametricmodule.h"
-#include "Controls/Modules/CurveModule/curvemodule.h"
+#include "Controls/Modules/PatchCreatorModule/patchcreatormodule.h"
 
 using namespace std;
 using namespace DirectX;
@@ -83,5 +84,11 @@ void Controls::updateSelected() {
         auto curve = static_pointer_cast<Curve>(object);
         modules.push_back(std::move(make_unique<CurveModule>(curve, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 7, 0, 1, 1);
+    }
+
+    if (object->type() & PATCHCREATOR) {
+        auto creator = dynamic_pointer_cast<PatchCreator>(object);
+        modules.push_back(std::move(make_unique<PatchCreatorModule>(creator, scene, this)));
+        ui->modulesLayout->addWidget(modules.back().get(), 8, 0, 1, 1);
     }
 }

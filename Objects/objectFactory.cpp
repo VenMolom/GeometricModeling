@@ -3,6 +3,7 @@
 //
 
 #include "objectFactory.h"
+#include "Objects/Patch/bicubicC0Creator.h"
 
 using namespace std;
 using namespace DirectX;
@@ -20,7 +21,7 @@ shared_ptr<BrezierC0> ObjectFactory::createBrezierC0(vector<weak_ptr<Point>> &&p
 }
 
 shared_ptr<BrezierC2> ObjectFactory::createBrezierC2(vector<weak_ptr<Point>> &&points,
-                                                       QBindable<weak_ptr<Object>> bindableSelected) {
+                                                     QBindable<weak_ptr<Object>> bindableSelected) {
     return make_shared<BrezierC2>(nextId++, std::move(points), bindableSelected);
 }
 
@@ -29,9 +30,8 @@ ObjectFactory::createInterpolationCurveC2(vector<weak_ptr<Point>> &&points) {
     return make_shared<InterpolationCurveC2>(nextId++, std::move(points));
 }
 
-std::shared_ptr<BicubicC0> ObjectFactory::createBicubicC0(DirectX::XMFLOAT3 position, array<int, PATCH_DIM> segments,
-                                                          array<float, PATCH_DIM> size, bool cylinder,
+std::shared_ptr<BicubicC0> ObjectFactory::createBicubicC0(DirectX::XMFLOAT3 position,
                                                           QBindable<weak_ptr<Object>> bindableSelected) {
-    return make_shared<BicubicC0>(nextId++, position, segments, size, cylinder, bindableSelected);
+    return make_shared<BicubicC0Creator>(position, bindableSelected);
 }
 

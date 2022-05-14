@@ -25,9 +25,9 @@ public:
 
     std::shared_ptr<InterpolationCurveC2> createInterpolationCurveC2(std::vector<std::weak_ptr<Point>> &&points);
 
-    std::shared_ptr<BicubicC0> createBicubicC0(DirectX::XMFLOAT3 position, std::array<int, PATCH_DIM> segments,
-                                               std::array<float, PATCH_DIM> size, bool cylinder,
-                                               QBindable<std::weak_ptr<Object>> bindableSelected);
+    std::shared_ptr<BicubicC0> createBicubicC0(DirectX::XMFLOAT3 position, QBindable<std::weak_ptr<Object>> bindableSelected);
+
+    uint id() { return nextId++; }
 private:
     uint nextId = 1;
 };

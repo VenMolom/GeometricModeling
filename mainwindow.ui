@@ -72,10 +72,10 @@
           <string>Add object</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="3" column="0">
-           <widget class="QPushButton" name="addBrezierC2">
+          <item row="1" column="0">
+           <widget class="QPushButton" name="addTorus">
             <property name="text">
-             <string>Brezier C2</string>
+             <string>Torus</string>
             </property>
            </widget>
           </item>
@@ -93,10 +93,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="addTorus">
+          <item row="3" column="0">
+           <widget class="QPushButton" name="addBrezierC2">
             <property name="text">
-             <string>Torus</string>
+             <string>Brezier C2</string>
             </property>
            </widget>
           </item>
@@ -104,6 +104,13 @@
            <widget class="QPushButton" name="addInterpolationC2">
             <property name="text">
              <string>Interpolation C2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QPushButton" name="addPatchC0">
+            <property name="text">
+             <string>Patch C0</string>
             </property>
            </widget>
           </item>
