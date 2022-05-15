@@ -77,7 +77,11 @@ set(PROJECT_SOURCES
         Objects/Patch/bicubicC0Creator.cpp Objects/Patch/bicubicC0Creator.h
         Objects/creator.h
         Controls/Modules/PatchCreatorModule/patchcreatormodule.h Controls/Modules/PatchCreatorModule/patchcreatormodule.cpp
-        Controls/Modules/PatchCreatorModule/patchcreatormodule.ui Objects/Patch/patchCreator.h)
+        Controls/Modules/PatchCreatorModule/patchcreatormodule.ui
+        Objects/Patch/patchCreator.h
+        Objects/linelist.cpp Objects/linelist.h
+        Controls/Modules/PatchModule/patchmodule.h Controls/Modules/PatchModule/patchmodule.cpp
+        Controls/Modules/PatchModule/patchmodule.ui)
 
 # Build HLSL shaders
 add_custom_target(shaders)

@@ -5,7 +5,6 @@
 #ifndef MG1_LINESTRIP_H
 #define MG1_LINESTRIP_H
 
-
 #include "object.h"
 
 class Linestrip : public Object {

@@ -15,6 +15,17 @@ BicubicC0::BicubicC0(uint id, QString name, XMFLOAT3 position, array<int, PATCH_
     createSegments(segments, size);
 }
 
+void BicubicC0::createSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
+    clear();
+    if (cylinder) {
+        createCylinderSegments(segments, size);
+    } else {
+        createPlaneSegments(segments, size);
+    }
+    updateMesh(segments);
+    updatePoints();
+}
+
 void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
     auto uDiff = size[0] / 3;
     auto vDiff = size[1] / 3;
@@ -49,18 +60,6 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
                 index += uPoints;
             }
         }
-    }
-
-    updateBuffers();
-}
-
-void BicubicC0::createSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
-    clear();
-    // TODO: take scale and rotation into account
-    if (cylinder) {
-        createCylinderSegments(segments, size);
-    } else {
-        createPlaneSegments(segments, size);
     }
 }
 
@@ -102,10 +101,40 @@ void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<flo
             }
         }
     }
-
-    updateBuffers();
 }
 
 Type BicubicC0::type() const {
     return PATCHC0;
+}
+
+void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
+    auto uPoints = (segments[0] * 4 - (segments[0] - 1));
+    for (int i = 0; i < segments[0]; ++i) {
+        for (int j = 0; j < segments[1]; ++j) {
+            auto index = j * 3 * uPoints + 3 * i;
+
+            for (int k = 0; k < 3; ++k) {
+                if (cylinder && j == segments[1] - 1 && k == 3) {
+                    return;
+                }
+
+                auto nextLine = (index + uPoints) % linelist.vertices().size();
+
+                linelist.addLine(index, index + 1);
+                linelist.addLine(index + 1, index + 2);
+                linelist.addLine(index + 2, index + 3);
+
+                linelist.addLine(index, nextLine);
+                linelist.addLine(index + 1, nextLine + 1);
+                linelist.addLine(index + 2, nextLine + 2);
+                linelist.addLine(index + 3, nextLine + 3);
+
+                index += uPoints;
+            }
+
+            linelist.addLine(index, index + 1);
+            linelist.addLine(index + 1, index + 2);
+            linelist.addLine(index + 2, index + 3);
+        }
+    }
 }

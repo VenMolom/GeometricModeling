@@ -42,9 +42,9 @@ void Torus::calculateVertices(const array<int, TORUS_DIM> &density, const array<
 
 void Torus::calculateIndices(const array<int, TORUS_DIM> &density) {
     auto verticesSize = density[0] * density[1];
-    for (auto i = 0; i < density[1]; ++i) { // major _rotation
-        for (auto j = 0; j < density[0]; ++j) { // minor _rotation
-            // lines around minor _rotation
+    for (auto i = 0; i < density[1]; ++i) { // major rotation
+        for (auto j = 0; j < density[0]; ++j) { // minor rotation
+            // lines around minor rotation
             auto index = j * density[1] + i;
             indices.push_back(index);
             indices.push_back((index + density[1]) % verticesSize);

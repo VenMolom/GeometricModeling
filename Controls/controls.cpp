@@ -6,6 +6,7 @@
 #include "Objects/Curve/brezierC2.h"
 
 #include "Controls/Modules/MoveModule/movemodule.h"
+#include "Controls/Modules/PatchModule/patchmodule.h"
 #include "Controls/Modules/TorusModule/torusmodule.h"
 #include "Controls/Modules/CurveModule/curvemodule.h"
 #include "Controls/Modules/ObjectModule/objectmodule.h"
@@ -86,9 +87,15 @@ void Controls::updateSelected() {
         ui->modulesLayout->addWidget(modules.back().get(), 7, 0, 1, 1);
     }
 
+    if (object->type() & PATCH) {
+        auto patch = static_pointer_cast<Patch>(object);
+        modules.push_back(std::move(make_unique<PatchModule>(patch, this)));
+        ui->modulesLayout->addWidget(modules.back().get(), 8, 0, 1, 1);
+    }
+
     if (object->type() & PATCHCREATOR) {
         auto creator = dynamic_pointer_cast<PatchCreator>(object);
         modules.push_back(std::move(make_unique<PatchCreatorModule>(creator, scene, this)));
-        ui->modulesLayout->addWidget(modules.back().get(), 8, 0, 1, 1);
+        ui->modulesLayout->addWidget(modules.back().get(), 9, 0, 1, 1);
     }
 }

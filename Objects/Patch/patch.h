@@ -7,6 +7,7 @@
 
 #include "Objects/Parametric/parametricObject.h"
 #include "Objects/Point/virtualPointsHolder.h"
+#include "Objects/linelist.h"
 
 #define PATCH_DIM 2
 
@@ -25,6 +26,10 @@ public:
 
     void setScale(DirectX::XMFLOAT3 scale) override;
 
+    boolean polygonal() const { return _polygonal; }
+
+    void setPolygonal(bool draw) { _polygonal = draw; }
+
     void draw(Renderer &renderer, DrawType drawType) override;
 
 protected:
@@ -41,11 +46,17 @@ protected:
 
     void clear();
 
+    void updateMesh(std::array<int, PATCH_DIM> segments) { calculateMeshIndices(segments, bezierMesh); }
+
+    virtual void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) = 0;
+
 private:
     std::vector<QPropertyNotifier> pointsHandlers{};
     std::vector<DirectX::XMFLOAT3> startingPositions{};
     DirectX::XMFLOAT3 startingPosition;
     DirectX::XMFLOAT4X4 modificationMatrixInverse;
+    Linelist bezierMesh;
+    bool _polygonal{false};
 };
 
 

@@ -12,6 +12,7 @@ BicubicC0Creator::BicubicC0Creator(const XMFLOAT3 &position, const QBindable<wea
 
 void BicubicC0Creator::draw(Renderer &renderer, DrawType drawType) {
     renderer.draw(*this, SELECTED_COLOR);
+    Cursor::drawCursor(renderer, position(), rotation());
 }
 
 Type BicubicC0Creator::type() const {

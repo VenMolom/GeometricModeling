@@ -56,7 +56,6 @@ private:
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
 
-    // TODO: jakiś przeskok jak się modyfikuje transform w creatorze płatka
     // TODO: punkty płatka composable (mechanizm composable, które nie ownuje)
     // TODO: zaznaczanie obszaru myszką ?
 };

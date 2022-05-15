@@ -27,7 +27,12 @@ void Patch::draw(Renderer &renderer, DrawType drawType) {
             point->draw(renderer, isSelected ? SELECTED : DEFAULT);
         }
     }
-    // TODO: draw polygonal
+
+    if (_polygonal && !bezierMesh.vertices().empty()) {
+        bezierMesh.draw(renderer, drawType);
+    }
+
+    Cursor::drawCursor(renderer, position(), rotation());
 }
 
 std::array<bool, PATCH_DIM> Patch::looped() const {
@@ -49,7 +54,10 @@ void Patch::pointMoved(const weak_ptr<VirtualPoint> &point, int index) {
                                                                      XMLoadFloat4x4(&modificationMatrixInverse)));
 
     vertices[index].position = newPos;
+    bezierMesh.vertices()[index].position = newPos;
+
     updateBuffers();
+    bezierMesh.update();
 }
 
 void Patch::addPoint(DirectX::XMFLOAT3 position) {
@@ -63,6 +71,7 @@ void Patch::addPoint(DirectX::XMFLOAT3 position) {
     startingPositions.push_back(position);
 
     vertices.push_back({position, {1, 1, 1}});
+    bezierMesh.vertices().push_back({position, {1, 1, 1}});
 }
 
 void Patch::setPosition(DirectX::XMFLOAT3 position) {
@@ -94,9 +103,12 @@ void Patch::updatePoints() {
         auto pos = startingPositions[i];
         XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), modifyMatrix));
         point->setPositionSilently(pos);
-        vertices[i++].position = pos;
+        vertices[i].position = pos;
+        bezierMesh.vertices()[i++].position = pos;
     }
+
     updateBuffers();
+    bezierMesh.update();
 }
 
 void Patch::clear() {
@@ -105,6 +117,9 @@ void Patch::clear() {
     points.clear();
     startingPositions.clear();
     pointsHandlers.clear();
+    startingPosition = _position.value();
+    bezierMesh.vertices().clear();
+    bezierMesh.indices().clear();
 }
 
 

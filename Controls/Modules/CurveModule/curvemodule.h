@@ -14,7 +14,7 @@ class CurveModule : public QWidget {
     Q_OBJECT
 
 public:
-    explicit CurveModule(std::shared_ptr<Curve> curve, QWidget *parent = nullptr);
+    CurveModule(std::shared_ptr<Curve> curve, QWidget *parent = nullptr);
     ~CurveModule();
 
 private slots:
