@@ -37,6 +37,8 @@ public:
 
     void centerSelected();
 
+    void selectFromScreen(QPointF start, QPointF end);
+
     void draw(Renderer &renderer);
 
     std::shared_ptr<Camera> camera() { return _camera; }
@@ -74,6 +76,8 @@ private:
     void addCursor(Utils3D::XMFLOAT3RAY ray, DirectX::XMINT2 screenPos);
 
     void removeComposite();
+
+    DirectX::XMFLOAT2 project(DirectX::XMFLOAT3 position);
 };
 
 

@@ -18,6 +18,12 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
             }
 
             if (!scene->selected().expired()) {
+                if (mode == ScreenTransform::NONE && scene->selected().lock()->type() & CURSOR) {
+                    screenSelectActive = true;
+                    screenSelectStart = event->position();
+                    break;
+                }
+
                 transformHandler = make_unique<ScreenTransform>(
                         scene->selected().lock(), event->position().toPoint(), scene->camera(),
                         mode == ScreenTransform::NONE ? ScreenTransform::MOVE : mode, axis);
@@ -38,8 +44,11 @@ void InputHandler::mousePressEvent(QMouseEvent *event) {
 void InputHandler::mouseReleaseEvent(QMouseEvent *event) {
     if (!(event->buttons() & MAIN_BUTTON)) {
         transformHandler = {};
+        if (screenSelectActive && (event->position() - screenSelectStart).manhattanLength() > SCREEN_SELECT_MIN_MOVE) {
+            scene->selectFromScreen(screenSelectStart, event->position());
+            screenSelectActive = false;
+        }
     }
-
 //    switch (event->button()) {
 //    }
 }
@@ -52,6 +61,10 @@ void InputHandler::mouseMoveEvent(QMouseEvent *event) {
         scene->camera()->move(event->position() - lastMousePos);
     }
     if (event->buttons() & MAIN_BUTTON) {
+        if (screenSelectActive) {
+            // TODO: update selector end in renderer
+        }
+
         if (transformHandler && event->buttons() == MAIN_BUTTON) {
             transformHandler->transform(event->position().toPoint());
         }

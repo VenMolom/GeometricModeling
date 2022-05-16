@@ -26,6 +26,8 @@
 #define Y_AXIS_KEY Qt::Key::Key_C
 #define Z_AXIS_KEY Qt::Key::Key_Z
 
+#define SCREEN_SELECT_MIN_MOVE 10.f
+
 class InputHandler {
 public:
     void mousePressEvent(QMouseEvent *event);
@@ -53,8 +55,12 @@ private:
 
     QPointF lastMousePos{};
     QPointF clickPos{};
+
     bool actionKeyPressed{false};
     bool subactionKeyPressed{false};
+
+    bool screenSelectActive{false};
+    QPointF screenSelectStart{};
     ScreenTransform::Transform mode{ScreenTransform::NONE};
     ScreenTransform::Axis axis{ScreenTransform::FREE};
     std::unique_ptr<ScreenTransform> transformHandler;

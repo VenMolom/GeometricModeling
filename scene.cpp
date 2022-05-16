@@ -240,3 +240,44 @@ void Scene::removeComposite() {
     _objects.splice(_objects.end(), std::move(released));
     composite.reset();
 }
+
+void Scene::selectFromScreen(QPointF start, QPointF end) {
+    QPointF minPoint{min(start.x(), end.x()), min(start.y(), end.y())};
+    QPointF maxPoint{max(start.x(), end.x()), max(start.y(), end.y())};
+
+    list<shared_ptr<Object>> selected{};
+
+    for(auto &object : _objects) {
+        if (!(object->type() & COMPOSABLE)) continue;
+
+        auto screenPos = project(object->position());
+        if (screenPos.x >= minPoint.x() && screenPos.x <= maxPoint.x()
+                && screenPos.y >= minPoint.y() && screenPos.y <= maxPoint.y()) {
+            selected.push_back(object);
+        }
+    }
+
+    virtualPointsHolders.remove_if([](weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
+    for (auto &holder: virtualPointsHolders) {
+        auto points = holder.lock()->virtualPoints();
+        for (auto &point: points) {
+            auto screenPos = project(point->position());
+            if (screenPos.x >= minPoint.x() && screenPos.x <= maxPoint.x()
+                && screenPos.y >= minPoint.y() && screenPos.y <= maxPoint.y()) {
+                selected.push_back(point);
+            }
+        }
+    }
+
+    if (selected.empty()) return;
+
+    addComposite(std::move(selected));
+}
+
+XMFLOAT2 Scene::project(XMFLOAT3 position) {
+    XMFLOAT2 screenPos;
+    XMStoreFloat2(&screenPos, XMVector3Project(XMLoadFloat3(&position), 0, 0,
+                                   _camera->viewport().width(), _camera->viewport().height(), 0.0f, 1.0f,
+                                   _camera->projectionMatrix(), _camera->viewMatrix(), XMMatrixIdentity()));
+    return screenPos;
+}
