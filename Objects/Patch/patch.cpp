@@ -3,6 +3,7 @@
 //
 
 #include "patch.h"
+#include "Objects/Point/composableVirtualPoint.h"
 
 using namespace std;
 using namespace DirectX;
@@ -32,7 +33,9 @@ void Patch::draw(Renderer &renderer, DrawType drawType) {
         bezierMesh.draw(renderer, drawType);
     }
 
-    Cursor::drawCursor(renderer, position(), rotation());
+    if (drawType == SELECTED) {
+        Cursor::drawCursor(renderer, position(), rotation());
+    }
 }
 
 std::array<bool, PATCH_DIM> Patch::looped() const {
@@ -61,7 +64,7 @@ void Patch::pointMoved(const weak_ptr<VirtualPoint> &point, int index) {
 }
 
 void Patch::addPoint(DirectX::XMFLOAT3 position) {
-    auto point = make_shared<VirtualPoint>(position);
+    auto point = make_shared<ComposableVirtualPoint>(position);
     weak_ptr<VirtualPoint> weakPoint = point;
     auto index = static_cast<int>(points.size());
     pointsHandlers.push_back(point->bindablePosition().addNotifier([this, weakPoint, index] {

@@ -81,7 +81,7 @@ set(PROJECT_SOURCES
         Objects/Patch/patchCreator.h
         Objects/linelist.cpp Objects/linelist.h
         Controls/Modules/PatchModule/patchmodule.h Controls/Modules/PatchModule/patchmodule.cpp
-        Controls/Modules/PatchModule/patchmodule.ui)
+        Controls/Modules/PatchModule/patchmodule.ui Objects/Point/composableVirtualPoint.cpp Objects/Point/composableVirtualPoint.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

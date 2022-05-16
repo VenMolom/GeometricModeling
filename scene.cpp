@@ -162,13 +162,13 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
         _selected = composite;
         cursor.reset();
     } else if ((composite && composite->equals(object))
-               || object->type() & VIRTUALPOINT3D
-               || object->type() & PATCHCREATOR
+               || object->type() & VIRTUAL
                || find_if(_objects.begin(), _objects.end(),
                           [&object](const shared_ptr<Object> &ob) { return object->equals(ob); }) != _objects.end()) {
         _selected = object;
         removeComposite();
-        cursor.reset();
+
+        if (!(object->type() & CURSOR)) cursor.reset();
     }
 }
 
@@ -231,6 +231,12 @@ void Scene::removeComposite() {
     if (!composite) return;
 
     auto comp = dynamic_cast<CompositeObject *>(composite.get());
-    _objects.splice(_objects.end(), comp->release());
+    auto released = comp->release();
+
+    released.remove_if([](const shared_ptr<Object> &ob) {
+        return ob->type() & VIRTUAL;
+    });
+
+    _objects.splice(_objects.end(), std::move(released));
     composite.reset();
 }
