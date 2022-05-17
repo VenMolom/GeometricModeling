@@ -33,12 +33,16 @@ void DxRenderer::renderScene() {
     if (scene) {
         scene->draw(*this);
     }
+
+    if (inputHandler.selector().enabled) {
+        drawSelector(inputHandler.selector());
+    }
 }
 
 void DxRenderer::renderStereoscopic() {
     auto projections = scene->camera()->stereoscopicProjectionMatrix();
     auto views = scene->camera()->stereoscopicViewMatrix();
-    clearColor = (float*) STEREO_CLEAR_COLOR;
+    clearColor = (float *) STEREO_CLEAR_COLOR;
 
     // render left eye
     renderEye(get<0>(projections), get<0>(views), m_stereoscopicLeftTarget);
@@ -67,7 +71,7 @@ void DxRenderer::renderStereoscopic() {
     m_device.context()->IASetInputLayout(m_layout.get());
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
-    clearColor = (float*) CLEAR_COLOR;
+    clearColor = (float *) CLEAR_COLOR;
 
     updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
 }
@@ -137,7 +141,7 @@ void DxRenderer::drawCurve(const Curve &curve, int lastPatchId, int lastPatchSiz
 
 void DxRenderer::draw(const Grid &grid, XMFLOAT4 color) {
     updateBuffer(m_cbModel, grid.modelMatrix());
-    updateBuffer(m_cbColor,  *(float(*)[4])clearColor);
+    updateBuffer(m_cbColor, *(float (*)[4]) clearColor);
 
     m_device.context()->PSSetShader(m_pixelFadeShader.get(), nullptr, 0);
     m_device.context()->OMSetDepthStencilState(m_dssNoDepthWrite.get(), 0);
@@ -238,6 +242,37 @@ uint DxRenderer::frameRate() {
     }
 
     return lastFrameRate;
+}
+
+void DxRenderer::drawSelector(const Selector &selector) {
+    auto viewport = scene->camera()->viewport();
+    auto width = abs(selector.start.x() - selector.end.x()) / viewport.width();
+    auto height = abs(selector.start.y() - selector.end.y()) / viewport.height();
+    QPointF center = {
+            (selector.start.x() + selector.end.x()) / viewport.width() - 1.f,
+            -(selector.start.y() + selector.end.y()) / viewport.height() + 1.f
+    };
+
+    auto mtx = XMMatrixScaling(width, height, 0) * XMMatrixTranslation(center.x(), center.y(), 0);
+
+    updateBuffer(m_cbModel, mtx);
+    updateBuffer(m_cbColor, SELECTOR_COLOR);
+    m_device.context()->IASetInputLayout(m_selectorLayout.get());
+    m_device.context()->VSSetShader(m_vertexSelectorShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelSelectorShader.get(), nullptr, 0);
+    m_device.context()->OMSetBlendState(m_bsAlpha.get(), nullptr, UINT_MAX);
+
+    m_device.context()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    ID3D11Buffer *vb = m_selectorQuad.get();
+    unsigned int stride = 2 * sizeof(float);
+    unsigned int offset = 0;
+    m_device.context()->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
+    m_device.context()->Draw(6, 0);
+
+    m_device.context()->IASetInputLayout(m_layout.get());
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+    m_device.context()->OMSetBlendState(nullptr, nullptr, UINT_MAX);
 }
 
 void DxRenderer::updateCameraCB(XMMATRIX viewMatrix) {
@@ -342,6 +377,7 @@ void DxRenderer::init3D3() {
     const auto vsBillboardBytes = DxDevice::LoadByteCode(L"vsBillboard.cso");
     const auto vsNoProjectionBytes = DxDevice::LoadByteCode(L"vsNoProjection.cso");
     const auto vsStereoBytes = DxDevice::LoadByteCode(L"vsStereo.cso");
+    const auto vsSelectorBytes = DxDevice::LoadByteCode(L"vsSelector.cso");
     const auto hsBrezierBytes = DxDevice::LoadByteCode(L"hsBrezier.cso");
     const auto hsBicubicBytes = DxDevice::LoadByteCode(L"hsBicubic.cso");
     const auto dsBrezierBytes = DxDevice::LoadByteCode(L"dsBrezier.cso");
@@ -350,10 +386,12 @@ void DxRenderer::init3D3() {
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
     const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
     const auto psStereoBytes = DxDevice::LoadByteCode(L"psStereo.cso");
+    const auto psSelectorBytes = DxDevice::LoadByteCode(L"psSelector.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
     m_vertexBillboardShader = m_device.CreateVertexShader(vsBillboardBytes);
     m_vertexNoProjectionShader = m_device.CreateVertexShader(vsNoProjectionBytes);
     m_vertexStereoShader = m_device.CreateVertexShader(vsStereoBytes);
+    m_vertexSelectorShader = m_device.CreateVertexShader(vsSelectorBytes);
     m_hullBrezierShader = m_device.CreateHullShader(hsBrezierBytes);
     m_hullBicubicShader = m_device.CreateHullShader(hsBicubicBytes);
     m_domainBrezierShader = m_device.CreateDomainShader(dsBrezierBytes);
@@ -362,6 +400,7 @@ void DxRenderer::init3D3() {
     m_pixelShader = m_device.CreatePixelShader(psBytes);
     m_pixelFadeShader = m_device.CreatePixelShader(psFadeBytes);
     m_pixelStereoShader = m_device.CreatePixelShader(psStereoBytes);
+    m_pixelSelectorShader = m_device.CreatePixelShader(psSelectorBytes);
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
@@ -384,6 +423,12 @@ void DxRenderer::init3D3() {
                     D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_stereoLayout = m_device.CreateInputLayout(elements, vsStereoBytes);
+
+    elements = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0,
+             D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+    m_selectorLayout = m_device.CreateInputLayout(elements, vsSelectorBytes);
 
     m_cbModel = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbView = m_device.CreateConstantBuffer<XMFLOAT4X4, 2>();
@@ -409,21 +454,38 @@ void DxRenderer::init3D3() {
     SamplerDescription samplerDesc;
     m_sampler = m_device.CreateSamplerState(samplerDesc);
 
+    BlendDescription blendDesc;
+    blendDesc.RenderTarget[0].BlendEnable = true;
+    blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    m_bsAlpha = m_device.CreateBlendState(blendDesc);
+
     RasterizerDescription rsDesc;
     rsDesc.CullMode = D3D11_CULL_NONE;
     rsDesc.FillMode = D3D11_FILL_WIREFRAME;
     m_noCullWireframe = m_device.CreateRasterizerState(rsDesc);
 
-    vector<VertexPositionTex> quad{{
-                                           {{-1.f, -1.f}, {.0f, 1.f}},
-                                           {{-1.f, 1.f}, {.0f, .0f}},
-                                           {{1.f, -1.f}, {1.f, 1.f}},
-                                           {{1.f, -1.f}, {1.f, 1.f}},
-                                           {{-1.f, 1.f}, {.0f, .0f}},
-                                           {{1.f, 1.f}, {1.f, .0f}}
-                                   }
+    vector<VertexPositionTex> quad{
+            {{-1.f, -1.f}, {.0f, 1.f}},
+            {{-1.f, 1.f},  {.0f, .0f}},
+            {{1.f,  -1.f}, {1.f, 1.f}},
+            {{1.f,  -1.f}, {1.f, 1.f}},
+            {{-1.f, 1.f},  {.0f, .0f}},
+            {{1.f,  1.f},  {1.f, .0f}}
+
     };
     m_ndcQuad = m_device.CreateVertexBuffer(quad);
+
+    vector<DirectX::XMFLOAT2> selectorNdc{
+            {-1.f, -1.f},
+            {-1.f, 1.f},
+            {1.f,  -1.f},
+            {1.f,  -1.f},
+            {-1.f, 1.f},
+            {1.f,  1.f}
+    };
+    m_selectorQuad = m_device.CreateVertexBuffer(selectorNdc);
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);

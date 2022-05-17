@@ -28,6 +28,12 @@
 
 #define SCREEN_SELECT_MIN_MOVE 10.f
 
+struct Selector {
+    bool enabled;
+    QPointF start;
+    QPointF end;
+};
+
 class InputHandler {
 public:
     void mousePressEvent(QMouseEvent *event);
@@ -50,6 +56,8 @@ public:
 
     ScreenTransform::Axis lockAxis() { return axis; }
 
+    const Selector& selector() { return _selector; }
+
 private:
     std::shared_ptr<Scene> scene;
 
@@ -59,8 +67,7 @@ private:
     bool actionKeyPressed{false};
     bool subactionKeyPressed{false};
 
-    bool screenSelectActive{false};
-    QPointF screenSelectStart{};
+    Selector _selector{};
     ScreenTransform::Transform mode{ScreenTransform::NONE};
     ScreenTransform::Axis axis{ScreenTransform::FREE};
     std::unique_ptr<ScreenTransform> transformHandler;

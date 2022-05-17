@@ -55,9 +55,6 @@ private:
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
-
-    // TODO: punkty płatka composable (mechanizm composable, które nie ownuje)
-    // TODO: zaznaczanie obszaru myszką ?
 };
 
 #endif // MAINWINDOW_H

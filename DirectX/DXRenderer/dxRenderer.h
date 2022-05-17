@@ -33,6 +33,8 @@ public:
 
     void draw(const Patch &patch, DirectX::XMFLOAT4 color) override;
 
+    void drawSelector(const Selector &selector);
+
     void enableStereoscopy(bool enable) override;
 
     void setLeftEyeColor(DirectX::XMFLOAT3 color) override;
@@ -76,6 +78,7 @@ private:
     mini::dx_ptr<ID3D11VertexShader> m_vertexBillboardShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexNoProjectionShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexStereoShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexSelectorShader;
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11HullShader> m_hullBicubicShader;
@@ -87,9 +90,11 @@ private:
     mini::dx_ptr<ID3D11PixelShader> m_pixelShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelStereoShader;
+    mini::dx_ptr<ID3D11PixelShader> m_pixelSelectorShader;
 
     mini::dx_ptr<ID3D11InputLayout> m_layout;
     mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
+    mini::dx_ptr<ID3D11InputLayout> m_selectorLayout;
 
     mini::dx_ptr<ID3D11Buffer> m_cbModel;
     mini::dx_ptr<ID3D11Buffer> m_cbView;
@@ -100,6 +105,7 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_cbStereoColor;
 
     mini::dx_ptr<ID3D11Buffer> m_ndcQuad;
+    mini::dx_ptr<ID3D11Buffer> m_selectorQuad;
 
     mini::dx_ptr<ID3D11DepthStencilState> m_dssNoDepthWrite;
 
@@ -108,6 +114,7 @@ private:
 
     const float CLEAR_COLOR[4]{0.2f, 0.2f, 0.2f, 1.0f};
     const float STEREO_CLEAR_COLOR[4]{0.f, 0.f, 0.f, 1.f};
+    const float SELECTOR_COLOR[4]{0.f, 0.f, 1.f, .2f};
 
     float *clearColor = (float *) CLEAR_COLOR;
 
@@ -116,6 +123,8 @@ private:
     DirectX::XMFLOAT4 leftEyeColor, rightEyeColor;
 
     mini::dx_ptr<ID3D11SamplerState> m_sampler;
+
+    mini::dx_ptr<ID3D11BlendState> m_bsAlpha;
 
     mini::dx_ptr<ID3D11RasterizerState> m_noCullWireframe;
 
