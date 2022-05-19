@@ -56,6 +56,8 @@ private:
     void addBernsteinPoint(const DirectX::XMFLOAT3 &position);
 
     void bernsteinMoved(const std::weak_ptr<VirtualPoint> &point);
+
+    void deBoorMoved(int index, const std::shared_ptr<Point> &moved);
 };
 
 

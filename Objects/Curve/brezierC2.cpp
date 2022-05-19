@@ -109,16 +109,81 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
         return;
     }
 
-    auto it = std::find_if(_points.begin(), _points.end(), [&moved](const weak_ptr<Point> &p) {
+    auto it = _points.begin();
+    while ((it = std::find_if(it, _points.end(), [&moved](const weak_ptr<Point> &p) {
         return moved.get() == p.lock().get();
-    });
+    })) != _points.end()) {
+        int index = it - _points.begin();
+        deBoorMoved(index, moved);
+        std::advance(it, 1);
+    }
+}
 
-    if (it == _points.end()) {
+const vector<shared_ptr<VirtualPoint>> &BrezierC2::virtualPoints() {
+    return bernsteinPoints;
+}
+
+void BrezierC2::synchroniseBernsteinPositions(int start, int end) {
+    for (; start <= end; ++start) {
+        bernsteinPoints[start]->setPositionSilently(vertices[start].position);
+    }
+}
+
+void BrezierC2::addBernsteinPoint(const DirectX::XMFLOAT3 &position) {
+    auto point = make_shared<VirtualPoint>(position);
+    weak_ptr<VirtualPoint> weakPoint = point;
+    bernsteinPointsHandlers.push_back(point->bindablePosition().addNotifier([this, weakPoint] {
+        bernsteinMoved(weakPoint);
+    }));
+    bernsteinPoints.push_back(std::move(point));
+}
+
+void BrezierC2::bernsteinMoved(const weak_ptr<VirtualPoint> &point) {
+    if (_points.size() < 4) return;
+
+    shared_ptr<VirtualPoint> moved;
+    if (!(moved = point.lock())) {
         updatePoints();
         return;
     }
 
-    int index = it - _points.begin();
+    auto it = std::find_if(bernsteinPoints.begin(), bernsteinPoints.end(),
+                           [&moved](const weak_ptr<VirtualPoint> &p) {
+                               return moved.get() == p.lock().get();
+                           });
+
+    if (it == bernsteinPoints.end()) {
+        updatePoints();
+        return;
+    }
+
+    int index = it - bernsteinPoints.begin();
+    int over = (index + 1) / 3 + 1;
+    shared_ptr<Point> deBoorOver;
+    if (!(deBoorOver = _points[over].lock())) {
+        updatePoints();
+        return;
+    }
+
+    auto oldPosition = vertices[index].position;
+    auto newPosition = moved->position();
+    auto value = index % 3 == 0 ? 3.0f / 2.0f : 54.0f / 31.0f;
+
+    auto deBoorOverPosition = deBoorOver->position();
+    XMStoreFloat3(&deBoorOverPosition,
+                  XMVectorAdd(
+                          XMLoadFloat3(&deBoorOverPosition),
+                          XMVectorScale(
+                                  XMVectorSubtract(XMLoadFloat3(&newPosition),
+                                                   XMLoadFloat3(&oldPosition)
+                                  ), value
+                          )
+                  )
+    );
+    deBoorOver->setPosition(deBoorOverPosition);
+}
+
+void BrezierC2::deBoorMoved(int index, const std::shared_ptr<Point> &moved) {
     int under = (index - 1) * 3;
     bool fixedLeft{false}, fixedRight{false};
 
@@ -228,68 +293,4 @@ void BrezierC2::pointMoved(const weak_ptr<Point> &point) {
     synchroniseBernsteinPositions(max(0, under - 3), min(static_cast<int>(vertices.size()) - 1, under + 3));
     updateBuffers();
     deBoorPoints.update();
-}
-
-const vector<shared_ptr<VirtualPoint>> &BrezierC2::virtualPoints() {
-    return bernsteinPoints;
-}
-
-void BrezierC2::synchroniseBernsteinPositions(int start, int end) {
-    for (; start <= end; ++start) {
-        bernsteinPoints[start]->setPositionSilently(vertices[start].position);
-    }
-}
-
-void BrezierC2::addBernsteinPoint(const DirectX::XMFLOAT3 &position) {
-    auto point = make_shared<VirtualPoint>(position);
-    weak_ptr<VirtualPoint> weakPoint = point;
-    bernsteinPointsHandlers.push_back(point->bindablePosition().addNotifier([this, weakPoint] {
-        bernsteinMoved(weakPoint);
-    }));
-    bernsteinPoints.push_back(std::move(point));
-}
-
-void BrezierC2::bernsteinMoved(const weak_ptr<VirtualPoint> &point) {
-    if (_points.size() < 4) return;
-
-    shared_ptr<VirtualPoint> moved;
-    if (!(moved = point.lock())) {
-        updatePoints();
-        return;
-    }
-
-    auto it = std::find_if(bernsteinPoints.begin(), bernsteinPoints.end(),
-                           [&moved](const weak_ptr<VirtualPoint> &p) {
-                               return moved.get() == p.lock().get();
-                           });
-
-    if (it == bernsteinPoints.end()) {
-        updatePoints();
-        return;
-    }
-
-    int index = it - bernsteinPoints.begin();
-    int over = (index + 1) / 3 + 1;
-    shared_ptr<Point> deBoorOver;
-    if (!(deBoorOver = _points[over].lock())) {
-        updatePoints();
-        return;
-    }
-
-    auto oldPosition = vertices[index].position;
-    auto newPosition = moved->position();
-    auto value = index % 3 == 0 ? 3.0f / 2.0f : 54.0f / 31.0f;
-
-    auto deBoorOverPosition = deBoorOver->position();
-    XMStoreFloat3(&deBoorOverPosition,
-                  XMVectorAdd(
-                          XMLoadFloat3(&deBoorOverPosition),
-                          XMVectorScale(
-                                  XMVectorSubtract(XMLoadFloat3(&newPosition),
-                                                   XMLoadFloat3(&oldPosition)
-                                  ), value
-                          )
-                  )
-    );
-    deBoorOver->setPosition(deBoorOverPosition);
 }

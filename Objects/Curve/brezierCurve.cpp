@@ -60,16 +60,13 @@ void BrezierCurve::pointMoved(const weak_ptr<Point> &point) {
         return;
     }
 
-    auto it = std::find_if(_points.begin(), _points.end(), [&moved](const weak_ptr<Point> &p) {
+    auto it = _points.begin();
+    while ((it = std::find_if(it, _points.end(), [&moved](const weak_ptr<Point> &p) {
         return moved.get() == p.lock().get();
-    });
-
-    if (it == _points.end()) {
-        updatePoints();
-        return;
+    })) != _points.end()) {
+        int index = it - _points.begin();
+        vertices[index].position = moved->position();
+        std::advance(it, 1);
     }
-
-    int index = it - _points.begin();
-    vertices[index].position = moved->position();
     updateBuffers();
 }
