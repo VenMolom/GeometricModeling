@@ -35,6 +35,10 @@ void BicubicC0Creator::setCylinder(bool cylinder) {
 }
 
 std::shared_ptr<Object> BicubicC0Creator::create(uint id) {
-    return make_shared<BicubicC0>(id, name(), _position.value(), segments, size, cylinder, bindableSelected);
+    auto patch = make_shared<BicubicC0>(id, name(), _position.value(), segments, size, cylinder, bindableSelected);
+    patch->setScale(_scale.value());
+    patch->setRotation(_rotation.value());
+    patch->setDensity(density());
+    return patch;
 }
 

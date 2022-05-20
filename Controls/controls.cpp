@@ -96,6 +96,6 @@ void Controls::updateSelected() {
     if (object->type() & PATCHCREATOR) {
         auto creator = dynamic_pointer_cast<PatchCreator>(object);
         modules.push_back(std::move(make_unique<PatchCreatorModule>(creator, scene, this)));
-        ui->modulesLayout->addWidget(modules.back().get(), 9, 0, 1, 1);
+        ui->modulesLayout->addWidget(modules.back().get(), 10, 0, 1, 1);
     }
 }
