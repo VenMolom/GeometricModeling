@@ -46,9 +46,15 @@ protected:
 
     void clear();
 
-    void updateMesh(std::array<int, PATCH_DIM> segments) { calculateMeshIndices(segments, bezierMesh); }
+    void createSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);
+
+    virtual void drawMesh(Renderer &renderer, DrawType drawType);
 
     virtual void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) = 0;
+
+    virtual void createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) = 0;
+
+    virtual void createPlaneSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) = 0;
 
 private:
     std::vector<QPropertyNotifier> pointsHandlers{};

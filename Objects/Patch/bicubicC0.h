@@ -16,14 +16,11 @@ public:
     Type type() const override;
 
 protected:
-    void createSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);
-
     void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) override;
 
-private:
-    void createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);
+    void createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) override;
 
-    void createPlaneSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size);
+    void createPlaneSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) override;
 };
 
 

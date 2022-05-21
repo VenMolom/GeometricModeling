@@ -188,6 +188,29 @@ void DxRenderer::draw(const Patch &patch, DirectX::XMFLOAT4 color) {
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
 }
 
+void DxRenderer::draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) {
+    updateBuffer(m_cbModel, XMMatrixIdentity());
+    updateBuffer(m_cbColor, color);
+    m_device.context()->RSSetState(m_noCullWireframe.get());
+    m_device.context()->HSSetShader(m_hullBicubicShader.get(), nullptr, 0);
+    m_device.context()->DSSetShader(m_domainBicubicDeBoorShader.get(), nullptr, 0);
+
+    // density.uv
+    auto density = patch.density();
+    XMINT4 tesselationAmount = {
+            static_cast<int32_t>(density[0]),
+            static_cast<int32_t>(density[1]),
+            0, 0
+    };
+    updateBuffer(m_cbTesselation, tesselationAmount);
+
+    patch.render(m_device.context());
+
+    m_device.context()->RSSetState(nullptr);
+    m_device.context()->HSSetShader(nullptr, nullptr, 0);
+    m_device.context()->DSSetShader(nullptr, nullptr, 0);
+}
+
 void DxRenderer::enableStereoscopy(bool enable) {
     stereoscopic = enable;
     if (!enable) {
@@ -382,6 +405,7 @@ void DxRenderer::init3D3() {
     const auto hsBicubicBytes = DxDevice::LoadByteCode(L"hsBicubic.cso");
     const auto dsBrezierBytes = DxDevice::LoadByteCode(L"dsBrezier.cso");
     const auto dsBicubicBytes = DxDevice::LoadByteCode(L"dsBicubic.cso");
+    const auto dsBicubicDeBoorBytes = DxDevice::LoadByteCode(L"dsBicubicDeBoor.cso");
     const auto gsPointBytes = DxDevice::LoadByteCode(L"gsPoint.cso");
     const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
     const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
@@ -396,6 +420,7 @@ void DxRenderer::init3D3() {
     m_hullBicubicShader = m_device.CreateHullShader(hsBicubicBytes);
     m_domainBrezierShader = m_device.CreateDomainShader(dsBrezierBytes);
     m_domainBicubicShader = m_device.CreateDomainShader(dsBicubicBytes);
+    m_domainBicubicDeBoorShader = m_device.CreateDomainShader(dsBicubicDeBoorBytes);
     m_geometryPointShader = m_device.CreateGeometryShader(gsPointBytes);
     m_pixelShader = m_device.CreatePixelShader(psBytes);
     m_pixelFadeShader = m_device.CreatePixelShader(psFadeBytes);

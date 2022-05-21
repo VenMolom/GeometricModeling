@@ -20,7 +20,7 @@ Patch::Patch(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> den
 }
 
 void Patch::draw(Renderer &renderer, DrawType drawType) {
-    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+    drawMesh(renderer, drawType);
 
     if (!points.empty()) {
         for (auto &point: points) {
@@ -38,12 +38,27 @@ void Patch::draw(Renderer &renderer, DrawType drawType) {
     }
 }
 
+void Patch::drawMesh(Renderer &renderer, DrawType drawType) {
+    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+}
+
 std::array<bool, PATCH_DIM> Patch::looped() const {
     return {false, cylinder};
 }
 
 const vector<std::shared_ptr<VirtualPoint>> &Patch::virtualPoints() {
     return points;
+}
+
+void Patch::createSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
+    clear();
+    if (cylinder) {
+        createCylinderSegments(segments, size);
+    } else {
+        createPlaneSegments(segments, size);
+    }
+    calculateMeshIndices(segments, bezierMesh);
+    updatePoints();
 }
 
 void Patch::pointMoved(const weak_ptr<VirtualPoint> &point, int index) {

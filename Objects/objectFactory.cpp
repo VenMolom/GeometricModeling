@@ -4,6 +4,7 @@
 
 #include "objectFactory.h"
 #include "Objects/Patch/bicubicC0Creator.h"
+#include "Objects/Patch/bicubicC2Creator.h"
 
 using namespace std;
 using namespace DirectX;
@@ -34,4 +35,10 @@ std::shared_ptr<BicubicC0> ObjectFactory::createBicubicC0(DirectX::XMFLOAT3 posi
                                                           QBindable<weak_ptr<Object>> bindableSelected) {
     return make_shared<BicubicC0Creator>(position, bindableSelected);
 }
+
+std::shared_ptr<BicubicC2> ObjectFactory::createBicubicC2(DirectX::XMFLOAT3 position,
+                                                          QBindable<weak_ptr<Object>> bindableSelected) {
+    return make_shared<BicubicC2Creator>(position, bindableSelected);
+}
+
 

@@ -31,6 +31,8 @@ private slots:
 
     void on_addPatchC0_clicked();
 
+    void on_addPatchC2_clicked();
+
     void on_objectsList_itemSelectionChanged();
 
     void on_deleteObject_clicked();

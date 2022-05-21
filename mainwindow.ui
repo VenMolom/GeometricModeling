@@ -86,17 +86,24 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="addBrezierC0">
-            <property name="text">
-             <string>Brezier C0</string>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0">
            <widget class="QPushButton" name="addBrezierC2">
             <property name="text">
              <string>Brezier C2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QPushButton" name="addPatchC0">
+            <property name="text">
+             <string>Patch C0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="addBrezierC0">
+            <property name="text">
+             <string>Brezier C0</string>
             </property>
            </widget>
           </item>
@@ -107,10 +114,10 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0">
-           <widget class="QPushButton" name="addPatchC0">
+          <item row="6" column="0">
+           <widget class="QPushButton" name="addPatchC2">
             <property name="text">
-             <string>Patch C0</string>
+             <string>Patch C2</string>
             </property>
            </widget>
           </item>

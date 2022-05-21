@@ -1,30 +1,30 @@
 //
-// Created by Molom on 2022-05-13.
+// Created by Molom on 2022-05-21.
 //
 
-#include "bicubicC0.h"
+#include "bicubicC2.h"
 
 using namespace std;
 using namespace DirectX;
 
-BicubicC0::BicubicC0(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> segments,
+BicubicC2::BicubicC2(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> segments,
                      array<float, PATCH_DIM> size, bool cylinder,
                      QBindable<weak_ptr<Object>> bindableSelected)
         : Patch(id, name, position, {3, 3}, cylinder, bindableSelected) {
     createSegments(segments, size);
 }
 
-void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
-    auto uDiff = size[0] / 3;
-    auto vDiff = size[1] / 3;
+void BicubicC2::createPlaneSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
+    auto uDiff = size[0];
+    auto vDiff = size[1];
 
     XMFLOAT3 startPos = _position;
-    startPos.x -= uDiff * segments[0] * 1.5f;
-    startPos.z -= vDiff * segments[1] * 1.5f;
+    startPos.x -= uDiff * (segments[0] * 0.5f + 1.f);
+    startPos.z -= vDiff * (segments[1] * 0.5f + 1.f);
 
     auto pos = startPos;
-    auto uPoints = (segments[0] * 3 + 1);
-    auto vPoints = (segments[1] * 3 + 1);
+    auto uPoints = segments[0] + 3;
+    auto vPoints = segments[1] + 3;
     // vertices
     for (int i = 0; i < vPoints; ++i) {
         for (int j = 0; j < uPoints; ++j) {
@@ -38,7 +38,7 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
     //indices
     for (int i = 0; i < segments[0]; ++i) {
         for (int j = 0; j < segments[1]; ++j) {
-            auto index = j * 3 * uPoints + 3 * i;
+            auto index = j * uPoints + i;
 
             for (int k = 0; k < 4; ++k) {
                 indices.push_back(index);
@@ -51,15 +51,15 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
     }
 }
 
-void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
-    auto uDiff = size[0] / 3;
+void BicubicC2::createCylinderSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
+    auto uDiff = size[0];
     auto radius = size[1];
 
     XMFLOAT3 startPos = _position;
-    startPos.x -= uDiff * segments[0] * 1.5f;
+    startPos.x -= uDiff * (segments[0] * 0.5f + 1.f);
 
-    auto uPoints = (segments[0] * 4 - (segments[0] - 1));
-    auto vPoints = segments[1] * 3;
+    auto uPoints = segments[0] + 3;
+    auto vPoints = segments[1];
     auto vAngle = XM_2PI / vPoints;
     // vertices
     for (int i = 0; i < vPoints; ++i) {
@@ -74,11 +74,11 @@ void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<flo
     //indices
     for (int i = 0; i < segments[0]; ++i) {
         for (int j = 0; j < segments[1]; ++j) {
-            auto index = j * 3 * uPoints + 3 * i;
+            auto index = j * uPoints + i;
 
             for (int k = 0; k < 4; ++k) {
-                if (j == segments[1] - 1 && k == 3) {
-                    index = 3 * i;
+                if (j == segments[1] - k) {
+                    index = i;
                 }
 
                 indices.push_back(index);
@@ -91,11 +91,12 @@ void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<flo
     }
 }
 
-Type BicubicC0::type() const {
-    return PATCHC0;
+Type BicubicC2::type() const {
+    return PATCHC2;
 }
 
-void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
+void BicubicC2::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
+    return;
     auto uPoints = (segments[0] * 4 - (segments[0] - 1));
     for (int i = 0; i < segments[0]; ++i) {
         for (int j = 0; j < segments[1]; ++j) {
@@ -125,4 +126,8 @@ void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &l
             linelist.addLine(index + 2, index + 3);
         }
     }
+}
+
+void BicubicC2::drawMesh(Renderer &renderer, DrawType drawType) {
+    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 }

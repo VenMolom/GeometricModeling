@@ -9,6 +9,7 @@
 #include "Objects/Curve/brezierC0.h"
 #include "Objects/Curve/brezierC2.h"
 #include "Objects/Patch/bicubicC0.h"
+#include "Objects/Patch/bicubicC2.h"
 #include "Objects/Parametric/torus.h"
 #include "Objects/Curve/interpolationCurveC2.h"
 
@@ -26,6 +27,8 @@ public:
     std::shared_ptr<InterpolationCurveC2> createInterpolationCurveC2(std::vector<std::weak_ptr<Point>> &&points);
 
     std::shared_ptr<BicubicC0> createBicubicC0(DirectX::XMFLOAT3 position, QBindable<std::weak_ptr<Object>> bindableSelected);
+
+    std::shared_ptr<BicubicC2> createBicubicC2(DirectX::XMFLOAT3 position, QBindable<std::weak_ptr<Object>> bindableSelected);
 
     uint id() { return nextId++; }
 private:

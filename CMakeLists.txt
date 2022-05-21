@@ -81,7 +81,10 @@ set(PROJECT_SOURCES
         Objects/Patch/patchCreator.h
         Objects/linelist.cpp Objects/linelist.h
         Controls/Modules/PatchModule/patchmodule.h Controls/Modules/PatchModule/patchmodule.cpp
-        Controls/Modules/PatchModule/patchmodule.ui Objects/Point/composableVirtualPoint.cpp Objects/Point/composableVirtualPoint.h)
+        Controls/Modules/PatchModule/patchmodule.ui
+        Objects/Point/composableVirtualPoint.cpp Objects/Point/composableVirtualPoint.h
+        Objects/Patch/bicubicC2.cpp Objects/Patch/bicubicC2.h
+        Objects/Patch/bicubicC2Creator.cpp Objects/Patch/bicubicC2Creator.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -93,6 +96,7 @@ set(HLSL_SHADER_FILES
         Shader/hsBicubic.hlsl
         Shader/dsBrezier.hlsl
         Shader/dsBicubic.hlsl
+        Shader/dsBicubicDeBoor.hlsl
         Shader/psCameraFade.hlsl
         Shader/vsBillboard.hlsl
         Shader/vsNoProjection.hlsl
@@ -115,6 +119,7 @@ set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/hsBicubic.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/dsBrezier.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/dsBicubic.hlsl PROPERTIES ShaderType "ds")
+set_source_files_properties(Shader/dsBicubicDeBoor.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/gsPoint.hlsl PROPERTIES ShaderType "gs")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 

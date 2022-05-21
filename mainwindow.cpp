@@ -51,6 +51,10 @@ void MainWindow::on_addPatchC0_clicked() {
     scene->addCreator(std::move(scene->objectFactory().createBicubicC0(XMFLOAT3(0, 0, 0), scene->bindableSelected())));
 }
 
+void MainWindow::on_addPatchC2_clicked() {
+    scene->addCreator(std::move(scene->objectFactory().createBicubicC2(XMFLOAT3(0, 0, 0), scene->bindableSelected())));
+}
+
 void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool select) {
     auto item = make_unique<ObjectListItem>(object, scene);
     ui->objectsList->addItem(item.get());
