@@ -23,8 +23,8 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
     startPos.z -= vDiff * segments[1] * 1.5f;
 
     auto pos = startPos;
-    auto uPoints = (segments[0] * 3 + 1);
-    auto vPoints = (segments[1] * 3 + 1);
+    auto uPoints = segments[0] * 3 + 1;
+    auto vPoints = segments[1] * 3 + 1;
     // vertices
     for (int i = 0; i < vPoints; ++i) {
         for (int j = 0; j < uPoints; ++j) {
@@ -58,7 +58,7 @@ void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<flo
     XMFLOAT3 startPos = _position;
     startPos.x -= uDiff * segments[0] * 1.5f;
 
-    auto uPoints = (segments[0] * 4 - (segments[0] - 1));
+    auto uPoints = segments[0] * 3 + 1;
     auto vPoints = segments[1] * 3;
     auto vAngle = XM_2PI / vPoints;
     // vertices
@@ -96,33 +96,45 @@ Type BicubicC0::type() const {
 }
 
 void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
-    auto uPoints = (segments[0] * 4 - (segments[0] - 1));
-    for (int i = 0; i < segments[0]; ++i) {
-        for (int j = 0; j < segments[1]; ++j) {
-            auto index = j * 3 * uPoints + 3 * i;
+//    auto uPoints = (segments[0] * 4 - (segments[0] - 1));
+//    for (int i = 0; i < segments[0]; ++i) {
+//        for (int j = 0; j < segments[1]; ++j) {
+//            auto index = j * 3 * uPoints + 3 * i;
+//
+//            for (int k = 0; k < 3; ++k) {
+//                if (cylinder && j == segments[1] - 1 && k == 3) {
+//                    return;
+//                }
+//
+//                auto nextLine = (index + uPoints) % linelist.vertices().size();
+//
+//                linelist.addLine(index, index + 1);
+//                linelist.addLine(index + 1, index + 2);
+//                linelist.addLine(index + 2, index + 3);
+//
+//                linelist.addLine(index, nextLine);
+//                linelist.addLine(index + 1, nextLine + 1);
+//                linelist.addLine(index + 2, nextLine + 2);
+//                linelist.addLine(index + 3, nextLine + 3);
+//
+//                index += uPoints;
+//            }
+//
+//            linelist.addLine(index, index + 1);
+//            linelist.addLine(index + 1, index + 2);
+//            linelist.addLine(index + 2, index + 3);
+//        }
+//    }
 
-            for (int k = 0; k < 3; ++k) {
-                if (cylinder && j == segments[1] - 1 && k == 3) {
-                    return;
-                }
+    auto uPoints = segments[0] * 3 + 1;
+    auto vPoints = segments[1] * 3 + (cylinder ? 0 : 1);
+    for (int i = 0; i < uPoints; ++i) {
+        for (int j = 0; j < vPoints; ++j) {
+            auto index = j * uPoints + i;
+            auto nextLine = (index + uPoints) % linelist.vertices().size();
 
-                auto nextLine = (index + uPoints) % linelist.vertices().size();
-
-                linelist.addLine(index, index + 1);
-                linelist.addLine(index + 1, index + 2);
-                linelist.addLine(index + 2, index + 3);
-
-                linelist.addLine(index, nextLine);
-                linelist.addLine(index + 1, nextLine + 1);
-                linelist.addLine(index + 2, nextLine + 2);
-                linelist.addLine(index + 3, nextLine + 3);
-
-                index += uPoints;
-            }
-
-            linelist.addLine(index, index + 1);
-            linelist.addLine(index + 1, index + 2);
-            linelist.addLine(index + 2, index + 3);
+            if (i != uPoints - 1) linelist.addLine(index, index + 1);
+            if (cylinder || j != vPoints - 1) linelist.addLine(index, nextLine);
         }
     }
 }
