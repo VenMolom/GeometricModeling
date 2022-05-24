@@ -281,3 +281,11 @@ XMFLOAT2 Scene::project(XMFLOAT3 position) {
                                    _camera->projectionMatrix(), _camera->viewMatrix(), XMMatrixIdentity()));
     return screenPos;
 }
+
+Scene::Scene(MG1::Scene &scene) :Scene() {
+
+}
+
+void Scene::serialize(MG1::Scene &scene) {
+
+}

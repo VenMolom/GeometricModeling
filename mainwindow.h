@@ -5,6 +5,7 @@
 #include <QModelIndexList>
 #include "scene.h"
 #include "ObjectListItem/objectListItem.h"
+#include <Scene/SceneSerializer.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -41,6 +42,10 @@ private slots:
 
     void onObjectAdded(const std::shared_ptr<Object> &object, bool select);
 
+    void on_actionSave_triggered();
+
+    void on_actionLoad_triggered();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 
@@ -54,6 +59,8 @@ private:
     QPropertyNotifier selectedHandler;
 
     void updateSelection();
+
+    MG1::SceneSerializer serializer{};
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis

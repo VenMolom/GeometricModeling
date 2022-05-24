@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include <QFileDialog>
 
 using namespace std;
 using namespace DirectX;
@@ -40,7 +41,8 @@ void MainWindow::on_addBrezierC0_clicked() {
 }
 
 void MainWindow::on_addBrezierC2_clicked() {
-    scene->addObject(std::move(scene->objectFactory().createBrezierC2(std::move(getSelectedPoints()), scene->bindableSelected())));
+    scene->addObject(std::move(
+            scene->objectFactory().createBrezierC2(std::move(getSelectedPoints()), scene->bindableSelected())));
 }
 
 void MainWindow::on_addInterpolationC2_clicked() {
@@ -200,3 +202,42 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 
     ui->renderWidget->handleKeyEvent(event);
 }
+
+void MainWindow::on_actionSave_triggered() {
+    scene->serialize(MG1::Scene::Get());
+    QFileDialog dialog(this, "Save scene file");
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setFilter(QDir::Files);
+    dialog.setNameFilter("Scene (*.json)");
+    dialog.selectFile("scene.json");
+
+    if (!dialog.exec()) return;
+
+    auto fileName = dialog.selectedFiles()[0];
+
+    serializer.SaveScene(fileName.toStdString());
+}
+
+
+void MainWindow::on_actionLoad_triggered() {
+    QFileDialog dialog(this, "Select scene file");
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setFilter(QDir::Files);
+    dialog.setNameFilter("Scene (*.json)");
+
+    if (!dialog.exec()) return;
+
+    auto fileName = dialog.selectedFiles()[0];
+
+    auto loaded = serializer.LoadScene(fileName.toStdString());
+
+    items.clear();
+
+    scene = std::make_shared<Scene>(loaded);
+    connect(scene.get(), &Scene::objectAdded, this, &MainWindow::onObjectAdded);
+    selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
+    ui->selectedControls->setScene(scene);
+    ui->sceneControls->setScene(scene);
+    ui->renderWidget->setScene(scene);
+}
+

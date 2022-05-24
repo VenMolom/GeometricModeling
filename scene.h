@@ -8,6 +8,7 @@
 #include <list>
 #include <QObject>
 #include <DirectXMath.h>
+#include <Scene/Scene.h>
 #include "Objects/Cursor/cursor.h"
 #include "Objects/CompositeObject/compositeObject.h"
 #include "Objects/Point/virtualPointsHolder.h"
@@ -20,6 +21,8 @@ class Scene : public QObject {
 
 public:
     explicit Scene();
+
+    explicit Scene(MG1::Scene &scene);
 
     void addObject(std::shared_ptr<Object> &&object, bool overrideCursor = false);
 
@@ -40,6 +43,8 @@ public:
     void selectFromScreen(QPointF start, QPointF end);
 
     void draw(Renderer &renderer);
+
+    void serialize(MG1::Scene &scene);
 
     std::shared_ptr<Camera> camera() { return _camera; }
 

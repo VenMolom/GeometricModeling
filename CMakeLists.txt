@@ -158,6 +158,10 @@ else ()
     endif ()
 endif ()
 
+add_subdirectory(Scene-Serializer/cpp/Serializer)
+target_link_libraries(MG1 PRIVATE Scene-Serializer/cpp/Serializer/MGSerializer)
+target_include_directories(MG1 PRIVATE Scene-Serializer/cpp/Serializer/Serializer)
+
 target_link_libraries(MG1 PRIVATE Qt${QT_VERSION_MAJOR}::Core)
 target_link_libraries(MG1 PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
 target_link_libraries(MG1 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)

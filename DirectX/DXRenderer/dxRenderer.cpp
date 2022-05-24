@@ -90,6 +90,7 @@ void DxRenderer::renderEye(const XMMATRIX &projection, const XMMATRIX &view,
 
 void DxRenderer::setScene(shared_ptr<Scene> scenePtr) {
     scene = std::move(scenePtr);
+    scene->camera()->resize(size());
     this->inputHandler.setScene(scene);
 
     updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
