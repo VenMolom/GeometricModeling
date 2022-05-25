@@ -64,6 +64,10 @@ private:
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
+
+    // TODO: change currentId in factory
+    // TODO: deserialize objects through factory (will handle ID)
+    // TODO: deserializacja nazw
 };
 
 #endif // MAINWINDOW_H

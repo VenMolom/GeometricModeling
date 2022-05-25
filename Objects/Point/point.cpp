@@ -30,3 +30,19 @@ bool Point::intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, Di
     auto boundingSphere = BoundingSphere{_position.value(), size};
     return boundingSphere.Intersects(XMLoadFloat3(&origin), XMLoadFloat3(&direction), distance);
 }
+
+MG1::Point Point::serialize() {
+    MG1::Point point{};
+    point.SetId(id());
+    point.name = name().toStdString();
+    auto pos = _position.value();
+    point.position = {pos.x, pos.y, pos.z};
+    return point;
+}
+
+Point::Point(const MG1::Point &point) : Object(point.GetId(), QString::fromStdString(point.name),
+                                               {point.position.x, point.position.y, point.position.z},
+                                               D3D11_PRIMITIVE_TOPOLOGY_POINTLIST) {
+    vertices.push_back({{0, 0, 0}, {1, 1, 1}});
+    updateBuffers();
+}

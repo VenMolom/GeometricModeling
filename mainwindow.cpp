@@ -232,12 +232,6 @@ void MainWindow::on_actionLoad_triggered() {
     auto loaded = serializer.LoadScene(fileName.toStdString());
 
     items.clear();
-
-    scene = std::make_shared<Scene>(loaded);
-    connect(scene.get(), &Scene::objectAdded, this, &MainWindow::onObjectAdded);
-    selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
-    ui->selectedControls->setScene(scene);
-    ui->sceneControls->setScene(scene);
-    ui->renderWidget->setScene(scene);
+    scene->load(loaded);
 }
 

@@ -282,10 +282,25 @@ XMFLOAT2 Scene::project(XMFLOAT3 position) {
     return screenPos;
 }
 
-Scene::Scene(MG1::Scene &scene) :Scene() {
+void Scene::load(MG1::Scene &scene) {
+    _selected.setValue({});
+    _objects.clear();
+    cursor.reset();
+    composite.reset();
+    creator.reset();
+    virtualPointsHolders.clear();
 
+    for(auto& point : scene.points) {
+        addObject(make_shared<Point>(point), true);
+    }
 }
 
 void Scene::serialize(MG1::Scene &scene) {
-
+    scene.Clear();
+    for(auto & object : _objects) {
+        if (object->type() == POINT3D) {
+            auto p = static_pointer_cast<Point>(object);
+            scene.points.push_back(p->serialize());
+        }
+    }
 }

@@ -22,8 +22,6 @@ class Scene : public QObject {
 public:
     explicit Scene();
 
-    explicit Scene(MG1::Scene &scene);
-
     void addObject(std::shared_ptr<Object> &&object, bool overrideCursor = false);
 
     void addComposite(std::list<std::shared_ptr<Object>> &&objects);
@@ -45,6 +43,8 @@ public:
     void draw(Renderer &renderer);
 
     void serialize(MG1::Scene &scene);
+
+    void load(MG1::Scene &scene);
 
     std::shared_ptr<Camera> camera() { return _camera; }
 

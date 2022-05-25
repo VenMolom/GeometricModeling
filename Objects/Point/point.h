@@ -6,10 +6,13 @@
 #define MG1_POINT_H
 
 #include "Objects/object.h"
+#include <Models/Point.h>
 
 class Point : public Object {
 public:
     Point(uint id, DirectX::XMFLOAT3 position);
+
+    explicit Point(const MG1::Point &point);
 
     void draw(Renderer &renderer, DrawType drawType) override;
 
@@ -21,6 +24,8 @@ public:
     void setRotation(DirectX::XMFLOAT3 rotation) override {}
 
     void setScale(DirectX::XMFLOAT3 scale) override {}
+
+    MG1::Point serialize();
 };
 
 
