@@ -294,3 +294,24 @@ void BrezierC2::deBoorMoved(int index, const std::shared_ptr<Point> &moved) {
     updateBuffers();
     deBoorPoints.update();
 }
+
+BrezierC2::BrezierC2(const MG1::Bezier &curve, const list<std::shared_ptr<Object>> &sceneObjects,
+                     QBindable<std::weak_ptr<Object>> bindableSelected)
+        : BrezierCurve(curve, sceneObjects),
+          VirtualPointsHolder(bindableSelected),
+          deBoorPoints() {
+    updatePoints();
+}
+
+MG1::BezierC2 BrezierC2::serialize() {
+    MG1::BezierC2 curve{};
+    curve.name = name().toStdString();
+    curve.SetId(id());
+
+    for (auto &point: _points) {
+        if (point.lock())
+            curve.controlPoints.emplace_back(point.lock()->id());
+    }
+
+    return curve;
+}

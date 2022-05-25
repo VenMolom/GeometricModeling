@@ -81,3 +81,25 @@ void Curve::preUpdate() {
 void Curve::postUpdate() {
     updateBuffers();
 }
+
+Curve::Curve(const MG1::Bezier &curve, const list<shared_ptr<Object>> &sceneObjects,
+             D3D11_PRIMITIVE_TOPOLOGY topology)
+        : Curve(curve.GetId(), QString::fromStdString(curve.name), {}, topology) {
+    vector<weak_ptr<Point>> points{};
+
+    for (auto &point: curve.controlPoints) {
+        auto it = find_if(sceneObjects.begin(), sceneObjects.end(),
+                          [&point](const shared_ptr<Object> &ob) {
+                              return ob->type() == POINT3D && ob->id() == point.GetId();
+                          });
+
+        if (it != sceneObjects.end()) {
+            weak_ptr<Point> p = dynamic_pointer_cast<Point>(*it);
+            if (p.lock()) {
+                points.push_back(p);
+            }
+        }
+    }
+
+    _points = std::move(points);
+}

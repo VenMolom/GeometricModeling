@@ -231,6 +231,7 @@ void MainWindow::on_actionLoad_triggered() {
 
     auto loaded = serializer.LoadScene(fileName.toStdString());
 
+    ui->objectsList->clearSelection();
     items.clear();
     scene->load(loaded);
 }

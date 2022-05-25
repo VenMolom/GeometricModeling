@@ -9,7 +9,8 @@ using namespace DirectX;
 float POINT_SIZE = 1.8f;
 
 Point::Point(uint id, DirectX::XMFLOAT3 position) : Object(id, "Point", position, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST) {
-    vertices.push_back({{0, 0, 0}, {1, 1, 1}});
+    vertices.push_back({{0, 0, 0},
+                        {1, 1, 1}});
     updateBuffers();
 }
 
@@ -40,9 +41,6 @@ MG1::Point Point::serialize() {
     return point;
 }
 
-Point::Point(const MG1::Point &point) : Object(point.GetId(), QString::fromStdString(point.name),
-                                               {point.position.x, point.position.y, point.position.z},
-                                               D3D11_PRIMITIVE_TOPOLOGY_POINTLIST) {
-    vertices.push_back({{0, 0, 0}, {1, 1, 1}});
-    updateBuffers();
+Point::Point(const MG1::Point &point) : Point(point.GetId(), {point.position.x, point.position.y, point.position.z}) {
+    setName(QString::fromStdString(point.name));
 }

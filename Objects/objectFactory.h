@@ -32,6 +32,8 @@ public:
 
     uint id() { return nextId++; }
 private:
+    friend class Scene;
+
     uint nextId = 1;
 };
 

@@ -21,6 +21,8 @@ protected:
 
     BrezierCurve(uint id, QString name, std::vector<std::weak_ptr<Point>> &&points);
 
+    BrezierCurve(const MG1::Bezier &curve, const std::list<std::shared_ptr<Object>> &sceneObjects);
+
     void drawPolygonal(Renderer &renderer, DrawType drawType) override;
 
     void drawCurve(Renderer &renderer, DrawType drawType) override;

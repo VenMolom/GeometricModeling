@@ -98,3 +98,24 @@ void Torus::draw(Renderer &renderer, DrawType drawType) {
         Cursor::drawCursor(renderer, position(), rotation());
     }
 }
+
+MG1::Torus Torus::serialize() {
+    MG1::Torus torus{};
+    torus.SetId(id());
+    torus.name = name().toStdString();
+    auto pos = _position.value();
+    torus.position = {pos.x, pos.y, pos.z};
+    auto rot = _rotation.value();
+    torus.rotation = {rot.x, rot.y, rot.z};
+    auto scale = _scale.value();
+    torus.scale = {scale.x, scale.y, scale.z};
+    torus.largeRadius = _majorRadius;
+    torus.smallRadius = _minorRadius;
+    auto dens = density();
+    torus.samples = {static_cast<uint>(dens[0]), static_cast<uint>(dens[1])};
+    return torus;
+}
+
+Torus::Torus(const MG1::Torus &torus) : Torus(torus.GetId(), {torus.position.x, torus.position.y, torus.position.z}) {
+    setName(QString::fromStdString(torus.name));
+}

@@ -290,8 +290,31 @@ void Scene::load(MG1::Scene &scene) {
     creator.reset();
     virtualPointsHolders.clear();
 
+    for(auto& patch : scene.surfacesC0) {
+
+    }
+    for(auto& patch : scene.surfacesC2) {
+
+    }
     for(auto& point : scene.points) {
+        factory.nextId = max(factory.nextId, point.GetId() + 1);
         addObject(make_shared<Point>(point), true);
+    }
+    for(auto& torus : scene.tori) {
+        factory.nextId = max(factory.nextId, torus.GetId() + 1);
+        addObject(make_shared<Torus>(torus), true);
+    }
+    for(auto& bezier : scene.bezierC0) {
+        factory.nextId = max(factory.nextId, bezier.GetId() + 1);
+        addObject(make_shared<BrezierC0>(bezier, _objects), true);
+    }
+    for(auto& bezier : scene.bezierC2) {
+        factory.nextId = max(factory.nextId, bezier.GetId() + 1);
+        addObject(make_shared<BrezierC2>(bezier, _objects, bindableSelected()), true);
+    }
+    for(auto& interpolated : scene.interpolatedC2) {
+        factory.nextId = max(factory.nextId, interpolated.GetId() + 1);
+        addObject(make_shared<InterpolationCurveC2>(interpolated, _objects), true);
     }
 }
 
@@ -301,6 +324,22 @@ void Scene::serialize(MG1::Scene &scene) {
         if (object->type() == POINT3D) {
             auto p = static_pointer_cast<Point>(object);
             scene.points.push_back(p->serialize());
+        }
+        if (object->type() == TORUS) {
+            auto t = static_pointer_cast<Torus>(object);
+            scene.tori.push_back(t->serialize());
+        }
+        if (object->type() == BREZIERC0) {
+            auto b = static_pointer_cast<BrezierC0>(object);
+            scene.bezierC0.push_back(b->serialize());
+        }
+        if (object->type() == BREZIERC2) {
+            auto b = static_pointer_cast<BrezierC2>(object);
+            scene.bezierC2.push_back(b->serialize());
+        }
+        if (object->type() == INTERPOLATIONC2) {
+            auto i = static_pointer_cast<InterpolationCurveC2>(object);
+            scene.interpolatedC2.push_back(i->serialize());
         }
     }
 }

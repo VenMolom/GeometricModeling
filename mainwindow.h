@@ -66,7 +66,6 @@ private:
     // TODO: ? lock modifications to specific axis
 
     // TODO: change currentId in factory
-    // TODO: deserialize objects through factory (will handle ID)
     // TODO: deserializacja nazw
 };
 

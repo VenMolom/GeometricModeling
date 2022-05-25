@@ -6,12 +6,15 @@
 #define MG1_TORUS_H
 
 #include "parametricObject.h"
+#include <Models/Torus.h>
 
 #define TORUS_DIM 2
 
 class Torus : public ParametricObject<TORUS_DIM> {
 public:
     Torus(uint id, DirectX::XMFLOAT3 position);
+
+    explicit Torus(const MG1::Torus &torus);
 
     float majorRadius() const { return _majorRadius; }
 
@@ -29,6 +32,8 @@ public:
 
     bool intersects(DirectX::XMFLOAT3 origin, DirectX::XMFLOAT3 direction, DirectX::XMMATRIX viewMatrix,
                     float nearZ, float farZ, float &distance) const override;
+
+    MG1::Torus serialize();
 
 protected:
     void densityUpdated() override;

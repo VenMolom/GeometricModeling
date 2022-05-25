@@ -131,7 +131,7 @@ void InterpolationCurveC2::postUpdate() {
         auto position = _points[i].lock()->position();
         auto positionNext = _points[i + 1].lock()->position();
         XMVECTOR left = XMVector3Normalize(
-                    XMVectorSubtract(XMLoadFloat3(&positionNext), XMLoadFloat3(&position)));
+                XMVectorSubtract(XMLoadFloat3(&positionNext), XMLoadFloat3(&position)));
         XMVECTOR right = XMVectorScale(XMVectorAdd(nextC, XMVectorScale(currentC, 2.0f)),
                                        knotDistances[i] / 3.0f);
 
@@ -143,7 +143,7 @@ void InterpolationCurveC2::postUpdate() {
         auto prevC = XMLoadFloat3(&c[c.size() - 2]);
         auto prevB = XMLoadFloat3(&b[b.size() - 2]);
         XMStoreFloat3(&b.back(),
-                      XMVectorAdd(prevB,XMVectorScale(prevC, knotDistances.back())));
+                      XMVectorAdd(prevB, XMVectorScale(prevC, knotDistances.back())));
     }
 
     calculateControlPoints();
@@ -172,7 +172,8 @@ void InterpolationCurveC2::calculateControlPoints() {
         float scale = knotDistances[i] / 3.0f;
         XMFLOAT3 left{}, right{};
         XMStoreFloat3(&left, XMVectorAdd(XMLoadFloat3(&position), XMVectorScale(XMLoadFloat3(&b[i]), scale)));
-        XMStoreFloat3(&right, XMVectorSubtract(XMLoadFloat3(&positionNext), XMVectorScale(XMLoadFloat3(&b[i + 1]), scale)));
+        XMStoreFloat3(&right,
+                      XMVectorSubtract(XMLoadFloat3(&positionNext), XMVectorScale(XMLoadFloat3(&b[i + 1]), scale)));
 
         if (i == 0) {
             vertices.push_back({position, {1.0f, 1.0f, 1.0f}});
@@ -190,4 +191,22 @@ void InterpolationCurveC2::calculateControlPoints() {
         indices.push_back(indices.back() + 1);
         indices.push_back(indices.back() + 1);
     }
+}
+
+InterpolationCurveC2::InterpolationCurveC2(const MG1::Bezier &curve, const list<shared_ptr<Object>> &sceneObjects)
+        : Curve(curve, sceneObjects, D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST) {
+    updatePoints();
+}
+
+MG1::InterpolatedC2 InterpolationCurveC2::serialize() {
+    MG1::InterpolatedC2 curve{};
+    curve.name = name().toStdString();
+    curve.SetId(id());
+
+    for (auto &point : _points) {
+        if (point.lock())
+            curve.controlPoints.emplace_back(point.lock()->id());
+    }
+
+    return curve;
 }

@@ -6,6 +6,7 @@
 #define MG1_BREZIERC2_H
 
 #include <DirectXMath.h>
+#include <Models/Curves/BezierC2.h>
 #include "Utils/utils3D.h"
 #include "brezierCurve.h"
 #include "Objects/Point/virtualPoint.h"
@@ -15,6 +16,9 @@
 class BrezierC2 : public BrezierCurve, public VirtualPointsHolder {
 public:
     BrezierC2(uint id, std::vector<std::weak_ptr<Point>> &&points, QBindable<std::weak_ptr<Object>> bindableSelected);
+
+    BrezierC2(const MG1::Bezier &curve, const std::list<std::shared_ptr<Object>> &sceneObjects,
+              QBindable<std::weak_ptr<Object>> bindableSelected);
 
     boolean bothPolygonals() const { return _bothPolygonals; }
 
@@ -27,6 +31,8 @@ public:
     Type type() const override;
 
     const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints() override;
+
+    MG1::BezierC2 serialize();
 
 protected:
 public:

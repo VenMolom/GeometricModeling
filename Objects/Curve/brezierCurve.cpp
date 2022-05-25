@@ -70,3 +70,8 @@ void BrezierCurve::pointMoved(const weak_ptr<Point> &point) {
     }
     updateBuffers();
 }
+
+BrezierCurve::BrezierCurve(const MG1::Bezier &curve, const list<shared_ptr<Object>> &sceneObjects)
+        : Curve(curve, sceneObjects, D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST) {
+
+}

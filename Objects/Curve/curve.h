@@ -6,6 +6,7 @@
 #define MG1_CURVE_H
 
 #include <DirectXMath.h>
+#include <Models/Curves/Bezier.h>
 #include "Objects/object.h"
 #include "Objects/Point/point.h"
 
@@ -42,6 +43,9 @@ protected:
     std::vector<QPropertyNotifier> pointsHandlers{};
 
     Curve(uint id, QString name, std::vector<std::weak_ptr<Point>> &&points, D3D11_PRIMITIVE_TOPOLOGY topology);
+
+    explicit Curve(const MG1::Bezier &curve, const std::list<std::shared_ptr<Object>> &sceneObjects,
+                   D3D11_PRIMITIVE_TOPOLOGY topology);
 
     virtual void drawPolygonal(Renderer &renderer, DrawType drawType) = 0;
 
