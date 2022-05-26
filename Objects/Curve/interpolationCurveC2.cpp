@@ -199,14 +199,5 @@ InterpolationCurveC2::InterpolationCurveC2(const MG1::Bezier &curve, const list<
 }
 
 MG1::InterpolatedC2 InterpolationCurveC2::serialize() {
-    MG1::InterpolatedC2 curve{};
-    curve.name = name().toStdString();
-    curve.SetId(id());
-
-    for (auto &point : _points) {
-        if (point.lock())
-            curve.controlPoints.emplace_back(point.lock()->id());
-    }
-
-    return curve;
+    return MG1::InterpolatedC2(Curve::serialize());
 }

@@ -103,3 +103,16 @@ Curve::Curve(const MG1::Bezier &curve, const list<shared_ptr<Object>> &sceneObje
 
     _points = std::move(points);
 }
+
+MG1::Bezier Curve::serialize() {
+    MG1::Bezier curve{};
+    curve.name = name().toStdString();
+    curve.SetId(id());
+
+    for (auto &point : _points) {
+        if (point.lock())
+            curve.controlPoints.emplace_back(point.lock()->id());
+    }
+
+    return curve;
+}

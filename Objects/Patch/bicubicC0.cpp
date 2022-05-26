@@ -10,7 +10,7 @@ using namespace DirectX;
 BicubicC0::BicubicC0(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> segments,
                      array<float, PATCH_DIM> size, bool cylinder,
                      QBindable<weak_ptr<Object>> bindableSelected)
-        : Patch(id, name, position, {3, 3}, cylinder, bindableSelected) {
+        : Patch(id, name, position, {3, 3}, segments, cylinder, bindableSelected) {
     createSegments(segments, size);
 }
 

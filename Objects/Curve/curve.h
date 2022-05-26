@@ -61,6 +61,8 @@ protected:
 
     virtual void pointMoved(const std::weak_ptr<Point> &point) = 0;
 
+    MG1::Bezier serialize();
+
 private:
     QProperty<int> pointsChanged{};
     bool _polygonal{false};
