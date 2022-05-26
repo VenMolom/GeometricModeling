@@ -138,3 +138,7 @@ void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &l
         }
     }
 }
+
+MG1::BezierSurfaceC0 BicubicC0::serialize(vector<MG1::Point> &serializedPoints) {
+    return Patch::serialize<MG1::BezierSurfaceC0>(serializedPoints);
+}

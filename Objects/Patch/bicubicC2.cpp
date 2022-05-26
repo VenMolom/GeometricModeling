@@ -112,3 +112,7 @@ void BicubicC2::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &l
 void BicubicC2::drawMesh(Renderer &renderer, DrawType drawType) {
     renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 }
+
+MG1::BezierSurfaceC2 BicubicC2::serialize(vector<MG1::Point> &serializedPoints) {
+    return Patch::serialize<MG1::BezierSurfaceC2>(serializedPoints);
+}

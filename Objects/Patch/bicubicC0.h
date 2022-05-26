@@ -5,6 +5,7 @@
 #ifndef MG1_BICUBICC0_H
 #define MG1_BICUBICC0_H
 
+#include <Models/Surfaces/BezierSurfaceC0.h>
 #include "patch.h"
 
 class BicubicC0 : public Patch {
@@ -14,6 +15,8 @@ public:
               QBindable<std::weak_ptr<Object>> bindableSelected);
 
     Type type() const override;
+
+    MG1::BezierSurfaceC0 serialize(std::vector<MG1::Point> &serializedPoints);
 
 protected:
     void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) override;

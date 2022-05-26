@@ -3,17 +3,20 @@
 //
 
 #include "patch.h"
+
+#include <utility>
 #include "Objects/Point/composableVirtualPoint.h"
 
 using namespace std;
 using namespace DirectX;
 
 Patch::Patch(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> density,
-             bool cylinder, QBindable<weak_ptr<Object>> bindableSelected)
-        : ParametricObject<PATCH_DIM>(id, name, position, density,
-                                      {make_tuple(0, 1.f), make_tuple(0, 1.f)},
+             array<int, PATCH_DIM> segments, bool cylinder, QBindable<weak_ptr<Object>> bindableSelected)
+        : ParametricObject<PATCH_DIM>(id, std::move(name), position, density,
+                                      {make_tuple(0, 1.f * segments[0]), make_tuple(0, 1.f * segments[1])},
                                       D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST),
           VirtualPointsHolder(bindableSelected),
+          segments(segments),
           cylinder(cylinder),
           startingPosition(position) {
     XMStoreFloat4x4(&modificationMatrixInverse, XMMatrixIdentity());
@@ -117,7 +120,7 @@ void Patch::updatePoints() {
     XMStoreFloat4x4(&modificationMatrixInverse, XMMatrixInverse(nullptr, modifyMatrix));
 
     int i = 0;
-    for (auto &point : points) {
+    for (auto &point: points) {
         auto pos = startingPositions[i];
         XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), modifyMatrix));
         point->setPositionSilently(pos);

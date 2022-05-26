@@ -5,6 +5,7 @@
 #ifndef MG1_BICUBICC2_H
 #define MG1_BICUBICC2_H
 
+#include <Models/Surfaces/BezierSurfaceC2.h>
 #include "patch.h"
 
 class BicubicC2 : public Patch {
@@ -14,6 +15,8 @@ public:
             QBindable<std::weak_ptr<Object>> bindableSelected);
 
     Type type() const override;
+
+    MG1::BezierSurfaceC2 serialize(std::vector<MG1::Point> &serializedPoints);
 
 protected:
     void drawMesh(Renderer &renderer, DrawType drawType) override;
