@@ -142,5 +142,3 @@ void Patch::clear() {
     bezierMesh.vertices().clear();
     bezierMesh.indices().clear();
 }
-
-

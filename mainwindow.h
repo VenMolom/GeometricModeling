@@ -65,8 +65,7 @@ private:
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
 
-    // TODO: change currentId in factory
-    // TODO: deserializacja nazw
+    //TODO: multiselect patch from list and delete leaves patch in scene but not in list
 };
 
 #endif // MAINWINDOW_H
