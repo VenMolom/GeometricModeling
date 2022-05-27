@@ -14,6 +14,9 @@ public:
             std::array<float, PATCH_DIM> size, bool cylinder,
             QBindable<std::weak_ptr<Object>> bindableSelected);
 
+    BicubicC2(const MG1::BezierSurfaceC2 &surface, std::vector<MG1::Point> &serializedPoints,
+          QBindable<std::weak_ptr<Object>> bindableSelected);
+
     Type type() const override;
 
     MG1::BezierSurfaceC2 serialize(std::vector<MG1::Point> &serializedPoints);

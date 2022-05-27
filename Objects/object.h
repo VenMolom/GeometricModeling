@@ -5,6 +5,8 @@
 #ifndef MG1_OBJECT_H
 #define MG1_OBJECT_H
 
+#define NOMINMAX
+
 #include <d3d11.h>
 #include <qstring.h>
 #include <utility>

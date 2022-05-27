@@ -17,7 +17,7 @@ Patch::Patch(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> den
                                       D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST),
           VirtualPointsHolder(bindableSelected),
           segments(segments),
-          cylinder(cylinder),
+          loopedV(cylinder),
           startingPosition(position) {
     XMStoreFloat4x4(&modificationMatrixInverse, XMMatrixIdentity());
 }
@@ -46,7 +46,7 @@ void Patch::drawMesh(Renderer &renderer, DrawType drawType) {
 }
 
 std::array<bool, PATCH_DIM> Patch::looped() const {
-    return {false, cylinder};
+    return {loopedU, loopedV};
 }
 
 const vector<std::shared_ptr<VirtualPoint>> &Patch::virtualPoints() {
@@ -55,7 +55,7 @@ const vector<std::shared_ptr<VirtualPoint>> &Patch::virtualPoints() {
 
 void Patch::createSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
     clear();
-    if (cylinder) {
+    if (loopedV) {
         createCylinderSegments(segments, size);
     } else {
         createPlaneSegments(segments, size);
@@ -141,4 +141,60 @@ void Patch::clear() {
     startingPosition = _position.value();
     bezierMesh.vertices().clear();
     bezierMesh.indices().clear();
+}
+
+void Patch::calculateCenter() {
+    XMFLOAT3 center{};
+    XMVECTOR c = XMLoadFloat3(&center);
+    for (auto &point: points) {
+        auto oc = point->position();
+        c = XMVectorAdd(c, XMLoadFloat3(&oc));
+    }
+    XMStoreFloat3(&center, XMVectorScale(c, 1.0f / static_cast<float>(points.size())));
+    startingPosition = center;
+    Object::setPosition(center);
+}
+
+void Patch::deserializePatch(const MG1::BezierPatch &patch, const std::map<uint, int> &pointMap) {
+    // vRow
+    for (int i = 0; i < 4; ++i) {
+        // uRow
+        for (int j = 0; j < 4; ++j) {
+            auto index = i * 4 + j;
+            auto pointRef = patch.controlPoints[index];
+            indices.push_back(pointMap.at(pointRef.GetId()));
+        }
+    }
+}
+
+Patch::Patch(const MG1::BezierSurfaceC0 &surface, vector<MG1::Point> &serializedPoints,
+             QBindable<weak_ptr<Object>> bindableSelected)
+        : ParametricObject<PATCH_DIM>(surface.GetId(), QString::fromStdString(surface.name), {0, 0, 0},
+                                      {static_cast<int>(surface.patches[0].samples.x),
+                                       static_cast<int>(surface.patches[0].samples.y)},
+                                      {make_tuple(0, 1.f * surface.size.x), make_tuple(0, 1.f * surface.size.x)},
+                                      D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST),
+          VirtualPointsHolder(bindableSelected),
+          segments({static_cast<int>(surface.size.x), static_cast<int>(surface.size.y)}),
+          loopedU(surface.uWrapped),
+          loopedV(surface.vWrapped) {
+    deserializePatches(surface.patches, serializedPoints);
+    calculateCenter();
+    XMStoreFloat4x4(&modificationMatrixInverse, XMMatrixIdentity());
+}
+
+Patch::Patch(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &serializedPoints,
+             QBindable<weak_ptr<Object>> bindableSelected)
+        : ParametricObject<PATCH_DIM>(surface.GetId(), QString::fromStdString(surface.name), {0, 0, 0},
+                                      {static_cast<int>(surface.patches[0].samples.x),
+                                       static_cast<int>(surface.patches[0].samples.y)},
+                                      {make_tuple(0, 1.f * surface.size.x), make_tuple(0, 1.f * surface.size.x)},
+                                      D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST),
+          VirtualPointsHolder(bindableSelected),
+          segments({static_cast<int>(surface.size.x), static_cast<int>(surface.size.y)}),
+          loopedU(surface.uWrapped),
+          loopedV(surface.vWrapped) {
+    deserializePatches(surface.patches, serializedPoints);
+    calculateCenter();
+    XMStoreFloat4x4(&modificationMatrixInverse, XMMatrixIdentity());
 }

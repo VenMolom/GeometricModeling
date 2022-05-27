@@ -4,13 +4,15 @@
 
 #include "bicubicC2.h"
 
+#include <utility>
+
 using namespace std;
 using namespace DirectX;
 
 BicubicC2::BicubicC2(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> segments,
                      array<float, PATCH_DIM> size, bool cylinder,
                      QBindable<weak_ptr<Object>> bindableSelected)
-        : Patch(id, name, position, {3, 3}, segments, cylinder, bindableSelected) {
+        : Patch(id, std::move(name), position, {3, 3}, segments, cylinder, bindableSelected) {
     createSegments(segments, size);
 }
 
@@ -97,16 +99,17 @@ Type BicubicC2::type() const {
 
 void BicubicC2::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
     auto uPoints = segments[0] + 3;
-    auto vPoints = segments[1] + (cylinder ? 0 : 3);
+    auto vPoints = segments[1] + (loopedV ? 0 : 3);
     for (int i = 0; i < uPoints; ++i) {
         for (int j = 0; j < vPoints; ++j) {
             auto index = j * uPoints + i;
             auto nextLine = (index + uPoints) % linelist.vertices().size();
 
             if (i != uPoints - 1) linelist.addLine(index, index + 1);
-            if (cylinder || j != vPoints - 1) linelist.addLine(index, nextLine);
+            if (loopedV || j != vPoints - 1) linelist.addLine(index, nextLine);
         }
     }
+    // TODO: make compatible with loopedU
 }
 
 void BicubicC2::drawMesh(Renderer &renderer, DrawType drawType) {
@@ -115,4 +118,11 @@ void BicubicC2::drawMesh(Renderer &renderer, DrawType drawType) {
 
 MG1::BezierSurfaceC2 BicubicC2::serialize(vector<MG1::Point> &serializedPoints) {
     return Patch::serialize<MG1::BezierSurfaceC2>(serializedPoints);
+}
+
+BicubicC2::BicubicC2(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &serializedPoints,
+                     QBindable<std::weak_ptr<Object>> bindableSelected)
+                     : Patch(surface, serializedPoints, bindableSelected) {
+    calculateMeshIndices(segments, bezierMesh);
+    updatePoints();
 }

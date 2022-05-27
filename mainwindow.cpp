@@ -204,7 +204,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void MainWindow::on_actionSave_triggered() {
-    scene->serialize(MG1::Scene::Get());
     QFileDialog dialog(this, "Save scene file");
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setFilter(QDir::Files);
@@ -214,7 +213,7 @@ void MainWindow::on_actionSave_triggered() {
     if (!dialog.exec()) return;
 
     auto fileName = dialog.selectedFiles()[0];
-
+    scene->serialize(MG1::Scene::Get());
     serializer.SaveScene(fileName.toStdString());
 }
 

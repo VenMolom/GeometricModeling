@@ -290,11 +290,15 @@ void Scene::load(MG1::Scene &scene) {
     creator.reset();
     virtualPointsHolders.clear();
 
-    for(auto& patch : scene.surfacesC0) {
+    factory.nextId = 0;
 
+    for(auto& patch : scene.surfacesC0) {
+        factory.nextId = max(factory.nextId, patch.GetId() + 1);
+        addObject(make_shared<BicubicC0>(patch, scene.points, bindableSelected()), true);
     }
     for(auto& patch : scene.surfacesC2) {
-
+        factory.nextId = max(factory.nextId, patch.GetId() + 1);
+        addObject(make_shared<BicubicC2>(patch, scene.points, bindableSelected()), true);
     }
     for(auto& point : scene.points) {
         factory.nextId = max(factory.nextId, point.GetId() + 1);
