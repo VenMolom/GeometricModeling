@@ -98,18 +98,18 @@ Type BicubicC2::type() const {
 }
 
 void BicubicC2::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
-    auto uPoints = segments[0] + 3;
+    auto uPoints = segments[0] + (loopedU ? 0 : 3);
     auto vPoints = segments[1] + (loopedV ? 0 : 3);
+
     for (int i = 0; i < uPoints; ++i) {
         for (int j = 0; j < vPoints; ++j) {
             auto index = j * uPoints + i;
             auto nextLine = (index + uPoints) % linelist.vertices().size();
 
-            if (i != uPoints - 1) linelist.addLine(index, index + 1);
+            if (loopedU || i != uPoints - 1) linelist.addLine(index, index + 1);
             if (loopedV || j != vPoints - 1) linelist.addLine(index, nextLine);
         }
     }
-    // TODO: make compatible with loopedU
 }
 
 void BicubicC2::drawMesh(Renderer &renderer, DrawType drawType) {

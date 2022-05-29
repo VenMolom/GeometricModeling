@@ -345,6 +345,9 @@ void Scene::serialize(MG1::Scene &scene) {
             auto i = static_pointer_cast<InterpolationCurveC2>(object);
             scene.interpolatedC2.push_back(i->serialize());
         }
+    }
+
+    for(auto & object : _objects) {
         if (object->type() == PATCHC0) {
             auto b = static_pointer_cast<BicubicC0>(object);
             scene.surfacesC0.push_back(b->serialize(scene.points));

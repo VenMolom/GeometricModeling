@@ -207,6 +207,7 @@ void MainWindow::on_actionSave_triggered() {
     QFileDialog dialog(this, "Save scene file");
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setFilter(QDir::Files);
+    dialog.setDirectory("../Saves");
     dialog.setNameFilter("Scene (*.json)");
     dialog.selectFile("scene.json");
 
@@ -222,6 +223,7 @@ void MainWindow::on_actionLoad_triggered() {
     QFileDialog dialog(this, "Select scene file");
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setFilter(QDir::Files);
+    dialog.setDirectory("../Saves");
     dialog.setNameFilter("Scene (*.json)");
 
     if (!dialog.exec()) return;

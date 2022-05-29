@@ -248,7 +248,7 @@ void Patch::deserializePatches(const std::vector<T> &patches, std::vector<MG1::P
             int v = std::clamp(i / pointsSegments, 0, segments[1] - 1);
             int uu = j - pointsSegments * u, vv = i - pointsSegments * v;
 
-            int patchIndex = segments[0] * u + v;
+            int patchIndex = segments[1] * u + v;
             int pointIndex = 4 * uu + vv;
 
             auto patch = static_cast<const MG1::BezierPatch *>(&patches[patchIndex]);

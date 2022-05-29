@@ -98,14 +98,14 @@ Type BicubicC0::type() const {
 }
 
 void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
-    auto uPoints = segments[0] * 3 + 1;
+    auto uPoints = segments[0] * 3 + (loopedU ? 0 : 1);
     auto vPoints = segments[1] * 3 + (loopedV ? 0 : 1);
     for (int i = 0; i < uPoints; ++i) {
         for (int j = 0; j < vPoints; ++j) {
             auto index = j * uPoints + i;
             auto nextLine = (index + uPoints) % linelist.vertices().size();
 
-            if (i != uPoints - 1) linelist.addLine(index, index + 1);
+            if (loopedU || i != uPoints - 1) linelist.addLine(index, index + 1);
             if (loopedV || j != vPoints - 1) linelist.addLine(index, nextLine);
         }
     }
