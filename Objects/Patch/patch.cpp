@@ -160,7 +160,7 @@ void Patch::deserializePatch(const MG1::BezierPatch &patch, const std::map<uint,
     for (int i = 0; i < 4; ++i) {
         // uRow
         for (int j = 0; j < 4; ++j) {
-            auto index = i * 4 + j;
+            auto index = j * 4 + i;
             auto pointRef = patch.controlPoints[index];
             indices.push_back(pointMap.at(pointRef.GetId()));
         }
@@ -188,7 +188,7 @@ Patch::Patch(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &serialized
         : ParametricObject<PATCH_DIM>(surface.GetId(), QString::fromStdString(surface.name), {0, 0, 0},
                                       {static_cast<int>(surface.patches[0].samples.x),
                                        static_cast<int>(surface.patches[0].samples.y)},
-                                      {make_tuple(0, 1.f * surface.size.x), make_tuple(0, 1.f * surface.size.x)},
+                                      {make_tuple(0, 1.f * surface.size.x), make_tuple(0, 1.f * surface.size.y)},
                                       D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST),
           VirtualPointsHolder(bindableSelected),
           segments({static_cast<int>(surface.size.x), static_cast<int>(surface.size.y)}),

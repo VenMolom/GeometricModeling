@@ -186,12 +186,12 @@ std::vector<T> Patch::serializePatches(std::vector<MG1::Point> &serializedPoints
 
     auto uPoints = segments[0] * pointsSegments + segmentsAdd;
 
-    // v segments
-    for (int i = 0; i < segments[1]; ++i) {
-        // u segments
-        for (int j = 0; j < segments[0]; ++j) {
-            auto start = i * pointsSegments * uPoints + pointsSegments * j;
-            patches.emplace_back(serializePatch<T>(start, j, i, uPoints, pointMap));
+    // u segments
+    for (int i = 0; i < segments[0]; ++i) {
+        // v segments
+        for (int j = 0; j < segments[1]; ++j) {
+            auto start = j * pointsSegments * uPoints + pointsSegments * i;
+            patches.emplace_back(serializePatch<T>(start, i, j, uPoints, pointMap));
         }
     }
 
@@ -205,6 +205,7 @@ MG1::BezierPatch Patch::serializePatch(int startIndex, int uSegment, int vSegmen
     patch.SetId(id());
     patch.name = name().toStdString();
     patch.samples = {static_cast<uint32_t>(density()[0]), static_cast<uint32_t>(density()[1])};
+    patch.controlPoints.resize(16, MG1::PointRef(0));
 
     static constexpr int pointsSegments = patchConfig<T>::pointsSegment;
 
@@ -217,7 +218,9 @@ MG1::BezierPatch Patch::serializePatch(int startIndex, int uSegment, int vSegmen
 
         // uRow
         for (int j = 0; j < 4; ++j) {
-            patch.controlPoints.emplace_back(pointMap.at(index + j));
+            auto cpIndex = j * 4 + i;
+            auto ref = pointMap.at(index + j);
+            patch.controlPoints[cpIndex] = MG1::PointRef(ref);
         }
         index += uPoints;
     }
@@ -245,8 +248,8 @@ void Patch::deserializePatches(const std::vector<T> &patches, std::vector<MG1::P
             int v = std::clamp(i / pointsSegments, 0, segments[1] - 1);
             int uu = j - pointsSegments * u, vv = i - pointsSegments * v;
 
-            int patchIndex = segments[0] * v + u;
-            int pointIndex = 4 * vv + uu;
+            int patchIndex = segments[0] * u + v;
+            int pointIndex = 4 * uu + vv;
 
             auto patch = static_cast<const MG1::BezierPatch *>(&patches[patchIndex]);
             auto pointRef = patch->controlPoints[pointIndex];
