@@ -30,12 +30,12 @@ void BicubicC2Creator::setSegments(const array<int, PATCH_DIM> &segments) {
 }
 
 void BicubicC2Creator::setCylinder(bool cylinder) {
-    this->loopedV = cylinder;
+    this->loopedU = cylinder;
     createSegments(segments, size);
 }
 
 std::shared_ptr<Object> BicubicC2Creator::create(uint id) {
-    auto patch = make_shared<BicubicC2>(id, name(), _position.value(), segments, size, loopedV, bindableSelected);
+    auto patch = make_shared<BicubicC2>(id, name(), _position.value(), segments, size, loopedU, bindableSelected);
     patch->setScale(_scale.value());
     patch->setRotation(_rotation.value());
     patch->setDensity(density());

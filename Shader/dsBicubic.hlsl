@@ -22,10 +22,10 @@ float4 deCastilloPatch(OutputPatch<DSIn, CONTROL_POINTS_PATCH> patch, float2 uv)
     for (int i = 0; i < 4; ++i)
     {
         float4 p[4] = { patch[4 * i].pos, patch[4 * i + 1].pos, patch[4 * i + 2].pos, patch[4 * i + 3].pos };
-        b[i] = deCastillo(p, uv.x);
+        b[i] = deCastillo(p, uv.y);
     }
 
-    return deCastillo(b, uv.y);
+    return deCastillo(b, uv.x);
 }
 
 [domain("quad")]

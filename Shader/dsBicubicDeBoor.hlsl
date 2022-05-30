@@ -31,14 +31,14 @@ float4 deBoorPatch(OutputPatch<DSIn, CONTROL_POINTS_PATCH> patch, float2 uv)
         controls = float4x4(patch[4 * i].pos, patch[4 * i + 1].pos, patch[4 * i + 2].pos, patch[4 * i + 3].pos);
         controls = mul(deBoorToBezier, controls);
         float4 p[4] = { controls._11_12_13_14, controls._21_22_23_24, controls._31_32_33_34, controls._41_42_43_44 };
-        b[i] = deCastillo(p, uv.x);
+        b[i] = deCastillo(p, uv.y);
     }
 
     controls = float4x4(b[0], b[1], b[2], b[3]);
     controls = mul(deBoorToBezier, controls);
     float4 bb[4] = { controls._11_12_13_14, controls._21_22_23_24, controls._31_32_33_34, controls._41_42_43_44 };
 
-    return deCastillo(bb, uv.y);
+    return deCastillo(bb, uv.x);
 }
 
 [domain("quad")]

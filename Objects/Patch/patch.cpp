@@ -17,7 +17,7 @@ Patch::Patch(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> den
                                       D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST),
           VirtualPointsHolder(bindableSelected),
           segments(segments),
-          loopedV(cylinder),
+          loopedU(cylinder),
           startingPosition(position) {
     XMStoreFloat4x4(&modificationMatrixInverse, XMMatrixIdentity());
 }
@@ -55,7 +55,7 @@ const vector<std::shared_ptr<VirtualPoint>> &Patch::virtualPoints() {
 
 void Patch::createSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
     clear();
-    if (loopedV) {
+    if (loopedU) {
         createCylinderSegments(segments, size);
     } else {
         createPlaneSegments(segments, size);
@@ -160,7 +160,7 @@ void Patch::deserializePatch(const MG1::BezierPatch &patch, const std::map<uint,
     for (int i = 0; i < 4; ++i) {
         // uRow
         for (int j = 0; j < 4; ++j) {
-            auto index = j * 4 + i;
+            auto index = i * 4 + j;
             auto pointRef = patch.controlPoints[index];
             indices.push_back(pointMap.at(pointRef.GetId()));
         }

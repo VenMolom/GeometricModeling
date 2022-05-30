@@ -46,7 +46,7 @@ public:
 protected:
     std::vector<std::shared_ptr<VirtualPoint>> points;
     std::array<int, PATCH_DIM> segments;
-    bool loopedU = false, loopedV;
+    bool loopedU, loopedV = false;
     Linelist bezierMesh;
 
     void densityUpdated() override {}
@@ -186,12 +186,12 @@ std::vector<T> Patch::serializePatches(std::vector<MG1::Point> &serializedPoints
 
     auto uPoints = segments[0] * pointsSegments + segmentsAdd;
 
-    // u segments
+    // v segments
     for (int i = 0; i < segments[0]; ++i) {
-        // v segments
+        // u segments
         for (int j = 0; j < segments[1]; ++j) {
-            auto start = j * pointsSegments * uPoints + pointsSegments * i;
-            patches.emplace_back(serializePatch<T>(start, i, j, uPoints, pointMap));
+            auto start = i * pointsSegments * uPoints + pointsSegments * j;
+            patches.emplace_back(serializePatch<T>(start, j, i, uPoints, pointMap));
         }
     }
 
@@ -218,7 +218,7 @@ MG1::BezierPatch Patch::serializePatch(int startIndex, int uSegment, int vSegmen
 
         // uRow
         for (int j = 0; j < 4; ++j) {
-            auto cpIndex = j * 4 + i;
+            auto cpIndex = i * 4 + j;
             auto ref = pointMap.at(index + j);
             patch.controlPoints[cpIndex] = MG1::PointRef(ref);
         }
@@ -248,8 +248,8 @@ void Patch::deserializePatches(const std::vector<T> &patches, std::vector<MG1::P
             int v = std::clamp(i / pointsSegments, 0, segments[1] - 1);
             int uu = j - pointsSegments * u, vv = i - pointsSegments * v;
 
-            int patchIndex = segments[1] * u + v;
-            int pointIndex = 4 * uu + vv;
+            int patchIndex = segments[0] * v + u;
+            int pointIndex = 4 * vv + uu;
 
             auto patch = static_cast<const MG1::BezierPatch *>(&patches[patchIndex]);
             auto pointRef = patch->controlPoints[pointIndex];

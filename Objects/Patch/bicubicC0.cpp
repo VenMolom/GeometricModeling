@@ -44,33 +44,33 @@ void BicubicC0::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
 
             for (int k = 0; k < 4; ++k) {
                 indices.push_back(index);
-                indices.push_back(index + 1);
-                indices.push_back(index + 2);
-                indices.push_back(index + 3);
-                index += uPoints;
+                indices.push_back(index + uPoints);
+                indices.push_back(index + 2 * uPoints);
+                indices.push_back(index + 3 * uPoints);
+                index += 1;
             }
         }
     }
 }
 
 void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DIM> size) {
-    auto uDiff = size[0] / 3;
-    auto radius = size[1];
+    auto radius = size[0];
+    auto vDiff = size[1] / 3;
 
     XMFLOAT3 startPos = _position;
-    startPos.x -= uDiff * segments[0] * 1.5f;
+    startPos.z -= vDiff * segments[1] * 1.5f;
 
-    auto uPoints = segments[0] * 3 + 1;
-    auto vPoints = segments[1] * 3;
-    auto vAngle = XM_2PI / vPoints;
+    auto uPoints = segments[0] * 3;
+    auto vPoints = segments[1] * 3 + 1;
+    auto uAngle = XM_2PI / uPoints;
     // vertices
     for (int i = 0; i < vPoints; ++i) {
-        auto angle = i * vAngle;
-        auto pos = XMFLOAT3(startPos.x, startPos.y + radius * cos(angle), startPos.z + radius * sin(angle));
         for (int j = 0; j < uPoints; ++j) {
+            auto angle = j * uAngle;
+            auto pos = XMFLOAT3(startPos.x + radius * sin(angle), startPos.y + radius * cos(angle), startPos.z);
             addPoint(pos);
-            pos.x += uDiff;
         }
+        startPos.z += vDiff;
     }
 
     //indices
@@ -79,15 +79,15 @@ void BicubicC0::createCylinderSegments(array<int, PATCH_DIM> segments, array<flo
             auto index = j * 3 * uPoints + 3 * i;
 
             for (int k = 0; k < 4; ++k) {
-                if (j == segments[1] - 1 && k == 3) {
-                    index = 3 * i;
+                if (i == segments[0] - 1 && k == 3) {
+                    index = j * 3 * uPoints;
                 }
 
                 indices.push_back(index);
-                indices.push_back(index + 1);
-                indices.push_back(index + 2);
-                indices.push_back(index + 3);
-                index += uPoints;
+                indices.push_back(index + uPoints);
+                indices.push_back(index + 2 * uPoints);
+                indices.push_back(index + 3 * uPoints);
+                index += 1;
             }
         }
     }
@@ -100,12 +100,14 @@ Type BicubicC0::type() const {
 void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &linelist) {
     auto uPoints = segments[0] * 3 + (loopedU ? 0 : 1);
     auto vPoints = segments[1] * 3 + (loopedV ? 0 : 1);
+
     for (int i = 0; i < uPoints; ++i) {
         for (int j = 0; j < vPoints; ++j) {
             auto index = j * uPoints + i;
             auto nextLine = (index + uPoints) % linelist.vertices().size();
+            auto nextIndex = j * uPoints + (i + 1) % uPoints;
 
-            if (loopedU || i != uPoints - 1) linelist.addLine(index, index + 1);
+            if (loopedU || i != uPoints - 1) linelist.addLine(index, nextIndex);
             if (loopedV || j != vPoints - 1) linelist.addLine(index, nextLine);
         }
     }
