@@ -184,12 +184,12 @@ std::vector<T> Patch::serializePatches(std::vector<MG1::Point> &serializedPoints
     }
 
 
-    auto uPoints = segments[0] * pointsSegments + segmentsAdd;
+    auto uPoints = segments[0] * pointsSegments + (loopedU ? 0 : segmentsAdd);
 
     // v segments
-    for (int i = 0; i < segments[0]; ++i) {
+    for (int i = 0; i < segments[1]; ++i) {
         // u segments
-        for (int j = 0; j < segments[1]; ++j) {
+        for (int j = 0; j < segments[0]; ++j) {
             auto start = i * pointsSegments * uPoints + pointsSegments * j;
             patches.emplace_back(serializePatch<T>(start, j, i, uPoints, pointMap));
         }
@@ -210,19 +210,19 @@ MG1::BezierPatch Patch::serializePatch(int startIndex, int uSegment, int vSegmen
     static constexpr int pointsSegments = patchConfig<T>::pointsSegment;
 
     auto index = startIndex;
-    // vRow
+    // uRow
     for (int i = 0; i < 4; ++i) {
-        if (loopedV && patchConfig<T>::wrap(vSegment, segments[1], i)) {
-            index = pointsSegments * uSegment;
+        if (loopedU && patchConfig<T>::wrap(uSegment, segments[0], i)) {
+            index = pointsSegments * vSegment * uPoints;
         }
 
-        // uRow
+        // vRow
         for (int j = 0; j < 4; ++j) {
-            auto cpIndex = i * 4 + j;
-            auto ref = pointMap.at(index + j);
+            auto cpIndex = j * 4 + i;
+            auto ref = pointMap.at(index + j * uPoints);
             patch.controlPoints[cpIndex] = MG1::PointRef(ref);
         }
-        index += uPoints;
+        index += 1;
     }
 
     return patch;
@@ -235,8 +235,8 @@ void Patch::deserializePatches(const std::vector<T> &patches, std::vector<MG1::P
     static constexpr int pointsSegments = patchConfig<T>::pointsSegment;
     static constexpr int segmentsAdd = patchConfig<T>::segmentModifier;
 
-    auto uPoints = segments[0] * pointsSegments + segmentsAdd;
-    auto vPoints = segments[1] * pointsSegments + segmentsAdd;
+    auto uPoints = segments[0] * pointsSegments + (loopedU ? 0 : segmentsAdd);
+    auto vPoints = segments[1] * pointsSegments + (loopedV ? 0 : segmentsAdd);
 
     //make map of points id (id -> index)
     std::map<uint, int> pointMap;
