@@ -131,9 +131,9 @@ Torus::Torus(const MG1::Torus &torus)
           _minorRadius(torus.smallRadius),
           _majorRadius(torus.largeRadius) {
     setRotation({
-        XMConvertToDegrees(torus.rotation.x),
-        XMConvertToDegrees(torus.rotation.y),
-        XMConvertToDegrees(torus.rotation.z)
+        XMConvertToRadians(torus.rotation.x),
+        XMConvertToRadians(torus.rotation.y),
+        XMConvertToRadians(torus.rotation.z)
     });
     setScale({torus.scale.x, torus.scale.y, torus.scale.z});
     calculateVertices(density(), range());
