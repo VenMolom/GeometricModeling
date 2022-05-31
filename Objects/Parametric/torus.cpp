@@ -108,7 +108,11 @@ MG1::Torus Torus::serialize() {
     auto pos = _position.value();
     torus.position = {pos.x, pos.y, pos.z};
     auto rot = _rotation.value();
-    torus.rotation = {rot.x, rot.y, rot.z};
+    torus.rotation = {
+            XMConvertToDegrees(rot.x),
+            XMConvertToDegrees(rot.y),
+            XMConvertToDegrees(rot.z)
+    };
     auto scale = _scale.value();
     torus.scale = {scale.x, scale.y, scale.z};
     torus.largeRadius = _majorRadius;
@@ -126,7 +130,11 @@ Torus::Torus(const MG1::Torus &torus)
                                       D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
           _minorRadius(torus.smallRadius),
           _majorRadius(torus.largeRadius) {
-    setRotation({torus.rotation.x, torus.rotation.y, torus.rotation.z});
+    setRotation({
+        XMConvertToDegrees(torus.rotation.x),
+        XMConvertToDegrees(torus.rotation.y),
+        XMConvertToDegrees(torus.rotation.z)
+    });
     setScale({torus.scale.x, torus.scale.y, torus.scale.z});
     calculateVertices(density(), range());
     calculateIndices(density());

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QFileDialog>
+#include <QMessageBox>
 
 using namespace std;
 using namespace DirectX;
@@ -214,8 +215,13 @@ void MainWindow::on_actionSave_triggered() {
     if (!dialog.exec()) return;
 
     auto fileName = dialog.selectedFiles()[0];
-    scene->serialize(MG1::Scene::Get());
-    serializer.SaveScene(fileName.toStdString());
+
+    try {
+        scene->serialize(MG1::Scene::Get());
+        serializer.SaveScene(fileName.toStdString());
+    } catch (...) {
+        QMessageBox::warning(this, "Save error", "Failed to save scene");
+    }
 }
 
 
@@ -230,10 +236,14 @@ void MainWindow::on_actionLoad_triggered() {
 
     auto fileName = dialog.selectedFiles()[0];
 
-    auto loaded = serializer.LoadScene(fileName.toStdString());
+    try {
+        auto loaded = serializer.LoadScene(fileName.toStdString());
 
-    ui->objectsList->clearSelection();
-    items.clear();
-    scene->load(loaded);
+        ui->objectsList->clearSelection();
+        items.clear();
+        scene->load(loaded);
+    } catch (...) {
+        QMessageBox::warning(this, "Load error", "Failed to load scene");
+    }
 }
 
