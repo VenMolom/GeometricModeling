@@ -14,6 +14,8 @@ public:
     virtual void setSize(const std::array<float, 2> &size) = 0;
 
     virtual void setCylinder(bool cylinder) = 0;
+
+    virtual Type type() const = 0;
 };
 
 

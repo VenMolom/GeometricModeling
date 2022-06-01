@@ -17,7 +17,13 @@ PatchCreatorModule::~PatchCreatorModule() {
 }
 
 void PatchCreatorModule::on_cylinderCheckBox_stateChanged(int arg1) {
-    creator->setCylinder(Qt::Checked == (Qt::CheckState) arg1);
+    bool checked = Qt::Checked == (Qt::CheckState) arg1;
+    creator->setCylinder(checked);
+    if (checked && creator->type() == PATCHC2CREATOR) {
+        ui->uSegments->setMinimum(3);
+    } else {
+        ui->uSegments->setMinimum(1);
+    }
 }
 
 
