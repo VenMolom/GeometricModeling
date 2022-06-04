@@ -71,6 +71,7 @@ void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool selec
 
 void MainWindow::updateSelection() {
     ui->actionCollapse_Points->setEnabled(false);
+    ui->actionFill_In->setEnabled(false);
     shared_ptr<Object> selected;
     if (!(selected = scene->selected().lock())) {
         ui->objectsList->clearSelection();
@@ -97,6 +98,7 @@ void MainWindow::updateSelection() {
         ui->deleteObject->setEnabled(true);
         ui->centerObject->setEnabled(true);
         ui->actionCollapse_Points->setEnabled(composite->collapsable());
+        ui->actionFill_In->setEnabled(composite->fillable());
         return;
     }
 
@@ -127,6 +129,7 @@ std::vector<std::weak_ptr<Point>> MainWindow::getSelectedPoints() {
 
 void MainWindow::on_objectsList_itemSelectionChanged() {
     ui->actionCollapse_Points->setEnabled(false);
+    ui->actionFill_In->setEnabled(false);
     auto selected = ui->objectsList->selectedItems();
     if (selected.empty()) {
         ui->deleteObject->setEnabled(false);
@@ -168,7 +171,10 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
 
         selectedHandler = {};
         auto comp = scene->addComposite(std::move(objects));
-        if (comp) ui->actionCollapse_Points->setEnabled(comp->collapsable());
+        if (comp) {
+            ui->actionCollapse_Points->setEnabled(comp->collapsable());
+            ui->actionFill_In->setEnabled(comp->fillable());
+        }
         selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
     }
     ui->deleteObject->setEnabled(true);
@@ -177,6 +183,10 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
 
 void MainWindow::on_actionCollapse_Points_triggered() {
     scene->collapseSelected();
+}
+
+void MainWindow::on_actionFill_In_triggered() {
+    scene->fillIn();
 }
 
 void MainWindow::on_deleteObject_clicked() {

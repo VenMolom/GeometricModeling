@@ -35,7 +35,7 @@ private:
     std::array<int, Dim> _density;
     std::array<std::tuple<float, float>, Dim> _range;
 
-    virtual void densityUpdated() = 0;
+    virtual void densityUpdated() {}
 };
 
 template<size_t Dim>

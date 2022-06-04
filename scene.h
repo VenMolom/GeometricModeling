@@ -34,6 +34,8 @@ public:
 
     void collapseSelected();
 
+    void fillIn();
+
     void addPoint(QPoint screenPosition);
 
     void selectOrAddCursor(QPoint screenPosition, bool multiple);

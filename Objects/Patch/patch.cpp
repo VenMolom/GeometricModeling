@@ -227,3 +227,7 @@ Patch::Patch(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &serialized
     calculateCenter();
     XMStoreFloat4x4(&modificationMatrixInverse, XMMatrixIdentity());
 }
+
+std::array<int, PATCH_DIM> Patch::size() const {
+    return segments;
+}

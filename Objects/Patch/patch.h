@@ -29,6 +29,8 @@ public:
 
     std::array<bool, PATCH_DIM> looped() const override;
 
+    std::array<int, PATCH_DIM> size() const;
+
     const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints() override;
 
     void setPosition(DirectX::XMFLOAT3 position) override;
@@ -51,8 +53,6 @@ protected:
     bool loopedU, loopedV = false;
     Linelist bezierMesh;
 
-    void densityUpdated() override {}
-
     void pointMoved(const std::weak_ptr<VirtualPoint> &point, int index);
 
     void addPoint(DirectX::XMFLOAT3 position);
@@ -69,9 +69,9 @@ protected:
 
     virtual void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) = 0;
 
-    virtual void createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) = 0;
+    virtual void createCylinderSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) {}
 
-    virtual void createPlaneSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) = 0;
+    virtual void createPlaneSegments(std::array<int, PATCH_DIM> segments, std::array<float, PATCH_DIM> size) {}
 
     template<typename T>
     T serialize(std::vector<MG1::Point> &serializedPoints);

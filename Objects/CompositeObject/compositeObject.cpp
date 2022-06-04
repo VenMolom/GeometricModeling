@@ -15,6 +15,7 @@ CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
           objects() {
 
     _collapsable = true;
+    _fillable = true;
 
     for (auto &object : objects) {
         if (!(object->type() & COMPOSABLE)) continue;
@@ -25,6 +26,20 @@ CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
         this->objects.push_back(object);
 
         if (object->type() != COMPOSABLEVIRTUALPOINT3D) _collapsable &= false;
+        if (object->type() != PATCHC0) _fillable &= false;
+    }
+
+    _fillable &= (this->objects.size() == 3);
+
+    if (_fillable) {
+        array<shared_ptr<BicubicC0>, 3> patches;
+        int index = 0;
+        for (auto& object : this->objects) {
+            patches[index++] = static_pointer_cast<BicubicC0>(object);
+        }
+        fillInInfo = GregoryUtils::checkForGregoryFillIn(patches);
+
+        _fillable = fillInInfo.canFill;
     }
 
     calculateCenter();
@@ -133,4 +148,16 @@ shared_ptr<VirtualPoint> CompositeObject::collapse() {
     if (!_collapsable) return {};
 
     return make_shared<ComposableVirtualPoint>(position());
+}
+
+std::shared_ptr<GregoryPatch> CompositeObject::fillIn(uint id) {
+    if (!_fillable) return {};
+
+    array<shared_ptr<BicubicC0>, 3> patches;
+    int index = 0;
+    for (auto& object : this->objects) {
+        patches[index++] = static_pointer_cast<BicubicC0>(object);
+    }
+
+    return make_shared<GregoryPatch>(id, patches, fillInInfo);
 }

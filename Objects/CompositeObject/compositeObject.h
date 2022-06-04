@@ -8,6 +8,8 @@
 #include <DirectXMath.h>
 #include "Objects/object.h"
 #include "Objects/Point/composableVirtualPoint.h"
+#include "Objects/Patch/gregoryPatch.h"
+#include "Utils/gregoryUtils.h"
 
 class CompositeObject : public Object{
 public:
@@ -33,15 +35,21 @@ public:
 
     bool collapsable() const { return _collapsable; }
 
+    bool fillable() const { return _fillable; }
+
     bool empty() const { return objects.empty(); }
 
     std::shared_ptr<VirtualPoint> collapse();
+
+    std::shared_ptr<GregoryPatch> fillIn(uint id);
 
 private:
     std::list<std::shared_ptr<Object>> objects;
     std::vector<DirectX::XMFLOAT4X4> startingMatrices{};
     DirectX::XMFLOAT3 startingPosition;
     bool _collapsable = false;
+    bool _fillable = false;
+    GregoryUtils::GregoryInfo fillInInfo;
 
     void calculateCenter();
 

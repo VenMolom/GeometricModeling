@@ -287,6 +287,7 @@
      <string>Action</string>
     </property>
     <addaction name="actionCollapse_Points"/>
+    <addaction name="actionFill_In"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAction"/>
@@ -310,6 +311,14 @@
    </property>
    <property name="text">
     <string>Collapse Points</string>
+   </property>
+  </action>
+  <action name="actionFill_In">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Fill In</string>
    </property>
   </action>
  </widget>

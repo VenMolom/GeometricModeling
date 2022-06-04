@@ -5,7 +5,6 @@
 #ifndef MG1_UTILS3D_H
 #define MG1_UTILS3D_H
 
-#include <DirectXMath.h>
 #include "camera.h"
 
 namespace Utils3D {

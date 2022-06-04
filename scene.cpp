@@ -124,6 +124,16 @@ void Scene::collapseSelected() {
     setSelected(newPoint);
 }
 
+void Scene::fillIn() {
+    if (!composite) return;
+
+    auto comp = static_pointer_cast<CompositeObject>(composite);
+
+    if (!comp->fillable()) return;
+
+    addObject(comp->fillIn(factory.id()));
+}
+
 void Scene::addPoint(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto position = getPositionOnPlane(screenPos, _camera->direction(), _camera->center());
