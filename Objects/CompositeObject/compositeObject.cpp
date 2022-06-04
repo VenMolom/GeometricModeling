@@ -14,6 +14,8 @@ CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
         : Object(0, "Composite", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED),
           objects() {
 
+    _collapsable = true;
+
     for (auto &object : objects) {
         if (!(object->type() & COMPOSABLE)) continue;
 
@@ -21,6 +23,8 @@ CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
         XMStoreFloat4x4(&model, object->modelMatrix());
         startingMatrices.push_back(model);
         this->objects.push_back(object);
+
+        if (object->type() != COMPOSABLEVIRTUALPOINT3D) _collapsable &= false;
     }
 
     calculateCenter();
@@ -123,4 +127,10 @@ DirectX::XMFLOAT3 CompositeObject::rotationMatrixToEuler(XMMATRIX rotationMatrix
 
 bool CompositeObject::equals(const shared_ptr<Object> &other) const {
     return contains(other);
+}
+
+shared_ptr<VirtualPoint> CompositeObject::collapse() {
+    if (!_collapsable) return {};
+
+    return make_shared<ComposableVirtualPoint>(position());
 }

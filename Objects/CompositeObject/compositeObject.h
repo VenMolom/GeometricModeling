@@ -7,6 +7,7 @@
 
 #include <DirectXMath.h>
 #include "Objects/object.h"
+#include "Objects/Point/composableVirtualPoint.h"
 
 class CompositeObject : public Object{
 public:
@@ -30,10 +31,17 @@ public:
 
     bool equals(const std::shared_ptr<Object> &other) const override;
 
+    bool collapsable() const { return _collapsable; }
+
+    bool empty() const { return objects.empty(); }
+
+    std::shared_ptr<VirtualPoint> collapse();
+
 private:
     std::list<std::shared_ptr<Object>> objects;
     std::vector<DirectX::XMFLOAT4X4> startingMatrices{};
     DirectX::XMFLOAT3 startingPosition;
+    bool _collapsable = false;
 
     void calculateCenter();
 

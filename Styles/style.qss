@@ -104,6 +104,12 @@ QMenuBar::item {
 QMenuBar::item:selected {
 	background:rgb(115, 115, 115);
 }
+QMenu::item:selected:disabled {
+	color:rgb(120,120,120);
+}
+QMenu::item:disabled {
+	color:rgb(120,120,120);
+}
 QMenu::item:selected {
 	color:rgb(255,255,255);
 	border-width:2px;

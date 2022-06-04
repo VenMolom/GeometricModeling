@@ -65,6 +65,8 @@ void Patch::createSegments(array<int, PATCH_DIM> segments, array<float, PATCH_DI
 }
 
 void Patch::pointMoved(const weak_ptr<VirtualPoint> &point, int index) {
+    if (ignoreSignal) return;
+
     shared_ptr<VirtualPoint> moved;
     if (!(moved = point.lock())) {
         return;
@@ -95,6 +97,31 @@ void Patch::addPoint(DirectX::XMFLOAT3 position) {
     bezierMesh.vertices().push_back({position, {1, 1, 1}});
 }
 
+void Patch::replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) {
+    auto pos = std::find_if(points.begin(), points.end(),
+                           [&point](const shared_ptr<VirtualPoint> &p) {
+                               return point->equals(p);
+                           });
+
+    if (pos == points.end()) {
+        return;
+    }
+    int index = pos - points.begin();
+
+    weak_ptr<VirtualPoint> weakPoint = newPoint;
+    pointsHandlers[index] = newPoint->bindablePosition().addNotifier([this, weakPoint, index] {
+        pointMoved(weakPoint, index);
+    });
+    points[index] = newPoint;
+
+    auto newPosition = newPoint->position();
+    startingPositions[index] = newPosition;
+    vertices[index].position = newPosition;
+    bezierMesh.vertices()[index].position = newPosition;
+    updateBuffers();
+    bezierMesh.update();
+}
+
 void Patch::setPosition(DirectX::XMFLOAT3 position) {
     Object::setPosition(position);
     updatePoints();
@@ -111,6 +138,7 @@ void Patch::setScale(DirectX::XMFLOAT3 scale) {
 }
 
 void Patch::updatePoints() {
+    ignoreSignal = true;
     auto rotation = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&_rotation.value()));
     auto scaling = XMMatrixScalingFromVector(XMLoadFloat3(&_scale.value()));
 
@@ -123,13 +151,14 @@ void Patch::updatePoints() {
     for (auto &point: points) {
         auto pos = startingPositions[i];
         XMStoreFloat3(&pos, XMVector3TransformCoord(XMLoadFloat3(&pos), modifyMatrix));
-        point->setPositionSilently(pos);
+        point->setPosition(pos);
         vertices[i].position = pos;
         bezierMesh.vertices()[i++].position = pos;
     }
 
     updateBuffers();
     bezierMesh.update();
+    ignoreSignal = false;
 }
 
 void Patch::clear() {

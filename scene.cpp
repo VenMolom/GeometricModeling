@@ -60,14 +60,21 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
     emit objectAdded(_objects.back(), select);
 }
 
-void Scene::addComposite(list<shared_ptr<Object>> &&objects) {
+shared_ptr<CompositeObject> Scene::addComposite(list<shared_ptr<Object>> &&objects) {
     _objects.remove_if([&objects](const shared_ptr<Object> &ob) {
         return find_if(objects.begin(), objects.end(),
                        [&ob](const shared_ptr<Object> &obb) { return ob->equals(obb); }) != objects.end();
     });
 
     auto comp = make_shared<CompositeObject>(std::move(objects));
+
+    if (comp->empty()) {
+        setSelected({});
+        return {};
+    }
+
     setSelected(comp);
+    return comp;
 }
 
 void Scene::addCreator(shared_ptr<Object> &&creator) {
@@ -92,6 +99,29 @@ void Scene::removeSelected() {
         composite.reset();
         setSelected(nullptr);
     }
+}
+
+void Scene::collapseSelected() {
+    if (!composite) return;
+
+    auto comp = static_pointer_cast<CompositeObject>(composite);
+
+    if (!comp->collapsable()) return;
+
+    auto newPoint = comp->collapse();
+
+    virtualPointsHolders.remove_if([](weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
+    for (auto &holder: virtualPointsHolders) {
+        auto points = holder.lock()->virtualPoints();
+        for (auto &point: points) {
+            if (comp->contains(point)) {
+                holder.lock()->replacePoint(point, newPoint);
+            }
+        }
+    }
+
+    composite.reset();
+    setSelected(newPoint);
 }
 
 void Scene::addPoint(QPoint screenPosition) {
@@ -248,7 +278,7 @@ void Scene::selectFromScreen(QPointF start, QPointF end) {
     list<shared_ptr<Object>> selected{};
 
     for(auto &object : _objects) {
-        if (!(object->type() & COMPOSABLE)) continue;
+        if (!(object->type() & SCREENSELECTABLE)) continue;
 
         auto screenPos = project(object->position());
         if (screenPos.x >= minPoint.x() && screenPos.x <= maxPoint.x()
@@ -269,7 +299,15 @@ void Scene::selectFromScreen(QPointF start, QPointF end) {
         }
     }
 
-    if (selected.empty()) return;
+    if (selected.empty()) {
+        setSelected({});
+        return;
+    }
+
+    if (selected.size() == 1) {
+        setSelected(selected.front());
+        return;
+    }
 
     addComposite(std::move(selected));
 }

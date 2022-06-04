@@ -282,9 +282,19 @@
     <addaction name="actionSave"/>
     <addaction name="actionLoad"/>
    </widget>
+   <widget class="QMenu" name="menuAction">
+    <property name="title">
+     <string>Action</string>
+    </property>
+    <addaction name="actionCollapse_Points"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuAction"/>
   </widget>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -292,6 +302,14 @@
   <action name="actionLoad">
    <property name="text">
     <string>Load</string>
+   </property>
+  </action>
+  <action name="actionCollapse_Points">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Collapse Points</string>
    </property>
   </action>
  </widget>

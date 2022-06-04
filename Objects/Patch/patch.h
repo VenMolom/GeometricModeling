@@ -43,6 +43,8 @@ public:
 
     void draw(Renderer &renderer, DrawType drawType) override;
 
+    void replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) override;
+
 protected:
     std::vector<std::shared_ptr<VirtualPoint>> points;
     std::array<int, PATCH_DIM> segments;
@@ -80,6 +82,7 @@ private:
     DirectX::XMFLOAT3 startingPosition;
     DirectX::XMFLOAT4X4 modificationMatrixInverse;
     bool _polygonal{false};
+    bool ignoreSignal{false};
 
     template<typename T>
     std::vector<T> serializePatches(std::vector<MG1::Point> &serializedPoints);

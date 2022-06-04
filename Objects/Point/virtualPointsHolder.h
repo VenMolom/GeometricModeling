@@ -20,6 +20,8 @@ public:
 
     virtual const std::vector<std::shared_ptr<VirtualPoint>> &virtualPoints() = 0;
 
+    virtual void replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) = 0;
+
 protected:
     std::weak_ptr<Object> selected;
     QBindable<std::weak_ptr<Object>> bindableSelected;

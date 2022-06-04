@@ -34,6 +34,8 @@ public:
 
     MG1::BezierC2 serialize();
 
+    void replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) override {}
+
 protected:
 public:
     void draw(Renderer &renderer, DrawType drawType) override;

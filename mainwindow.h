@@ -46,6 +46,8 @@ private slots:
 
     void on_actionLoad_triggered();
 
+    void on_actionCollapse_Points_triggered();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 

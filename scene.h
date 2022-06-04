@@ -24,13 +24,15 @@ public:
 
     void addObject(std::shared_ptr<Object> &&object, bool overrideCursor = false);
 
-    void addComposite(std::list<std::shared_ptr<Object>> &&objects);
+    std::shared_ptr<CompositeObject> addComposite(std::list<std::shared_ptr<Object>> &&objects);
 
     void addCreator(std::shared_ptr<Object> &&object);
 
     void createFromCreator();
 
     void removeSelected();
+
+    void collapseSelected();
 
     void addPoint(QPoint screenPosition);
 

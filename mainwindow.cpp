@@ -70,6 +70,7 @@ void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool selec
 }
 
 void MainWindow::updateSelection() {
+    ui->actionCollapse_Points->setEnabled(false);
     shared_ptr<Object> selected;
     if (!(selected = scene->selected().lock())) {
         ui->objectsList->clearSelection();
@@ -95,6 +96,7 @@ void MainWindow::updateSelection() {
         }
         ui->deleteObject->setEnabled(true);
         ui->centerObject->setEnabled(true);
+        ui->actionCollapse_Points->setEnabled(composite->collapsable());
         return;
     }
 
@@ -124,6 +126,7 @@ std::vector<std::weak_ptr<Point>> MainWindow::getSelectedPoints() {
 }
 
 void MainWindow::on_objectsList_itemSelectionChanged() {
+    ui->actionCollapse_Points->setEnabled(false);
     auto selected = ui->objectsList->selectedItems();
     if (selected.empty()) {
         ui->deleteObject->setEnabled(false);
@@ -164,11 +167,16 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
         }
 
         selectedHandler = {};
-        scene->addComposite(std::move(objects));
+        auto comp = scene->addComposite(std::move(objects));
+        if (comp) ui->actionCollapse_Points->setEnabled(comp->collapsable());
         selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
     }
     ui->deleteObject->setEnabled(true);
     ui->centerObject->setEnabled(true);
+}
+
+void MainWindow::on_actionCollapse_Points_triggered() {
+    scene->collapseSelected();
 }
 
 void MainWindow::on_deleteObject_clicked() {
@@ -246,4 +254,3 @@ void MainWindow::on_actionLoad_triggered() {
         QMessageBox::warning(this, "Load error", "Failed to load scene");
     }
 }
-
