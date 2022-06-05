@@ -312,6 +312,9 @@
    <property name="text">
     <string>Collapse Points</string>
    </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
   </action>
   <action name="actionFill_In">
    <property name="enabled">
@@ -319,6 +322,9 @@
    </property>
    <property name="text">
     <string>Fill In</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
   </action>
  </widget>

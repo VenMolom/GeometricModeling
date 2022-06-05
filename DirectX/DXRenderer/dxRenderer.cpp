@@ -212,6 +212,29 @@ void DxRenderer::draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) {
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
 }
 
+void DxRenderer::draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) {
+    updateBuffer(m_cbModel, XMMatrixIdentity());
+    updateBuffer(m_cbColor, color);
+    m_device.context()->RSSetState(m_noCullWireframe.get());
+    m_device.context()->HSSetShader(m_hullGregoryShader.get(), nullptr, 0);
+    m_device.context()->DSSetShader(m_domainGregoryShader.get(), nullptr, 0);
+
+    // density.uv
+    auto density = patch.density();
+    XMINT4 tesselationAmount = {
+            static_cast<int32_t>(density[0]),
+            static_cast<int32_t>(density[1]),
+            0, 0
+    };
+    updateBuffer(m_cbTesselation, tesselationAmount);
+
+    patch.render(m_device.context());
+
+    m_device.context()->RSSetState(nullptr);
+    m_device.context()->HSSetShader(nullptr, nullptr, 0);
+    m_device.context()->DSSetShader(nullptr, nullptr, 0);
+}
+
 void DxRenderer::enableStereoscopy(bool enable) {
     stereoscopic = enable;
     if (!enable) {
@@ -340,7 +363,7 @@ void DxRenderer::paintEvent(QPaintEvent *event) {
                                    .append(inputHandler.currentMode()));
 
     renderScene();
-    m_device.swapChain()->Present(0, 0);
+    m_device.swapChain()->Present(1, 0);
     update();
 }
 
@@ -398,35 +421,25 @@ void DxRenderer::init3D3() {
     setupViewport();
 
     const auto vsBytes = DxDevice::LoadByteCode(L"vs.cso");
-    const auto vsBillboardBytes = DxDevice::LoadByteCode(L"vsBillboard.cso");
-    const auto vsNoProjectionBytes = DxDevice::LoadByteCode(L"vsNoProjection.cso");
     const auto vsStereoBytes = DxDevice::LoadByteCode(L"vsStereo.cso");
     const auto vsSelectorBytes = DxDevice::LoadByteCode(L"vsSelector.cso");
-    const auto hsBrezierBytes = DxDevice::LoadByteCode(L"hsBrezier.cso");
-    const auto hsBicubicBytes = DxDevice::LoadByteCode(L"hsBicubic.cso");
-    const auto dsBrezierBytes = DxDevice::LoadByteCode(L"dsBrezier.cso");
-    const auto dsBicubicBytes = DxDevice::LoadByteCode(L"dsBicubic.cso");
-    const auto dsBicubicDeBoorBytes = DxDevice::LoadByteCode(L"dsBicubicDeBoor.cso");
-    const auto gsPointBytes = DxDevice::LoadByteCode(L"gsPoint.cso");
-    const auto psBytes = DxDevice::LoadByteCode(L"ps.cso");
-    const auto psFadeBytes = DxDevice::LoadByteCode(L"psCameraFade.cso");
-    const auto psStereoBytes = DxDevice::LoadByteCode(L"psStereo.cso");
-    const auto psSelectorBytes = DxDevice::LoadByteCode(L"psSelector.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
-    m_vertexBillboardShader = m_device.CreateVertexShader(vsBillboardBytes);
-    m_vertexNoProjectionShader = m_device.CreateVertexShader(vsNoProjectionBytes);
     m_vertexStereoShader = m_device.CreateVertexShader(vsStereoBytes);
     m_vertexSelectorShader = m_device.CreateVertexShader(vsSelectorBytes);
-    m_hullBrezierShader = m_device.CreateHullShader(hsBrezierBytes);
-    m_hullBicubicShader = m_device.CreateHullShader(hsBicubicBytes);
-    m_domainBrezierShader = m_device.CreateDomainShader(dsBrezierBytes);
-    m_domainBicubicShader = m_device.CreateDomainShader(dsBicubicBytes);
-    m_domainBicubicDeBoorShader = m_device.CreateDomainShader(dsBicubicDeBoorBytes);
-    m_geometryPointShader = m_device.CreateGeometryShader(gsPointBytes);
-    m_pixelShader = m_device.CreatePixelShader(psBytes);
-    m_pixelFadeShader = m_device.CreatePixelShader(psFadeBytes);
-    m_pixelStereoShader = m_device.CreatePixelShader(psStereoBytes);
-    m_pixelSelectorShader = m_device.CreatePixelShader(psSelectorBytes);
+    m_vertexBillboardShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsBillboard.cso"));
+    m_vertexNoProjectionShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsNoProjection.cso"));
+    m_hullBrezierShader = m_device.CreateHullShader(DxDevice::LoadByteCode(L"hsBrezier.cso"));
+    m_hullBicubicShader = m_device.CreateHullShader(DxDevice::LoadByteCode(L"hsBicubic.cso"));
+    m_hullGregoryShader = m_device.CreateHullShader(DxDevice::LoadByteCode(L"hsGregory.cso"));
+    m_domainBrezierShader = m_device.CreateDomainShader(DxDevice::LoadByteCode(L"dsBrezier.cso"));
+    m_domainBicubicShader = m_device.CreateDomainShader(DxDevice::LoadByteCode(L"dsBicubic.cso"));
+    m_domainGregoryShader = m_device.CreateDomainShader(DxDevice::LoadByteCode(L"dsGregory.cso"));
+    m_domainBicubicDeBoorShader = m_device.CreateDomainShader(DxDevice::LoadByteCode(L"dsBicubicDeBoor.cso"));
+    m_geometryPointShader = m_device.CreateGeometryShader(DxDevice::LoadByteCode(L"gsPoint.cso"));
+    m_pixelShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"ps.cso"));
+    m_pixelFadeShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psCameraFade.cso"));
+    m_pixelStereoShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psStereo.cso"));
+    m_pixelSelectorShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psSelector.cso"));
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);

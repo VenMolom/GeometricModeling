@@ -35,6 +35,8 @@ public:
 
     void draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) override;
 
+    void draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) override;
+
     void drawSelector(const Selector &selector);
 
     void enableStereoscopy(bool enable) override;
@@ -84,8 +86,10 @@ private:
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11HullShader> m_hullBicubicShader;
+    mini::dx_ptr<ID3D11HullShader> m_hullGregoryShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainBrezierShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainBicubicShader;
+    mini::dx_ptr<ID3D11DomainShader> m_domainGregoryShader;
     mini::dx_ptr<ID3D11DomainShader> m_domainBicubicDeBoorShader;
 
     mini::dx_ptr<ID3D11GeometryShader> m_geometryPointShader;

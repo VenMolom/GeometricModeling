@@ -98,7 +98,7 @@ void Patch::pointMoved(const weak_ptr<VirtualPoint> &point, int index) {
     bezierMesh.update();
 }
 
-void Patch::addPoint(DirectX::XMFLOAT3 position) {
+void Patch::addPoint(XMFLOAT3 position) {
     auto point = make_shared<ComposableVirtualPoint>(position);
     weak_ptr<VirtualPoint> weakPoint = point;
     auto index = static_cast<int>(points.size());
@@ -112,7 +112,7 @@ void Patch::addPoint(DirectX::XMFLOAT3 position) {
     bezierMesh.vertices().push_back({position, {1, 1, 1}});
 }
 
-void Patch::replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) {
+void Patch::replacePoint(shared_ptr<VirtualPoint> point, shared_ptr<VirtualPoint> newPoint) {
     auto pos = std::find_if(points.begin(), points.end(),
                             [&point](const shared_ptr<VirtualPoint> &p) {
                                 return point->equals(p);

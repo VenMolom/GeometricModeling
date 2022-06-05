@@ -96,8 +96,10 @@ set(HLSL_SHADER_FILES
         Shader/vs.hlsl
         Shader/hsBrezier.hlsl
         Shader/hsBicubic.hlsl
+        Shader/hsGregory.hlsl
         Shader/dsBrezier.hlsl
         Shader/dsBicubic.hlsl
+        Shader/dsGregory.hlsl
         Shader/dsBicubicDeBoor.hlsl
         Shader/psCameraFade.hlsl
         Shader/vsBillboard.hlsl
@@ -119,8 +121,10 @@ set_source_files_properties(Shader/psStereo.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psSelector.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/hsBicubic.hlsl PROPERTIES ShaderType "hs")
+set_source_files_properties(Shader/hsGregory.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/dsBrezier.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/dsBicubic.hlsl PROPERTIES ShaderType "ds")
+set_source_files_properties(Shader/dsGregory.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/dsBicubicDeBoor.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/gsPoint.hlsl PROPERTIES ShaderType "gs")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")

@@ -36,3 +36,4 @@ struct HSBicubicConstOutput {
 #define CONTROL_POINTS_BREZIER 4
 
 #define CONTROL_POINTS_PATCH 16
+#define CONTROL_POINTS_GREGORY 20
