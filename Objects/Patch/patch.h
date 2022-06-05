@@ -18,15 +18,6 @@
 
 class Patch : public ParametricObject<PATCH_DIM>, public VirtualPointsHolder {
 public:
-    Patch(uint id, QString name, DirectX::XMFLOAT3 position, std::array<int, PATCH_DIM> density,
-          std::array<int, PATCH_DIM> segments, bool cylinder, QBindable<std::weak_ptr<Object>> bindableSelected);
-
-    Patch(const MG1::BezierSurfaceC0 &surface, std::vector<MG1::Point> &serializedPoints,
-          QBindable<std::weak_ptr<Object>> bindableSelected);
-
-    Patch(const MG1::BezierSurfaceC2 &surface, std::vector<MG1::Point> &serializedPoints,
-          QBindable<std::weak_ptr<Object>> bindableSelected);
-
     std::array<bool, PATCH_DIM> looped() const override;
 
     std::array<int, PATCH_DIM> size() const;
@@ -53,6 +44,19 @@ protected:
     bool loopedU, loopedV = false;
     Linelist bezierMesh;
 
+    Patch(uint id, QString name, DirectX::XMFLOAT3 position, std::array<int, PATCH_DIM> density,
+          std::array<int, PATCH_DIM> segments, bool cylinder, QBindable<std::weak_ptr<Object>> bindableSelected);
+
+    Patch(uint id, QString name, DirectX::XMFLOAT3 position, std::array<int, PATCH_DIM> density,
+          std::array<int, PATCH_DIM> segments, bool cylinder, QBindable<std::weak_ptr<Object>> bindableSelected,
+          D3D11_PRIMITIVE_TOPOLOGY topology);
+
+    Patch(const MG1::BezierSurfaceC0 &surface, std::vector<MG1::Point> &serializedPoints,
+          QBindable<std::weak_ptr<Object>> bindableSelected);
+
+    Patch(const MG1::BezierSurfaceC2 &surface, std::vector<MG1::Point> &serializedPoints,
+          QBindable<std::weak_ptr<Object>> bindableSelected);
+
     void pointMoved(const std::weak_ptr<VirtualPoint> &point, int index);
 
     void addPoint(DirectX::XMFLOAT3 position);
@@ -66,6 +70,10 @@ protected:
     void calculateCenter();
 
     virtual void drawMesh(Renderer &renderer, DrawType drawType);
+
+    virtual void drawPoints(Renderer &renderer, DrawType drawType);
+
+    virtual void drawCursor(Renderer &renderer, DrawType drawType);
 
     virtual void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) = 0;
 

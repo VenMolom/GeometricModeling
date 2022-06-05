@@ -9,10 +9,10 @@
 #include "Utils/gregoryUtils.h"
 
 class GregoryPatch : public Patch {
+public:
     GregoryPatch(uint id, const std::array<std::shared_ptr<BicubicC0>, 3> &patches,
                  GregoryUtils::GregoryInfo fillInInfo);
 
-public:
     Type type() const override;
 
     void setPosition(DirectX::XMFLOAT3 position) override {}
@@ -21,10 +21,24 @@ public:
 
     void setScale(DirectX::XMFLOAT3 scale) override {}
 
-    void draw(Renderer &renderer, DrawType drawType) override;
-
     void replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) override {}
 
+protected:
+    void calculateMeshIndices(std::array<int, 2> segments, Linelist &linelist) override;
+
+    void drawMesh(Renderer &renderer, DrawType drawType) override;
+
+    void drawCursor(Renderer &renderer, DrawType drawType) override {}
+
+    void drawPoints(Renderer &renderer, DrawType drawType) override {}
+
+private:
+    std::array<std::shared_ptr<BicubicC0>, 3> patches;
+    GregoryUtils::GregoryInfo fillInInfo;
+
+    void clear();
+    void createPoints();
+    void setHandlers();
 };
 
 

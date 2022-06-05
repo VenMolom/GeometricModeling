@@ -11,10 +11,10 @@
 namespace GregoryUtils {
     struct GregoryInfo {
         bool canFill;
-        std::array<std::pair<int, int>, 3> corners;
+        std::array<std::pair<std::pair<int, int>, std::pair<int, int>>, 3> corners;
 
         GregoryInfo();
-        GregoryInfo(bool canFill, const std::array<std::pair<int, int>, 3> &corners);
+        GregoryInfo(bool canFill, const std::array<std::pair<std::pair<int, int>, std::pair<int, int>>, 3> &corners);
     };
 
     GregoryInfo checkForGregoryFillIn(const std::array<std::shared_ptr<BicubicC0>, 3> &patches);

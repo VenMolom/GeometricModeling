@@ -6,7 +6,7 @@
 
 using namespace DirectX;
 
-float POINT_SIZE = 1.8f;
+float POINT_SIZE = 2.f;
 
 Point::Point(uint id, DirectX::XMFLOAT3 position) : Object(id, "Point", position, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST) {
     vertices.push_back({{0, 0, 0},

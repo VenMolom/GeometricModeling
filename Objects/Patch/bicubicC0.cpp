@@ -124,3 +124,9 @@ BicubicC0::BicubicC0(const MG1::BezierSurfaceC0 &surface, vector<MG1::Point> &se
     calculateMeshIndices(segments, bezierMesh);
     updatePoints();
 }
+
+std::shared_ptr<VirtualPoint> BicubicC0::pointAt(std::pair<int, int> index) const {
+    auto uPoints = segments[0] * 3 + (loopedU ? 0 : 1);
+    auto idx = index.second * uPoints + index.first;
+    return points[idx];
+}

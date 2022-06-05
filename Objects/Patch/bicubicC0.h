@@ -21,6 +21,8 @@ public:
 
     MG1::BezierSurfaceC0 serialize(std::vector<MG1::Point> &serializedPoints);
 
+    std::shared_ptr<VirtualPoint> pointAt(std::pair<int, int> index) const;
+
 protected:
     void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) override;
 

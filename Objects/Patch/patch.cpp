@@ -12,9 +12,16 @@ using namespace DirectX;
 
 Patch::Patch(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> density,
              array<int, PATCH_DIM> segments, bool cylinder, QBindable<weak_ptr<Object>> bindableSelected)
+        : Patch(id, std::move(name), position, density, segments, cylinder, bindableSelected,
+                D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST) {
+}
+
+Patch::Patch(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> density,
+             array<int, PATCH_DIM> segments, bool cylinder, QBindable<weak_ptr<Object>> bindableSelected,
+             D3D11_PRIMITIVE_TOPOLOGY topology)
         : ParametricObject<PATCH_DIM>(id, std::move(name), position, density,
                                       {make_tuple(0, 1.f * segments[0]), make_tuple(0, 1.f * segments[1])},
-                                      D3D11_PRIMITIVE_TOPOLOGY_16_CONTROL_POINT_PATCHLIST),
+                                      topology),
           VirtualPointsHolder(bindableSelected),
           segments(segments),
           loopedU(cylinder),
@@ -25,24 +32,32 @@ Patch::Patch(uint id, QString name, XMFLOAT3 position, array<int, PATCH_DIM> den
 void Patch::draw(Renderer &renderer, DrawType drawType) {
     drawMesh(renderer, drawType);
 
+    drawPoints(renderer, drawType);
+
+    if (_polygonal && !bezierMesh.vertices().empty()) {
+        bezierMesh.draw(renderer, drawType);
+    }
+
+    drawCursor(renderer, drawType);
+}
+
+void Patch::drawMesh(Renderer &renderer, DrawType drawType) {
+    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
+}
+
+void Patch::drawPoints(Renderer &renderer, DrawType drawType) {
     if (!points.empty()) {
         for (auto &point: points) {
             auto isSelected = !selected.expired() && point->equals(selected.lock());
             point->draw(renderer, isSelected ? SELECTED : DEFAULT);
         }
     }
+}
 
-    if (_polygonal && !bezierMesh.vertices().empty()) {
-        bezierMesh.draw(renderer, drawType);
-    }
-
+void Patch::drawCursor(Renderer &renderer, DrawType drawType) {
     if (drawType == SELECTED) {
         Cursor::drawCursor(renderer, position(), rotation());
     }
-}
-
-void Patch::drawMesh(Renderer &renderer, DrawType drawType) {
-    renderer.draw(*this, drawType != DEFAULT ? SELECTED_COLOR : DEFAULT_COLOR);
 }
 
 std::array<bool, PATCH_DIM> Patch::looped() const {
@@ -99,9 +114,9 @@ void Patch::addPoint(DirectX::XMFLOAT3 position) {
 
 void Patch::replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) {
     auto pos = std::find_if(points.begin(), points.end(),
-                           [&point](const shared_ptr<VirtualPoint> &p) {
-                               return point->equals(p);
-                           });
+                            [&point](const shared_ptr<VirtualPoint> &p) {
+                                return point->equals(p);
+                            });
 
     if (pos == points.end()) {
         return;
