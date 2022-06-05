@@ -33,15 +33,17 @@ void GregoryPatch::drawMesh(Renderer &renderer, DrawType drawType) {
 }
 
 void GregoryPatch::createPoints() {
-    // points - [patch][depth][bezier_index]
+    // edge points [patch][depth][bezier_index]
     array<array<array<shared_ptr<VirtualPoint>, 4>, 2>, 3> B;
-    array<array<array<shared_ptr<VirtualPoint>, 3>, 2>, 3> R;
-    array<array<array<shared_ptr<VirtualPoint>, 2>, 2>, 3> S;
-    array<array<array<shared_ptr<VirtualPoint>, 1>, 2>, 3> T;
-    // inside points [patch][bezier_index}
-    array<array<shared_ptr<VirtualPoint>, 4>, 3> P;
-    array<shared_ptr<VirtualPoint>, 3> a;
-    shared_ptr<VirtualPoint> P0;
+    array<array<array<XMFLOAT3, 3>, 2>, 3> R{};
+    array<array<array<XMFLOAT3, 2>, 2>, 3> S{};
+    array<array<array<XMFLOAT3, 1>, 2>, 3> T{};
+    // inside edge points [patch][bezier_index}
+    array<XMFLOAT3, 3> a{};
+    array<array<XMFLOAT3, 4>, 3> P{};
+    XMFLOAT3 P0{};
+    // in
+    array<array<XMFLOAT3, 4>, 3> U{};
 
     // patch
     for (int i = 0; i < 3; ++i) {
@@ -73,89 +75,85 @@ void GregoryPatch::createPoints() {
         // fill R
         for (int k = 0; k < 2; ++k) {
             for (int j = 0; j < 3; ++j) {
-                XMFLOAT3 pos;
-                storeFloat3Lerp(pos, B[i][k][j]->position(), B[i][k][j + 1]->position(), 0.5f);
-                R[i][k][j] = make_shared<VirtualPoint>(pos);
+                storeFloat3Lerp(R[i][k][j], B[i][k][j]->position(), B[i][k][j + 1]->position(), 0.5f);
             }
         }
 
         // fill S
         for (int k = 0; k < 2; ++k) {
             for (int j = 0; j < 2; ++j) {
-                XMFLOAT3 pos;
-                storeFloat3Lerp(pos, R[i][k][j]->position(), R[i][k][j + 1]->position(), 0.5f);
-                S[i][k][j] = make_shared<VirtualPoint>(pos);
+                storeFloat3Lerp(S[i][k][j], R[i][k][j], R[i][k][j + 1], 0.5f);
             }
         }
 
         // fill T
         for (int k = 0; k < 2; ++k) {
-            XMFLOAT3 pos;
-            storeFloat3Lerp(pos, S[i][k][0]->position(), S[i][k][1]->position(), 0.5f);
-            T[i][k][0] = make_shared<VirtualPoint>(pos);
+            storeFloat3Lerp(T[i][k][0], S[i][k][0], S[i][k][1], 0.5f);
         }
 
         // fill P
-        XMFLOAT3 pos, t0Pos = T[i][0][0]->position(), t1Pos = T[i][1][0]->position();
-        auto t0 = XMLoadFloat3(&t0Pos);
-        auto t1 = XMLoadFloat3(&t1Pos);
-        XMStoreFloat3(&pos, XMVectorAdd(t0, XMVectorSubtract(t0, t1)));
-        P[i][3] = make_shared<VirtualPoint>(t0Pos);
-        P[i][2] = make_shared<VirtualPoint>(pos);
+        storeFloat3Lerp(P[i][2], T[i][1][0], T[i][0][0], 2.f);
+        P[i][3] = T[i][0][0];
 
         // a
-        XMFLOAT3 p3Pos = t0Pos, p2Pos = pos;
-        auto p3 = XMLoadFloat3(&p3Pos);
-        auto p2 = XMLoadFloat3(&p2Pos);
-        XMStoreFloat3(&pos, XMVectorAdd(p3, XMVectorScale(XMVectorSubtract(p2, p3), 1.5f)));
-        a[i] = make_shared<VirtualPoint>(pos);
+        storeFloat3Lerp(a[i], P[i][3], P[i][2], 2.f);
     }
 
-    XMFLOAT3 p0Pos, a0Pos = a[0]->position(), a1Pos = a[1]->position(), a2Pos = a[2]->position();
-    auto a0 = XMLoadFloat3(&a0Pos);
-    auto a1 = XMLoadFloat3(&a1Pos);
-    auto a2 = XMLoadFloat3(&a2Pos);
-
-    XMStoreFloat3(&p0Pos, XMVectorScale(XMVectorAdd(XMVectorAdd(a0, a1), a2), 1.f / 3.f));
-    P0 = make_shared<VirtualPoint>(p0Pos);
+    auto a0 = XMLoadFloat3(&a[0]);
+    auto a1 = XMLoadFloat3(&a[1]);
+    auto a2 = XMLoadFloat3(&a[2]);
+    XMStoreFloat3(&P0, XMVectorScale(XMVectorAdd(XMVectorAdd(a0, a1), a2), 1.f / 3.f));
 
     for (int i = 0; i < 3; ++i) {
-        XMFLOAT3 pos;
-        storeFloat3Lerp(pos, p0Pos, a[i]->position(), 2.f/ 3.f);
-        P[i][1] = make_shared<VirtualPoint>(pos);
+        storeFloat3Lerp(P[i][1], P0, a[i], 2.f / 3.f);
+
+        storeFloat3Lerp(U[i][0], R[i][1][0], R[i][0][0], 2.f);
+        storeFloat3Lerp(U[i][1], S[i][1][0], S[i][0][0], 2.f);
+        storeFloat3Lerp(U[i][2], S[i][1][1], S[i][0][1], 2.f);
+        storeFloat3Lerp(U[i][3], R[i][1][2], R[i][0][2], 2.f);
 
         // edges
-        for (int k = 0; k < 2; ++k){
+        for (int k = 0; k < 2; ++k) {
             bezierMesh.vertices().push_back({B[i][k][0]->position(), {1, 1, 1}});
-            bezierMesh.vertices().push_back({R[i][k][0]->position(), {1, 1, 1}});
-            bezierMesh.vertices().push_back({S[i][k][0]->position(), {1, 1, 1}});
-            bezierMesh.vertices().push_back({T[i][k][0]->position(), {1, 1, 1}});
-            bezierMesh.vertices().push_back({S[i][k][1]->position(), {1, 1, 1}});
-            bezierMesh.vertices().push_back({R[i][k][2]->position(), {1, 1, 1}});
+            bezierMesh.vertices().push_back({R[i][k][0], {1, 1, 1}});
+            bezierMesh.vertices().push_back({S[i][k][0], {1, 1, 1}});
+            bezierMesh.vertices().push_back({T[i][k][0], {1, 1, 1}});
+            bezierMesh.vertices().push_back({S[i][k][1], {1, 1, 1}});
+            bezierMesh.vertices().push_back({R[i][k][2], {1, 1, 1}});
             bezierMesh.vertices().push_back({B[i][k][3]->position(), {1, 1, 1}});
 
+            // inside points
+            bezierMesh.vertices().push_back({U[i][0], {1, 1, 1}});
+            bezierMesh.vertices().push_back({U[i][1], {1, 1, 1}});
+            bezierMesh.vertices().push_back({U[i][2], {1, 1, 1}});
+            bezierMesh.vertices().push_back({U[i][3], {1, 1, 1}});
+
             // border
-            bezierMesh.addLine(i * 17 + k * 7,     i * 17 + k * 7 + 1);
-            bezierMesh.addLine(i * 17 + k * 7 + 1, i * 17 + k * 7 + 2);
-            bezierMesh.addLine(i * 17 + k * 7 + 2, i * 17 + k * 7 + 3);
-            bezierMesh.addLine(i * 17 + k * 7 + 3, i * 17 + k * 7 + 4);
-            bezierMesh.addLine(i * 17 + k * 7 + 4, i * 17 + k * 7 + 5);
-            bezierMesh.addLine(i * 17 + k * 7 + 5, i * 17 + k * 7 + 6);
+            bezierMesh.addLine(i * 25 + k * 11, i * 25 + k * 11 + 1);
+            bezierMesh.addLine(i * 25 + k * 11 + 1, i * 25 + k * 11 + 2);
+            bezierMesh.addLine(i * 25 + k * 11 + 2, i * 25 + k * 11 + 3);
+            bezierMesh.addLine(i * 25 + k * 11 + 3, i * 25 + k * 11 + 4);
+            bezierMesh.addLine(i * 25 + k * 11 + 4, i * 25 + k * 11 + 5);
+            bezierMesh.addLine(i * 25 + k * 11 + 5, i * 25 + k * 11 + 6);
+            bezierMesh.addLine(i * 25 + k * 11 + 1, i * 25 + k * 11 + 7);
+            bezierMesh.addLine(i * 25 + k * 11 + 2, i * 25 + k * 11 + 8);
+            bezierMesh.addLine(i * 25 + k * 11 + 4, i * 25 + k * 11 + 9);
+            bezierMesh.addLine(i * 25 + k * 11 + 5, i * 25 + k * 11 + 10);
         }
 
         auto index = bezierMesh.vertices().size();
-        bezierMesh.vertices().push_back({P[i][3]->position(), {1, 1, 1}});
-        bezierMesh.vertices().push_back({P[i][2]->position(), {1, 1, 1}});
-        bezierMesh.vertices().push_back({P[i][1]->position(), {1, 1, 1}});
-        bezierMesh.addLine(index,     index + 1);
+        bezierMesh.vertices().push_back({P[i][3], {1, 1, 1}});
+        bezierMesh.vertices().push_back({P[i][2], {1, 1, 1}});
+        bezierMesh.vertices().push_back({P[i][1], {1, 1, 1}});
+        bezierMesh.addLine(index, index + 1);
         bezierMesh.addLine(index + 1, index + 2);
     }
 
     auto index = bezierMesh.vertices().size();
-    bezierMesh.vertices().push_back({P0->position(), {1, 1, 1}});
-    bezierMesh.addLine(index, 16);
-    bezierMesh.addLine(index, 33);
-    bezierMesh.addLine(index, 50);
+    bezierMesh.vertices().push_back({P0, {1, 1, 1}});
+    bezierMesh.addLine(index, 24);
+    bezierMesh.addLine(index, 49);
+    bezierMesh.addLine(index, 74);
 
     bezierMesh.update();
 }
