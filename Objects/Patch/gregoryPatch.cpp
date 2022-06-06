@@ -152,7 +152,30 @@ void GregoryPatch::createPoints() {
         //calculate P^i{1}
         storeFloat3Lerp(P[i][1], P0, Q[i], 2.f / 3.f);
 
-        // inside points from border
+//        auto b0Pos = B[i][0][0]->position();
+//        auto b01Pos = B[i][1][0]->position();
+//        auto a0 = XMVectorSubtract(XMLoadFloat3(&R[(i + 1) % 3][0][2]), XMLoadFloat3(&b0Pos));
+//        auto b0 = XMVectorSubtract(XMLoadFloat3(&b0Pos), XMLoadFloat3(&b01Pos));
+//        auto g0 = XMVectorScale(XMVectorAdd(a0, b0), 0.5f);
+//        auto g2 = XMVectorSubtract(XMLoadFloat3(&P[i][2]), XMLoadFloat3(&T[i][0][0]));
+//
+//        P[i][0] = P0;
+//        auto p = calculateInsidePoints(g0, g2, b0, g2, { b0Pos, R[i][0][0], S[i][0][0], T[i][0][0] });
+//        U[i][0] = p.first;
+//        U[i][1] = p.second;
+//
+//        g0 = g2;
+//        auto b3Pos = B[i][0][3]->position();
+//        auto b31Pos = B[i][1][3]->position();
+//        auto a2 = XMVectorSubtract(XMLoadFloat3(&R[(i + 2) % 3][0][0]), XMLoadFloat3(&b3Pos));
+//        auto b2 = XMVectorSubtract(XMLoadFloat3(&b3Pos), XMLoadFloat3(&b31Pos));
+//        g2 = XMVectorScale(XMVectorAdd(a2, b2), 0.5f);
+//
+//        p = calculateInsidePoints(g0, g2, g0, b2, { T[i][0][0], S[i][0][1], R[i][0][2], b3Pos });
+//        U[i][2] = p.first;
+//        U[i][3] = p.second;
+
+          // inside points from border
         storeFloat3Lerp(U[i][0], R[i][1][0], R[i][0][0], 2.f);
         storeFloat3Lerp(U[i][1], S[i][1][0], S[i][0][0], 2.f);
         storeFloat3Lerp(U[i][2], S[i][1][1], S[i][0][1], 2.f);
