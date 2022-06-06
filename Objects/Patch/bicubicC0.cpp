@@ -111,7 +111,6 @@ void BicubicC0::calculateMeshIndices(array<int, PATCH_DIM> segments, Linelist &l
             if (loopedV || j != vPoints - 1) linelist.addLine(index, nextLine);
         }
     }
-    // TODO: make compatible with loopedU
 }
 
 MG1::BezierSurfaceC0 BicubicC0::serialize(vector<MG1::Point> &serializedPoints) {

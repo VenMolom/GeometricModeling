@@ -69,7 +69,8 @@ private:
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
 
-    //TODO: multiselect patch from list and delete leaves patch in scene but not in list
+    //TODO: select from list that contains noncomposable objects and delete action
+    // will delete them from list but not from scene
 };
 
 #endif // MAINWINDOW_H
