@@ -33,7 +33,8 @@ protected:
     void drawPoints(Renderer &renderer, DrawType drawType) override {}
 
 private:
-    std::array<std::shared_ptr<BicubicC0>, 3> patches;
+    std::array<std::array<std::array<std::shared_ptr<VirtualPoint>, 4>, 2>, 3> B{};
+    std::vector<QPropertyNotifier> patchesPointsHandlers{};
     GregoryUtils::GregoryInfo fillInInfo;
 
     void addPoint(DirectX::XMFLOAT3 position);
@@ -44,7 +45,9 @@ private:
 
     void createPoints();
 
-    void setHandlers();
+    void setHandlers(const std::array<std::shared_ptr<BicubicC0>, 3> &patches);
+
+    void addHandler(const std::shared_ptr<VirtualPoint> &point);
 
     std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3> calculateInsidePoints(
             DirectX::XMVECTOR g0, DirectX::XMVECTOR g2,

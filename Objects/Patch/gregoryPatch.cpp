@@ -13,9 +13,8 @@ using namespace DirectX;
 GregoryPatch::GregoryPatch(uint id, const array<shared_ptr<BicubicC0>, 3> &patches, GregoryInfo fillInInfo)
         : Patch(id, "GregoryPatch", {0, 0, 0}, {3, 3}, {1, 1}, false, {},
                 D3D11_PRIMITIVE_TOPOLOGY_20_CONTROL_POINT_PATCHLIST),
-          patches(patches),
           fillInInfo(fillInInfo) {
-    setHandlers();
+    setHandlers(patches);
     createPoints();
     calculateIndices();
     calculateMeshIndices(segments, bezierMesh);
@@ -100,8 +99,9 @@ void GregoryPatch::drawMesh(Renderer &renderer, DrawType drawType) {
 }
 
 void GregoryPatch::createPoints() {
+    clear();
+
     // edge points [patch][depth][bezier_index]
-    array<array<array<shared_ptr<VirtualPoint>, 4>, 2>, 3> B;
     array<array<array<XMFLOAT3, 3>, 2>, 3> R{};
     array<array<array<XMFLOAT3, 2>, 2>, 3> S{};
     array<array<array<XMFLOAT3, 1>, 2>, 3> T{};
@@ -115,31 +115,6 @@ void GregoryPatch::createPoints() {
 
     // patch
     for (int i = 0; i < 3; ++i) {
-        // fill B
-        auto firstCorner = fillInInfo.corners[i].first;
-        auto secondCorner = fillInInfo.corners[(i + 2) % 3].second;
-        auto uDiff = (secondCorner.first - firstCorner.first) / 3;
-        auto vDiff = (secondCorner.second - firstCorner.second) / 3;
-
-        for (int k = 0; k < 2; k++) {
-            B[i][k][0] = patches[i]->pointAt(firstCorner);
-            B[i][k][1] = patches[i]->pointAt(make_pair(firstCorner.first + uDiff, firstCorner.second + vDiff));
-            B[i][k][2] = patches[i]->pointAt(make_pair(firstCorner.first + 2 * uDiff, firstCorner.second + 2 * vDiff));
-            B[i][k][3] = patches[i]->pointAt(secondCorner);
-
-            if (k == 0) {
-                if (uDiff == 0) {
-                    auto diff = (firstCorner.first == 0 ? 1 : -1);
-                    firstCorner.first += diff;
-                    secondCorner.first += diff;
-                } else {
-                    auto diff = (firstCorner.second == 0 ? 1 : -1);
-                    firstCorner.second += diff;
-                    secondCorner.second += diff;
-                }
-            }
-        }
-
         // fill R
         for (int k = 0; k < 2; ++k) {
             for (int j = 0; j < 3; ++j) {
@@ -238,8 +213,44 @@ void GregoryPatch::createPoints() {
     updateBuffers();
 }
 
-void GregoryPatch::setHandlers() {
-    // TODO: store position changed handles for patches' border points
+void GregoryPatch::setHandlers(const array<shared_ptr<BicubicC0>, 3> &patches) {
+    for (int i = 0; i < 3; ++i) {
+        // fill B
+        auto firstCorner = fillInInfo.corners[i].first;
+        auto secondCorner = fillInInfo.corners[(i + 2) % 3].second;
+        auto uDiff = (secondCorner.first - firstCorner.first) / 3;
+        auto vDiff = (secondCorner.second - firstCorner.second) / 3;
+
+        for (int k = 0; k < 2; k++) {
+            B[i][k][0] = patches[i]->pointAt(firstCorner);
+            B[i][k][1] = patches[i]->pointAt(make_pair(firstCorner.first + uDiff, firstCorner.second + vDiff));
+            B[i][k][2] = patches[i]->pointAt(make_pair(firstCorner.first + 2 * uDiff, firstCorner.second + 2 * vDiff));
+            B[i][k][3] = patches[i]->pointAt(secondCorner);
+
+            addHandler(B[i][k][0]);
+            addHandler(B[i][k][1]);
+            addHandler(B[i][k][2]);
+            addHandler(B[i][k][3]);
+
+            if (k == 0) {
+                if (uDiff == 0) {
+                    auto diff = (firstCorner.first == 0 ? 1 : -1);
+                    firstCorner.first += diff;
+                    secondCorner.first += diff;
+                } else {
+                    auto diff = (firstCorner.second == 0 ? 1 : -1);
+                    firstCorner.second += diff;
+                    secondCorner.second += diff;
+                }
+            }
+        }
+    }
+}
+
+void GregoryPatch::addHandler(const shared_ptr<VirtualPoint> &point) {
+    patchesPointsHandlers.push_back(point->bindablePosition().addNotifier([this] {
+        createPoints();
+    }));
 }
 
 void GregoryPatch::clear() {
