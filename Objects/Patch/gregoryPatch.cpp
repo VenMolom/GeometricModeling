@@ -190,18 +190,22 @@ void GregoryPatch::createPoints() {
         auto g2 = XMVectorSubtract(XMLoadFloat3(&S[i][0][0]), XMLoadFloat3(&T[i][0][0]));
 
         P[i][0] = P0;
-        auto p = calculateInsidePoints(g0, g2, b0, g2, P[i]);
-        V[i][0] = p.first;
-        V[i][1] = p.second;
+//        auto p = calculateInsidePoints(g0, g2, b0, g2, P[i]);
+//        V[i][0] = p.first;
+//        V[i][1] = p.second;
+        XMStoreFloat3(&V[i][0], XMVectorAdd(XMLoadFloat3(&P[i][1]), g0));
+        V[i][1] = U[i][1];
 
         // inside points from P (toward B3, next patch)
         a0 = XMVectorNegate(a0);
         g0 = XMVectorNegate(g0);
         g2 = XMVectorNegate(g2);
 
-        p = calculateInsidePoints(g0, g2, a0, g2, P[i]);
-        V[i][2] = p.first;
-        V[i][3] = p.second;
+//        p = calculateInsidePoints(g0, g2, a0, g2, P[i], true);
+//        V[i][2] = p.first;
+//        V[i][3] = p.second;
+        XMStoreFloat3(&V[i][2], XMVectorAdd(XMLoadFloat3(&P[i][1]), g0));
+        V[i][3] = U[i][2];
     }
 
     for (int i = 0; i < 3; ++i) {
@@ -281,8 +285,8 @@ void GregoryPatch::clear() {
     bezierMesh.vertices().clear();
 }
 
-pair<XMFLOAT3, XMFLOAT3> GregoryPatch::calculateInsidePoints(XMVECTOR g0, XMVECTOR g2,
-                                                             XMVECTOR b0, XMVECTOR b2, array<XMFLOAT3, 4> P) {
+pair<XMFLOAT3, XMFLOAT3> GregoryPatch::calculateInsidePoints(XMVECTOR g0, XMVECTOR g2, XMVECTOR b0, XMVECTOR b2,
+                                                             array<XMFLOAT3, 4> P, bool reverse) {
     auto g1 = XMVectorScale(XMVectorAdd(g0, g2), 0.5f);
 
     auto c0 = XMVectorSubtract(XMLoadFloat3(&P[1]), XMLoadFloat3(&P[0]));
@@ -299,6 +303,11 @@ pair<XMFLOAT3, XMFLOAT3> GregoryPatch::calculateInsidePoints(XMVECTOR g0, XMVECT
     auto gg2 = deCasteljau({g0, g1, g2}, 2.f / 3.f);
     auto cc1 = deCasteljau({c0, c1, c2}, 1.f / 3.f);
     auto cc2 = deCasteljau({c0, c1, c2}, 2.f / 3.f);
+
+    if (reverse) {
+        cc1 = XMVectorNegate(cc1);
+        cc2 = XMVectorNegate(cc2);
+    }
 
     auto d1 = XMVectorAdd(XMVectorScale(gg1, k0 * (2.f / 3.f) + k1 * (1.f / 3.f)),
                           XMVectorScale(cc1, h0 * (2.f / 3.f) + h1 * (1.f / 3.f)));

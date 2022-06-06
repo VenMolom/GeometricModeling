@@ -52,7 +52,7 @@ private:
     std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3> calculateInsidePoints(
             DirectX::XMVECTOR g0, DirectX::XMVECTOR g2,
             DirectX::XMVECTOR b0, DirectX::XMVECTOR b2,
-            std::array<DirectX::XMFLOAT3, 4> P);
+            std::array<DirectX::XMFLOAT3, 4> P, bool reverse = false);
 
     DirectX::XMVECTOR deCasteljau(std::array<DirectX::XMVECTOR, 3> points, float t);
 
