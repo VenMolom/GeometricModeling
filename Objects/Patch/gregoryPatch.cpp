@@ -190,22 +190,22 @@ void GregoryPatch::createPoints() {
         auto g2 = XMVectorSubtract(XMLoadFloat3(&S[i][0][0]), XMLoadFloat3(&T[i][0][0]));
 
         P[i][0] = P0;
-//        auto p = calculateInsidePoints(g0, g2, b0, g2, P[i]);
-//        V[i][0] = p.first;
+        auto p = calculateInsidePoints(g0, g2, b0, g2, P[i]);
+        V[i][0] = p.first;
 //        V[i][1] = p.second;
-        XMStoreFloat3(&V[i][0], XMVectorAdd(XMLoadFloat3(&P[i][1]), g0));
         V[i][1] = U[i][1];
+//        XMStoreFloat3(&V[i][0], XMVectorAdd(XMLoadFloat3(&P[i][1]), g0));
 
         // inside points from P (toward B3, next patch)
         a0 = XMVectorNegate(a0);
         g0 = XMVectorNegate(g0);
         g2 = XMVectorNegate(g2);
 
-//        p = calculateInsidePoints(g0, g2, a0, g2, P[i], true);
-//        V[i][2] = p.first;
+        p = calculateInsidePoints(g0, g2, a0, g2, P[i], true);
+        V[i][2] = p.first;
 //        V[i][3] = p.second;
-        XMStoreFloat3(&V[i][2], XMVectorAdd(XMLoadFloat3(&P[i][1]), g0));
         V[i][3] = U[i][2];
+//        XMStoreFloat3(&V[i][2], XMVectorAdd(XMLoadFloat3(&P[i][1]), g0));
     }
 
     for (int i = 0; i < 3; ++i) {
