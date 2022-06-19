@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include "Controls/intersectdialog.h"
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -72,6 +73,7 @@ void MainWindow::onObjectAdded(const std::shared_ptr<Object> &object, bool selec
 void MainWindow::updateSelection() {
     ui->actionCollapse_Points->setEnabled(false);
     ui->actionFill_In->setEnabled(false);
+    ui->actionIntersect->setEnabled(false);
     shared_ptr<Object> selected;
     if (!(selected = scene->selected().lock())) {
         ui->objectsList->clearSelection();
@@ -88,6 +90,10 @@ void MainWindow::updateSelection() {
         return;
     }
 
+    if (selected->type() & PARAMETRIC) {
+        ui->actionIntersect->setEnabled(true);
+    }
+
     if (selected->type() & COMPOSITE) {
         auto composite = dynamic_cast<CompositeObject *>(selected.get());
         for (auto &item: items) {
@@ -99,6 +105,7 @@ void MainWindow::updateSelection() {
         ui->centerObject->setEnabled(true);
         ui->actionCollapse_Points->setEnabled(composite->collapsable());
         ui->actionFill_In->setEnabled(composite->fillable());
+        ui->actionIntersect->setEnabled(composite->intersectable());
         return;
     }
 
@@ -130,6 +137,7 @@ std::vector<std::weak_ptr<Point>> MainWindow::getSelectedPoints() {
 void MainWindow::on_objectsList_itemSelectionChanged() {
     ui->actionCollapse_Points->setEnabled(false);
     ui->actionFill_In->setEnabled(false);
+    ui->actionIntersect->setEnabled(false);
     auto selected = ui->objectsList->selectedItems();
     if (selected.empty()) {
         ui->deleteObject->setEnabled(false);
@@ -141,6 +149,10 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
     if (selected.size() == 1) {
         if (auto o = dynamic_cast<ObjectListItem *>(selected[0])) {
             o->select();
+
+            if (o->type() & PARAMETRIC) {
+                ui->actionIntersect->setEnabled(true);
+            }
         }
     } else {
         shared_ptr<Object> sel;
@@ -174,6 +186,7 @@ void MainWindow::on_objectsList_itemSelectionChanged() {
         if (comp) {
             ui->actionCollapse_Points->setEnabled(comp->collapsable());
             ui->actionFill_In->setEnabled(comp->fillable());
+            ui->actionIntersect->setEnabled(comp->intersectable());
         }
         selectedHandler = scene->bindableSelected().addNotifier([this] { updateSelection(); });
     }
@@ -187,6 +200,15 @@ void MainWindow::on_actionCollapse_Points_triggered() {
 
 void MainWindow::on_actionFill_In_triggered() {
     scene->fillIn();
+}
+
+void MainWindow::on_actionIntersect_triggered() {
+    IntersectHandler handler{scene->hasCursor()};
+    IntersectDialog dialog(this, handler);
+
+    if(!dialog.exec()) return;
+
+    scene->intersect(handler);
 }
 
 void MainWindow::on_deleteObject_clicked() {

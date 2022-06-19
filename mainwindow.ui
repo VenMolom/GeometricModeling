@@ -288,6 +288,7 @@
     </property>
     <addaction name="actionCollapse_Points"/>
     <addaction name="actionFill_In"/>
+    <addaction name="actionIntersect"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAction"/>
@@ -325,6 +326,17 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionIntersect">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Intersect</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
    </property>
   </action>
  </widget>

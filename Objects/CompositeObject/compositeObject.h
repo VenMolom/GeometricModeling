@@ -37,6 +37,8 @@ public:
 
     bool fillable() const { return _fillable; }
 
+    bool intersectable() const { return _intersectable; }
+
     bool empty() const { return objects.empty(); }
 
     std::shared_ptr<VirtualPoint> collapse();
@@ -49,6 +51,7 @@ private:
     DirectX::XMFLOAT3 startingPosition;
     bool _collapsable = false;
     bool _fillable = false;
+    bool _intersectable = false;
     GregoryUtils::GregoryInfo fillInInfo;
 
     void calculateCenter();

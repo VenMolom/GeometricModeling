@@ -15,6 +15,7 @@
 #include "Objects/Grid/grid.h"
 #include "Objects/objectFactory.h"
 #include "Objects/creator.h"
+#include "Handlers/intersectHandler.h"
 
 class Scene : public QObject {
     Q_OBJECT
@@ -36,6 +37,8 @@ public:
 
     void fillIn();
 
+    void intersect(IntersectHandler &handler);
+
     void addPoint(QPoint screenPosition);
 
     void selectOrAddCursor(QPoint screenPosition, bool multiple);
@@ -56,9 +59,11 @@ public:
 
     ObjectFactory &objectFactory() { return factory; }
 
-    void setSelected (std::shared_ptr<Object> object);
+    void setSelected(std::shared_ptr<Object> object);
 
     QBindable<std::weak_ptr<Object>> bindableSelected() { return &_selected; }
+
+    bool hasCursor() { return static_cast<bool>(cursor); }
 
 signals:
     void objectAdded(const std::shared_ptr<Object>& object, bool select);

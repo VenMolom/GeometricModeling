@@ -50,6 +50,8 @@ private slots:
 
     void on_actionFill_In_triggered();
 
+    void on_actionIntersect_triggered();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 

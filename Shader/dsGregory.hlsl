@@ -47,17 +47,9 @@ void convertPatch(in OutputPatch<DSIn, CONTROL_POINTS_GREGORY> patch, in float2 
 
     convertedPatch[5] = (uv.x * patch[6].pos + uv.y * patch[5].pos) / (uv.x + uv.y + 0.00001f);
     convertedPatch[6] = ((1 - uv.x) * patch[7].pos + uv.y * patch[8].pos) / (1 - uv.x + uv.y + 0.00001f);
-//     convertedPatch[5] = (uv.y * patch[6].pos + uv.x * patch[5].pos) / (uv.x + uv.y + 0.00001f);
-//     convertedPatch[6] = ((1 - uv.y) * patch[7].pos + uv.x * patch[8].pos) / (1 - uv.y + uv.x + 0.00001f);
-    //convertedPatch[5] = lerp(convertedPatch[4], convertedPatch[7], 0);
-    //convertedPatch[6] = lerp(convertedPatch[4], convertedPatch[7], 1);
 
     convertedPatch[9] = (uv.x * patch[12].pos + (1 - uv.y) * patch[11].pos) / (1 + uv.x - uv.y + 0.00001f);
     convertedPatch[10] = ((1 - uv.x) * patch[13].pos + (1 - uv.y) * patch[14].pos) / (2 - uv.x - uv.y + 0.00001f);
-//     convertedPatch[9] = (uv.y * patch[12].pos + (1 - uv.x) * patch[11].pos) / (1 + uv.y - uv.x + 0.00001f);
-//     convertedPatch[10] = ((1 - uv.y) * patch[13].pos + (1 - uv.x) * patch[14].pos) / (2 - uv.x - uv.y + 0.00001f);
-    //convertedPatch[9] = lerp(convertedPatch[8], convertedPatch[11], 0);
-    //convertedPatch[10] = lerp(convertedPatch[8], convertedPatch[11], 1);
 }
 
 [domain("quad")]

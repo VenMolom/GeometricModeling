@@ -16,6 +16,7 @@ CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
 
     _collapsable = true;
     _fillable = true;
+    _intersectable = true;
 
     for (auto &object : objects) {
         if (!(object->type() & COMPOSABLE)) continue;
@@ -25,11 +26,13 @@ CompositeObject::CompositeObject(list<shared_ptr<Object>> &&objects)
         startingMatrices.push_back(model);
         this->objects.push_back(object);
 
-        if (object->type() != COMPOSABLEVIRTUALPOINT3D) _collapsable &= false;
-        if (object->type() != PATCHC0) _fillable &= false;
+        if (object->type() != COMPOSABLEVIRTUALPOINT3D) _collapsable = false;
+        if (object->type() != PATCHC0) _fillable = false;
+        if (!(object->type() & PARAMETRIC)) _intersectable = false;
     }
 
     _fillable &= (this->objects.size() == 3);
+    _intersectable &= (this->objects.size() == 2);
 
     if (_fillable) {
         array<shared_ptr<BicubicC0>, 3> patches;

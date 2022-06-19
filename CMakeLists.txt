@@ -86,7 +86,9 @@ set(PROJECT_SOURCES
         Objects/Patch/bicubicC2.cpp Objects/Patch/bicubicC2.h
         Objects/Patch/bicubicC2Creator.cpp Objects/Patch/bicubicC2Creator.h
         Utils/gregoryUtils.cpp Utils/gregoryUtils.h
-        Objects/Patch/gregoryPatch.cpp Objects/Patch/gregoryPatch.h)
+        Objects/Patch/gregoryPatch.cpp Objects/Patch/gregoryPatch.h
+        Controls/intersectdialog.h Controls/intersectdialog.cpp
+        Controls/intersectdialog.ui Handlers/intersectHandler.cpp Handlers/intersectHandler.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

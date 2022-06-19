@@ -201,3 +201,6 @@ QCheckBox::indicator:checked {
 QStatusBar {
 	color:rgb(240,240,240);
 }
+QDialog {
+	background-color:rgb(82, 82, 82);
+}

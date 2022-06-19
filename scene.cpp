@@ -32,6 +32,8 @@ void Scene::draw(Renderer &renderer) {
     }
 }
 
+#pragma region Add
+
 void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
     if (!overrideCursor && cursor) {
         object->setPosition(cursor->position());
@@ -58,6 +60,27 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
 
     _objects.push_back(std::move(object));
     emit objectAdded(_objects.back(), select);
+}
+
+void Scene::addPoint(QPoint screenPosition) {
+    auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
+    auto position = getPositionOnPlane(screenPos, _camera->direction(), _camera->center());
+    addObject(factory.createPoint(position), true);
+}
+
+void Scene::addCursor(XMFLOAT3RAY ray, XMINT2 screenPos) {
+    auto plane = getPerpendicularPlaneThroughPoint(_camera->direction(), _camera->center());
+    auto position = getRayCrossWithPlane(ray, plane);
+
+    removeComposite();
+    if (cursor) {
+        cursor->setPosition(position);
+        cursor->setScreenPosition(screenPos);
+        setSelected(cursor);
+    } else {
+        cursor = make_shared<Cursor>(position, screenPos, _camera);
+        setSelected(cursor);
+    }
 }
 
 shared_ptr<CompositeObject> Scene::addComposite(list<shared_ptr<Object>> &&objects) {
@@ -93,13 +116,9 @@ void Scene::createFromCreator() {
     }
 }
 
-void Scene::removeSelected() {
-    if (auto selected = _selected.value().lock()) {
-        _objects.remove_if([&selected](const shared_ptr<Object> &ob) { return selected->equals(ob); });
-        composite.reset();
-        setSelected(nullptr);
-    }
-}
+#pragma endregion
+
+#pragma region Actions
 
 void Scene::collapseSelected() {
     if (!composite) return;
@@ -134,16 +153,91 @@ void Scene::fillIn() {
     addObject(comp->fillIn(factory.id()));
 }
 
-void Scene::addPoint(QPoint screenPosition) {
-    auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
-    auto position = getPositionOnPlane(screenPos, _camera->direction(), _camera->center());
-    addObject(factory.createPoint(position), true);
+void Scene::intersect(IntersectHandler &handler) {
+    array<shared_ptr<ParametricObject<2>>, 2> surfaces{};
+
+    if (composite) {
+        auto comp = dynamic_cast<CompositeObject *>(composite.get());
+        if (!comp->intersectable()) return;
+
+        auto released = comp->release();
+
+        int index = 0;
+        for (auto& surf : released) {
+            surfaces[index++] = static_pointer_cast<ParametricObject<2>>(surf);
+        }
+
+        _objects.splice(_objects.end(), std::move(released));
+        composite.reset();
+    } else {
+        auto selected = _selected.value().lock();
+        if (!selected || !(selected->type() & PARAMETRIC)) return;
+
+        auto surf = static_pointer_cast<ParametricObject<2>>(selected);
+        surfaces[0] = surfaces[1] = surf;
+    }
+
+    handler.setSurfaces(surfaces);
+
+    shared_ptr<Object> intersection;
+    if (cursor) {
+        intersection = handler.calculateIntersection(cursor->position());
+    } else {
+        intersection = handler.calculateIntersection();
+    }
+
+    if (intersection) addObject(std::move(intersection), true);
 }
+
+#pragma endregion
+
+#pragma region Selected
 
 void Scene::centerSelected() {
     if (auto selected = _selected.value().lock()) {
         _camera->moveTo(selected->position());
     }
+}
+
+void Scene::selectFromScreen(QPointF start, QPointF end) {
+    QPointF minPoint{min(start.x(), end.x()), min(start.y(), end.y())};
+    QPointF maxPoint{max(start.x(), end.x()), max(start.y(), end.y())};
+
+    list<shared_ptr<Object>> selected{};
+
+    for(auto &object : _objects) {
+        if (!(object->type() & SCREENSELECTABLE)) continue;
+
+        auto screenPos = project(object->position());
+        if (screenPos.x >= minPoint.x() && screenPos.x <= maxPoint.x()
+            && screenPos.y >= minPoint.y() && screenPos.y <= maxPoint.y()) {
+            selected.push_back(object);
+        }
+    }
+
+    virtualPointsHolders.remove_if([](weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
+    for (auto &holder: virtualPointsHolders) {
+        auto points = holder.lock()->virtualPoints();
+        for (auto &point: points) {
+            auto screenPos = project(point->position());
+            if (screenPos.x >= minPoint.x() && screenPos.x <= maxPoint.x()
+                && screenPos.y >= minPoint.y() && screenPos.y <= maxPoint.y()) {
+                selected.push_back(point);
+            }
+        }
+    }
+
+    if (selected.empty()) {
+        setSelected({});
+        return;
+    }
+
+    if (selected.size() == 1) {
+        setSelected(selected.front());
+        return;
+    }
+
+    addComposite(std::move(selected));
 }
 
 void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
@@ -200,17 +294,18 @@ void Scene::setSelected(std::shared_ptr<Object> object) {
     if (object->type() & COMPOSITE) {
         composite = std::move(object);
         _selected = composite;
-        cursor.reset();
     } else if ((composite && composite->equals(object))
                || object->type() & VIRTUAL
                || find_if(_objects.begin(), _objects.end(),
                           [&object](const shared_ptr<Object> &ob) { return object->equals(ob); }) != _objects.end()) {
         _selected = object;
         removeComposite();
-
-        if (!(object->type() & CURSOR)) cursor.reset();
     }
 }
+
+#pragma endregion
+
+#pragma region Helpers
 
 Utils3D::XMFLOAT3RAY Scene::getRayFromScreenPosition(XMINT2 screenPosition) const {
     return getRayFromScreen(screenPosition, _camera);
@@ -253,19 +348,17 @@ XMFLOAT3 Scene::getPositionOnPlane(XMINT2 screenPosition, XMFLOAT3 normal, XMFLO
     return getRayCrossWithPlane(ray, plane);
 }
 
-void Scene::addCursor(XMFLOAT3RAY ray, XMINT2 screenPos) {
-    auto plane = getPerpendicularPlaneThroughPoint(_camera->direction(), _camera->center());
-    auto position = getRayCrossWithPlane(ray, plane);
-
-    removeComposite();
-    if (cursor) {
-        cursor->setPosition(position);
-        cursor->setScreenPosition(screenPos);
-    } else {
-        cursor = make_shared<Cursor>(position, screenPos, _camera);
-        setSelected(cursor);
-    }
+XMFLOAT2 Scene::project(XMFLOAT3 position) {
+    XMFLOAT2 screenPos;
+    XMStoreFloat2(&screenPos, XMVector3Project(XMLoadFloat3(&position), 0, 0,
+                                               _camera->viewport().width(), _camera->viewport().height(), 0.0f, 1.0f,
+                                               _camera->projectionMatrix(), _camera->viewMatrix(), XMMatrixIdentity()));
+    return screenPos;
 }
+
+#pragma endregion
+
+#pragma region Remove
 
 void Scene::removeComposite() {
     if (!composite) return;
@@ -281,54 +374,17 @@ void Scene::removeComposite() {
     composite.reset();
 }
 
-void Scene::selectFromScreen(QPointF start, QPointF end) {
-    QPointF minPoint{min(start.x(), end.x()), min(start.y(), end.y())};
-    QPointF maxPoint{max(start.x(), end.x()), max(start.y(), end.y())};
-
-    list<shared_ptr<Object>> selected{};
-
-    for(auto &object : _objects) {
-        if (!(object->type() & SCREENSELECTABLE)) continue;
-
-        auto screenPos = project(object->position());
-        if (screenPos.x >= minPoint.x() && screenPos.x <= maxPoint.x()
-                && screenPos.y >= minPoint.y() && screenPos.y <= maxPoint.y()) {
-            selected.push_back(object);
-        }
+void Scene::removeSelected() {
+    if (auto selected = _selected.value().lock()) {
+        _objects.remove_if([&selected](const shared_ptr<Object> &ob) { return selected->equals(ob); });
+        composite.reset();
+        setSelected(nullptr);
     }
-
-    virtualPointsHolders.remove_if([](weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
-    for (auto &holder: virtualPointsHolders) {
-        auto points = holder.lock()->virtualPoints();
-        for (auto &point: points) {
-            auto screenPos = project(point->position());
-            if (screenPos.x >= minPoint.x() && screenPos.x <= maxPoint.x()
-                && screenPos.y >= minPoint.y() && screenPos.y <= maxPoint.y()) {
-                selected.push_back(point);
-            }
-        }
-    }
-
-    if (selected.empty()) {
-        setSelected({});
-        return;
-    }
-
-    if (selected.size() == 1) {
-        setSelected(selected.front());
-        return;
-    }
-
-    addComposite(std::move(selected));
 }
 
-XMFLOAT2 Scene::project(XMFLOAT3 position) {
-    XMFLOAT2 screenPos;
-    XMStoreFloat2(&screenPos, XMVector3Project(XMLoadFloat3(&position), 0, 0,
-                                   _camera->viewport().width(), _camera->viewport().height(), 0.0f, 1.0f,
-                                   _camera->projectionMatrix(), _camera->viewMatrix(), XMMatrixIdentity()));
-    return screenPos;
-}
+#pragma endregion
+
+#pragma region Serialize
 
 void Scene::load(MG1::Scene &scene) {
     _selected.setValue({});
@@ -406,3 +462,5 @@ void Scene::serialize(MG1::Scene &scene) {
         }
     }
 }
+
+#pragma endregion
