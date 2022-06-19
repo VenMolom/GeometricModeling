@@ -31,11 +31,11 @@ public:
 
     virtual std::array<bool, Dim> looped() const = 0;
 
-    virtual DirectX::XMFLOAT3 value(const std::array<float, Dim> &parameters) = 0;
+    virtual DirectX::XMVECTOR value(const std::array<float, Dim> &parameters) = 0;
 
-    virtual DirectX::XMFLOAT3 tangent(const std::array<float, Dim> &parameters) = 0;
+    virtual DirectX::XMVECTOR tangent(const std::array<float, Dim> &parameters) = 0;
 
-    virtual DirectX::XMFLOAT3 bitangent(const std::array<float, Dim> &parameters) = 0;
+    virtual DirectX::XMVECTOR bitangent(const std::array<float, Dim> &parameters) = 0;
 
 private:
     std::array<int, Dim> _density;

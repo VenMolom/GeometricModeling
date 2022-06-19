@@ -36,10 +36,24 @@ private:
     bool hasCursor{};
     int _maxPoints{};
     float _step{};
+
+    float epsilon = 10e-6;
     std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces{};
 
     struct IntersectPoint {
         float u, v, s, t;
+
+        IntersectPoint operator-(const IntersectPoint &rhs) const {
+            return {u - rhs.u, v - rhs.v, s - rhs.s, t - rhs.t};
+        }
+
+        IntersectPoint operator*(float a) const {
+            return {u * a, v * a, s * a, t * a};
+        }
+
+        float lenght() const {
+            return sqrt(u * u + v * v + s * s + t * t);
+        }
     };
 
     IntersectPoint probeStartingPoint();

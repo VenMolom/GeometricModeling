@@ -55,7 +55,7 @@ void Utils3D::storeFloat3Lerp(XMFLOAT3 &target, const XMFLOAT3 &v1, const XMFLOA
     XMStoreFloat3(&target, XMVectorLerp(XMLoadFloat3(&v1), XMLoadFloat3(&v2), t));
 }
 
-XMVECTOR bernsteinPolynomial(const vector<XMVECTOR> &controls, float t) {
+XMVECTOR Utils3D::bernsteinPolynomial(const vector<XMVECTOR> &controls, float t) {
     float t1 = 1.f - t;
     vector<XMVECTOR> points{controls};
 
@@ -66,4 +66,22 @@ XMVECTOR bernsteinPolynomial(const vector<XMVECTOR> &controls, float t) {
     }
 
     return points[0];
+}
+
+vector<XMVECTOR> Utils3D::convertToBernstein(const vector<XMVECTOR> &deBoor) {
+    XMMATRIX points(deBoor[0], deBoor[1], deBoor[2], deBoor[3]);
+    XMMATRIX convert(
+            1.f / 6.f, 4.f / 6.f, 1.f / 6.f, 0,
+            0, 2.f / 3.f, 1.f / 3.f, 0,
+            0, 1.f / 3.f, 2.f / 3.f, 0,
+            0, 1.f / 6.f, 4.f / 6.f, 1.f / 6.f
+    );
+
+    points = convert * points;
+    return {
+        points.r[0],
+        points.r[1],
+        points.r[2],
+        points.r[3],
+    };
 }

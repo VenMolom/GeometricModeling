@@ -35,11 +35,11 @@ public:
 
     MG1::Torus serialize();
 
-    DirectX::XMFLOAT3 value(const std::array<float, TORUS_DIM> &parameters) override;
+    DirectX::XMVECTOR value(const std::array<float, TORUS_DIM> &parameters) override;
 
-    DirectX::XMFLOAT3 tangent(const std::array<float, TORUS_DIM> &parameters) override;
+    DirectX::XMVECTOR tangent(const std::array<float, TORUS_DIM> &parameters) override;
 
-    DirectX::XMFLOAT3 bitangent(const std::array<float, TORUS_DIM> &parameters) override;
+    DirectX::XMVECTOR bitangent(const std::array<float, TORUS_DIM> &parameters) override;
 
 protected:
     void densityUpdated() override;

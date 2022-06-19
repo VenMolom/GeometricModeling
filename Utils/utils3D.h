@@ -22,6 +22,8 @@ namespace Utils3D {
     void storeFloat3Lerp(DirectX::XMFLOAT3 &target, const DirectX::XMFLOAT3 &v1, const DirectX::XMFLOAT3 &v2, float t);
 
     DirectX::XMVECTOR bernsteinPolynomial(const std::vector<DirectX::XMVECTOR> &controls, float t);
+
+    std::vector<DirectX::XMVECTOR> convertToBernstein(const std::vector<DirectX::XMVECTOR> &deBoor);
 }
 
 #endif //MG1_UTILS3D_H

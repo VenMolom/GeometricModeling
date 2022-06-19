@@ -123,7 +123,78 @@ MG1::BezierSurfaceC2 BicubicC2::serialize(vector<MG1::Point> &serializedPoints) 
 
 BicubicC2::BicubicC2(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &serializedPoints,
                      QBindable<std::weak_ptr<Object>> bindableSelected)
-                     : Patch(surface, serializedPoints, bindableSelected) {
+        : Patch(surface, serializedPoints, bindableSelected) {
     calculateMeshIndices(segments, bezierMesh);
     updatePoints();
+}
+
+DirectX::XMVECTOR BicubicC2::value(const array<float, 2> &parameters) {
+    auto[u, v] = parameters;
+
+    vector<XMVECTOR> p{4};
+    for (int i = 0; i < 4; ++i) {
+        p[i] = Utils3D::bernsteinPolynomial(
+                Utils3D::convertToBernstein(
+                        {
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 1].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 2].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 3].position),
+                        }
+                ), v
+        );
+    }
+    return Utils3D::bernsteinPolynomial(Utils3D::convertToBernstein(p), u);
+}
+
+DirectX::XMVECTOR BicubicC2::tangent(const array<float, 2> &parameters) {
+    auto[u, v] = parameters;
+
+    vector<XMVECTOR> p{4};
+    for (int i = 0; i < 4; ++i) {
+        p[i] = Utils3D::bernsteinPolynomial(
+                Utils3D::convertToBernstein(
+                        {
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 1].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 2].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 3].position),
+                        }
+                ), v
+        );
+    }
+
+    p = Utils3D::convertToBernstein(p);
+    vector<XMVECTOR> pp{
+            XMVectorScale(XMVectorSubtract(p[1], p[0]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[2], p[1]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[3], p[2]), 3.f)
+    };
+    return Utils3D::bernsteinPolynomial(pp, u);
+}
+
+DirectX::XMVECTOR BicubicC2::bitangent(const array<float, 2> &parameters) {
+    auto[u, v] = parameters;
+
+    vector<XMVECTOR> p{4};
+    for (int i = 0; i < 4; ++i) {
+        p[i] = Utils3D::bernsteinPolynomial(
+                Utils3D::convertToBernstein(
+                        {
+                                XMLoadFloat3(&bezierMesh.vertices()[i].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[4 + i].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[8 + i].position),
+                                XMLoadFloat3(&bezierMesh.vertices()[12 + i].position),
+                        }
+                ), u
+        );
+    }
+
+    p = Utils3D::convertToBernstein(p);
+    vector<XMVECTOR> pp{
+            XMVectorScale(XMVectorSubtract(p[1], p[0]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[2], p[1]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[3], p[2]), 3.f)
+    };
+    return Utils3D::bernsteinPolynomial(pp, v);
 }

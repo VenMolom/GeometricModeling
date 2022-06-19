@@ -130,7 +130,7 @@ std::shared_ptr<VirtualPoint> BicubicC0::pointAt(std::pair<int, int> index) cons
     return points[idx];
 }
 
-DirectX::XMFLOAT3 BicubicC0::value(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC0::value(const array<float, 2> &parameters) {
     auto[u, v] = parameters;
 
     vector<XMVECTOR> p{4};
@@ -144,13 +144,10 @@ DirectX::XMFLOAT3 BicubicC0::value(const array<float, 2> &parameters) {
                 }, v
         );
     }
-
-    XMFLOAT3 res{};
-    XMStoreFloat3(&res, Utils3D::bernsteinPolynomial(p, u));
-    return res;
+    return Utils3D::bernsteinPolynomial(p, u);
 }
 
-DirectX::XMFLOAT3 BicubicC0::tangent(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC0::tangent(const array<float, 2> &parameters) {
     auto[u, v] = parameters;
 
     vector<XMVECTOR> p{4};
@@ -170,13 +167,10 @@ DirectX::XMFLOAT3 BicubicC0::tangent(const array<float, 2> &parameters) {
             XMVectorScale(XMVectorSubtract(p[2], p[1]), 3.f),
             XMVectorScale(XMVectorSubtract(p[3], p[2]), 3.f)
     };
-
-    XMFLOAT3 res{};
-    XMStoreFloat3(&res, Utils3D::bernsteinPolynomial(pp, u));
-    return res;
+    return Utils3D::bernsteinPolynomial(pp, u);
 }
 
-DirectX::XMFLOAT3 BicubicC0::bitangent(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC0::bitangent(const array<float, 2> &parameters) {
     auto[u, v] = parameters;
 
     vector<XMVECTOR> p{4};
@@ -196,8 +190,5 @@ DirectX::XMFLOAT3 BicubicC0::bitangent(const array<float, 2> &parameters) {
             XMVectorScale(XMVectorSubtract(p[2], p[1]), 3.f),
             XMVectorScale(XMVectorSubtract(p[3], p[2]), 3.f)
     };
-
-    XMFLOAT3 res{};
-    XMStoreFloat3(&res, Utils3D::bernsteinPolynomial(pp, v));
-    return res;
+    return Utils3D::bernsteinPolynomial(pp, v);
 }

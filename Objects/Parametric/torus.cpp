@@ -142,7 +142,7 @@ Torus::Torus(const MG1::Torus &torus)
     updateBuffers();
 }
 
-DirectX::XMFLOAT3 Torus::value(const array<float, TORUS_DIM> &parameters) {
+DirectX::XMVECTOR Torus::value(const array<float, TORUS_DIM> &parameters) {
     auto[u, v] = parameters;
     return {
             (_majorRadius + _minorRadius * cos(v)) * cos(u),
@@ -151,7 +151,7 @@ DirectX::XMFLOAT3 Torus::value(const array<float, TORUS_DIM> &parameters) {
     };
 }
 
-DirectX::XMFLOAT3 Torus::tangent(const array<float, TORUS_DIM> &parameters) {
+DirectX::XMVECTOR Torus::tangent(const array<float, TORUS_DIM> &parameters) {
     auto[u, v] = parameters;
     return {
             -(_majorRadius + _minorRadius * cos(v)) * sin(u),
@@ -160,7 +160,7 @@ DirectX::XMFLOAT3 Torus::tangent(const array<float, TORUS_DIM> &parameters) {
     };
 }
 
-DirectX::XMFLOAT3 Torus::bitangent(const array<float, TORUS_DIM> &parameters) {
+DirectX::XMVECTOR Torus::bitangent(const array<float, TORUS_DIM> &parameters) {
     auto[u, v] = parameters;
     return {
             -_minorRadius * sin(v) * cos(u),
