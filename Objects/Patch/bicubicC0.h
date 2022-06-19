@@ -23,6 +23,12 @@ public:
 
     std::shared_ptr<VirtualPoint> pointAt(std::pair<int, int> index) const;
 
+    DirectX::XMFLOAT3 value(const std::array<float, 2> &parameters) override;
+
+    DirectX::XMFLOAT3 tangent(const std::array<float, 2> &parameters) override;
+
+    DirectX::XMFLOAT3 bitangent(const std::array<float, 2> &parameters) override;
+
 protected:
     void calculateMeshIndices(std::array<int, PATCH_DIM> segments, Linelist &linelist) override;
 

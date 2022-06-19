@@ -129,3 +129,75 @@ std::shared_ptr<VirtualPoint> BicubicC0::pointAt(std::pair<int, int> index) cons
     auto idx = index.second * uPoints + index.first;
     return points[idx];
 }
+
+DirectX::XMFLOAT3 BicubicC0::value(const array<float, 2> &parameters) {
+    auto[u, v] = parameters;
+
+    vector<XMVECTOR> p{4};
+    for (int i = 0; i < 4; ++i) {
+        p[i] = Utils3D::bernsteinPolynomial(
+                {
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i + 1].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i + 2].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i + 3].position),
+                }, v
+        );
+    }
+
+    XMFLOAT3 res{};
+    XMStoreFloat3(&res, Utils3D::bernsteinPolynomial(p, u));
+    return res;
+}
+
+DirectX::XMFLOAT3 BicubicC0::tangent(const array<float, 2> &parameters) {
+    auto[u, v] = parameters;
+
+    vector<XMVECTOR> p{4};
+    for (int i = 0; i < 4; ++i) {
+        p[i] = Utils3D::bernsteinPolynomial(
+                {
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i + 1].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i + 2].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[4 * i + 3].position),
+                }, v
+        );
+    }
+
+    vector<XMVECTOR> pp{
+            XMVectorScale(XMVectorSubtract(p[1], p[0]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[2], p[1]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[3], p[2]), 3.f)
+    };
+
+    XMFLOAT3 res{};
+    XMStoreFloat3(&res, Utils3D::bernsteinPolynomial(pp, u));
+    return res;
+}
+
+DirectX::XMFLOAT3 BicubicC0::bitangent(const array<float, 2> &parameters) {
+    auto[u, v] = parameters;
+
+    vector<XMVECTOR> p{4};
+    for (int i = 0; i < 4; ++i) {
+        p[i] = Utils3D::bernsteinPolynomial(
+                {
+                        XMLoadFloat3(&bezierMesh.vertices()[i].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[4 + i].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[8 + i].position),
+                        XMLoadFloat3(&bezierMesh.vertices()[12 + i].position),
+                }, u
+        );
+    }
+
+    vector<XMVECTOR> pp{
+            XMVectorScale(XMVectorSubtract(p[1], p[0]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[2], p[1]), 3.f),
+            XMVectorScale(XMVectorSubtract(p[3], p[2]), 3.f)
+    };
+
+    XMFLOAT3 res{};
+    XMStoreFloat3(&res, Utils3D::bernsteinPolynomial(pp, v));
+    return res;
+}

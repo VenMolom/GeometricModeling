@@ -6,8 +6,9 @@
 
 using namespace Utils3D;
 using namespace DirectX;
+using namespace std;
 
-XMFLOAT3RAY Utils3D::getRayFromScreen(XMINT2 screenPosition, const std::shared_ptr<Camera> &camera) {
+XMFLOAT3RAY Utils3D::getRayFromScreen(XMINT2 screenPosition, const shared_ptr<Camera> &camera) {
     XMFLOAT3 position = camera->position();
     XMFLOAT3 right = camera->right();
     XMFLOAT3 up = camera->up();
@@ -23,8 +24,8 @@ XMFLOAT3RAY Utils3D::getRayFromScreen(XMINT2 screenPosition, const std::shared_p
             XMVectorAdd(
                     XMVectorAdd(XMVectorScale(XMLoadFloat3(&right), scaleX),
                                 XMVectorScale(XMLoadFloat3(&up), scaleY)),
-            XMVectorScale(XMLoadFloat3(&direction), -camera->z())
-    )));
+                    XMVectorScale(XMLoadFloat3(&direction), -camera->z())
+            )));
     return result;
 }
 
@@ -50,7 +51,19 @@ XMFLOAT3 Utils3D::getRayCrossWithPlane(XMFLOAT3RAY ray, XMFLOAT4 plane) {
     return result;
 }
 
-void
-Utils3D::storeFloat3Lerp(DirectX::XMFLOAT3 &target, const DirectX::XMFLOAT3 &v1, const DirectX::XMFLOAT3 &v2, float t) {
+void Utils3D::storeFloat3Lerp(XMFLOAT3 &target, const XMFLOAT3 &v1, const XMFLOAT3 &v2, float t) {
     XMStoreFloat3(&target, XMVectorLerp(XMLoadFloat3(&v1), XMLoadFloat3(&v2), t));
+}
+
+XMVECTOR bernsteinPolynomial(const vector<XMVECTOR> &controls, float t) {
+    float t1 = 1.f - t;
+    vector<XMVECTOR> points{controls};
+
+    for (int j = points.size() - 1; j > 0; ++j) {
+        for (int i = 0; i < j; ++i) {
+            points[i] = XMVectorAdd(XMVectorScale(points[i], t1), XMVectorScale(points[i + 1], t));
+        }
+    }
+
+    return points[0];
 }
