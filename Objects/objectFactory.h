@@ -12,6 +12,7 @@
 #include "Objects/Patch/bicubicC2.h"
 #include "Objects/Parametric/torus.h"
 #include "Objects/Curve/interpolationCurveC2.h"
+#include "Objects/Intersection/intersection.h"
 
 class ObjectFactory {
 public:
@@ -29,6 +30,8 @@ public:
     std::shared_ptr<BicubicC0> createBicubicC0(DirectX::XMFLOAT3 position, QBindable<std::weak_ptr<Object>> bindableSelected);
 
     std::shared_ptr<BicubicC2> createBicubicC2(DirectX::XMFLOAT3 position, QBindable<std::weak_ptr<Object>> bindableSelected);
+
+    std::shared_ptr<Intersection> createIntersection(const std::vector<DirectX::XMFLOAT3> &points);
 
     uint id() { return nextId++; }
 private:

@@ -15,15 +15,11 @@ IntersectHandler::IntersectHandler(bool cursorExists, ObjectFactory &factory)
 
 shared_ptr<Object> IntersectHandler::calculateIntersection() {
     auto starting = probeStartingPoint();
-
     return findIntersectCurve(starting);
 }
 
-shared_ptr<Object> IntersectHandler::calculateIntersection(XMFLOAT3 cursorPos) {
-    if (!_useCursor) return calculateIntersection();
-
-    auto starting = probeCursorPoint(cursorPos);
-
+shared_ptr<Object> IntersectHandler::calculateIntersection(XMFLOAT3 hint) {
+    auto starting = _useCursor ? probeStartingPoint(hint) : probeStartingPoint();
     return findIntersectCurve(starting);
 }
 
@@ -53,7 +49,7 @@ IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint() const {
     return closest;
 }
 
-IntersectHandler::IntersectPoint IntersectHandler::probeCursorPoint(XMFLOAT3 cursorPos) const {
+IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint(XMFLOAT3 hint) const {
     auto uPoints = static_cast<int>(floor(sqrt(_maxPoints)));
     auto vPoints = static_cast<int>(round(_maxPoints / uPoints));
 
@@ -61,13 +57,13 @@ IntersectHandler::IntersectPoint IntersectHandler::probeCursorPoint(XMFLOAT3 cur
     auto qPoints = generatePoints(surfaces[1], uPoints, vPoints);
 
     IntersectPoint closest{};
-    auto cursor = XMLoadFloat3(&cursorPos);
+    auto hintPos = XMLoadFloat3(&hint);
     auto pointsCount = uPoints * vPoints;
     float minDistance = INFINITY;
     for (int i = 0; i < pointsCount; ++i) {
         auto p = pPoints[i];
 
-        auto distance = XMVector3Length(XMVectorSubtract(p.second, cursor)).m128_f32[0];
+        auto distance = XMVector3Length(XMVectorSubtract(p.second, hintPos)).m128_f32[0];
         if (distance < minDistance) {
             minDistance = distance;
             closest.u = p.first.first;
@@ -79,7 +75,7 @@ IntersectHandler::IntersectPoint IntersectHandler::probeCursorPoint(XMFLOAT3 cur
     for (int i = 0; i < pointsCount; ++i) {
         auto p = qPoints[i];
 
-        auto distance = XMVector3Length(XMVectorSubtract(p.second, cursor)).m128_f32[0];
+        auto distance = XMVector3Length(XMVectorSubtract(p.second, hintPos)).m128_f32[0];
         if (distance < minDistance) {
             minDistance = distance;
             closest.s = p.first.first;
@@ -91,16 +87,134 @@ IntersectHandler::IntersectPoint IntersectHandler::probeCursorPoint(XMFLOAT3 cur
 }
 
 shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting) {
+    XMFLOAT3 pos{};
+    XMStoreFloat3(&pos, surfaces[0]->value({starting.u, starting.v}));
+    return factory.createPoint(pos);
     IntersectPoint firstIntersect{};
     if (!findIntersectPoint(starting, firstIntersect)) return {};
 
-    // TODO: iterative newton
-    XMFLOAT3 pos{};
-    XMStoreFloat3(&pos, surfaces[0]->value({firstIntersect.u, firstIntersect.v}));
-    return factory.createPoint(pos);
+    list<pair<IntersectPoint, XMVECTOR>> intersections;
+    intersections.emplace_back(firstIntersect, surfaces[0]->value({firstIntersect.u, firstIntersect.v}));
+    bool closed = false;
+    while (true) {
+        auto[i0, p0] = intersections.back();
+        auto np = XMVector3Cross(surfaces[0]->tangent({i0.u, i0.v}),
+                                 surfaces[0]->bitangent({i0.u, i0.v}));
+        auto nq = XMVector3Cross(surfaces[1]->tangent({i0.s, i0.t}),
+                                 surfaces[1]->bitangent({i0.s, i0.t}));
+        auto t = XMVector3Cross(np, nq);
+        IntersectPoint next{};
 
+        auto result = calculateNextIntersectPoint(i0, next, p0, t);
+        if (result == NoResult) break;
 
-    return {};
+        intersections.emplace_back(next, surfaces[0]->value({next.u, next.v}));
+
+        if (result == End) break;
+        if ((next - intersections.front().first).length() < _step / 2) {
+            closed = true;
+            break;
+        }
+    }
+
+    if (!closed) {
+        while (true) {
+            auto[i0, p0] = intersections.front();
+            auto np = XMVector3Cross(surfaces[0]->tangent({i0.u, i0.v}),
+                                     surfaces[0]->bitangent({i0.u, i0.v}));
+            auto nq = XMVector3Cross(surfaces[1]->tangent({i0.s, i0.t}),
+                                     surfaces[1]->bitangent({i0.s, i0.t}));
+            auto t = XMVector3Cross(nq, np);
+            IntersectPoint next{};
+
+            auto result = calculateNextIntersectPoint(i0, next, p0, t);
+            if (result == NoResult) break;
+
+            intersections.emplace_front(next, surfaces[0]->value({next.u, next.v}));
+
+            if (result == End) break;
+            if ((next - intersections.back().first).length() < _step / 2) {
+                break;
+            }
+        }
+    }
+
+    vector<XMFLOAT3> points{};
+    for (auto& i : intersections) {
+        XMFLOAT3 p{};
+        XMStoreFloat3(&p, i.second);
+        points.push_back(p);
+    }
+
+    return factory.createIntersection(points);
+}
+
+IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
+                                                   XMVECTOR startValue, XMVECTOR t) const {
+    auto funcValue = [this](const IntersectPoint &point, XMVECTOR v, XMVECTOR t) {
+        auto value = surfaces[0]->value({point.u, point.v});
+        auto vec = XMVectorSubtract(value, surfaces[1]->value({point.s, point.t}));
+
+        vec.m128_f32[3] = XMVector3Dot(XMVectorSubtract(value, v), t).m128_f32[0] - _step;
+        return vec;
+    };
+
+    auto funcMatrix = [this](const IntersectPoint &point, XMVECTOR t) -> XMMATRIX {
+        auto pu = surfaces[0]->tangent({point.u, point.v});
+        auto pv = surfaces[0]->bitangent({point.u, point.v});
+        auto qs = XMVectorNegate(surfaces[1]->tangent({point.s, point.t}));
+        auto qt = XMVectorNegate(surfaces[1]->bitangent({point.s, point.t}));
+
+        XMMATRIX mat{
+            pu, pv, qs, qt
+        };
+        mat = XMMatrixTranspose(mat);
+        mat.r[3] = XMVectorSet(XMVector3Dot(pu, t).m128_f32[0], XMVector3Dot(pv, t).m128_f32[0], 0, 0);
+
+        return XMMatrixTranspose(mat);
+    };
+
+    IntersectPoint point = start;
+    auto value = funcValue(point, startValue, t);
+    int iterations = 0;
+    while (iterations++ < _maxPoints) {
+        auto matrix = funcMatrix(point, t);
+        XMVECTOR det{};
+        auto mInv = XMMatrixInverse(&det, matrix);
+        if (abs(det.m128_f32[0]) < epsilon) return NoResult;
+        auto sol = XMVector4Transform(value, mInv);
+
+        IntersectPoint solution{sol.m128_f32[0], sol.m128_f32[1], sol.m128_f32[2], sol.m128_f32[3]};
+        auto nextPoint = point - solution;
+        auto nextValue = funcValue(nextPoint, startValue, t);
+
+        if (solution.length() < epsilon || (nextPoint - point).length() < epsilon) {
+            if (XMVector3Length(nextValue).m128_f32[0] >= epsilon) return NoResult;
+
+            auto pRange = surfaces[0]->range();
+            auto qRange = surfaces[1]->range();
+            if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1])) {
+                nextPoint.clampToRange(pRange[0], pRange[1], qRange[0], qRange[1]);
+                next.u = nextPoint.u;
+                next.v = nextPoint.v;
+                next.s = nextPoint.s;
+                next.t = nextPoint.t;
+                return End;
+            }
+            // TODO: wrap
+
+            next.u = nextPoint.u;
+            next.v = nextPoint.v;
+            next.s = nextPoint.s;
+            next.t = nextPoint.t;
+            return Found;
+        }
+
+        point = nextPoint;
+        value = nextValue;
+    }
+
+    return NoResult;
 }
 
 bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoint &intersect) const {
@@ -136,7 +250,7 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
         auto nextPoint = point - grad * a;
         auto nextValue = funcValue(nextPoint);
 
-        if (grad.lenght() < epsilon || (nextPoint - point).lenght() < epsilon) {
+        if (grad.length() < epsilon || (nextPoint - point).length() < epsilon) {
             if (nextValue >= epsilon) return false;
 
             auto pRange = surfaces[0]->range();

@@ -24,10 +24,9 @@ public:
         this->surfaces = std::move(surfaces);
     }
 
-    //TODO: change return type
     std::shared_ptr<Object> calculateIntersection();
 
-    std::shared_ptr<Object> calculateIntersection(DirectX::XMFLOAT3 cursorPos);
+    std::shared_ptr<Object> calculateIntersection(DirectX::XMFLOAT3 hint);
 
 private:
     bool _useCursor{};
@@ -50,38 +49,66 @@ private:
             return {u * a, v * a, s * a, t * a};
         }
 
-        float lenght() const {
+        float length() const {
             return sqrt(u * u + v * v + s * s + t * t);
         }
 
         bool outOfRange(std::tuple<float, float> uRange, std::tuple<float, float> vRange,
                         std::tuple<float, float> sRange, std::tuple<float, float> tRange) {
             auto[startU, endU] = uRange;
-            if (u > endU || u < startU) return false;
+            if (u > endU || u < startU) return true;
 
             auto[startV, endV] = vRange;
-            if (v > endV || v < startV) return false;
+            if (v > endV || v < startV) return true;
 
             auto[startS, endS] = sRange;
-            if (s > endS || s < startS) return false;
+            if (s > endS || s < startS) return true;
 
             auto[startT, endT] = tRange;
-            if (t > endT || t < startT) return false;
+            if (t > endT || t < startT) return true;
 
-            return true;
+            return false;
         }
+
+        bool clampToRange(std::tuple<float, float> uRange, std::tuple<float, float> vRange,
+                        std::tuple<float, float> sRange, std::tuple<float, float> tRange) {
+            auto[startU, endU] = uRange;
+            u = std::clamp(u, startU, endU);
+
+            auto[startV, endV] = vRange;
+            v = std::clamp(v, startV, endV);
+
+            auto[startS, endS] = sRange;
+            s = std::clamp(s, startS, endS);
+
+            auto[startT, endT] = tRange;
+            t = std::clamp(t, startT, endT);
+
+            return false;
+        }
+    };
+
+    enum PointResult {
+        Found,
+        NoResult,
+        End
     };
 
     IntersectPoint probeStartingPoint() const;
 
-    IntersectPoint probeCursorPoint(DirectX::XMFLOAT3 cursorPos) const;
+    IntersectPoint probeStartingPoint(DirectX::XMFLOAT3 hint) const;
 
     bool findIntersectPoint(IntersectPoint starting, IntersectPoint &intersect) const;
 
     std::shared_ptr<Object> findIntersectCurve(IntersectPoint starting);
 
+    PointResult calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
+                                               DirectX::XMVECTOR startValue, DirectX::XMVECTOR t) const;
+
     std::vector<std::pair<std::pair<float, float>, DirectX::XMVECTOR>>
     generatePoints(std::shared_ptr<ParametricObject<2>> surface, int uPoints, int vPoints) const;
+
+    //TODO: self intersection
 };
 
 #endif //MG1_INTERSECTHANDLER_H

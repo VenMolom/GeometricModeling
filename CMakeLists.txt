@@ -88,7 +88,7 @@ set(PROJECT_SOURCES
         Utils/gregoryUtils.cpp Utils/gregoryUtils.h
         Objects/Patch/gregoryPatch.cpp Objects/Patch/gregoryPatch.h
         Controls/intersectdialog.h Controls/intersectdialog.cpp
-        Controls/intersectdialog.ui Handlers/intersectHandler.cpp Handlers/intersectHandler.h)
+        Controls/intersectdialog.ui Handlers/intersectHandler.cpp Handlers/intersectHandler.h Objects/Intersection/intersection.cpp Objects/Intersection/intersection.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
