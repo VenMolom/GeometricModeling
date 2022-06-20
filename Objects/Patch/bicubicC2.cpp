@@ -130,16 +130,17 @@ BicubicC2::BicubicC2(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &se
 
 DirectX::XMVECTOR BicubicC2::value(const array<float, 2> &parameters) {
     auto[u, v] = parameters;
+    auto control = getControlPoints(u, v);
 
     vector<XMVECTOR> p{4};
     for (int i = 0; i < 4; ++i) {
         p[i] = Utils3D::bernsteinPolynomial(
                 Utils3D::convertToBernstein(
                         {
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 1].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 2].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 3].position),
+                                XMLoadFloat3(&control[4 * i]),
+                                XMLoadFloat3(&control[4 * i + 1]),
+                                XMLoadFloat3(&control[4 * i + 2]),
+                                XMLoadFloat3(&control[4 * i + 3]),
                         }
                 ), v
         );
@@ -149,16 +150,17 @@ DirectX::XMVECTOR BicubicC2::value(const array<float, 2> &parameters) {
 
 DirectX::XMVECTOR BicubicC2::tangent(const array<float, 2> &parameters) {
     auto[u, v] = parameters;
+    auto control = getControlPoints(u, v);
 
     vector<XMVECTOR> p{4};
     for (int i = 0; i < 4; ++i) {
         p[i] = Utils3D::bernsteinPolynomial(
                 Utils3D::convertToBernstein(
                         {
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 1].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 2].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[4 * i + 3].position),
+                                XMLoadFloat3(&control[4 * i]),
+                                XMLoadFloat3(&control[4 * i + 1]),
+                                XMLoadFloat3(&control[4 * i + 2]),
+                                XMLoadFloat3(&control[4 * i + 3]),
                         }
                 ), v
         );
@@ -175,16 +177,17 @@ DirectX::XMVECTOR BicubicC2::tangent(const array<float, 2> &parameters) {
 
 DirectX::XMVECTOR BicubicC2::bitangent(const array<float, 2> &parameters) {
     auto[u, v] = parameters;
+    auto control = getControlPoints(u, v);
 
     vector<XMVECTOR> p{4};
     for (int i = 0; i < 4; ++i) {
         p[i] = Utils3D::bernsteinPolynomial(
                 Utils3D::convertToBernstein(
                         {
-                                XMLoadFloat3(&bezierMesh.vertices()[i].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[4 + i].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[8 + i].position),
-                                XMLoadFloat3(&bezierMesh.vertices()[12 + i].position),
+                                XMLoadFloat3(&control[i]),
+                                XMLoadFloat3(&control[4 + i]),
+                                XMLoadFloat3(&control[8 + i]),
+                                XMLoadFloat3(&control[12 + i]),
                         }
                 ), u
         );

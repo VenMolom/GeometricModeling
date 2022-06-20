@@ -87,9 +87,6 @@ IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint(XMFLOAT3 h
 }
 
 shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting) {
-    XMFLOAT3 pos{};
-    XMStoreFloat3(&pos, surfaces[0]->value({starting.u, starting.v}));
-    return factory.createPoint(pos);
     IntersectPoint firstIntersect{};
     if (!findIntersectPoint(starting, firstIntersect)) return {};
 
@@ -111,10 +108,10 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
         intersections.emplace_back(next, surfaces[0]->value({next.u, next.v}));
 
         if (result == End) break;
-        if ((next - intersections.front().first).length() < _step / 2) {
-            closed = true;
-            break;
-        }
+//        if ((next - intersections.front().first).length() < _step / 2) {
+//            closed = true;
+//            break;
+//        }
     }
 
     if (!closed) {

@@ -246,3 +246,37 @@ Patch::Patch(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &serialized
 std::array<int, PATCH_DIM> Patch::size() const {
     return segments;
 }
+
+std::array<DirectX::XMFLOAT3, 16> Patch::getControlPoints(float &u, float &v) {
+    int segmentU = std::clamp(static_cast<int>(u), 0, segments[0] - 1);
+    int segmentV = std::clamp(static_cast<int>(v), 0, segments[1] - 1);
+
+    int startIndex = segmentU * segments[1] * 16 + segmentV * 16;
+
+    array<XMFLOAT3, 16> control{
+            vertices[indices[startIndex]].position,
+            vertices[indices[startIndex + 1]].position,
+            vertices[indices[startIndex + 2]].position,
+            vertices[indices[startIndex + 3]].position,
+
+            vertices[indices[startIndex + 4]].position,
+            vertices[indices[startIndex + 5]].position,
+            vertices[indices[startIndex + 6]].position,
+            vertices[indices[startIndex + 7]].position,
+
+            vertices[indices[startIndex + 8]].position,
+            vertices[indices[startIndex + 9]].position,
+            vertices[indices[startIndex + 10]].position,
+            vertices[indices[startIndex + 11]].position,
+
+            vertices[indices[startIndex + 12]].position,
+            vertices[indices[startIndex + 13]].position,
+            vertices[indices[startIndex + 14]].position,
+            vertices[indices[startIndex + 15]].position,
+    };
+
+    u -= segmentU;
+    v -= segmentV;
+
+    return control;
+}
