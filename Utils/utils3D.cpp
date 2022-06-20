@@ -59,7 +59,7 @@ XMVECTOR Utils3D::bernsteinPolynomial(const vector<XMVECTOR> &controls, float t)
     float t1 = 1.f - t;
     vector<XMVECTOR> points{controls};
 
-    for (int j = points.size() - 1; j > 0; ++j) {
+    for (int j = points.size() - 1; j > 0; --j) {
         for (int i = 0; i < j; ++i) {
             points[i] = XMVectorAdd(XMVectorScale(points[i], t1), XMVectorScale(points[i + 1], t));
         }

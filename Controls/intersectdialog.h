@@ -22,7 +22,7 @@ private slots:
 private:
     Ui::IntersectDialog *ui;
 
-    IntersectHandler handler;
+    IntersectHandler &handler;
 };
 
 #endif // INTERSECTDIALOG_H

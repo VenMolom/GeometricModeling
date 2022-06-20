@@ -203,7 +203,7 @@ void MainWindow::on_actionFill_In_triggered() {
 }
 
 void MainWindow::on_actionIntersect_triggered() {
-    IntersectHandler handler{scene->hasCursor()};
+    IntersectHandler handler{scene->hasCursor(), scene->objectFactory()};
     IntersectDialog dialog(this, handler);
 
     if(!dialog.exec()) return;

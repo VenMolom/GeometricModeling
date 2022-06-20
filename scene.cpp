@@ -3,6 +3,7 @@
 //
 
 #include "scene.h"
+#include <QMessageBox>
 
 using namespace DirectX;
 using namespace Utils3D;
@@ -186,7 +187,12 @@ void Scene::intersect(IntersectHandler &handler) {
         intersection = handler.calculateIntersection();
     }
 
-    if (intersection) addObject(std::move(intersection), true);
+    if (intersection) {
+        addObject(std::move(intersection), true);
+    } else {
+        setSelected({});
+        QMessageBox::warning(nullptr, "Operation error", "Failed to locate intersection");
+    }
 }
 
 #pragma endregion

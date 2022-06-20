@@ -6,10 +6,11 @@
 #define MG1_INTERSECTHANDLER_H
 
 #include "Objects/Parametric/parametricObject.h"
+#include "Objects/objectFactory.h"
 
 class IntersectHandler {
 public:
-    IntersectHandler(bool cursorExists);
+    IntersectHandler(bool cursorExists, ObjectFactory &factory);
 
     bool canUseCursor() { return hasCursor; }
 
@@ -39,6 +40,7 @@ private:
 
     float epsilon = 10e-6;
     std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces{};
+    ObjectFactory &factory;
 
     struct IntersectPoint {
         float u, v, s, t;
