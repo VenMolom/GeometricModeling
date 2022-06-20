@@ -12,11 +12,7 @@ class IntersectHandler {
 public:
     IntersectHandler(bool cursorExists, ObjectFactory &factory);
 
-    bool canUseCursor() { return hasCursor; }
-
-    int maxPoints() { return _maxPoints; }
-
-    float step() { return _step; }
+    bool canUseCursor() const { return hasCursor; }
 
     void setMaxPoints(int maxPoints) { _maxPoints = maxPoints; }
 
@@ -30,6 +26,7 @@ public:
 
     //TODO: change return type
     std::shared_ptr<Object> calculateIntersection();
+
     std::shared_ptr<Object> calculateIntersection(DirectX::XMFLOAT3 cursorPos);
 
 private:
@@ -56,15 +53,35 @@ private:
         float lenght() const {
             return sqrt(u * u + v * v + s * s + t * t);
         }
+
+        bool outOfRange(std::tuple<float, float> uRange, std::tuple<float, float> vRange,
+                        std::tuple<float, float> sRange, std::tuple<float, float> tRange) {
+            auto[startU, endU] = uRange;
+            if (u > endU || u < startU) return false;
+
+            auto[startV, endV] = vRange;
+            if (v > endV || v < startV) return false;
+
+            auto[startS, endS] = sRange;
+            if (s > endS || s < startS) return false;
+
+            auto[startT, endT] = tRange;
+            if (t > endT || t < startT) return false;
+
+            return true;
+        }
     };
 
-    IntersectPoint probeStartingPoint();
+    IntersectPoint probeStartingPoint() const;
 
-    IntersectPoint probeCursorPoint(DirectX::XMFLOAT3 cursorPos);
+    IntersectPoint probeCursorPoint(DirectX::XMFLOAT3 cursorPos) const;
 
-    bool findIntersectPoint(IntersectPoint starting, IntersectPoint &intersect);
+    bool findIntersectPoint(IntersectPoint starting, IntersectPoint &intersect) const;
 
     std::shared_ptr<Object> findIntersectCurve(IntersectPoint starting);
+
+    std::vector<std::pair<std::pair<float, float>, DirectX::XMVECTOR>>
+    generatePoints(std::shared_ptr<ParametricObject<2>> surface, int uPoints, int vPoints) const;
 };
 
 #endif //MG1_INTERSECTHANDLER_H
