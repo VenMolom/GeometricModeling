@@ -31,7 +31,7 @@ public:
 
     std::shared_ptr<BicubicC2> createBicubicC2(DirectX::XMFLOAT3 position, QBindable<std::weak_ptr<Object>> bindableSelected);
 
-    std::shared_ptr<Intersection> createIntersection(const std::vector<DirectX::XMFLOAT3> &points);
+    std::shared_ptr<Intersection> createIntersection(const std::vector<DirectX::XMFLOAT3> &points, bool closed);
 
     uint id() { return nextId++; }
 private:

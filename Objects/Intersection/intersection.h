@@ -10,7 +10,7 @@
 
 class Intersection : public Object {
 public:
-    Intersection(uint id, const std::vector<DirectX::XMFLOAT3> &points);
+    Intersection(uint id, const std::vector<DirectX::XMFLOAT3> &points, bool closed);
 
     void setPosition(DirectX::XMFLOAT3 position) override {}
 

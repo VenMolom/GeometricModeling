@@ -53,25 +53,26 @@ private:
             return sqrt(u * u + v * v + s * s + t * t);
         }
 
-        bool outOfRange(std::tuple<float, float> uRange, std::tuple<float, float> vRange,
-                        std::tuple<float, float> sRange, std::tuple<float, float> tRange) {
+        bool outOfRange(const std::tuple<float, float> &uRange, const std::tuple<float, float> &vRange,
+                        const std::tuple<float, float> &sRange, const std::tuple<float, float> &tRange,
+                        bool wrapU = false, bool wrapV = false, bool wrapS = false, bool wrapT = false) {
             auto[startU, endU] = uRange;
-            if (u > endU || u < startU) return true;
+            if ((u > endU || u < startU) && !wrapU) return true;
 
             auto[startV, endV] = vRange;
-            if (v > endV || v < startV) return true;
+            if ((v > endV || v < startV) && !wrapV) return true;
 
             auto[startS, endS] = sRange;
-            if (s > endS || s < startS) return true;
+            if ((s > endS || s < startS) && !wrapS) return true;
 
             auto[startT, endT] = tRange;
-            if (t > endT || t < startT) return true;
+            if ((t > endT || t < startT) && !wrapT) return true;
 
             return false;
         }
 
-        bool clampToRange(std::tuple<float, float> uRange, std::tuple<float, float> vRange,
-                        std::tuple<float, float> sRange, std::tuple<float, float> tRange) {
+        void clampToRange(const std::tuple<float, float> &uRange, const std::tuple<float, float> &vRange,
+                        const std::tuple<float, float> &sRange, const std::tuple<float, float> &tRange) {
             auto[startU, endU] = uRange;
             u = std::clamp(u, startU, endU);
 
@@ -83,8 +84,27 @@ private:
 
             auto[startT, endT] = tRange;
             t = std::clamp(t, startT, endT);
+        }
 
-            return false;
+        void wrap(const std::tuple<float, float> &uRange, const std::tuple<float, float> &vRange,
+                  const std::tuple<float, float> &sRange, const std::tuple<float, float> &tRange,
+                  bool wrapU, bool wrapV, bool wrapS, bool wrapT) {
+            if (wrapU) {
+                auto[startU, endU] = uRange;
+                u = fmod(u - startU, endU - startU) + startU;
+            }
+            if (wrapV) {
+                auto[startV, endV] = vRange;
+                v = fmod(u - startV, endV - startV) + startV;
+            }
+            if (wrapS) {
+                auto[startS, endS] = sRange;
+                s = fmod(u - startS, endS - startS) + startS;
+            }
+            if (wrapT) {
+                auto[startT, endT] = tRange;
+                t = fmod(u - startT, endT - startT) + startT;
+            }
         }
     };
 

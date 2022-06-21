@@ -7,11 +7,16 @@
 using namespace std;
 using namespace DirectX;
 
-Intersection::Intersection(uint id, const vector<XMFLOAT3> &points)
+Intersection::Intersection(uint id, const vector<XMFLOAT3> &points, bool closed)
         : Object(id, "Intersection", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP) {
+    uint index = 0;
     for (auto &point : points) {
         vertices.push_back({point, {1, 1, 1}});
+        indices.push_back(index++);
     }
+//    if (closed) {
+//        indices.push_back(0);
+//    }
     updateBuffers();
 }
 

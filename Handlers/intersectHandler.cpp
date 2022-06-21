@@ -99,7 +99,7 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
                                  surfaces[0]->bitangent({i0.u, i0.v}));
         auto nq = XMVector3Cross(surfaces[1]->tangent({i0.s, i0.t}),
                                  surfaces[1]->bitangent({i0.s, i0.t}));
-        auto t = XMVector3Cross(np, nq);
+        auto t = XMVector3Normalize(XMVector3Cross(np, nq));
         IntersectPoint next{};
 
         auto result = calculateNextIntersectPoint(i0, next, p0, t);
@@ -108,10 +108,11 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
         intersections.emplace_back(next, surfaces[0]->value({next.u, next.v}));
 
         if (result == End) break;
-//        if ((next - intersections.front().first).length() < _step / 2) {
-//            closed = true;
-//            break;
-//        }
+        if (XMVector3Length(XMVectorSubtract(intersections.back().second,
+                                             intersections.front().second)).m128_f32[0] < _step) {
+            closed = true;
+            break;
+        }
     }
 
     if (!closed) {
@@ -121,7 +122,7 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
                                      surfaces[0]->bitangent({i0.u, i0.v}));
             auto nq = XMVector3Cross(surfaces[1]->tangent({i0.s, i0.t}),
                                      surfaces[1]->bitangent({i0.s, i0.t}));
-            auto t = XMVector3Cross(nq, np);
+            auto t = XMVector3Normalize(XMVector3Cross(nq, np));
             IntersectPoint next{};
 
             auto result = calculateNextIntersectPoint(i0, next, p0, t);
@@ -130,24 +131,26 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
             intersections.emplace_front(next, surfaces[0]->value({next.u, next.v}));
 
             if (result == End) break;
-            if ((next - intersections.back().first).length() < _step / 2) {
+            if (XMVector3Length(XMVectorSubtract(intersections.front().second,
+                                                 intersections.back().second)).m128_f32[0] < _step) {
+                closed = true;
                 break;
             }
         }
     }
 
     vector<XMFLOAT3> points{};
-    for (auto& i : intersections) {
+    for (auto &i: intersections) {
         XMFLOAT3 p{};
         XMStoreFloat3(&p, i.second);
         points.push_back(p);
     }
 
-    return factory.createIntersection(points);
+    return factory.createIntersection(points, closed);
 }
 
 IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
-                                                   XMVECTOR startValue, XMVECTOR t) const {
+                                                                            XMVECTOR startValue, XMVECTOR t) const {
     auto funcValue = [this](const IntersectPoint &point, XMVECTOR v, XMVECTOR t) {
         auto value = surfaces[0]->value({point.u, point.v});
         auto vec = XMVectorSubtract(value, surfaces[1]->value({point.s, point.t}));
@@ -163,7 +166,7 @@ IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(Inte
         auto qt = XMVectorNegate(surfaces[1]->bitangent({point.s, point.t}));
 
         XMMATRIX mat{
-            pu, pv, qs, qt
+                pu, pv, qs, qt
         };
         mat = XMMatrixTranspose(mat);
         mat.r[3] = XMVectorSet(XMVector3Dot(pu, t).m128_f32[0], XMVector3Dot(pv, t).m128_f32[0], 0, 0);
@@ -178,7 +181,9 @@ IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(Inte
         auto matrix = funcMatrix(point, t);
         XMVECTOR det{};
         auto mInv = XMMatrixInverse(&det, matrix);
-        if (abs(det.m128_f32[0]) < epsilon) return NoResult;
+        if (abs(det.m128_f32[0]) < epsilon) {
+            return NoResult;
+        }
         auto sol = XMVector4Transform(value, mInv);
 
         IntersectPoint solution{sol.m128_f32[0], sol.m128_f32[1], sol.m128_f32[2], sol.m128_f32[3]};
@@ -186,11 +191,16 @@ IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(Inte
         auto nextValue = funcValue(nextPoint, startValue, t);
 
         if (solution.length() < epsilon || (nextPoint - point).length() < epsilon) {
-            if (XMVector3Length(nextValue).m128_f32[0] >= epsilon) return NoResult;
+            if (XMVector3Length(nextValue).m128_f32[0] >= epsilon) {
+                return NoResult;
+            }
 
+            auto[wrapU, wrapV] = surfaces[0]->looped();
+            auto[wrapS, wrapT] = surfaces[1]->looped();
             auto pRange = surfaces[0]->range();
             auto qRange = surfaces[1]->range();
-            if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1])) {
+
+            if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT)) {
                 nextPoint.clampToRange(pRange[0], pRange[1], qRange[0], qRange[1]);
                 next.u = nextPoint.u;
                 next.v = nextPoint.v;
@@ -198,7 +208,8 @@ IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(Inte
                 next.t = nextPoint.t;
                 return End;
             }
-            // TODO: wrap
+
+            nextPoint.wrap(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT);
 
             next.u = nextPoint.u;
             next.v = nextPoint.v;
@@ -253,6 +264,7 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
             auto pRange = surfaces[0]->range();
             auto qRange = surfaces[1]->range();
             if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1])) return false;
+            // TODO: może wrap tutaj
 
             intersect.u = nextPoint.u;
             intersect.v = nextPoint.v;
