@@ -91,20 +91,27 @@ private:
                   bool wrapU, bool wrapV, bool wrapS, bool wrapT) {
             if (wrapU) {
                 auto[startU, endU] = uRange;
-                u = fmod(u - startU, endU - startU) + startU;
+                u = wrap(u, startU, endU);
             }
             if (wrapV) {
                 auto[startV, endV] = vRange;
-                v = fmod(u - startV, endV - startV) + startV;
+                v = wrap(v, startV, endV);
             }
             if (wrapS) {
                 auto[startS, endS] = sRange;
-                s = fmod(u - startS, endS - startS) + startS;
+                s = wrap(s, startS, endS);
             }
             if (wrapT) {
                 auto[startT, endT] = tRange;
-                t = fmod(u - startT, endT - startT) + startT;
+                t = wrap(t, startT, endT);
             }
+        }
+
+    private:
+        static float wrap(float value, float start, float end) {
+            auto v = value - start;
+            auto l = end - start;
+            return v - l * floor(v / l) + start;
         }
     };
 

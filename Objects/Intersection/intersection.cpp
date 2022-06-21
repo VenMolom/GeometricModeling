@@ -14,9 +14,9 @@ Intersection::Intersection(uint id, const vector<XMFLOAT3> &points, bool closed)
         vertices.push_back({point, {1, 1, 1}});
         indices.push_back(index++);
     }
-//    if (closed) {
-//        indices.push_back(0);
-//    }
+    if (closed) {
+        indices.push_back(0);
+    }
     updateBuffers();
 }
 
