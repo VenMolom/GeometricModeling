@@ -9,6 +9,7 @@ using namespace std;
 using namespace DirectX;
 
 DxRenderer::DxRenderer(QWidget *parent) : m_device(this),
+                                          m_viewport({width(), height()}),
                                           inputHandler() {
     setAttribute(Qt::WA_PaintOnScreen, true);
     setAttribute(Qt::WA_NativeWindow, true);
@@ -17,6 +18,8 @@ DxRenderer::DxRenderer(QWidget *parent) : m_device(this),
 }
 
 void DxRenderer::renderScene() {
+    auto backBuffer = m_backBuffer.get();
+    m_device.context()->OMSetRenderTargets(1, &backBuffer, m_depthBuffer.get());
     m_device.context()->ClearRenderTargetView(m_backBuffer.get(), CLEAR_COLOR);
 
     m_device.context()->ClearDepthStencilView(
@@ -28,9 +31,8 @@ void DxRenderer::renderScene() {
         return;
     }
 
-    updateCameraCB();
-
     if (scene) {
+        updateCameraCB();
         scene->draw(*this);
     }
 
@@ -103,6 +105,22 @@ void DxRenderer::draw(const Object &object, XMFLOAT4 color) {
     updateBuffer(m_cbColor, color);
 
     object.render(m_device.context());
+}
+
+void DxRenderer::draw(const Torus &torus, DirectX::XMFLOAT4 color) {
+    updateBuffer(m_cbModel, torus.modelMatrix());
+    updateBuffer(m_cbColor, color);
+
+    auto intersection = torus.intersectionInstance();
+    if (intersection && intersection->active()) {
+        m_device.context()->PSSetShader(m_pixelParamShader.get(), nullptr, 0);
+        updateBuffer(m_cbTrim, XMFLOAT4(static_cast<int>(intersection->first()), 0, 0, 0));
+        setTextures({intersection->texture().get()}, m_sampler);
+    }
+
+    torus.render(m_device.context());
+
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
 void DxRenderer::draw(const BrezierCurve &curve, XMFLOAT4 color) {
@@ -182,11 +200,19 @@ void DxRenderer::draw(const Patch &patch, DirectX::XMFLOAT4 color) {
     };
     updateBuffer(m_cbTesselation, tesselationAmount);
 
+    auto intersection = patch.intersectionInstance();
+    if (intersection && intersection->active()) {
+        m_device.context()->PSSetShader(m_pixelParamShader.get(), nullptr, 0);
+        updateBuffer(m_cbTrim, XMFLOAT4(static_cast<int>(intersection->first()), 0, 0, 0));
+        setTextures({intersection->texture().get()}, m_sampler);
+    }
+
     patch.render(m_device.context());
 
     m_device.context()->RSSetState(nullptr);
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
 void DxRenderer::draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) {
@@ -205,11 +231,19 @@ void DxRenderer::draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) {
     };
     updateBuffer(m_cbTesselation, tesselationAmount);
 
+    auto intersection = patch.intersectionInstance();
+    if (intersection && intersection->active()) {
+        m_device.context()->PSSetShader(m_pixelParamShader.get(), nullptr, 0);
+        updateBuffer(m_cbTrim, XMFLOAT4(static_cast<int>(intersection->first()), 0, 0, 0));
+        setTextures({intersection->texture().get()}, m_sampler);
+    }
+
     patch.render(m_device.context());
 
     m_device.context()->RSSetState(nullptr);
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
 void DxRenderer::draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) {
@@ -233,6 +267,26 @@ void DxRenderer::draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) {
     m_device.context()->RSSetState(nullptr);
     m_device.context()->HSSetShader(nullptr, nullptr, 0);
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
+}
+
+void DxRenderer::draw(const IntersectionInstance &instance) {
+    float clear[4] = {1, 1, 1, 1};
+    auto &target = instance.target();
+    m_device.context()->ClearRenderTargetView(target.get(), clear);
+    auto renderTarget = target.get();
+    Viewport v({IntersectionInstance::SIZE, IntersectionInstance::SIZE});
+    m_device.context()->RSSetViewports(1, &v);
+    m_device.context()->OMSetRenderTargets(1, &renderTarget, nullptr);
+    m_device.context()->VSSetShader(m_vertexTextureShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelTextureShader.get(), nullptr, 0);
+
+    instance.render(m_device.context());
+
+    auto backBuffer = m_backBuffer.get();
+    m_device.context()->OMSetRenderTargets(1, &backBuffer, m_depthBuffer.get());
+    m_device.context()->RSSetViewports(1, &m_viewport);
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
 void DxRenderer::enableStereoscopy(bool enable) {
@@ -426,6 +480,7 @@ void DxRenderer::init3D3() {
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
     m_vertexStereoShader = m_device.CreateVertexShader(vsStereoBytes);
     m_vertexSelectorShader = m_device.CreateVertexShader(vsSelectorBytes);
+    m_vertexTextureShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsTexture.cso"));
     m_vertexBillboardShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsBillboard.cso"));
     m_vertexNoProjectionShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsNoProjection.cso"));
     m_hullBrezierShader = m_device.CreateHullShader(DxDevice::LoadByteCode(L"hsBrezier.cso"));
@@ -440,6 +495,8 @@ void DxRenderer::init3D3() {
     m_pixelFadeShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psCameraFade.cso"));
     m_pixelStereoShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psStereo.cso"));
     m_pixelSelectorShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psSelector.cso"));
+    m_pixelTextureShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psTexture.cso"));
+    m_pixelParamShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psParam.cso"));
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
@@ -476,13 +533,14 @@ void DxRenderer::init3D3() {
     m_cbTesselation = m_device.CreateConstantBuffer<XMINT4>();
     m_cbFarPlane = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbStereoColor = m_device.CreateConstantBuffer<XMFLOAT4, 2>();
+    m_cbTrim = m_device.CreateConstantBuffer<XMFLOAT4>();
 
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
-    ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get(), m_cbStereoColor.get()};
+    ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get(), m_cbStereoColor.get(), m_cbTrim.get()};
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
     ID3D11Buffer *gsCbs[] = {m_cbFarPlane.get(), m_cbProj.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
-    m_device.context()->PSSetConstantBuffers(0, 3, psCbs);
+    m_device.context()->PSSetConstantBuffers(0, 4, psCbs);
     m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
     m_device.context()->GSSetConstantBuffers(0, 2, gsCbs);
 
@@ -544,8 +602,8 @@ void DxRenderer::setupViewport() {
     auto backBuffer = m_backBuffer.get();
     m_device.context()->OMSetRenderTargets(1,
                                            &backBuffer, m_depthBuffer.get());
-    Viewport viewport{wndSize};
-    m_device.context()->RSSetViewports(1, &viewport);
+    m_viewport = Viewport{wndSize};
+    m_device.context()->RSSetViewports(1, &m_viewport);
 
     Texture2DDescription textureDesc(width(), height());
     textureDesc.MipLevels = 1;

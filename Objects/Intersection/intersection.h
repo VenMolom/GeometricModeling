@@ -7,10 +7,14 @@
 
 
 #include "Objects/object.h"
+#include "Objects/Parametric/parametricObject.h"
 
 class Intersection : public Object {
 public:
-    Intersection(uint id, const std::vector<DirectX::XMFLOAT3> &points, bool closed);
+    Intersection(uint id, const std::array<std::shared_ptr<ParametricObject<2>>, 2> &surfaces,
+                 const std::vector<std::pair<float, float>> &firstParameters,
+                 const std::vector<std::pair<float, float>> &secondParameters,
+                 const std::vector<DirectX::XMFLOAT3> &points, bool closed, Renderer &renderer);
 
     void setPosition(DirectX::XMFLOAT3 position) override {}
 
@@ -21,6 +25,12 @@ public:
     void draw(Renderer &renderer, DrawType drawType) override;
 
     Type type() const override;
+
+    //TODO: convert to interpolation curve
+
+private:
+    bool closed;
+    std::array<std::shared_ptr<IntersectionInstance>, 2> instances;
 };
 
 

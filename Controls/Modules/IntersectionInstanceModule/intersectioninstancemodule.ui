@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PatchModule</class>
- <widget class="QWidget" name="PatchModule">
+ <class>IntersectionInstanceModule</class>
+ <widget class="QWidget" name="IntersectionInstanceModule">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>128</width>
-    <height>68</height>
+    <width>166</width>
+    <height>90</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,22 +15,23 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QCheckBox" name="polygonalCheckBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
+    <widget class="QLabel" name="label">
      <property name="text">
-      <string>Show polygonal</string>
+      <string>Trimming</string>
      </property>
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QCheckBox" name="pointsCheckBox">
+    <widget class="QCheckBox" name="activeCheckBox">
      <property name="text">
-      <string>Show points</string>
+      <string>Active</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QCheckBox" name="firstCheckBox">
+     <property name="text">
+      <string>First</string>
      </property>
     </widget>
    </item>

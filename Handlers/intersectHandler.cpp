@@ -13,14 +13,14 @@ IntersectHandler::IntersectHandler(bool cursorExists, ObjectFactory &factory)
 
 }
 
-shared_ptr<Object> IntersectHandler::calculateIntersection() {
+shared_ptr<Object> IntersectHandler::calculateIntersection(Renderer &renderer) {
     auto starting = probeStartingPoint();
-    return findIntersectCurve(starting);
+    return findIntersectCurve(starting, renderer);
 }
 
-shared_ptr<Object> IntersectHandler::calculateIntersection(XMFLOAT3 hint) {
+shared_ptr<Object> IntersectHandler::calculateIntersection(Renderer &renderer, XMFLOAT3 hint) {
     auto starting = _useCursor ? probeStartingPoint(hint) : probeStartingPoint();
-    return findIntersectCurve(starting);
+    return findIntersectCurve(starting, renderer);
 }
 
 IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint() const {
@@ -86,7 +86,7 @@ IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint(XMFLOAT3 h
     return closest;
 }
 
-shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting) {
+shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting, Renderer &renderer) {
     IntersectPoint firstIntersect{};
     if (!findIntersectPoint(starting, firstIntersect)) return {};
 
@@ -109,7 +109,7 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
 
         if (result == End) break;
         if (XMVector3Length(XMVectorSubtract(intersections.back().second,
-                                             intersections.front().second)).m128_f32[0] < _step) {
+                                             intersections.front().second)).m128_f32[0] < _step / 2) {
             closed = true;
             break;
         }
@@ -132,7 +132,7 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
 
             if (result == End) break;
             if (XMVector3Length(XMVectorSubtract(intersections.front().second,
-                                                 intersections.back().second)).m128_f32[0] < _step) {
+                                                 intersections.back().second)).m128_f32[0] < _step / 2) {
                 closed = true;
                 break;
             }
@@ -140,13 +140,17 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting)
     }
 
     vector<XMFLOAT3> points{};
+    vector<pair<float, float>> firstParams{}, secondParams{};
     for (auto &i: intersections) {
         XMFLOAT3 p{};
         XMStoreFloat3(&p, i.second);
         points.push_back(p);
+        //TODO: if wrap happens add additional points at both edges
+        firstParams.emplace_back(i.first.u, i.first.v);
+        secondParams.emplace_back(i.first.s, i.first.t);
     }
 
-    return factory.createIntersection(points, closed);
+    return factory.createIntersection(surfaces, firstParams, secondParams, points, closed, renderer);
 }
 
 IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,

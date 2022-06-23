@@ -206,19 +206,22 @@ void MainWindow::on_actionIntersect_triggered() {
     IntersectHandler handler{scene->hasCursor(), scene->objectFactory()};
     IntersectDialog dialog(this, handler);
 
-    if(!dialog.exec()) return;
+    if (!dialog.exec()) return;
 
-    scene->intersect(handler);
+    scene->intersect(handler, *ui->renderWidget);
 }
 
 void MainWindow::on_deleteObject_clicked() {
     auto selected = ui->objectsList->selectedItems();
     if (selected.empty()) return;
 
+    auto sel = scene->selected().lock();
     scene->removeSelected();
-    items.remove_if([&selected](const unique_ptr<ObjectListItem> &ob) {
-        return selected.contains(ob.get());
-    });
+    if (sel) {
+        items.remove_if([&sel](const unique_ptr<ObjectListItem> &ob) {
+            return sel->equals(ob->object());
+        });
+    }
 }
 
 void MainWindow::on_centerObject_clicked() {

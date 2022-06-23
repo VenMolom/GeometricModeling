@@ -7,10 +7,14 @@
 using namespace std;
 using namespace DirectX;
 
-Intersection::Intersection(uint id, const vector<XMFLOAT3> &points, bool closed)
-        : Object(id, "Intersection", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP) {
+Intersection::Intersection(uint id, const array<shared_ptr<ParametricObject<2>>, 2> &surfaces,
+                           const vector<pair<float, float>> &firstParameters,
+                           const vector<pair<float, float>> &secondParameters,
+                           const vector<XMFLOAT3> &points, bool closed, Renderer &renderer)
+        : Object(id, "Intersection", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP),
+          closed(closed) {
     uint index = 0;
-    for (auto &point : points) {
+    for (auto &point: points) {
         vertices.push_back({point, {1, 1, 1}});
         indices.push_back(index++);
     }
@@ -18,6 +22,11 @@ Intersection::Intersection(uint id, const vector<XMFLOAT3> &points, bool closed)
         indices.push_back(0);
     }
     updateBuffers();
+
+    instances[0] = make_shared<IntersectionInstance>(firstParameters, surfaces[0]->range(), closed, renderer);
+    surfaces[0]->setIntersectionInstance(instances[0]);
+    instances[1] = make_shared<IntersectionInstance>(secondParameters, surfaces[1]->range(), closed, renderer);
+    surfaces[1]->setIntersectionInstance(instances[1]);
 }
 
 void Intersection::draw(Renderer &renderer, DrawType drawType) {

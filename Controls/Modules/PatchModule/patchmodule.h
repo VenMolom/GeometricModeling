@@ -20,6 +20,8 @@ private slots:
 
     void on_polygonalCheckBox_stateChanged(int arg1);
 
+    void on_pointsCheckBox_stateChanged(int arg1);
+
 private:
     std::shared_ptr<Patch> patch;
 

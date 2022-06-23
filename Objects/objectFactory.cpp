@@ -41,8 +41,11 @@ std::shared_ptr<BicubicC2> ObjectFactory::createBicubicC2(DirectX::XMFLOAT3 posi
     return make_shared<BicubicC2Creator>(position, bindableSelected);
 }
 
-std::shared_ptr<Intersection> ObjectFactory::createIntersection(const vector<XMFLOAT3> &points, bool closed) {
-    return make_shared<Intersection>(nextId++, points, closed);
+std::shared_ptr<Intersection> ObjectFactory::createIntersection(const array<shared_ptr<ParametricObject<2>>, 2> &surfaces,
+                                                                const vector<pair<float, float>> &firstParameters,
+                                                                const vector<pair<float, float>> &secondParameters,
+                                                                const vector<XMFLOAT3> &points, bool closed, Renderer &renderer) {
+    return make_shared<Intersection>(nextId++, surfaces, firstParameters, secondParameters, points, closed, renderer);
 }
 
 

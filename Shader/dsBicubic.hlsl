@@ -38,6 +38,7 @@ PSIn main(
 
     output.pos = deCastilloPatch(patch, uv);
     output.col = patch[0].col;
+    output.tex = uv;
 
 	return output;
 }

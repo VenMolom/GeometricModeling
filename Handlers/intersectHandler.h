@@ -24,9 +24,9 @@ public:
         this->surfaces = std::move(surfaces);
     }
 
-    std::shared_ptr<Object> calculateIntersection();
+    std::shared_ptr<Object> calculateIntersection(Renderer &renderer);
 
-    std::shared_ptr<Object> calculateIntersection(DirectX::XMFLOAT3 hint);
+    std::shared_ptr<Object> calculateIntersection(Renderer &renderer, DirectX::XMFLOAT3 hint);
 
 private:
     bool _useCursor{};
@@ -127,7 +127,7 @@ private:
 
     bool findIntersectPoint(IntersectPoint starting, IntersectPoint &intersect) const;
 
-    std::shared_ptr<Object> findIntersectCurve(IntersectPoint starting);
+    std::shared_ptr<Object> findIntersectCurve(IntersectPoint starting, Renderer &renderer);
 
     PointResult calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
                                                DirectX::XMVECTOR startValue, DirectX::XMVECTOR t) const;

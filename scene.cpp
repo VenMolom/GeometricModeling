@@ -154,7 +154,7 @@ void Scene::fillIn() {
     addObject(comp->fillIn(factory.id()));
 }
 
-void Scene::intersect(IntersectHandler &handler) {
+void Scene::intersect(IntersectHandler &handler, Renderer &renderer) {
     array<shared_ptr<ParametricObject<2>>, 2> surfaces{};
 
     if (composite) {
@@ -182,9 +182,9 @@ void Scene::intersect(IntersectHandler &handler) {
 
     shared_ptr<Object> intersection;
     if (cursor) {
-        intersection = handler.calculateIntersection(cursor->position());
+        intersection = handler.calculateIntersection(renderer, cursor->position());
     } else {
-        intersection = handler.calculateIntersection();
+        intersection = handler.calculateIntersection(renderer);
     }
 
     if (intersection) {
@@ -223,6 +223,7 @@ void Scene::selectFromScreen(QPointF start, QPointF end) {
 
     virtualPointsHolders.remove_if([](weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
     for (auto &holder: virtualPointsHolders) {
+        if (!holder.lock()->showPoints()) continue;
         auto points = holder.lock()->virtualPoints();
         for (auto &point: points) {
             auto screenPos = project(point->position());
@@ -333,6 +334,7 @@ shared_ptr<Object> Scene::findIntersectingObject(XMFLOAT3RAY ray) {
 
     virtualPointsHolders.remove_if([](weak_ptr<VirtualPointsHolder> &holder) { return holder.expired(); });
     for (auto &holder: virtualPointsHolders) {
+        if (!holder.lock()->showPoints()) continue;
         auto points = holder.lock()->virtualPoints();
         for (auto &point: points) {
             float distance{};

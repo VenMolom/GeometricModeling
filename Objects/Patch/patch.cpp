@@ -46,7 +46,7 @@ void Patch::drawMesh(Renderer &renderer, DrawType drawType) {
 }
 
 void Patch::drawPoints(Renderer &renderer, DrawType drawType) {
-    if (!points.empty()) {
+    if (!points.empty() && showPoints()) {
         for (auto &point: points) {
             auto isSelected = !selected.expired() && point->equals(selected.lock());
             point->draw(renderer, isSelected ? SELECTED : DEFAULT);

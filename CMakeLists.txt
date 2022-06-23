@@ -76,7 +76,8 @@ set(PROJECT_SOURCES
         Objects/Patch/patch.cpp Objects/Patch/patch.h
         Objects/Patch/bicubicC0Creator.cpp Objects/Patch/bicubicC0Creator.h
         Objects/creator.h
-        Controls/Modules/PatchCreatorModule/patchcreatormodule.h Controls/Modules/PatchCreatorModule/patchcreatormodule.cpp
+        Controls/Modules/PatchCreatorModule/patchcreatormodule.h
+        Controls/Modules/PatchCreatorModule/patchcreatormodule.cpp
         Controls/Modules/PatchCreatorModule/patchcreatormodule.ui
         Objects/Patch/patchCreator.h
         Objects/linelist.cpp Objects/linelist.h
@@ -88,7 +89,13 @@ set(PROJECT_SOURCES
         Utils/gregoryUtils.cpp Utils/gregoryUtils.h
         Objects/Patch/gregoryPatch.cpp Objects/Patch/gregoryPatch.h
         Controls/intersectdialog.h Controls/intersectdialog.cpp
-        Controls/intersectdialog.ui Handlers/intersectHandler.cpp Handlers/intersectHandler.h Objects/Intersection/intersection.cpp Objects/Intersection/intersection.h)
+        Controls/intersectdialog.ui
+        Handlers/intersectHandler.cpp Handlers/intersectHandler.h
+        Objects/Intersection/intersection.cpp Objects/Intersection/intersection.h
+        Objects/Intersection/intersectionInstance.cpp Objects/Intersection/intersectionInstance.h
+        Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.h
+        Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.cpp
+        Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.ui)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -110,17 +117,23 @@ set(HLSL_SHADER_FILES
         Shader/vsStereo.hlsl
         Shader/psStereo.hlsl
         Shader/vsSelector.hlsl
-        Shader/psSelector.hlsl)
+        Shader/psSelector.hlsl
+        Shader/vsTexture.hlsl
+        Shader/psTexture.hlsl
+        Shader/psParam.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsBillboard.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsNoProjection.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsStereo.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsSelector.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties(Shader/vsTexture.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psStereo.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psSelector.hlsl PROPERTIES ShaderType "ps")
+set_source_files_properties(Shader/psTexture.hlsl PROPERTIES ShaderType "ps")
+set_source_files_properties(Shader/psParam.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/hsBicubic.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/hsGregory.hlsl PROPERTIES ShaderType "hs")

@@ -10,6 +10,8 @@
 
 class Object;
 
+class Torus;
+
 class BrezierCurve;
 
 class InterpolationCurveC2;
@@ -24,6 +26,8 @@ class BicubicC2;
 
 class GregoryPatch;
 
+class IntersectionInstance;
+
 const DirectX::XMFLOAT4 SELECTED_COLOR{1.0f, 0.4f, 0.0f, 1.0f};
 const DirectX::XMFLOAT4 DEFAULT_COLOR{0.0f, 0.0f, 0.0f, 0.0f};
 const DirectX::XMFLOAT4 POLYGONAL_COLOR{0.0f, 1.0f, 1.0f, 1.0f};
@@ -31,6 +35,8 @@ const DirectX::XMFLOAT4 POLYGONAL_COLOR{0.0f, 1.0f, 1.0f, 1.0f};
 class Renderer {
 public:
     virtual void draw(const Object &object, DirectX::XMFLOAT4 color) = 0;
+
+    virtual void draw(const Torus &torus, DirectX::XMFLOAT4 color) = 0;
 
     virtual void draw(const BrezierCurve &curve, DirectX::XMFLOAT4 color) = 0;
 
@@ -45,6 +51,8 @@ public:
     virtual void draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) = 0;
 
     virtual void draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) = 0;
+
+    virtual void draw(const IntersectionInstance &instance) = 0;
 };
 
 #endif //MG1_RENDERER_H

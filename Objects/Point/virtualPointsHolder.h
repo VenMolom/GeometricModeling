@@ -22,12 +22,17 @@ public:
 
     virtual void replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) = 0;
 
+    void setShowPoints(bool show) { _showPoints = show; }
+
+    bool showPoints() const { return _showPoints; }
+
 protected:
     std::weak_ptr<Object> selected;
     QBindable<std::weak_ptr<Object>> bindableSelected;
 
 private:
     QPropertyNotifier selectedHandler;
+    bool _showPoints{true};
 };
 
 #endif //MG1_VIRTUALPOINTSHOLDER_H

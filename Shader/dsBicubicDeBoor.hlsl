@@ -51,6 +51,7 @@ PSIn main(
 
     output.pos = deBoorPatch(patch, uv);
     output.col = patch[0].col;
+    output.tex = uv;
 
     return output;
 }

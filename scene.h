@@ -37,7 +37,7 @@ public:
 
     void fillIn();
 
-    void intersect(IntersectHandler &handler);
+    void intersect(IntersectHandler &handler, Renderer &renderer);
 
     void addPoint(QPoint screenPosition);
 

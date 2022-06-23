@@ -23,6 +23,8 @@ public:
 
     void draw(const Object &object, DirectX::XMFLOAT4 color) override;
 
+    void draw(const Torus &torus, DirectX::XMFLOAT4 color) override;
+
     void draw(const BrezierCurve &curve, DirectX::XMFLOAT4 color) override;
 
     void draw(const InterpolationCurveC2 &curve, DirectX::XMFLOAT4 color) override;
@@ -36,6 +38,8 @@ public:
     void draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) override;
 
     void draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) override;
+
+    void draw(const IntersectionInstance &instance) override;
 
     void drawSelector(const Selector &selector);
 
@@ -74,6 +78,7 @@ private:
     QStatusBar *statusBar;
 
     DxDevice m_device;
+    Viewport m_viewport;
 
     mini::dx_ptr<ID3D11RenderTargetView> m_backBuffer;
     mini::dx_ptr<ID3D11DepthStencilView> m_depthBuffer;
@@ -83,6 +88,7 @@ private:
     mini::dx_ptr<ID3D11VertexShader> m_vertexNoProjectionShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexStereoShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexSelectorShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexTextureShader;
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11HullShader> m_hullBicubicShader;
@@ -98,6 +104,8 @@ private:
     mini::dx_ptr<ID3D11PixelShader> m_pixelFadeShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelStereoShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelSelectorShader;
+    mini::dx_ptr<ID3D11PixelShader> m_pixelTextureShader;
+    mini::dx_ptr<ID3D11PixelShader> m_pixelParamShader;
 
     mini::dx_ptr<ID3D11InputLayout> m_layout;
     mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
@@ -110,6 +118,7 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_cbTesselation;
     mini::dx_ptr<ID3D11Buffer> m_cbFarPlane;
     mini::dx_ptr<ID3D11Buffer> m_cbStereoColor;
+    mini::dx_ptr<ID3D11Buffer> m_cbTrim;
 
     mini::dx_ptr<ID3D11Buffer> m_ndcQuad;
     mini::dx_ptr<ID3D11Buffer> m_selectorQuad;

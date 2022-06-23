@@ -15,6 +15,7 @@
 #include "Controls/Modules/ScreenMoveModule/screenmovemodule.h"
 #include "Controls/Modules/ParametricModule/parametricmodule.h"
 #include "Controls/Modules/PatchCreatorModule/patchcreatormodule.h"
+#include "Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.h"
 
 using namespace std;
 using namespace DirectX;
@@ -97,5 +98,13 @@ void Controls::updateSelected() {
         auto creator = dynamic_pointer_cast<PatchCreator>(object);
         modules.push_back(std::move(make_unique<PatchCreatorModule>(creator, scene, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 10, 0, 1, 1);
+    }
+
+    if (object->type() & PARAMETRIC) {
+        auto parametric = static_pointer_cast<ParametricObject<2>>(object);
+        if (parametric->intersectionInstance()) {
+            modules.push_back(std::move(make_unique<IntersectionInstanceModule>(parametric->intersectionInstance(), this)));
+            ui->modulesLayout->addWidget(modules.back().get(), 11, 0, 1, 1);
+        }
     }
 }
