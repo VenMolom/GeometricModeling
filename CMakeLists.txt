@@ -95,7 +95,9 @@ set(PROJECT_SOURCES
         Objects/Intersection/intersectionInstance.cpp Objects/Intersection/intersectionInstance.h
         Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.h
         Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.cpp
-        Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.ui)
+        Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.ui
+        Controls/intersectiontexturedialog.h Controls/intersectiontexturedialog.cpp
+        Controls/intersectiontexturedialog.ui)
 
 # Build HLSL shaders
 add_custom_target(shaders)
