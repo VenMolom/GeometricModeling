@@ -27,6 +27,7 @@ public:
     Type type() const override;
 
     //TODO: convert to interpolation curve
+    //TODO: display trimming textures
 
 private:
     bool closed;
