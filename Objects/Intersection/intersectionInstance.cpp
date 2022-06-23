@@ -6,6 +6,7 @@
 #include <DirectXMath.h>
 #include <random>
 #include <stack>
+#include <QPainter>
 
 using namespace std;
 using namespace DirectX;
@@ -75,6 +76,7 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
     auto* data = reinterpret_cast<float*>(res.pData);
 
     floodFill(data);
+    createPixmap(data);
 
     device.context()->Unmap(cpuTex.get(), 0);
     device.context()->CopyResource(sourceRes, cpuTex.get());
@@ -115,4 +117,19 @@ void IntersectionInstance::floodFill(float *data) {
             indexStack.push({u, v - 1});
         }
     }
+}
+
+void IntersectionInstance::createPixmap(float *data) {
+    QImage image{SIZE, SIZE, QImage::Format_RGB32};
+
+    for (int x = 0; x < SIZE; ++x) {
+        for (int y = 0; y < SIZE; ++y) {
+            auto index = y * static_cast<int>(SIZE) + x;
+            int value = static_cast<int>(data[index] * 255.f);
+
+            image.setPixelColor(x, y, QColor::fromRgb(value, value, value));
+        }
+    }
+
+    _pixmap = QPixmap::fromImage(image);
 }

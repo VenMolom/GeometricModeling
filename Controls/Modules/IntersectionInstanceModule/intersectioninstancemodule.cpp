@@ -26,3 +26,8 @@ void IntersectionInstanceModule::on_firstCheckBox_stateChanged(int arg1) {
     instance->setFirst(Qt::Checked == (Qt::CheckState) arg1);
 }
 
+
+void IntersectionInstanceModule::on_removeButton_clicked() {
+    // TODO: remove instance from parametric object
+}
+

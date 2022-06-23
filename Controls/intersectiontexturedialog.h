@@ -2,6 +2,7 @@
 #define INTERSECTIONTEXTUREDIALOG_H
 
 #include <QDialog>
+#include "Objects/Intersection/intersection.h"
 
 namespace Ui {
     class IntersectionTextureDialog;
@@ -11,7 +12,7 @@ class IntersectionTextureDialog : public QDialog {
 Q_OBJECT
 
 public:
-    explicit IntersectionTextureDialog(QWidget *parent = nullptr);
+    explicit IntersectionTextureDialog(std::shared_ptr<Intersection> intersection, QWidget *parent = nullptr);
 
     ~IntersectionTextureDialog();
 

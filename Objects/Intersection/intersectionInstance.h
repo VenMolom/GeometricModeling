@@ -19,6 +19,8 @@ public:
 
     const mini::dx_ptr<ID3D11ShaderResourceView> &texture() const { return _texture; }
 
+    const QPixmap pixmap() const { return _pixmap; }
+
     void setActive(bool active) { _active = active; }
 
     void setFirst(bool first) { _first = first; }
@@ -30,10 +32,13 @@ public:
 private:
     mini::dx_ptr<ID3D11ShaderResourceView> _texture;
     mini::dx_ptr<ID3D11RenderTargetView> _target;
+    QPixmap _pixmap;
 
     bool _active{true}, _first{true};
 
     void floodFill(float *data);
+
+    void createPixmap(float *data);
 };
 
 

@@ -22,6 +22,8 @@ private slots:
 
     void on_firstCheckBox_stateChanged(int arg1);
 
+    void on_removeButton_clicked();
+
 private:
     std::shared_ptr<IntersectionInstance> instance;
 

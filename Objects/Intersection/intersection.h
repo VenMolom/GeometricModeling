@@ -26,8 +26,11 @@ public:
 
     Type type() const override;
 
+    std::shared_ptr<IntersectionInstance> firstInstance() const { return instances[0]; }
+
+    std::shared_ptr<IntersectionInstance> secondInstance() const { return instances[1]; }
+
     //TODO: convert to interpolation curve
-    //TODO: display trimming textures
 
 private:
     bool closed;

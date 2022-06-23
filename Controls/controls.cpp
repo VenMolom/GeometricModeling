@@ -15,6 +15,7 @@
 #include "Controls/Modules/ScreenMoveModule/screenmovemodule.h"
 #include "Controls/Modules/ParametricModule/parametricmodule.h"
 #include "Controls/Modules/PatchCreatorModule/patchcreatormodule.h"
+#include "Controls/Modules/IntersectionModule/intersectionmodule.h"
 #include "Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.h"
 
 using namespace std;
@@ -106,5 +107,11 @@ void Controls::updateSelected() {
             modules.push_back(std::move(make_unique<IntersectionInstanceModule>(parametric->intersectionInstance(), this)));
             ui->modulesLayout->addWidget(modules.back().get(), 11, 0, 1, 1);
         }
+    }
+
+    if (object->type() & INTERSECTION) {
+        auto intersection = dynamic_pointer_cast<Intersection>(object);
+        modules.push_back(std::move(make_unique<IntersectionModule>(intersection, this)));
+        ui->modulesLayout->addWidget(modules.back().get(), 12, 0, 1, 1);
     }
 }
