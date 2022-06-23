@@ -8,6 +8,8 @@ IntersectionTextureDialog::IntersectionTextureDialog(std::shared_ptr<Intersectio
 
     ui->firstTexture->setPixmap(intersection->firstInstance()->pixmap());
     ui->secondTexture->setPixmap(intersection->secondInstance()->pixmap());
+
+    setWindowTitle("Intersection Parameter Space");
 }
 
 IntersectionTextureDialog::~IntersectionTextureDialog() {

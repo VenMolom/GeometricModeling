@@ -10,6 +10,8 @@ IntersectDialog::IntersectDialog(QWidget *parent, IntersectHandler &handler) :
     if (!handler.canUseCursor()) {
         ui->useCursor->setEnabled(false);
     }
+
+    setWindowTitle("Intersect");
 }
 
 IntersectDialog::~IntersectDialog() {
