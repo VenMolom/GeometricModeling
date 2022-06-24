@@ -145,7 +145,6 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting,
         XMFLOAT3 p{};
         XMStoreFloat3(&p, i.second);
         points.push_back(p);
-        //TODO: if wrap happens add additional points at both edges
         firstParams.emplace_back(i.first.u, i.first.v);
         secondParams.emplace_back(i.first.s, i.first.t);
     }

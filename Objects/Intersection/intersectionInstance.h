@@ -13,7 +13,8 @@ public:
     static constexpr uint SIZE = 256;
 
     IntersectionInstance(const std::vector<std::pair<float, float>> &parameters,
-                         const std::array<std::tuple<float, float>, 2> &range, bool closed, Renderer &renderer);
+                         const std::array<std::tuple<float, float>, 2> &range,
+                         const std::array<bool, 2> &looped, bool closed, Renderer &renderer);
 
     const mini::dx_ptr<ID3D11RenderTargetView> &target() const { return _target; }
 
@@ -36,7 +37,7 @@ private:
 
     bool _active{true}, _first{true};
 
-    void floodFill(float *data);
+    void floodFill(float *data, const std::array<bool, 2> &looped);
 
     void createPixmap(float *data);
 };

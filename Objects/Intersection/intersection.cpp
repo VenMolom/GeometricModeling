@@ -23,9 +23,11 @@ Intersection::Intersection(uint id, const array<shared_ptr<ParametricObject<2>>,
     }
     updateBuffers();
 
-    instances[0] = make_shared<IntersectionInstance>(firstParameters, surfaces[0]->range(), closed, renderer);
+    instances[0] = make_shared<IntersectionInstance>(firstParameters, surfaces[0]->range(),
+                                                     surfaces[0]->looped(), closed, renderer);
     surfaces[0]->setIntersectionInstance(instances[0]);
-    instances[1] = make_shared<IntersectionInstance>(secondParameters, surfaces[1]->range(), closed, renderer);
+    instances[1] = make_shared<IntersectionInstance>(secondParameters, surfaces[1]->range(),
+                                                     surfaces[1]->looped(), closed, renderer);
     surfaces[1]->setIntersectionInstance(instances[1]);
 }
 

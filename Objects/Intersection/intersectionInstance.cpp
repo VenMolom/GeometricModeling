@@ -13,8 +13,9 @@ using namespace DirectX;
 
 IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &parameters,
                                            const array<tuple<float, float>, 2> &range,
+                                           const array<bool, 2> &looped,
                                            bool closed, Renderer &renderer)
-        : Renderable(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP) {
+        : Renderable(D3D11_PRIMITIVE_TOPOLOGY_LINELIST) {
 
     const DxDevice &device = DxDevice::Instance();
 
@@ -49,13 +50,45 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
                      * XMMatrixTranslation(-1, 1, 0);
 
     uint index = 0;
-    // TODO: handle wrapped
     for (auto[u, v]: parameters) {
         XMFLOAT3 vec(u, v, 0);
         XMStoreFloat3(&vec, XMVector3TransformCoord(XMLoadFloat3(&vec), transform));
+
+        // !may not work if no wrap happened but points are far away in parameter space
+        if (!vertices.empty() && (looped[0] || looped[1])) {
+            auto vv = vertices.back().position;
+            auto vvv = vec;
+            auto loop = false;
+            if (looped[0] && abs(vv.x - vec.x) > 1.f) { // wrap happened
+                auto sign = vec.x > 0 ? 1.f : -1.f;
+                vv.x += 2.f * sign;
+                vvv.x -= 2.f * sign;
+                loop = true;
+            }
+            if (looped[1] && abs(vv.y - vec.y) > 1.f) { // wrap happened
+                auto sign = vec.y > 0 ? 1.f : -1.f;
+                vv.y += 2.f * sign;
+                vvv.y -= 2.f * sign;
+                loop = true;
+            }
+            if (loop) {
+                vertices.push_back({vv, {1, 1, 1}});
+                indices.push_back(index++);
+
+                vertices.push_back({vvv, {1, 1, 1}});
+                indices.push_back(index++);
+            }
+        }
+
         vertices.push_back({vec, {1, 1, 1}});
+
+        if (vertices.size() > 1) {
+            indices.push_back(index);
+        }
         indices.push_back(index++);
     }
+
+
     if (closed) {
         indices.push_back(0);
     }
@@ -75,7 +108,7 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
 
     auto* data = reinterpret_cast<float*>(res.pData);
 
-    floodFill(data);
+    floodFill(data, looped);
     createPixmap(data);
 
     device.context()->Unmap(cpuTex.get(), 0);
@@ -84,8 +117,8 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
     sourceRes->Release();
 }
 
-void IntersectionInstance::floodFill(float *data) {
-    //TODO: handle wrapped
+void IntersectionInstance::floodFill(float *data, const array<bool, 2> &looped) {
+    auto [loopedU, loopedV] = looped;
     std::default_random_engine m_random{};
     static const uniform_int_distribution<int> posDistribution(0, SIZE - 1);
 
@@ -106,7 +139,21 @@ void IntersectionInstance::floodFill(float *data) {
         auto [u, v] = indexStack.top();
         indexStack.pop();
 
-        if (u >= SIZE || u < 0 || v < 0 || v >= SIZE) continue;
+        if (u >= SIZE || u < 0) {
+            if (loopedU) {
+                u = u - SIZE * (u / SIZE);
+            } else {
+                continue;
+            }
+        }
+
+        if (v >= SIZE || v < 0) {
+            if (loopedV) {
+                v = v - SIZE * (v / SIZE);
+            } else {
+                continue;
+            }
+        }
 
         index = v * static_cast<int>(SIZE) + u;
         if (data[index] == 1.f) {
