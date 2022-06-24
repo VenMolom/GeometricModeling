@@ -179,42 +179,36 @@ IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(Inte
     };
 
     IntersectPoint point = start;
+    auto[wrapU, wrapV] = surfaces[0]->looped();
+    auto[wrapS, wrapT] = surfaces[1]->looped();
+    auto pRange = surfaces[0]->range();
+    auto qRange = surfaces[1]->range();
     auto value = funcValue(point, startValue, t);
     int iterations = 0;
     while (iterations++ < _maxPoints) {
         auto matrix = funcMatrix(point, t);
         XMVECTOR det{};
         auto mInv = XMMatrixInverse(&det, matrix);
-        if (abs(det.m128_f32[0]) < epsilon) {
-            return NoResult;
-        }
+        if (abs(det.m128_f32[0]) < epsilon) return NoResult;
         auto sol = XMVector4Transform(value, mInv);
 
         IntersectPoint solution{sol.m128_f32[0], sol.m128_f32[1], sol.m128_f32[2], sol.m128_f32[3]};
         auto nextPoint = point - solution;
         auto nextValue = funcValue(nextPoint, startValue, t);
 
+        if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT)) {
+            nextPoint.clampToRange(point, pRange[0], pRange[1], qRange[0], qRange[1]);
+            next.u = nextPoint.u;
+            next.v = nextPoint.v;
+            next.s = nextPoint.s;
+            next.t = nextPoint.t;
+            return End;
+        }
+
+        nextPoint.wrap(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT);
+
         if (solution.length() < epsilon || (nextPoint - point).length() < epsilon) {
-            if (XMVector3Length(nextValue).m128_f32[0] >= epsilon) {
-                return NoResult;
-            }
-
-            auto[wrapU, wrapV] = surfaces[0]->looped();
-            auto[wrapS, wrapT] = surfaces[1]->looped();
-            auto pRange = surfaces[0]->range();
-            auto qRange = surfaces[1]->range();
-
-            if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT)) {
-                nextPoint.clampToRange(pRange[0], pRange[1], qRange[0], qRange[1]);
-                next.u = nextPoint.u;
-                next.v = nextPoint.v;
-                next.s = nextPoint.s;
-                next.t = nextPoint.t;
-                return End;
-            }
-
-            nextPoint.wrap(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT);
-
+            if (XMVector3Length(nextValue).m128_f32[0] >= epsilon) return NoResult;
             next.u = nextPoint.u;
             next.v = nextPoint.v;
             next.s = nextPoint.s;
@@ -255,6 +249,8 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
     float a = 0.5f;
     float value = funcValue(point);
 
+    auto pRange = surfaces[0]->range();
+    auto qRange = surfaces[1]->range();
     int iterations = 0;
     while (iterations++ < _maxPoints) {
         grad = gradValue(point);
@@ -262,12 +258,10 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
         auto nextPoint = point - grad * a;
         auto nextValue = funcValue(nextPoint);
 
+        if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1])) return false;
+
         if (grad.length() < epsilon || (nextPoint - point).length() < epsilon) {
             if (nextValue >= epsilon) return false;
-
-            auto pRange = surfaces[0]->range();
-            auto qRange = surfaces[1]->range();
-            if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1])) return false;
             // TODO: może wrap tutaj
 
             intersect.u = nextPoint.u;

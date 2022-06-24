@@ -71,19 +71,39 @@ private:
             return false;
         }
 
-        void clampToRange(const std::tuple<float, float> &uRange, const std::tuple<float, float> &vRange,
-                        const std::tuple<float, float> &sRange, const std::tuple<float, float> &tRange) {
+        void clampToRange(const IntersectPoint &prev,
+                          const std::tuple<float, float> &uRange,
+                          const std::tuple<float, float> &vRange,
+                          const std::tuple<float, float> &sRange,
+                          const std::tuple<float, float> &tRange) {
+            auto delta = *this - prev;
+
+            auto minDiff = 1.f;
+
             auto[startU, endU] = uRange;
-            u = std::clamp(u, startU, endU);
-
             auto[startV, endV] = vRange;
-            v = std::clamp(v, startV, endV);
-
             auto[startS, endS] = sRange;
-            s = std::clamp(s, startS, endS);
-
             auto[startT, endT] = tRange;
-            t = std::clamp(t, startT, endT);
+
+            if (delta.u != 0) {
+                minDiff = std::min(minDiff, (std::clamp(u, startU, endU) - prev.u) / delta.u);
+            }
+            if (delta.v != 0) {
+                minDiff = std::min(minDiff, (std::clamp(v, startV, endV) - prev.v) / delta.v);
+            }
+            if (delta.s != 0) {
+                minDiff = std::min(minDiff, (std::clamp(s, startS, endS) - prev.s) / delta.s);
+            }
+            if (delta.t != 0) {
+                minDiff = std::min(minDiff, (std::clamp(t, startT, endT) - prev.t) / delta.t);
+            }
+
+            delta = delta * minDiff;
+
+            u = prev.u + delta.u;
+            v = prev.v + delta.v;
+            s = prev.s + delta.s;
+            t = prev.t + delta.t;
         }
 
         void wrap(const std::tuple<float, float> &uRange, const std::tuple<float, float> &vRange,
@@ -130,7 +150,7 @@ private:
     std::shared_ptr<Object> findIntersectCurve(IntersectPoint starting, Renderer &renderer);
 
     PointResult calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
-                                               DirectX::XMVECTOR startValue, DirectX::XMVECTOR t) const;
+                                            DirectX::XMVECTOR startValue, DirectX::XMVECTOR t) const;
 
     std::vector<std::pair<std::pair<float, float>, DirectX::XMVECTOR>>
     generatePoints(std::shared_ptr<ParametricObject<2>> surface, int uPoints, int vPoints) const;
