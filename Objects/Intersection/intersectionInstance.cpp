@@ -127,7 +127,9 @@ void IntersectionInstance::createPixmap(float *data) {
             auto index = y * static_cast<int>(SIZE) + x;
             int value = static_cast<int>(data[index] * 255.f);
 
-            image.setPixelColor(x, y, QColor::fromRgb(value, value, value));
+            QColor color = abs(value - 127) < 3 ? QColor(255, 140, 0) : QColor(value, value, value);
+
+            image.setPixelColor(x, y, color);
         }
     }
 

@@ -30,8 +30,6 @@ public:
 
     std::shared_ptr<IntersectionInstance> secondInstance() const { return instances[1]; }
 
-    //TODO: convert to interpolation curve
-
 private:
     bool closed;
     std::array<std::shared_ptr<IntersectionInstance>, 2> instances;
