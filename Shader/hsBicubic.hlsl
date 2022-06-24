@@ -15,6 +15,11 @@ HSBicubicConstOutput CalcHSPatchConstants(
     output.inside[0] = tesselationSetting.x;
     output.inside[1] = tesselationSetting.y;
 
+    int2 segments = tesselationSetting.zw;
+    int2 segment = int2(PatchID / segments.y, PatchID % segments.y);
+    output.start = float2(segment.xy) / float2(segments.xy);
+    output.end = output.start + 1.f / segments;
+
 	return output;
 }
 

@@ -51,7 +51,7 @@ PSIn main(
 
     output.pos = deBoorPatch(patch, uv);
     output.col = patch[0].col;
-    output.tex = uv;
+    output.tex = float2(lerp(input.start.x, input.end.x, uv.x), lerp(input.start.y, input.end.y, uv.y));
 
     return output;
 }

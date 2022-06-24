@@ -32,6 +32,8 @@ struct HSBrezierConstOutput {
 struct HSBicubicConstOutput {
 	float edges[4] : SV_TessFactor;
 	float inside[2] : SV_InsideTessFactor;
+	float2 start : TEXSTART;
+	float2 end : TEXEND;
 };
 
 #define CONTROL_POINTS_BREZIER 4

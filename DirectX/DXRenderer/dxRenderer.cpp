@@ -112,6 +112,7 @@ void DxRenderer::draw(const Torus &torus, DirectX::XMFLOAT4 color) {
     updateBuffer(m_cbColor, color);
 
     auto intersection = torus.intersectionInstance();
+    // TODO: fix (assign UVs)
     if (intersection && intersection->active()) {
         m_device.context()->PSSetShader(m_pixelParamShader.get(), nullptr, 0);
         updateBuffer(m_cbTrim, XMFLOAT4(static_cast<int>(intersection->first()), 0, 0, 0));
@@ -191,12 +192,13 @@ void DxRenderer::draw(const Patch &patch, DirectX::XMFLOAT4 color) {
     m_device.context()->HSSetShader(m_hullBicubicShader.get(), nullptr, 0);
     m_device.context()->DSSetShader(m_domainBicubicShader.get(), nullptr, 0);
 
-    // density.uv
+    // density.uv, size.uv
     auto density = patch.density();
+    auto size = patch.size();
     XMINT4 tesselationAmount = {
             static_cast<int32_t>(density[0]),
             static_cast<int32_t>(density[1]),
-            0, 0
+            size[0], size[1]
     };
     updateBuffer(m_cbTesselation, tesselationAmount);
 
@@ -222,12 +224,13 @@ void DxRenderer::draw(const BicubicC2 &patch, DirectX::XMFLOAT4 color) {
     m_device.context()->HSSetShader(m_hullBicubicShader.get(), nullptr, 0);
     m_device.context()->DSSetShader(m_domainBicubicDeBoorShader.get(), nullptr, 0);
 
-    // density.uv
+    // density.uv, size.uv
     auto density = patch.density();
+    auto size = patch.size();
     XMINT4 tesselationAmount = {
             static_cast<int32_t>(density[0]),
             static_cast<int32_t>(density[1]),
-            0, 0
+            size[0], size[1]
     };
     updateBuffer(m_cbTesselation, tesselationAmount);
 
