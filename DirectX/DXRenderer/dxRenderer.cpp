@@ -112,7 +112,6 @@ void DxRenderer::draw(const Torus &torus, DirectX::XMFLOAT4 color) {
     updateBuffer(m_cbColor, color);
 
     auto intersection = torus.intersectionInstance();
-    // TODO: fix (assign UVs)
     if (intersection && intersection->active()) {
         m_device.context()->PSSetShader(m_pixelParamShader.get(), nullptr, 0);
         updateBuffer(m_cbTrim, XMFLOAT4(static_cast<int>(intersection->first()), 0, 0, 0));
