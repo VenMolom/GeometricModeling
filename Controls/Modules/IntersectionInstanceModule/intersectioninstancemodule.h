@@ -16,6 +16,9 @@ public:
 
     ~IntersectionInstanceModule();
 
+signals:
+    void removeIntersectionInstance();
+
 private slots:
 
     void on_activeCheckBox_stateChanged(int arg1);

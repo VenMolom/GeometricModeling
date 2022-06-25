@@ -261,8 +261,7 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
 
         if (grad.length() < epsilon || (nextPoint - point).length() < epsilon) {
             if (nextValue >= epsilon) return false;
-            // TODO: może wrap tutaj
-
+            // ? może wrap tutaj
             intersect.u = nextPoint.u;
             intersect.v = nextPoint.v;
             intersect.s = nextPoint.s;

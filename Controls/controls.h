@@ -18,11 +18,15 @@ public:
 
     void setScene(std::shared_ptr<Scene> scenePtr);
 
+public slots:
+    void removeIntersection();
+
 private:
     QPropertyNotifier sceneHandler;
 
     std::shared_ptr<Scene> scene;
     std::vector<std::unique_ptr<QWidget>> modules;
+    std::weak_ptr<Object> object;
 
     void updateSelected();
 

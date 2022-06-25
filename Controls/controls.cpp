@@ -38,80 +38,94 @@ void Controls::setScene(shared_ptr<Scene> scenePtr) {
 }
 
 void Controls::updateSelected() {
-    auto object = scene->selected().lock();
+    object = scene->selected();
+    auto objectLocked = scene->selected().lock();
 
     modules.clear();
-    if (!object) return;
+    if (!objectLocked) return;
 
-    if (object->type() & NAMEABLE) {
-        modules.push_back(std::move(make_unique<ObjectModule>(object, this)));
+    if (objectLocked->type() & NAMEABLE) {
+        modules.push_back(std::move(make_unique<ObjectModule>(objectLocked, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 0, 0, 1, 1);
     }
 
-    if (object->type() & MOVABLE) {
-        modules.push_back(std::move(make_unique<MoveModule>(object, this)));
+    if (objectLocked->type() & MOVABLE) {
+        modules.push_back(std::move(make_unique<MoveModule>(objectLocked, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 1, 0, 1, 1);
     }
 
-    if (object->type() & SCREENMOVABLE) {
+    if (objectLocked->type() & SCREENMOVABLE) {
         // TODO: ?? best add some screenMove base class
-        auto cursor = static_pointer_cast<Cursor>(object);
+        auto cursor = static_pointer_cast<Cursor>(objectLocked);
         modules.push_back(std::move(make_unique<ScreenMoveModule>(cursor, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 2, 0, 1, 1);
     }
 
-    if (object->type() & TRANSFORMABLE) {
-        modules.push_back(std::move(make_unique<TransformModule>(object, this)));
+    if (objectLocked->type() & TRANSFORMABLE) {
+        modules.push_back(std::move(make_unique<TransformModule>(objectLocked, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 3, 0, 1, 1);
     }
 
-    if (object->type() & PARAMETRIC) {
-        auto parametric = static_pointer_cast<ParametricObject<2>>(object);
+    if (objectLocked->type() & PARAMETRIC) {
+        auto parametric = static_pointer_cast<ParametricObject<2>>(objectLocked);
         modules.push_back(std::move(make_unique<ParametricModule>(parametric, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 4, 0, 1, 1);
     }
 
-    if (object->type() & TORUS) {
-        auto torus = static_pointer_cast<Torus>(object);
+    if (objectLocked->type() & TORUS) {
+        auto torus = static_pointer_cast<Torus>(objectLocked);
         modules.push_back(std::move(make_unique<TorusModule>(torus, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 5, 0, 1, 1);
     }
 
-    if (object->type() & BREZIERC2) {
-        auto curve = static_pointer_cast<BrezierC2>(object);
+    if (objectLocked->type() & BREZIERC2) {
+        auto curve = static_pointer_cast<BrezierC2>(objectLocked);
         modules.push_back(std::move(make_unique<BSplineModule>(curve, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 6, 0, 1, 1);
     }
 
-    if (object->type() & CURVE) {
-        auto curve = static_pointer_cast<Curve>(object);
+    if (objectLocked->type() & CURVE) {
+        auto curve = static_pointer_cast<Curve>(objectLocked);
         modules.push_back(std::move(make_unique<CurveModule>(curve, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 7, 0, 1, 1);
     }
 
-    if (object->type() & PATCH) {
-        auto patch = static_pointer_cast<Patch>(object);
+    if (objectLocked->type() & PATCH) {
+        auto patch = static_pointer_cast<Patch>(objectLocked);
         modules.push_back(std::move(make_unique<PatchModule>(patch, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 8, 0, 1, 1);
     }
 
-    if (object->type() & PATCHCREATOR) {
-        auto creator = dynamic_pointer_cast<PatchCreator>(object);
+    if (objectLocked->type() & PATCHCREATOR) {
+        auto creator = dynamic_pointer_cast<PatchCreator>(objectLocked);
         modules.push_back(std::move(make_unique<PatchCreatorModule>(creator, scene, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 10, 0, 1, 1);
     }
 
-    if (object->type() & PARAMETRIC) {
-        auto parametric = static_pointer_cast<ParametricObject<2>>(object);
+    if (objectLocked->type() & PARAMETRIC) {
+        auto parametric = static_pointer_cast<ParametricObject<2>>(objectLocked);
         if (parametric->intersectionInstance()) {
-            modules.push_back(std::move(make_unique<IntersectionInstanceModule>(parametric->intersectionInstance(), this)));
+            auto module = make_unique<IntersectionInstanceModule>(parametric->intersectionInstance(), this);
+            connect(module.get(), &IntersectionInstanceModule::removeIntersectionInstance,
+                    this, &Controls::removeIntersection);
+            modules.push_back(std::move(module));
             ui->modulesLayout->addWidget(modules.back().get(), 11, 0, 1, 1);
         }
     }
 
-    if (object->type() & INTERSECTION) {
-        auto intersection = dynamic_pointer_cast<Intersection>(object);
+    if (objectLocked->type() & INTERSECTION) {
+        auto intersection = dynamic_pointer_cast<Intersection>(objectLocked);
         modules.push_back(std::move(make_unique<IntersectionModule>(intersection, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 12, 0, 1, 1);
+    }
+}
+
+void Controls::removeIntersection() {
+    auto objectLocked = object.lock();
+    if (objectLocked && objectLocked->type() & PARAMETRIC) {
+        auto parametric = static_pointer_cast<ParametricObject<2>>(objectLocked);
+        parametric->setIntersectionInstance({});
+        ui->modulesLayout->removeWidget(modules.back().get());
+        modules.pop_back();
     }
 }
