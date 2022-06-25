@@ -119,8 +119,13 @@ void DxRenderer::draw(const Torus &torus, DirectX::XMFLOAT4 color) {
         setTextures({intersection->texture().get()}, m_sampler);
     }
 
+    m_device.context()->IASetInputLayout(m_paramLayout.get());
+    m_device.context()->VSSetShader(m_vertexParamShader.get(), nullptr, 0);
+
     torus.render(m_device.context());
 
+    m_device.context()->IASetInputLayout(m_layout.get());
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
@@ -480,9 +485,11 @@ void DxRenderer::init3D3() {
     const auto vsBytes = DxDevice::LoadByteCode(L"vs.cso");
     const auto vsStereoBytes = DxDevice::LoadByteCode(L"vsStereo.cso");
     const auto vsSelectorBytes = DxDevice::LoadByteCode(L"vsSelector.cso");
+    const auto vsParamBytes = DxDevice::LoadByteCode(L"vsParam.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
     m_vertexStereoShader = m_device.CreateVertexShader(vsStereoBytes);
     m_vertexSelectorShader = m_device.CreateVertexShader(vsSelectorBytes);
+    m_vertexParamShader = m_device.CreateVertexShader(vsParamBytes);
     m_vertexTextureShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsTexture.cso"));
     m_vertexBillboardShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsBillboard.cso"));
     m_vertexNoProjectionShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsNoProjection.cso"));
@@ -513,6 +520,15 @@ void DxRenderer::init3D3() {
     };
     m_layout = m_device.CreateInputLayout(elements, vsBytes);
     m_device.context()->IASetInputLayout(m_layout.get());
+
+    elements = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+                    D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
+                                                         static_cast<UINT>(offsetof(VertexPositionTexture, tex)),
+                    D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+    m_paramLayout = m_device.CreateInputLayout(elements, vsParamBytes);
 
     elements = {
             {"POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0,

@@ -12,6 +12,7 @@ Torus::Torus(uint id, XMFLOAT3 position)
         : ParametricObject<TORUS_DIM>(id, "Torus", position, {15, 15},
                                       {make_tuple(0, XM_2PI), make_tuple(0, XM_2PI)},
                                       D3D11_PRIMITIVE_TOPOLOGY_LINELIST) {
+    convertToTextured();
     calculateVertices(density(), range());
     calculateIndices(density());
     updateBuffers();
@@ -19,41 +20,46 @@ Torus::Torus(uint id, XMFLOAT3 position)
 
 void
 Torus::calculateVertices(const array<int, TORUS_DIM> &density, const array<tuple<float, float>, TORUS_DIM> &range) {
-    vertices.clear();
+    verticesTextured.clear();
     auto[startU, endU] = range[0];
     auto deltaU = (endU - startU) / static_cast<float>(density[0]);
 
     auto[startV, endV] = range[1];
     auto deltaV = (endV - startV) / static_cast<float>(density[1]);
 
+    auto densityFloat0 = static_cast<float>(density[0]);
+    auto densityFloat1 = static_cast<float>(density[1]);
+
     auto u = startU;
-    for (auto i = 0; i < density[0]; ++i, u += deltaU) { // minor _rotation
+    for (auto i = 0; i <= density[0]; ++i, u += deltaU) { // minor _rotation
         auto v = startV;
-        for (auto j = 0; j < density[1]; ++j, v += deltaV) { // major _rotation
-            vertices.push_back({
-                                       {
-                                               (_majorRadius + _minorRadius * cos(v)) * cos(u),
-                                                  _minorRadius * sin(v),
-                                                     (_majorRadius + _minorRadius * cos(v)) * sin(u)
-                                       },
-                                       {       1, 1, 1}
-                               });
+        for (auto j = 0; j <= density[1]; ++j, v += deltaV) { // major _rotation
+            verticesTextured.push_back({
+                                               {
+                                                       (_majorRadius + _minorRadius * cos(v)) * cos(u),
+                                                       _minorRadius * sin(v),
+                                                       (_majorRadius + _minorRadius * cos(v)) * sin(u)
+                                               },
+                                               {
+                                                       static_cast<float>(i) / densityFloat0,
+                                                       static_cast<float>(j) / densityFloat1
+                                               }
+                                       });
         }
     }
 }
 
 void Torus::calculateIndices(const array<int, TORUS_DIM> &density) {
     indices.clear();
-    auto verticesSize = density[0] * density[1];
     for (auto i = 0; i < density[1]; ++i) { // major rotation
         for (auto j = 0; j < density[0]; ++j) { // minor rotation
             // lines around minor rotation
-            auto index = j * density[1] + i;
+            auto index = j * (density[1] + 1) + i;
             indices.push_back(index);
-            indices.push_back((index + density[1]) % verticesSize);
+            indices.push_back(index + (density[1] + 1));
 
             indices.push_back(index);
-            indices.push_back((index + 1) % density[1] + j * density[1]);
+            indices.push_back(index + 1);
         }
     }
 }
@@ -145,26 +151,26 @@ Torus::Torus(const MG1::Torus &torus)
 DirectX::XMVECTOR Torus::value(const array<float, TORUS_DIM> &parameters) {
     auto[u, v] = parameters;
     return XMVector3TransformCoord({
-            (_majorRadius + _minorRadius * cos(v)) * cos(u),
-            _minorRadius * sin(v),
-            (_majorRadius + _minorRadius * cos(v)) * sin(u)
-    }, modelMatrix());
+                                           (_majorRadius + _minorRadius * cos(v)) * cos(u),
+                                           _minorRadius * sin(v),
+                                           (_majorRadius + _minorRadius * cos(v)) * sin(u)
+                                   }, modelMatrix());
 }
 
 DirectX::XMVECTOR Torus::tangent(const array<float, TORUS_DIM> &parameters) {
     auto[u, v] = parameters;
     return XMVector3TransformNormal({
-            -(_majorRadius + _minorRadius * cos(v)) * sin(u),
-            0,
-            (_majorRadius + _minorRadius * cos(v)) * cos(u)
-    }, modelMatrix());
+                                            -(_majorRadius + _minorRadius * cos(v)) * sin(u),
+                                            0,
+                                            (_majorRadius + _minorRadius * cos(v)) * cos(u)
+                                    }, modelMatrix());
 }
 
 DirectX::XMVECTOR Torus::bitangent(const array<float, TORUS_DIM> &parameters) {
     auto[u, v] = parameters;
     return XMVector3TransformNormal({
-            -_minorRadius * sin(v) * cos(u),
-            _minorRadius * cos(v),
-            -_minorRadius * sin(v) * sin(u)
-    }, modelMatrix());
+                                            -_minorRadius * sin(v) * cos(u),
+                                            _minorRadius * cos(v),
+                                            -_minorRadius * sin(v) * sin(u)
+                                    }, modelMatrix());
 }

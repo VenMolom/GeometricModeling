@@ -24,6 +24,11 @@ struct VSStereoIn {
     float2 tex : TEXCOORD0;
 };
 
+struct VSParamIn {
+    float3 pos : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
 struct HSBrezierConstOutput {
 	float edges[2] : SV_TessFactor;
 	int patchSize : PATCHSIZE;

@@ -15,9 +15,10 @@ public:
 
 protected:
     std::vector<VertexPositionColor> vertices;
+    std::vector<VertexPositionTexture> verticesTextured;
     std::vector<Index> indices;
 
-    Renderable(D3D11_PRIMITIVE_TOPOLOGY topology);
+    explicit Renderable(D3D11_PRIMITIVE_TOPOLOGY topology);
 
     void updateBuffers();
 
@@ -25,7 +26,9 @@ protected:
 
     void setTopology(D3D11_PRIMITIVE_TOPOLOGY topology) { this->topology = topology; }
 
-    void switchIndexed(bool enabled) { this->indexed = enabled; }
+    void switchIndexed(bool enabled) { indexed = enabled; }
+
+    void convertToTextured();
 
 private:
     mini::dx_ptr<ID3D11Buffer> indexBuffer{};
@@ -35,7 +38,10 @@ private:
     unsigned int indexCount = 0;
     unsigned int vertexCount = 0;
     bool indexed = true;
+    bool textured = false;
     D3D11_PRIMITIVE_TOPOLOGY topology;
+
+    void updateBuffersTextured();
 };
 
 

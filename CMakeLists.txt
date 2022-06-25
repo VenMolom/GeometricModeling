@@ -125,6 +125,7 @@ set(HLSL_SHADER_FILES
         Shader/psSelector.hlsl
         Shader/vsTexture.hlsl
         Shader/psTexture.hlsl
+        Shader/vsParam.hlsl
         Shader/psParam.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
@@ -133,6 +134,7 @@ set_source_files_properties(Shader/vsNoProjection.hlsl PROPERTIES ShaderType "vs
 set_source_files_properties(Shader/vsStereo.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsSelector.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsTexture.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties(Shader/vsParam.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psStereo.hlsl PROPERTIES ShaderType "ps")

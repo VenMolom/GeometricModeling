@@ -12,6 +12,11 @@ Renderable::Renderable(D3D11_PRIMITIVE_TOPOLOGY topology) : topology(topology) {
 }
 
 void Renderable::updateBuffers() {
+    if (textured) {
+        updateBuffersTextured();
+        return;
+    }
+
     if (vertices.empty()) {
         indexBuffer.reset();
         vertexBuffer.reset();
@@ -58,5 +63,28 @@ void Renderable::render(const dx_ptr<ID3D11DeviceContext> &context) const {
         context->DrawIndexed(indexCount, 0, 0);
     } else {
         context->Draw(vertexCount, 0);
+    }
+}
+
+void Renderable::convertToTextured() {
+    textured = true;
+    stride = sizeof(VertexPositionTexture);
+    updateBuffersTextured();
+}
+
+void Renderable::updateBuffersTextured() {
+    if (verticesTextured.empty()) {
+        indexBuffer.reset();
+        vertexBuffer.reset();
+        return;
+    }
+
+    vertexBuffer = DxDevice::Instance().CreateVertexBuffer(verticesTextured);
+    vertexCount = verticesTextured.size();
+    indexBuffer.reset();
+
+    if (!indices.empty()) {
+        indexBuffer = DxDevice::Instance().CreateIndexBuffer(indices);
+        indexCount = indices.size();
     }
 }

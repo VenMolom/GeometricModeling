@@ -89,6 +89,7 @@ private:
     mini::dx_ptr<ID3D11VertexShader> m_vertexStereoShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexSelectorShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexTextureShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexParamShader;
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11HullShader> m_hullBicubicShader;
@@ -109,6 +110,7 @@ private:
 
     mini::dx_ptr<ID3D11InputLayout> m_layout;
     mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
+    mini::dx_ptr<ID3D11InputLayout> m_paramLayout;
     mini::dx_ptr<ID3D11InputLayout> m_selectorLayout;
 
     mini::dx_ptr<ID3D11Buffer> m_cbModel;
