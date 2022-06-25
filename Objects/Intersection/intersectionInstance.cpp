@@ -72,10 +72,10 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
                 loop = true;
             }
             if (loop) {
-                vertices.push_back({vv, {1, 1, 1}});
+                vertices.push_back({vvv, {1, 1, 1}});
                 indices.push_back(index++);
 
-                vertices.push_back({vvv, {1, 1, 1}});
+                vertices.push_back({vv, {1, 1, 1}});
                 indices.push_back(index++);
             }
         }
@@ -87,7 +87,6 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
         }
         indices.push_back(index++);
     }
-
 
     if (closed) {
         indices.push_back(0);
