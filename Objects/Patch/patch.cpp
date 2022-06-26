@@ -200,11 +200,11 @@ void Patch::calculateCenter() {
 }
 
 void Patch::deserializePatch(const MG1::BezierPatch &patch, const std::map<uint, int> &pointMap) {
-    // vRow
+    // uRow
     for (int i = 0; i < 4; ++i) {
-        // uRow
+        // vRow
         for (int j = 0; j < 4; ++j) {
-            auto index = i * 4 + j;
+            auto index = j * 4 + i;
             auto pointRef = patch.controlPoints[index];
             indices.push_back(pointMap.at(pointRef.GetId()));
         }
@@ -251,7 +251,7 @@ std::array<DirectX::XMFLOAT3, 16> Patch::getControlPoints(float &u, float &v) {
     int segmentU = std::clamp(static_cast<int>(u), 0, segments[0] - 1);
     int segmentV = std::clamp(static_cast<int>(v), 0, segments[1] - 1);
 
-    int startIndex = segmentU * segments[1] * 16 + segmentV * 16;
+    int startIndex = segmentV * segments[0] * 16 + segmentU * 16;
 
     array<XMFLOAT3, 16> control{
             vertices[indices[startIndex]].position,

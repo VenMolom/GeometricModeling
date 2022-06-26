@@ -38,9 +38,9 @@ void BicubicC2::createPlaneSegments(array<int, PATCH_DIM> segments, array<float,
     }
 
     //indices
-    for (int i = 0; i < segments[0]; ++i) {
-        for (int j = 0; j < segments[1]; ++j) {
-            auto index = j * uPoints + i;
+    for (int i = 0; i < segments[1]; ++i) {
+        for (int j = 0; j < segments[0]; ++j) {
+            auto index = i * uPoints + j;
 
             for (int k = 0; k < 4; ++k) {
                 indices.push_back(index);
@@ -74,13 +74,13 @@ void BicubicC2::createCylinderSegments(array<int, PATCH_DIM> segments, array<flo
     }
 
     //indices
-    for (int i = 0; i < segments[0]; ++i) {
-        for (int j = 0; j < segments[1]; ++j) {
-            auto index = j * uPoints + i;
+    for (int i = 0; i < segments[1]; ++i) {
+        for (int j = 0; j < segments[0]; ++j) {
+            auto index = i * uPoints + j;
 
             for (int k = 0; k < 4; ++k) {
-                if (i == segments[0] - k) {
-                    index = j * uPoints;
+                if (j == segments[0] - k) {
+                    index = i * uPoints;
                 }
 
                 indices.push_back(index);
