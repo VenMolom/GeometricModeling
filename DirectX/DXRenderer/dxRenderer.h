@@ -39,7 +39,7 @@ public:
 
     void draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) override;
 
-    void draw(const IntersectionInstance &instance) override;
+    void draw(const IntersectionInstance &instance, bool clear = true) override;
 
     void drawSelector(const Selector &selector);
 

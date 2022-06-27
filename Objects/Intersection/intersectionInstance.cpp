@@ -19,7 +19,54 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
 
     const DxDevice &device = DxDevice::Instance();
 
-    // CPU
+    auto cpuTex = createTargetAndTexture(device);
+
+    auto[uStart, uEnd] = range[0];
+    auto[vStart, vEnd] = range[1];
+    auto transform = XMMatrixTranslation(-uStart, -vStart, 0)
+                     * XMMatrixScaling(1.f / (uEnd - uStart), 1.f / (vEnd - vStart), 1.0f)
+                     * XMMatrixScaling(2.f, -2.f, 1.f)
+                     * XMMatrixTranslation(-1, 1, 0);
+
+    fillBuffer(parameters, looped, closed, transform);
+
+    renderer.draw(*this);
+
+    mapAndFill(looped, device, cpuTex);
+}
+
+IntersectionInstance::IntersectionInstance(const vector<std::pair<float, float>> &firstParameters,
+                                           const vector<std::pair<float, float>> &secondParameters,
+                                           const array<std::tuple<float, float>, 2> &range,
+                                           const array<bool, 2> &looped, bool closed, Renderer &renderer)
+        : Renderable(D3D11_PRIMITIVE_TOPOLOGY_LINELIST) {
+
+    const DxDevice &device = DxDevice::Instance();
+
+    auto cpuTex = createTargetAndTexture(device);
+
+    auto[uStart, uEnd] = range[0];
+    auto[vStart, vEnd] = range[1];
+    auto transform = XMMatrixTranslation(-uStart, -vStart, 0)
+                     * XMMatrixScaling(1.f / (uEnd - uStart), 1.f / (vEnd - vStart), 1.0f)
+                     * XMMatrixScaling(2.f, -2.f, 1.f)
+                     * XMMatrixTranslation(-1, 1, 0);
+
+    fillBuffer(firstParameters, looped, closed, transform);
+
+    renderer.draw(*this);
+
+    mapAndFill(looped, device, cpuTex, false);
+
+    fillBuffer(secondParameters, looped, closed, transform);
+
+    renderer.draw(*this, false);
+
+    mapAndFill(looped, device, cpuTex, true);
+}
+
+mini::dx_ptr<ID3D11Texture2D> IntersectionInstance::createTargetAndTexture(const DxDevice &device) {
+// CPU
     Texture2DDescription textureDesc(SIZE, SIZE);
     textureDesc.MipLevels = 1;
     textureDesc.Format = DXGI_FORMAT_R32_FLOAT;
@@ -42,12 +89,13 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
     _texture = device.CreateShaderResourceView(tex, srvd);
     _target = device.CreateRenderTargetView(tex);
 
-    auto[uStart, uEnd] = range[0];
-    auto[vStart, vEnd] = range[1];
-    auto transform = XMMatrixTranslation(-uStart, -vStart, 0)
-                     * XMMatrixScaling(1.f / (uEnd - uStart), 1.f / (vEnd - vStart), 1.0f)
-                     * XMMatrixScaling(2.f, -2.f, 1.f)
-                     * XMMatrixTranslation(-1, 1, 0);
+    return cpuTex;
+}
+
+void IntersectionInstance::fillBuffer(const vector<pair<float, float>> &parameters, const array<bool, 2> &looped,
+                                      bool closed, XMMATRIX transform) {
+    vertices.clear();
+    indices.clear();
 
     uint index = 0;
     for (auto[u, v]: parameters) {
@@ -92,36 +140,37 @@ IntersectionInstance::IntersectionInstance(const vector<pair<float, float>> &par
         indices.push_back(0);
     }
     updateBuffers();
+}
 
-    renderer.draw(*this);
-
+void IntersectionInstance::mapAndFill(const array<bool, 2> &looped, const DxDevice &device,
+                                      const mini::dx_ptr<ID3D11Texture2D> &stagingTex, bool withPixmap) {
     D3D11_MAPPED_SUBRESOURCE res;
 
-    ID3D11Resource* sourceRes = nullptr;
+    ID3D11Resource *sourceRes = nullptr;
     _texture->GetResource(&sourceRes);
-    device.context()->CopyResource(cpuTex.get(), sourceRes);
+    device.context()->CopyResource(stagingTex.get(), sourceRes);
 
-    auto hr = device.context()->Map(cpuTex.get(), 0, D3D11_MAP_READ_WRITE, 0, &res);
+    auto hr = device.context()->Map(stagingTex.get(), 0, D3D11_MAP_READ_WRITE, 0, &res);
     if (FAILED(hr))
         return;
 
-    auto* data = reinterpret_cast<float*>(res.pData);
+    auto *data = reinterpret_cast<float *>(res.pData);
 
     floodFill(data, looped);
-    createPixmap(data);
+    if (withPixmap) createPixmap(data);
 
-    device.context()->Unmap(cpuTex.get(), 0);
-    device.context()->CopyResource(sourceRes, cpuTex.get());
+    device.context()->Unmap(stagingTex.get(), 0);
+    device.context()->CopyResource(sourceRes, stagingTex.get());
 
     sourceRes->Release();
 }
 
 void IntersectionInstance::floodFill(float *data, const array<bool, 2> &looped) {
-    auto [loopedU, loopedV] = looped;
-    std::default_random_engine m_random{};
+    auto[loopedU, loopedV] = looped;
+    static default_random_engine m_random{};
     static const uniform_int_distribution<int> posDistribution(0, SIZE - 1);
 
-    int x,y, index;
+    int x, y, index;
     float pointData;
     do {
         x = posDistribution(m_random);
@@ -129,13 +178,16 @@ void IntersectionInstance::floodFill(float *data, const array<bool, 2> &looped) 
         index = y * static_cast<int>(SIZE) + x;
 
         pointData = data[index];
-    } while (pointData != 1.f);
+    } while (abs(pointData - 0.5f) < 1e-3);
+
+    auto startColor = round(pointData);
+    auto fillColor = round(1.f - pointData);
 
     stack<pair<int, int>> indexStack{};
     indexStack.push({x, y});
 
     while (!indexStack.empty()) {
-        auto [u, v] = indexStack.top();
+        auto[u, v] = indexStack.top();
         indexStack.pop();
 
         if (u >= SIZE || u < 0) {
@@ -155,8 +207,8 @@ void IntersectionInstance::floodFill(float *data, const array<bool, 2> &looped) 
         }
 
         index = v * static_cast<int>(SIZE) + u;
-        if (data[index] == 1.f) {
-            data[index] = 0.f;
+        if (data[index] == startColor) {
+            data[index] = fillColor;
             indexStack.push({u + 1, v});
             indexStack.push({u - 1, v});
             indexStack.push({u, v + 1});

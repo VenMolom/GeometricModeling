@@ -36,6 +36,11 @@ public:
                                                      const std::vector<std::pair<float, float>> &secondParameters,
                                                      const std::vector<DirectX::XMFLOAT3> &points, bool closed, Renderer &renderer);
 
+    std::shared_ptr<Intersection> createIntersection(const std::shared_ptr<ParametricObject<2>> &surface,
+                                                     const std::vector<std::pair<float, float>> &firstParameters,
+                                                     const std::vector<std::pair<float, float>> &secondParameters,
+                                                     const std::vector<DirectX::XMFLOAT3> &points, bool closed, Renderer &renderer);
+
     uint id() { return nextId++; }
 private:
     friend class Scene;

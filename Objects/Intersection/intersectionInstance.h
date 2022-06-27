@@ -16,6 +16,11 @@ public:
                          const std::array<std::tuple<float, float>, 2> &range,
                          const std::array<bool, 2> &looped, bool closed, Renderer &renderer);
 
+    IntersectionInstance(const std::vector<std::pair<float, float>> &firstParameters,
+                         const std::vector<std::pair<float, float>> &secondParameters,
+                         const std::array<std::tuple<float, float>, 2> &range,
+                         const std::array<bool, 2> &looped, bool closed, Renderer &renderer);
+
     const mini::dx_ptr<ID3D11RenderTargetView> &target() const { return _target; }
 
     const mini::dx_ptr<ID3D11ShaderResourceView> &texture() const { return _texture; }
@@ -37,9 +42,17 @@ private:
 
     bool _active{true}, _first{true};
 
-    void floodFill(float *data, const std::array<bool, 2> &looped);
+    mini::dx_ptr<ID3D11Texture2D> createTargetAndTexture(const DxDevice &device);
+
+    void mapAndFill(const std::array<bool, 2> &looped, const DxDevice &device,
+                    const mini::dx_ptr<ID3D11Texture2D> &stagingTex, bool withPixmap = true);
+
+    static void floodFill(float *data, const std::array<bool, 2> &looped);
 
     void createPixmap(float *data);
+
+    void fillBuffer(const std::vector<std::pair<float, float>> &parameters, const std::array<bool, 2> &looped,
+                    bool closed, DirectX::XMMATRIX transform);
 };
 
 

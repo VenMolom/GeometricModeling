@@ -16,6 +16,11 @@ public:
                  const std::vector<std::pair<float, float>> &secondParameters,
                  const std::vector<DirectX::XMFLOAT3> &points, bool closed, Renderer &renderer);
 
+    Intersection(uint id, const std::shared_ptr<ParametricObject<2>>& surface,
+                 const std::vector<std::pair<float, float>> &firstParameters,
+                 const std::vector<std::pair<float, float>> &secondParameters,
+                 const std::vector<DirectX::XMFLOAT3> &points, bool closed, Renderer &renderer);
+
     void setPosition(DirectX::XMFLOAT3 position) override {}
 
     void setRotation(DirectX::XMFLOAT3 rotation) override {}
@@ -28,7 +33,7 @@ public:
 
     std::shared_ptr<IntersectionInstance> firstInstance() const { return instances[0]; }
 
-    std::shared_ptr<IntersectionInstance> secondInstance() const { return instances[1]; }
+    std::shared_ptr<IntersectionInstance> secondInstance() const { return instances[1] ? instances[1] : instances[0]; }
 
 private:
     bool closed;

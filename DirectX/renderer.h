@@ -52,7 +52,7 @@ public:
 
     virtual void draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) = 0;
 
-    virtual void draw(const IntersectionInstance &instance) = 0;
+    virtual void draw(const IntersectionInstance &instance, bool clear = true) = 0;
 };
 
 #endif //MG1_RENDERER_H

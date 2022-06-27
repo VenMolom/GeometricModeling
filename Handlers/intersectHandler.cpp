@@ -3,6 +3,7 @@
 //
 
 #include "intersectHandler.h"
+#include <random>
 
 using namespace std;
 using namespace DirectX;
@@ -24,22 +25,15 @@ shared_ptr<Object> IntersectHandler::calculateIntersection(Renderer &renderer, X
 }
 
 IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint() const {
-    auto uPoints = static_cast<int>(floor(sqrt(_maxPoints)));
-    auto vPoints = static_cast<int>(round(_maxPoints / uPoints));
-
-    auto pPoints = generatePoints(surfaces[0], uPoints, vPoints);
-    auto qPoints = generatePoints(surfaces[1], uPoints, vPoints);
+    auto pPoints = generatePoints(surfaces[0], _maxPoints);
+    auto qPoints = generatePoints(surfaces[1], _maxPoints);
 
     IntersectPoint closest{};
     float minDistance = INFINITY;
-    auto pointsCount = uPoints * vPoints;
-    for (int i = 0; i < pointsCount; ++i) {
-        for (int j = 0; j < pointsCount; ++j) {
-            auto p1 = pPoints[i];
-            auto p2 = qPoints[j];
-
+    for (auto p1 : pPoints) {
+        for (auto p2 : qPoints) {
             auto distance = XMVector3Length(XMVectorSubtract(p1.second, p2.second)).m128_f32[0];
-            if (distance < minDistance) {
+            if (distance < minDistance && (!selfIntersection || parameterDistance(p1.first, p2.first) > parameterEpsilon)) {
                 minDistance = distance;
                 closest = {p1.first.first, p1.first.second, p2.first.first, p2.first.second};
             }
@@ -50,19 +44,13 @@ IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint() const {
 }
 
 IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint(XMFLOAT3 hint) const {
-    auto uPoints = static_cast<int>(floor(sqrt(_maxPoints)));
-    auto vPoints = static_cast<int>(round(_maxPoints / uPoints));
-
-    auto pPoints = generatePoints(surfaces[0], uPoints, vPoints);
-    auto qPoints = generatePoints(surfaces[1], uPoints, vPoints);
+    auto pPoints = generatePoints(surfaces[0], _maxPoints);
+    auto qPoints = generatePoints(surfaces[1], _maxPoints);
 
     IntersectPoint closest{};
     auto hintPos = XMLoadFloat3(&hint);
-    auto pointsCount = uPoints * vPoints;
     float minDistance = INFINITY;
-    for (int i = 0; i < pointsCount; ++i) {
-        auto p = pPoints[i];
-
+    for (auto p : pPoints) {
         auto distance = XMVector3Length(XMVectorSubtract(p.second, hintPos)).m128_f32[0];
         if (distance < minDistance) {
             minDistance = distance;
@@ -72,11 +60,10 @@ IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint(XMFLOAT3 h
     }
 
     minDistance = INFINITY;
-    for (int i = 0; i < pointsCount; ++i) {
-        auto p = qPoints[i];
-
+    pair<float, float> p1 = {closest.u, closest.v};
+    for (auto p : qPoints) {
         auto distance = XMVector3Length(XMVectorSubtract(p.second, hintPos)).m128_f32[0];
-        if (distance < minDistance) {
+        if (distance < minDistance && (!selfIntersection || parameterDistance(p1, p.first) > parameterEpsilon)) {
             minDistance = distance;
             closest.s = p.first.first;
             closest.t = p.first.second;
@@ -149,7 +136,9 @@ shared_ptr<Object> IntersectHandler::findIntersectCurve(IntersectPoint starting,
         secondParams.emplace_back(i.first.s, i.first.t);
     }
 
-    return factory.createIntersection(surfaces, firstParams, secondParams, points, closed, renderer);
+    return selfIntersection
+           ? factory.createIntersection(surfaces[0], firstParams, secondParams, points, closed, renderer)
+           : factory.createIntersection(surfaces, firstParams, secondParams, points, closed, renderer);
 }
 
 IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
@@ -282,27 +271,36 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
 }
 
 vector<pair<pair<float, float>, XMVECTOR>> IntersectHandler::generatePoints(shared_ptr<ParametricObject<2>> surface,
-                                                                            int uPoints, int vPoints) const {
+                                                                            int points) {
+    static default_random_engine m_random{};
+
     auto range = surface->range();
-
     auto[startU, endU] = range[0];
-    auto deltaU = (endU - startU) / static_cast<float>(uPoints - 1);
-
     auto[startV, endV] = range[1];
-    auto deltaV = (endV - startV) / static_cast<float>(vPoints - 1);
+    const uniform_real_distribution<float> uDistribution(startU,  endU);
+    const uniform_real_distribution<float> vDistribution(startV,  endV);
 
-    vector<pair<pair<float, float>, XMVECTOR>> points{};
-    points.reserve(uPoints * vPoints);
-
-    pair<float, float> point{startU, startV};
-    for (int i = 0; i < vPoints; ++i) {
-        for (int j = 0; j < uPoints; ++j) {
-            points.emplace_back(point, surface->value({point.first, point.second}));
-            point.first += deltaU;
-        }
-        point.first = startU;
-        point.second += deltaV;
+    vector<pair<pair<float, float>, XMVECTOR>> pointsVec{};
+    pointsVec.reserve(points);
+    for (int i = 0; i < points; ++i) {
+        auto u = uDistribution(m_random);
+        auto v = vDistribution(m_random);
+        pair<float, float> p = {u, v};
+        pointsVec.emplace_back(p, surface->value({u, v}));
     }
 
-    return points;
+    return pointsVec;
+}
+
+void IntersectHandler::setSurfaces(std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces) {
+    {
+        this->surfaces = std::move(surfaces);
+        selfIntersection = this->surfaces[0].get() == this->surfaces[1].get();
+    }
+}
+
+float IntersectHandler::parameterDistance(std::pair<float, float> uv1, std::pair<float, float> uv2) {
+    auto u = uv1.first - uv2.first;
+    auto v = uv1.second - uv2.second;
+    return u * u + v * v;
 }

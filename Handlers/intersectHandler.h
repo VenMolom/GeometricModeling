@@ -20,9 +20,7 @@ public:
 
     void useCursor(bool use) { _useCursor = use; }
 
-    void setSurfaces(std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces) {
-        this->surfaces = std::move(surfaces);
-    }
+    void setSurfaces(std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces);
 
     std::shared_ptr<Object> calculateIntersection(Renderer &renderer);
 
@@ -33,8 +31,10 @@ private:
     bool hasCursor{};
     int _maxPoints{};
     float _step{};
+    bool selfIntersection{};
 
-    float epsilon = 10e-6;
+    float epsilon = 1e-6;
+    float parameterEpsilon = 1e-2;
     std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces{};
     ObjectFactory &factory;
 
@@ -152,10 +152,10 @@ private:
     PointResult calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
                                             DirectX::XMVECTOR startValue, DirectX::XMVECTOR t) const;
 
-    std::vector<std::pair<std::pair<float, float>, DirectX::XMVECTOR>>
-    generatePoints(std::shared_ptr<ParametricObject<2>> surface, int uPoints, int vPoints) const;
+    static std::vector<std::pair<std::pair<float, float>, DirectX::XMVECTOR>>
+    generatePoints(std::shared_ptr<ParametricObject<2>> surface, int points);
 
-    //TODO: self intersection
+    static float parameterDistance(std::pair<float, float> uv1, std::pair<float, float> uv2);
 };
 
 #endif //MG1_INTERSECTHANDLER_H

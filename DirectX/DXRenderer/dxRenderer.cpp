@@ -276,10 +276,12 @@ void DxRenderer::draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) {
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
 }
 
-void DxRenderer::draw(const IntersectionInstance &instance) {
-    float clear[4] = {1, 1, 1, 1};
+void DxRenderer::draw(const IntersectionInstance &instance, bool clear) {
+    float clearColor[4] = {1, 1, 1, 1};
     auto &target = instance.target();
-    m_device.context()->ClearRenderTargetView(target.get(), clear);
+    if (clear) {
+        m_device.context()->ClearRenderTargetView(target.get(), clearColor);
+    }
     auto renderTarget = target.get();
     Viewport v({IntersectionInstance::SIZE, IntersectionInstance::SIZE});
     m_device.context()->RSSetViewports(1, &v);

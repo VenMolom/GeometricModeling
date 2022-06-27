@@ -48,4 +48,12 @@ std::shared_ptr<Intersection> ObjectFactory::createIntersection(const array<shar
     return make_shared<Intersection>(nextId++, surfaces, firstParameters, secondParameters, points, closed, renderer);
 }
 
+std::shared_ptr<Intersection> ObjectFactory::createIntersection(const shared_ptr<ParametricObject<2>> &surface,
+                                                                const vector<pair<float, float>> &firstParameters,
+                                                                const vector<pair<float, float>> &secondParameters,
+                                                                const vector<XMFLOAT3> &points,
+                                                                bool closed, Renderer &renderer) {
+    return make_shared<Intersection>(nextId++, surface, firstParameters, secondParameters, points, closed, renderer);
+}
+
 
