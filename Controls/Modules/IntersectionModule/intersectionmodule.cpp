@@ -4,9 +4,11 @@
 #include "ui_intersectionmodule.h"
 #include "Controls/intersectiontexturedialog.h"
 
-IntersectionModule::IntersectionModule(std::shared_ptr<Intersection> intersection, QWidget *parent) :
+IntersectionModule::IntersectionModule(std::shared_ptr<Intersection> intersection, std::shared_ptr<Scene> scene,
+                                       QWidget *parent) :
         QWidget(parent),
         intersection(std::move(intersection)),
+        scene(std::move(scene)),
         ui(new Ui::IntersectionModule) {
     ui->setupUi(this);
 }
@@ -23,6 +25,6 @@ void IntersectionModule::on_parameterSpaceButton_clicked() {
 
 
 void IntersectionModule::on_convertToCurveButton_clicked() {
-    //TODO: convert to curve
+    scene->createInterpolationCurve(intersection->points(), intersection->closed());
 }
 

@@ -12,7 +12,8 @@ Intersection::Intersection(uint id, const array<shared_ptr<ParametricObject<2>>,
                            const vector<pair<float, float>> &secondParameters,
                            const vector<XMFLOAT3> &points, bool closed, Renderer &renderer)
         : Object(id, "Intersection", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP),
-          closed(closed) {
+          _closed(closed),
+          _points(points) {
     uint index = 0;
     for (auto &point: points) {
         vertices.push_back({point, {1, 1, 1}});
@@ -36,7 +37,8 @@ Intersection::Intersection(uint id, const shared_ptr<ParametricObject<2>> &surfa
                            const vector<pair<float, float>> &secondParameters,
                            const vector<XMFLOAT3> &points, bool closed, Renderer &renderer)
         : Object(id, "Intersection", {0, 0, 0}, D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP),
-          closed(closed) {
+          _closed(closed),
+          _points(points) {
     uint index = 0;
     for (auto &point: points) {
         vertices.push_back({point, {1, 1, 1}});

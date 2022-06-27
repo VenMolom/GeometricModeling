@@ -63,6 +63,11 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
     emit objectAdded(_objects.back(), select);
 }
 
+void Scene::addObjectNoAction(shared_ptr<Object> &&object) {
+    _objects.push_back(std::move(object));
+    emit objectAdded(_objects.back(), false);
+}
+
 void Scene::addPoint(QPoint screenPosition) {
     auto screenPos = XMINT2(screenPosition.x(), screenPosition.y());
     auto position = getPositionOnPlane(screenPos, _camera->direction(), _camera->center());
@@ -115,6 +120,22 @@ void Scene::createFromCreator() {
     if (creator) {
         addObject(dynamic_pointer_cast<Creator>(creator)->create(factory.id()), true);
     }
+}
+
+void Scene::createInterpolationCurve(const vector<XMFLOAT3> &points, bool closed) {
+    vector<std::weak_ptr<Point>> weakPoints{};
+
+    for (auto &point : points) {
+        auto p = factory.createPoint(point);
+        weakPoints.emplace_back(p);
+        addObjectNoAction(p);
+    }
+
+    if (closed) {
+        weakPoints.emplace_back(weakPoints.front());
+    }
+
+    addObject(factory.createInterpolationCurveC2(std::move(weakPoints)));
 }
 
 #pragma endregion
@@ -406,31 +427,31 @@ void Scene::load(MG1::Scene &scene) {
 
     for(auto& patch : scene.surfacesC0) {
         factory.nextId = max(factory.nextId, patch.GetId() + 1);
-        addObject(make_shared<BicubicC0>(patch, scene.points, bindableSelected()), true);
+        addObjectNoAction(make_shared<BicubicC0>(patch, scene.points, bindableSelected()));
     }
     for(auto& patch : scene.surfacesC2) {
         factory.nextId = max(factory.nextId, patch.GetId() + 1);
-        addObject(make_shared<BicubicC2>(patch, scene.points, bindableSelected()), true);
+        addObjectNoAction(make_shared<BicubicC2>(patch, scene.points, bindableSelected()));
     }
     for(auto& point : scene.points) {
         factory.nextId = max(factory.nextId, point.GetId() + 1);
-        addObject(make_shared<Point>(point), true);
+        addObjectNoAction(make_shared<Point>(point));
     }
     for(auto& torus : scene.tori) {
         factory.nextId = max(factory.nextId, torus.GetId() + 1);
-        addObject(make_shared<Torus>(torus), true);
+        addObjectNoAction(make_shared<Torus>(torus));
     }
     for(auto& bezier : scene.bezierC0) {
         factory.nextId = max(factory.nextId, bezier.GetId() + 1);
-        addObject(make_shared<BrezierC0>(bezier, _objects), true);
+        addObjectNoAction(make_shared<BrezierC0>(bezier, _objects));
     }
     for(auto& bezier : scene.bezierC2) {
         factory.nextId = max(factory.nextId, bezier.GetId() + 1);
-        addObject(make_shared<BrezierC2>(bezier, _objects, bindableSelected()), true);
+        addObjectNoAction(make_shared<BrezierC2>(bezier, _objects, bindableSelected()));
     }
     for(auto& interpolated : scene.interpolatedC2) {
         factory.nextId = max(factory.nextId, interpolated.GetId() + 1);
-        addObject(make_shared<InterpolationCurveC2>(interpolated, _objects), true);
+        addObjectNoAction(make_shared<InterpolationCurveC2>(interpolated, _objects));
     }
 }
 

@@ -115,7 +115,7 @@ void Controls::updateSelected() {
 
     if (objectLocked->type() & INTERSECTION) {
         auto intersection = dynamic_pointer_cast<Intersection>(objectLocked);
-        modules.push_back(std::move(make_unique<IntersectionModule>(intersection, this)));
+        modules.push_back(std::move(make_unique<IntersectionModule>(intersection, scene, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 12, 0, 1, 1);
     }
 }

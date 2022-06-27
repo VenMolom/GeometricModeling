@@ -31,6 +31,8 @@ public:
 
     void createFromCreator();
 
+    void createInterpolationCurve(const std::vector<DirectX::XMFLOAT3> &points, bool closed);
+
     void removeSelected();
 
     void collapseSelected();
@@ -92,6 +94,8 @@ private:
     void removeComposite();
 
     DirectX::XMFLOAT2 project(DirectX::XMFLOAT3 position);
+
+    void addObjectNoAction(std::shared_ptr<Object> &&object);
 };
 
 
