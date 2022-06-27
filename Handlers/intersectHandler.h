@@ -14,11 +14,13 @@ public:
 
     bool canUseCursor() const { return hasCursor; }
 
-    void setMaxPoints(int maxPoints) { _maxPoints = maxPoints; }
+    void setMaxPoints(int maxPoints) { this->maxPoints = maxPoints; }
 
-    void setStep(float step) { _step = step; }
+    void setStep(float step) { this->step = step; }
 
     void useCursor(bool use) { _useCursor = use; }
+
+    void setIterations(int iterations) { this->iterations = iterations; }
 
     void setSurfaces(std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces);
 
@@ -29,8 +31,9 @@ public:
 private:
     bool _useCursor{};
     bool hasCursor{};
-    int _maxPoints{};
-    float _step{};
+    int maxPoints{};
+    int iterations{};
+    float step{};
     bool selfIntersection{};
 
     float epsilon = 1e-6;

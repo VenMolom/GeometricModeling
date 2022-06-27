@@ -21,6 +21,7 @@ IntersectDialog::~IntersectDialog() {
 
 void IntersectDialog::on_buttonBox_accepted() {
     handler.setMaxPoints(ui->maxPoints->value());
+    handler.setIterations(ui->iterations->value());
     handler.setStep(static_cast<float>(ui->step->value()));
     handler.useCursor(ui->useCursor->isChecked());
 }
