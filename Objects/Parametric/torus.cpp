@@ -137,6 +137,7 @@ Torus::Torus(const MG1::Torus &torus)
                                       D3D11_PRIMITIVE_TOPOLOGY_LINELIST),
           _minorRadius(torus.smallRadius),
           _majorRadius(torus.largeRadius) {
+    convertToTextured();
     setRotation({
                         XMConvertToRadians(torus.rotation.x),
                         XMConvertToRadians(torus.rotation.y),

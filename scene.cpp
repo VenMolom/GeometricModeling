@@ -306,7 +306,7 @@ void Scene::selectOrAddCursor(QPoint screenPosition, bool multiple) {
 
 void Scene::setSelected(std::shared_ptr<Object> object) {
     if (!object && cursor) {
-        return;
+        _selected.setValue(cursor);
     }
 
     if (creator) {
@@ -407,7 +407,7 @@ void Scene::removeSelected() {
     if (auto selected = _selected.value().lock()) {
         _objects.remove_if([&selected](const shared_ptr<Object> &ob) { return selected->equals(ob); });
         composite.reset();
-        setSelected(nullptr);
+        setSelected({});
     }
 }
 

@@ -196,7 +196,7 @@ IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(Inte
         nextPoint.wrap(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT);
 
         if (solution.length() < epsilon || (nextPoint - point).length() < epsilon) {
-            if (XMVector3Length(nextValue).m128_f32[0] >= epsilon) return NoResult;
+            if (XMVector3Length(nextValue).m128_f32[0] >= 2 * epsilon) return NoResult;
             next.u = nextPoint.u;
             next.v = nextPoint.v;
             next.s = nextPoint.s;
