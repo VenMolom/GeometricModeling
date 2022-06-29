@@ -10,7 +10,7 @@
 
 class IntersectionInstance : public Renderable {
 public:
-    static constexpr uint SIZE = 256;
+    static constexpr uint SIZE = 512;
 
     IntersectionInstance(const std::vector<std::pair<float, float>> &parameters,
                          const std::array<std::tuple<float, float>, 2> &range,

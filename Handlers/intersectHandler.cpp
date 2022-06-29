@@ -195,8 +195,7 @@ IntersectHandler::PointResult IntersectHandler::calculateNextIntersectPoint(Inte
 
         nextPoint.wrap(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT);
 
-        if (solution.length() < epsilon || (nextPoint - point).length() < epsilon) {
-            if (XMVector3Length(nextValue).m128_f32[0] >= 2 * epsilon) return NoResult;
+        if (solution.length() < epsilon) {
             next.u = nextPoint.u;
             next.v = nextPoint.v;
             next.s = nextPoint.s;
@@ -237,6 +236,8 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
     float a = 0.5f;
     float value = funcValue(point);
 
+    auto[wrapU, wrapV] = surfaces[0]->looped();
+    auto[wrapS, wrapT] = surfaces[1]->looped();
     auto pRange = surfaces[0]->range();
     auto qRange = surfaces[1]->range();
     int iteration = 0;
@@ -246,11 +247,13 @@ bool IntersectHandler::findIntersectPoint(IntersectPoint starting, IntersectPoin
         auto nextPoint = point - grad * a;
         auto nextValue = funcValue(nextPoint);
 
-        if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1])) return false;
+        if (nextPoint.outOfRange(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT)) {
+            return false;
+        }
+
+        nextPoint.wrap(pRange[0], pRange[1], qRange[0], qRange[1], wrapU, wrapV, wrapS, wrapT);
 
         if (grad.length() < epsilon || (nextPoint - point).length() < epsilon) {
-            if (nextValue >= epsilon) return false;
-            // ? może wrap tutaj
             intersect.u = nextPoint.u;
             intersect.v = nextPoint.v;
             intersect.s = nextPoint.s;
