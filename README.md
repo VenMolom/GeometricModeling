@@ -1,4 +1,4 @@
-# MG1
+# Geometric Modeling
 
 CAD software developed as a project for Geometric Modeling 1 (Modelowanie Geometryczne 1) at Faculty of Mathematics and Information Science of Warsaw University of Technology.
 
