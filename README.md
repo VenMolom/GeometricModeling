@@ -19,6 +19,7 @@ Written in C++ using DirectX11 as rendering engine and Qt6 for GUI.
 - Stereoscopic rendering,
 - Selecting objects from screen space (single or group),
 - Filling holes between compatible C0 surfaes using Gregory patches,
+- Calculating intersections between parametric objects (torus and surfaces),
 - Saving and loading scene from compatible JSON file format.
 
 ## Modes
