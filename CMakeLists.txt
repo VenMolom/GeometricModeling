@@ -100,7 +100,8 @@ set(PROJECT_SOURCES
         Controls/intersectiontexturedialog.ui
         Controls/Modules/IntersectionModule/intersectionmodule.h
         Controls/Modules/IntersectionModule/intersectionmodule.cpp
-        Controls/Modules/IntersectionModule/intersectionmodule.ui)
+        Controls/Modules/IntersectionModule/intersectionmodule.ui
+        Utils/fileParser.cpp Utils/fileParser.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
