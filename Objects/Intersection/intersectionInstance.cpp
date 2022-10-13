@@ -168,7 +168,7 @@ void IntersectionInstance::mapAndFill(const array<bool, 2> &looped, const DxDevi
 void IntersectionInstance::floodFill(float *data, const array<bool, 2> &looped) {
     auto[loopedU, loopedV] = looped;
     static default_random_engine m_random{};
-    static const uniform_int_distribution<int> posDistribution(0, SIZE - 1);
+    static uniform_int_distribution<int> posDistribution(0, SIZE - 1);
 
     int x, y, index;
     float pointData;

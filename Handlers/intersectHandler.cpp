@@ -280,8 +280,8 @@ vector<pair<pair<float, float>, XMVECTOR>> IntersectHandler::generatePoints(shar
     auto range = surface->range();
     auto[startU, endU] = range[0];
     auto[startV, endV] = range[1];
-    const uniform_real_distribution<float> uDistribution(startU,  endU);
-    const uniform_real_distribution<float> vDistribution(startV,  endV);
+    uniform_real_distribution<float> uDistribution(startU,  endU);
+    uniform_real_distribution<float> vDistribution(startV,  endV);
 
     vector<pair<pair<float, float>, XMVECTOR>> pointsVec{};
     pointsVec.reserve(points);

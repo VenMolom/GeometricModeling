@@ -135,21 +135,6 @@ private:
             return vSegment == vSegments - row;
         }
     };
-
-    template<typename T>
-    struct patchFormat {
-        using type = void;
-    };
-
-    template<>
-    struct patchFormat<MG1::BezierSurfaceC0> {
-        using type = MG1::BezierPatchC0;
-    };
-
-    template<>
-    struct patchFormat<MG1::BezierSurfaceC2> {
-        using type = MG1::BezierPatchC2;
-    };
 };
 
 template<typename T>
@@ -167,13 +152,13 @@ T Patch::serialize(std::vector<MG1::Point> &serializedPoints) {
         surfC0->size = {static_cast<uint32_t>(segments[0]), static_cast<uint32_t>(segments[1])};
         surfC0->uWrapped = loopedU;
         surfC0->vWrapped = loopedV;
-        surfC0->patches = serializePatches<patchFormat<T>::type>(serializedPoints);
+        surfC0->patches = serializePatches<MG1::BezierPatchC0>(serializedPoints);
     } else if constexpr(std::is_same_v<MG1::BezierSurfaceC2, T>) {
         auto surfC2 = static_cast<MG1::BezierSurfaceC2 *>(&surface);
         surfC2->size = {static_cast<uint32_t>(segments[0]), static_cast<uint32_t>(segments[1])};
         surfC2->uWrapped = loopedU;
         surfC2->vWrapped = loopedV;
-        surfC2->patches = serializePatches<patchFormat<T>::type>(serializedPoints);
+        surfC2->patches = serializePatches<MG1::BezierPatchC2>(serializedPoints);
     }
 
     return surface;
