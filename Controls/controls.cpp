@@ -11,6 +11,7 @@
 #include "Controls/Modules/CurveModule/curvemodule.h"
 #include "Controls/Modules/ObjectModule/objectmodule.h"
 #include "Controls/Modules/BSplineModule/bsplinemodule.h"
+#include "Controls/Modules/CNCRouterModule/cncroutermodule.h"
 #include "Controls/Modules/TransformModule/transformmodule.h"
 #include "Controls/Modules/ScreenMoveModule/screenmovemodule.h"
 #include "Controls/Modules/ParametricModule/parametricmodule.h"
@@ -117,6 +118,12 @@ void Controls::updateSelected() {
         auto intersection = dynamic_pointer_cast<Intersection>(objectLocked);
         modules.push_back(std::move(make_unique<IntersectionModule>(intersection, scene, this)));
         ui->modulesLayout->addWidget(modules.back().get(), 12, 0, 1, 1);
+    }
+
+    if (objectLocked->type() & CNCROUTER) {
+        auto router = dynamic_pointer_cast<CNCRouter>(objectLocked);
+        modules.push_back(std::move(make_unique<CNCRouterModule>(router, this)));
+        ui->modulesLayout->addWidget(modules.back().get(), 13, 0, 1, 1);
     }
 }
 
