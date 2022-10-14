@@ -56,4 +56,8 @@ std::shared_ptr<Intersection> ObjectFactory::createIntersection(const shared_ptr
     return make_shared<Intersection>(nextId++, surface, firstParameters, secondParameters, points, closed, renderer);
 }
 
+std::shared_ptr<CNCRouter> ObjectFactory::createCNCRouter(XMFLOAT3 position) {
+    return make_shared<CNCRouter>(nextId++, position);
+}
+
 

@@ -52,6 +52,8 @@ private slots:
 
     void on_actionIntersect_triggered();
 
+    void on_addCNCRouter_clicked();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 

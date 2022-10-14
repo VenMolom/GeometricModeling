@@ -11,6 +11,7 @@
 #include "Objects/Patch/bicubicC0.h"
 #include "Objects/Patch/bicubicC2.h"
 #include "Objects/Parametric/torus.h"
+#include "Objects/CNCRouter/CNCRouter.h"
 #include "Objects/Curve/interpolationCurveC2.h"
 #include "Objects/Intersection/intersection.h"
 
@@ -40,6 +41,8 @@ public:
                                                      const std::vector<std::pair<float, float>> &firstParameters,
                                                      const std::vector<std::pair<float, float>> &secondParameters,
                                                      const std::vector<DirectX::XMFLOAT3> &points, bool closed, Renderer &renderer);
+
+    std::shared_ptr<CNCRouter> createCNCRouter(DirectX::XMFLOAT3 position);
 
     uint id() { return nextId++; }
 private:
