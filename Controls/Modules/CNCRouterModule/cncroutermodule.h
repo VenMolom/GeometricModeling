@@ -48,8 +48,12 @@ private slots:
 
 private:
     std::shared_ptr<CNCRouter> router;
+    QPropertyNotifier stateHandler, progressHandler;
 
     Ui::CNCRouterModule *ui;
+
+    void updateState();
+    void updateProgress();
 };
 
 #endif // CNCROUTERMODULE_H

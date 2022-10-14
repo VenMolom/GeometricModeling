@@ -10,6 +10,15 @@
 #include "Utils/fileParser.h"
 #include "Objects/linestrip.h"
 
+enum RouterState {
+    Created,
+    FirstPathLoaded,
+    NextPathLoaded,
+    Started,
+    Skipped,
+    Finished
+};
+
 class CNCRouter: public Object, public Updatable {
 public:
     CNCRouter(uint id, DirectX::XMFLOAT3 position);
@@ -28,9 +37,61 @@ public:
 
     void loadPath(CNCPath&& path);
 
+    DirectX::XMFLOAT3 size() const { return _size; }
+
+    void setSize(DirectX::XMFLOAT3 size);
+
+    std::pair<int, int> pointsDensity() const { return _pointsDensity; }
+
+    void setPointsDensity(std::pair<int, int> density);
+
+    float maxDepth() const { return _maxDepth; }
+
+    void setMaxDepth(float depth);
+
+    CNCType toolType() const { return _toolType; }
+
+    void setToolType(CNCType type);
+
+    int toolSize() const { return _toolSize; }
+
+    void setToolSize(int size);
+
+    bool showPaths() const { return _showPaths; }
+
+    void setShowPaths(bool show);
+
+    RouterState state() const { return _state; }
+
+    QBindable<RouterState> bindableState() { return &_state; }
+
+    int simulationSpeed() const { return _simulationSpeed; }
+
+    void setSimulationSpeed(int speed);
+
+    int progress() const { return _progress; }
+
+    QBindable<int> bindableProgress() { return &_progress; }
+
+    void start();
+
+    void skip();
+
+    void reset();
+
 private:
     CNCPath routerPath;
     Linestrip drawPaths;
+
+    DirectX::XMFLOAT3 _size{10, 10, 5};
+    std::pair<int, int> _pointsDensity{512, 512};
+    float _maxDepth{3};
+    CNCType _toolType{static_cast<CNCType>(0)};
+    int _toolSize{8}, _simulationSpeed{0};
+    bool _showPaths{false}, fresh{true};
+    QProperty<int> _progress{0};
+    QProperty<RouterState> _state{static_cast<RouterState>(0)};
+
 
     void fillDrawPaths();
 };

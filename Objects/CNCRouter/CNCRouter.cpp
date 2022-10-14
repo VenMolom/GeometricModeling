@@ -18,6 +18,41 @@ Type CNCRouter::type() const {
     return CNCROUTER;
 }
 
+void CNCRouter::setPosition(DirectX::XMFLOAT3 position) {
+    drawPaths.setPosition(position);
+    Object::setPosition(position);
+}
+
+void CNCRouter::setSize(DirectX::XMFLOAT3 size) {
+    _size = size;
+    // TODO: update some matrix idk
+}
+
+void CNCRouter::setPointsDensity(std::pair<int, int> density) {
+    _pointsDensity = density;
+    // TODO: update texture
+}
+
+void CNCRouter::setMaxDepth(float depth) {
+    _maxDepth = depth;
+}
+
+void CNCRouter::setToolType(CNCType type) {
+    _toolType = type;
+}
+
+void CNCRouter::setToolSize(int size) {
+    _toolSize = size;
+}
+
+void CNCRouter::setShowPaths(bool show) {
+    _showPaths = show;
+}
+
+void CNCRouter::setSimulationSpeed(int speed) {
+    _simulationSpeed = speed;
+}
+
 void CNCRouter::draw(Renderer &renderer, DrawType drawType) {
     // TODO: draw block
     // TODO: draw paths if selected
@@ -29,8 +64,11 @@ void CNCRouter::update(float frameTime) {
 }
 
 void CNCRouter::loadPath(CNCPath &&path) {
+    _state = fresh ? RouterState::FirstPathLoaded : RouterState::NextPathLoaded;
     routerPath = path;
     fillDrawPaths();
+
+    // TODO: implement
 }
 
 void CNCRouter::fillDrawPaths() {
@@ -45,7 +83,17 @@ void CNCRouter::fillDrawPaths() {
     drawPaths.update();
 }
 
-void CNCRouter::setPosition(DirectX::XMFLOAT3 position) {
-    drawPaths.setPosition(position);
-    Object::setPosition(position);
+void CNCRouter::start() {
+    fresh = false;
+    // TODO: implement
+}
+
+void CNCRouter::skip() {
+    // TODO: implement
+}
+
+void CNCRouter::reset() {
+    fresh = true;
+    _state = RouterState::FirstPathLoaded;
+    // TODO: implement
 }

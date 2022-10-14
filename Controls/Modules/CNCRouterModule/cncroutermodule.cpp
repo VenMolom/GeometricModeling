@@ -9,7 +9,27 @@ CNCRouterModule::CNCRouterModule(shared_ptr<CNCRouter> router, QWidget *parent) 
         router(std::move(router)),
         ui(new Ui::CNCRouterModule) {
     ui->setupUi(this);
-    // TODO: set fields based on info in router
+    stateHandler = this->router->bindableState().addNotifier([this] { updateState(); });
+    progressHandler = this->router->bindableProgress().addNotifier([this] { updateProgress(); });
+    updateState();
+    updateProgress();
+
+    auto size = this->router->size();
+    ui->sizeX->setValue(size.x);
+    ui->sizeY->setValue(size.y);
+    ui->sizeZ->setValue(size.z);
+
+    auto density = this->router->pointsDensity();
+    ui->pointsDensityX->setValue(density.first);
+    ui->pointsDensityY->setValue(density.second);
+
+    ui->maxDepth->setValue(this->router->maxDepth());
+
+    ui->toolType->setCurrentIndex((int)this->router->toolType());
+    ui->toolSize->setValue(this->router->toolSize());
+
+    ui->showPaths->setChecked(this->router->showPaths());
+    ui->speed->setValue(this->router->simulationSpeed());
 }
 
 CNCRouterModule::~CNCRouterModule() {
@@ -17,42 +37,52 @@ CNCRouterModule::~CNCRouterModule() {
 }
 
 void CNCRouterModule::on_sizeX_valueChanged(double arg1) {
-
+    auto size = router->size();
+    size.x = arg1;
+    router->setSize(size);
 }
 
 
 void CNCRouterModule::on_sizeY_valueChanged(double arg1) {
-
+    auto size = router->size();
+    size.y = arg1;
+    router->setSize(size);
 }
 
 
 void CNCRouterModule::on_sizeZ_valueChanged(double arg1) {
-
+    auto size = router->size();
+    size.z = arg1;
+    router->setSize(size);
 }
 
 
 void CNCRouterModule::on_pointsDensityX_valueChanged(int arg1) {
-
+    auto density = router->pointsDensity();
+    density.first = arg1;
+    router->setPointsDensity(density);
 }
 
 
 void CNCRouterModule::on_pointsDensityY_valueChanged(int arg1) {
-
+    auto density = router->pointsDensity();
+    density.second = arg1;
+    router->setPointsDensity(density);
 }
 
 
 void CNCRouterModule::on_maxDepth_valueChanged(double arg1) {
-
+    router->setMaxDepth(arg1);
 }
 
 
 void CNCRouterModule::on_toolType_currentIndexChanged(int index) {
-
+    router->setToolType((CNCType) index);
 }
 
 
 void CNCRouterModule::on_toolSize_valueChanged(int arg1) {
-
+    router->setToolSize(arg1);
 }
 
 
@@ -72,28 +102,30 @@ void CNCRouterModule::on_loadFileButton_clicked() {
     ui->fileLoadedFrame->setEnabled(true);
 }
 
-
-void CNCRouterModule::on_startButton_clicked() {
-
+void CNCRouterModule::on_showPaths_stateChanged(int arg1) {
+    router->setShowPaths(Qt::Checked == (Qt::CheckState) arg1);
 }
-
-
-void CNCRouterModule::on_skipButton_clicked() {
-
-}
-
 
 void CNCRouterModule::on_speed_valueChanged(int value) {
-
+    router->setSimulationSpeed(value);
 }
 
+void CNCRouterModule::on_startButton_clicked() {
+    router->start();
+}
+
+void CNCRouterModule::on_skipButton_clicked() {
+    router->skip();
+}
 
 void CNCRouterModule::on_resetButton_clicked() {
-
+    router->reset();
 }
 
-
-void CNCRouterModule::on_showPaths_stateChanged(int arg1) {
-
+void CNCRouterModule::updateState() {
+    // TODO: implement
 }
 
+void CNCRouterModule::updateProgress() {
+    ui->progressBar->setValue(router->progress());
+}
