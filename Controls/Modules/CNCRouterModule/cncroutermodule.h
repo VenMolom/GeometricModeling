@@ -2,20 +2,22 @@
 #define CNCROUTERMODULE_H
 
 #include <QWidget>
+#include "Objects/CNCRouter/CNCRouter.h"
 
 namespace Ui {
-class CNCRouterModule;
+    class CNCRouterModule;
 }
 
-class CNCRouterModule : public QWidget
-{
-    Q_OBJECT
+class CNCRouterModule : public QWidget {
+Q_OBJECT
 
 public:
-    explicit CNCRouterModule(QWidget *parent = nullptr);
+    explicit CNCRouterModule(std::shared_ptr<CNCRouter> router, QWidget *parent = nullptr);
+
     ~CNCRouterModule();
 
 private slots:
+
     void on_sizeX_valueChanged(double arg1);
 
     void on_sizeY_valueChanged(double arg1);
@@ -43,6 +45,8 @@ private slots:
     void on_resetButton_clicked();
 
 private:
+    std::shared_ptr<CNCRouter> router;
+
     Ui::CNCRouterModule *ui;
 };
 
