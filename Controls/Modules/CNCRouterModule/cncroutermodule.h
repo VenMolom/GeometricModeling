@@ -44,7 +44,7 @@ private slots:
 
     void on_resetButton_clicked();
 
-    void on_checkBox_stateChanged(int arg1);
+    void on_showPaths_stateChanged(int arg1);
 
 private:
     std::shared_ptr<CNCRouter> router;
