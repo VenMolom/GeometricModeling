@@ -101,7 +101,10 @@ set(PROJECT_SOURCES
         Controls/Modules/IntersectionModule/intersectionmodule.h
         Controls/Modules/IntersectionModule/intersectionmodule.cpp
         Controls/Modules/IntersectionModule/intersectionmodule.ui
-        Utils/fileParser.cpp Utils/fileParser.h)
+        Utils/fileParser.cpp Utils/fileParser.h
+        Controls/Modules/CNCRouterModule/cncroutermodule.h
+        Controls/Modules/CNCRouterModule/cncroutermodule.cpp
+        Controls/Modules/CNCRouterModule/cncroutermodule.ui)
 
 # Build HLSL shaders
 add_custom_target(shaders)

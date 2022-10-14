@@ -70,6 +70,16 @@ private:
 
     std::vector<std::weak_ptr<Point>> getSelectedPoints();
     // TODO: ? lock modifications to specific axis
+
+    // TODO: CNCRouter:
+    // klasa z metodą update, callowana przed renderem co klatkę
+    // storuje wysokość punktów w teksturze
+    // ruch freza to narysowanie do tekstury prostokątu zakończonego półokręgami
+    // shader używa informacji czy jest to frez kolisty czy płaski do wyliczenia gradientu
+    // ruch IRT używa frame time i prędkości freza do policzenia długości ruchu,
+    //  trzeba obsłużyć ruch po więcej niż 1 ścieżce w jednym update'cie
+    // ruch w tle obrabia 1 całą ścieżkę co update
+    // postęp liczony na podstawie ilośći obrobionych ścieżek
 };
 
 #endif // MAINWINDOW_H

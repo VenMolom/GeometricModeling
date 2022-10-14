@@ -16,8 +16,8 @@ CNCPath FileParser::parseCNCPath(std::filesystem::path path) {
     CNCPath result{};
     smatch matches;
     static const regex rgx(R"(\.([k|f])(\d\d)$)");
-    auto filename = path.filename().string();
-    if (regex_search(filename, matches, rgx)) {
+    result.filename = path.filename().string();
+    if (regex_search(result.filename, matches, rgx)) {
         switch (matches[1].str()[0]) {
             case 'k':
                 result.type = CNCType::Round;

@@ -21,6 +21,7 @@ enum CNCType {
 };
 
 struct CNCPath {
+    std::string filename;
     CNCType type;
     int size;
     bool globalCoordinates;
