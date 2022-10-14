@@ -81,13 +81,13 @@ void FileParser::parseCNCLine(const std::string &line, CNCPath &path) {
             auto match = matches[i].str();
             switch (match[0]) {
                 case 'X':
-                    move.target.x = stof(match.c_str() + 1);
+                    move.target.x = stof(match.c_str() + 1) / 10.f;
                     break;
                 case 'Y':
-                    move.target.y = stof(match.c_str() + 1);
+                    move.target.y = stof(match.c_str() + 1) / 10.f;
                     break;
                 case 'Z':
-                    move.target.z = stof(match.c_str() + 1);
+                    move.target.z = stof(match.c_str() + 1) / 10.f;
                     break;
             }
         }
