@@ -21,82 +21,129 @@ find_library(D3D11_LIBRARY d3d11.lib)
 
 set(PROJECT_SOURCES
         main.cpp
-        mainwindow.cpp mainwindow.h mainwindow.ui
+        mainwindow.cpp
+        mainwindow.h
+        mainwindow.ui
         scene.cpp scene.h
-        Objects/object.cpp Objects/object.h
+        Objects/object.cpp
+        Objects/object.h
         camera.cpp camera.h
-        Controls/controls.h Controls/controls.cpp Controls/controls.ui
-        DirectX/DXRenderer/dxRenderer.cpp DirectX/DXRenderer/dxRenderer.h
-        DirectX/DXDevice/dxDevice.cpp DirectX/DXDevice/dxDevice.h
+        Controls/controls.h
+        Controls/controls.cpp
+        Controls/controls.ui
+        DirectX/DXRenderer/dxRenderer.cpp
+        DirectX/DXRenderer/dxRenderer.h
+        DirectX/DXDevice/dxDevice.cpp
+        DirectX/DXDevice/dxDevice.h
         DirectX/DXDevice/dxptr.h
-        DirectX/DXStructures/dxStructures.cpp DirectX/DXStructures/dxStructures.h
-        DirectX/DXDevice/exceptions.cpp DirectX/DXDevice/exceptions.h
+        DirectX/DXStructures/dxStructures.cpp
+        DirectX/DXStructures/dxStructures.h
+        DirectX/DXDevice/exceptions.cpp
+        DirectX/DXDevice/exceptions.h
         DirectX/renderer.h
         Objects/Parametric/parametricObject.h
-        Objects/Parametric/torus.cpp Objects/Parametric/torus.h
-        Resources.qrc Handlers/inputHandler.cpp Handlers/inputHandler.h
-        Objects/Cursor/cursor.cpp Objects/Cursor/cursor.h
-        Utils/utils3D.h Utils/utils3D.cpp
-        Objects/Point/point.cpp Objects/Point/point.h
-        ObjectListItem/objectListItem.cpp ObjectListItem/objectListItem.h
-        Objects/CompositeObject/compositeObject.cpp Objects/CompositeObject/compositeObject.h
-        Objects/Curve/brezierC0.cpp Objects/Curve/brezierC0.h
-        Objects/Curve/brezierCurve.cpp Objects/Curve/brezierCurve.h
-        Objects/Curve/brezierC2.cpp Objects/Curve/brezierC2.h
-        Controls/Modules/ObjectModule/objectmodule.h Controls/Modules/ObjectModule/objectmodule.cpp
+        Objects/Parametric/torus.cpp
+        Objects/Parametric/torus.h
+        Resources.qrc Handlers/inputHandler.cpp
+        Handlers/inputHandler.h
+        Objects/Cursor/cursor.cpp
+        Objects/Cursor/cursor.h
+        Utils/utils3D.h
+        Utils/utils3D.cpp
+        Objects/Point/point.cpp
+        Objects/Point/point.h
+        ObjectListItem/objectListItem.cpp
+        ObjectListItem/objectListItem.h
+        Objects/CompositeObject/compositeObject.cpp
+        Objects/CompositeObject/compositeObject.h
+        Objects/Curve/brezierC0.cpp
+        Objects/Curve/brezierC0.h
+        Objects/Curve/brezierCurve.cpp
+        Objects/Curve/brezierCurve.h
+        Objects/Curve/brezierC2.cpp
+        Objects/Curve/brezierC2.h
+        Controls/Modules/ObjectModule/objectmodule.h
+        Controls/Modules/ObjectModule/objectmodule.cpp
         Controls/Modules/ObjectModule/objectmodule.ui
-        Controls/Modules/ParametricModule/parametricmodule.h Controls/Modules/ParametricModule/parametricmodule.cpp
+        Controls/Modules/ParametricModule/parametricmodule.h
+        Controls/Modules/ParametricModule/parametricmodule.cpp
         Controls/Modules/ParametricModule/parametricmodule.ui
-        Controls/Modules/TorusModule/torusmodule.h Controls/Modules/TorusModule/torusmodule.cpp
+        Controls/Modules/TorusModule/torusmodule.h
+        Controls/Modules/TorusModule/torusmodule.cpp
         Controls/Modules/TorusModule/torusmodule.ui
-        Controls/Modules/CurveModule/curvemodule.h Controls/Modules/CurveModule/curvemodule.cpp
+        Controls/Modules/CurveModule/curvemodule.h
+        Controls/Modules/CurveModule/curvemodule.cpp
         Controls/Modules/CurveModule/curvemodule.ui
-        Controls/Modules/MoveModule/movemodule.h Controls/Modules/MoveModule/movemodule.cpp
+        Controls/Modules/MoveModule/movemodule.h
+        Controls/Modules/MoveModule/movemodule.cpp
         Controls/Modules/MoveModule/movemodule.ui
-        Controls/Modules/TransformModule/transformmodule.h Controls/Modules/TransformModule/transformmodule.cpp
+        Controls/Modules/TransformModule/transformmodule.h
+        Controls/Modules/TransformModule/transformmodule.cpp
         Controls/Modules/TransformModule/transformmodule.ui
-        Controls/Modules/ScreenMoveModule/screenmovemodule.h Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
+        Controls/Modules/ScreenMoveModule/screenmovemodule.h
+        Controls/Modules/ScreenMoveModule/screenmovemodule.cpp
         Controls/Modules/ScreenMoveModule/screenmovemodule.ui
-        Controls/Modules/BSplineModule/bsplinemodule.h Controls/Modules/BSplineModule/bsplinemodule.cpp
+        Controls/Modules/BSplineModule/bsplinemodule.h
+        Controls/Modules/BSplineModule/bsplinemodule.cpp
         Controls/Modules/BSplineModule/bsplinemodule.ui
-        Objects/Point/virtualPoint.cpp Objects/Point/virtualPoint.h
+        Objects/Point/virtualPoint.cpp
+        Objects/Point/virtualPoint.h
         Objects/Point/virtualPointsHolder.h
-        Objects/Grid/grid.cpp Objects/Grid/grid.h
-        Objects/renderable.cpp Objects/renderable.h
-        Objects/linestrip.cpp Objects/linestrip.h
-        Objects/Curve/curve.cpp Objects/Curve/curve.h
-        Objects/Curve/interpolationCurveC2.cpp Objects/Curve/interpolationCurveC2.h
-        Objects/objectFactory.cpp Objects/objectFactory.h
-        Handlers/screenTransform.cpp Handlers/screenTransform.h
-        Controls/scenecontrols.h Controls/scenecontrols.cpp
-        Controls/scenecontrols.ui DirectX/stereoscopicRenderer.h
+        Objects/Grid/grid.cpp
+        Objects/Grid/grid.h
+        Objects/renderable.cpp
+        Objects/renderable.h
+        Objects/linestrip.cpp
+        Objects/linestrip.h
+        Objects/Curve/curve.cpp
+        Objects/Curve/curve.h
+        Objects/Curve/interpolationCurveC2.cpp
+        Objects/Curve/interpolationCurveC2.h
+        Objects/objectFactory.cpp
+        Objects/objectFactory.h
+        Handlers/screenTransform.cpp
+        Handlers/screenTransform.h
+        Controls/scenecontrols.h
+        Controls/scenecontrols.cpp
+        Controls/scenecontrols.ui
+        DirectX/stereoscopicRenderer.h
         DirectX/DXDevice/ptr_vector.h
         DirectX/DXDevice/compressed_pair.h
         Objects/Patch/bicubicC0.cpp Objects/Patch/bicubicC0.h
         Objects/Patch/patch.cpp Objects/Patch/patch.h
-        Objects/Patch/bicubicC0Creator.cpp Objects/Patch/bicubicC0Creator.h
+        Objects/Patch/bicubicC0Creator.cpp
+        Objects/Patch/bicubicC0Creator.h
         Objects/creator.h
         Controls/Modules/PatchCreatorModule/patchcreatormodule.h
         Controls/Modules/PatchCreatorModule/patchcreatormodule.cpp
         Controls/Modules/PatchCreatorModule/patchcreatormodule.ui
         Objects/Patch/patchCreator.h
         Objects/linelist.cpp Objects/linelist.h
-        Controls/Modules/PatchModule/patchmodule.h Controls/Modules/PatchModule/patchmodule.cpp
+        Controls/Modules/PatchModule/patchmodule.h
+        Controls/Modules/PatchModule/patchmodule.cpp
         Controls/Modules/PatchModule/patchmodule.ui
-        Objects/Point/composableVirtualPoint.cpp Objects/Point/composableVirtualPoint.h
-        Objects/Patch/bicubicC2.cpp Objects/Patch/bicubicC2.h
-        Objects/Patch/bicubicC2Creator.cpp Objects/Patch/bicubicC2Creator.h
+        Objects/Point/composableVirtualPoint.cpp
+        Objects/Point/composableVirtualPoint.h
+        Objects/Patch/bicubicC2.cpp
+        Objects/Patch/bicubicC2.h
+        Objects/Patch/bicubicC2Creator.cpp
+        Objects/Patch/bicubicC2Creator.h
         Utils/gregoryUtils.cpp Utils/gregoryUtils.h
         Objects/Patch/gregoryPatch.cpp Objects/Patch/gregoryPatch.h
-        Controls/intersectdialog.h Controls/intersectdialog.cpp
+        Controls/intersectdialog.h
+        Controls/intersectdialog.cpp
         Controls/intersectdialog.ui
-        Handlers/intersectHandler.cpp Handlers/intersectHandler.h
-        Objects/Intersection/intersection.cpp Objects/Intersection/intersection.h
-        Objects/Intersection/intersectionInstance.cpp Objects/Intersection/intersectionInstance.h
+        Handlers/intersectHandler.cpp
+        Handlers/intersectHandler.h
+        Objects/Intersection/intersection.cpp
+        Objects/Intersection/intersection.h
+        Objects/Intersection/intersectionInstance.cpp
+        Objects/Intersection/intersectionInstance.h
         Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.h
         Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.cpp
         Controls/Modules/IntersectionInstanceModule/intersectioninstancemodule.ui
-        Controls/intersectiontexturedialog.h Controls/intersectiontexturedialog.cpp
+        Controls/intersectiontexturedialog.h
+        Controls/intersectiontexturedialog.cpp
         Controls/intersectiontexturedialog.ui
         Controls/Modules/IntersectionModule/intersectionmodule.h
         Controls/Modules/IntersectionModule/intersectionmodule.cpp
@@ -104,7 +151,9 @@ set(PROJECT_SOURCES
         Utils/fileParser.cpp Utils/fileParser.h
         Controls/Modules/CNCRouterModule/cncroutermodule.h
         Controls/Modules/CNCRouterModule/cncroutermodule.cpp
-        Controls/Modules/CNCRouterModule/cncroutermodule.ui)
+        Controls/Modules/CNCRouterModule/cncroutermodule.ui
+        Objects/updatable.h Objects/CNCRouter/CNCRouter.cpp
+        Objects/CNCRouter/CNCRouter.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
