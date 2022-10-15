@@ -64,6 +64,7 @@ void CNCRouter::update(float frameTime) {
 }
 
 void CNCRouter::loadPath(CNCPath &&path) {
+    _filename = QString::fromStdString(path.filename);
     _state = fresh ? RouterState::FirstPathLoaded : RouterState::NextPathLoaded;
     routerPath = path;
     fillDrawPaths();
@@ -85,15 +86,18 @@ void CNCRouter::fillDrawPaths() {
 
 void CNCRouter::start() {
     fresh = false;
+    _state = RouterState::Started;
     // TODO: implement
 }
 
 void CNCRouter::skip() {
+    fresh = false;
+    _state = RouterState::Skipped;
     // TODO: implement
 }
 
 void CNCRouter::reset() {
     fresh = true;
-    _state = RouterState::FirstPathLoaded;
+    _state = routerPath.moves.empty() ? RouterState::Created : RouterState::FirstPathLoaded;
     // TODO: implement
 }

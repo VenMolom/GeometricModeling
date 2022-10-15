@@ -73,6 +73,8 @@ public:
 
     QBindable<int> bindableProgress() { return &_progress; }
 
+    QString filename() const { return _filename; }
+
     void start();
 
     void skip();
@@ -89,6 +91,7 @@ private:
     CNCType _toolType{static_cast<CNCType>(0)};
     int _toolSize{8}, _simulationSpeed{0};
     bool _showPaths{false}, fresh{true};
+    QString _filename;
     QProperty<int> _progress{0};
     QProperty<RouterState> _state{static_cast<RouterState>(0)};
 

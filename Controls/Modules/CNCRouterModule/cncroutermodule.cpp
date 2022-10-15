@@ -97,9 +97,6 @@ void CNCRouterModule::on_loadFileButton_clicked() {
 
     auto path = filesystem::path(dialog.selectedFiles()[0].toStdString());
     router->loadPath(FileParser::parseCNCPath(path));
-
-    ui->filenameLabel->setText(QString::fromStdString(path.filename().string()));
-    ui->fileLoadedFrame->setEnabled(true);
 }
 
 void CNCRouterModule::on_showPaths_stateChanged(int arg1) {
@@ -123,7 +120,73 @@ void CNCRouterModule::on_resetButton_clicked() {
 }
 
 void CNCRouterModule::updateState() {
-    // TODO: implement
+    switch (router->state()) {
+        case Created:
+            ui->fileLoadedFrame->setEnabled(false);
+            ui->materialGroupBox->setEnabled(true);
+            ui->toolGroupBox->setEnabled(true);
+            ui->loadFileButton->setEnabled(true);
+            ui->startButton->setEnabled(true);
+            ui->skipButton->setEnabled(true);
+            ui->resetButton->setEnabled(true);
+            ui->speed->setEnabled(true);
+            break;
+        case FirstPathLoaded:
+            ui->filenameLabel->setText(router->filename());
+            ui->fileLoadedFrame->setEnabled(true);
+            ui->materialGroupBox->setEnabled(true);
+            ui->toolGroupBox->setEnabled(true);
+            ui->loadFileButton->setEnabled(true);
+            ui->startButton->setEnabled(true);
+            ui->skipButton->setEnabled(true);
+            ui->resetButton->setEnabled(true);
+            ui->speed->setEnabled(true);
+            break;
+        case NextPathLoaded:
+            ui->filenameLabel->setText(router->filename());
+            ui->fileLoadedFrame->setEnabled(true);
+            ui->materialGroupBox->setEnabled(false);
+            ui->toolGroupBox->setEnabled(true);
+            ui->loadFileButton->setEnabled(true);
+            ui->startButton->setEnabled(true);
+            ui->skipButton->setEnabled(true);
+            ui->resetButton->setEnabled(true);
+            ui->speed->setEnabled(true);
+            break;
+        case Started:
+            ui->filenameLabel->setText(router->filename());
+            ui->fileLoadedFrame->setEnabled(true);
+            ui->materialGroupBox->setEnabled(false);
+            ui->toolGroupBox->setEnabled(false);
+            ui->loadFileButton->setEnabled(false);
+            ui->startButton->setEnabled(false);
+            ui->skipButton->setEnabled(true);
+            ui->resetButton->setEnabled(false);
+            ui->speed->setEnabled(true);
+            break;
+        case Skipped:
+            ui->filenameLabel->setText(router->filename());
+            ui->fileLoadedFrame->setEnabled(true);
+            ui->materialGroupBox->setEnabled(false);
+            ui->toolGroupBox->setEnabled(false);
+            ui->loadFileButton->setEnabled(false);
+            ui->startButton->setEnabled(false);
+            ui->skipButton->setEnabled(false);
+            ui->resetButton->setEnabled(false);
+            ui->speed->setEnabled(false);
+            break;
+        case Finished:
+            ui->filenameLabel->setText(router->filename());
+            ui->fileLoadedFrame->setEnabled(true);
+            ui->materialGroupBox->setEnabled(false);
+            ui->toolGroupBox->setEnabled(true);
+            ui->loadFileButton->setEnabled(true);
+            ui->startButton->setEnabled(false);
+            ui->skipButton->setEnabled(false);
+            ui->resetButton->setEnabled(true);
+            ui->speed->setEnabled(false);
+            break;
+    }
 }
 
 void CNCRouterModule::updateProgress() {
