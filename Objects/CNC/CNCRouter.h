@@ -5,9 +5,8 @@
 #ifndef MG1_CNCROUTER_H
 #define MG1_CNCROUTER_H
 
-#include "Objects/object.h"
+#include "CNCTool.h"
 #include "Objects/updatable.h"
-#include "Utils/fileParser.h"
 #include "Objects/linestrip.h"
 
 enum RouterState {
@@ -19,7 +18,7 @@ enum RouterState {
     Finished
 };
 
-class CNCRouter: public Object, public Updatable {
+class CNCRouter : public Object, public Updatable {
 public:
     CNCRouter(uint id, DirectX::XMFLOAT3 position);
 
@@ -35,7 +34,7 @@ public:
 
     void update(float frameTime) override;
 
-    void loadPath(CNCPath&& path);
+    void loadPath(CNCPath &&path);
 
     DirectX::XMFLOAT3 size() const { return _size; }
 
@@ -49,11 +48,11 @@ public:
 
     void setMaxDepth(float depth);
 
-    CNCType toolType() const { return _toolType; }
+    CNCType toolType() const { return tool.endType(); }
 
     void setToolType(CNCType type);
 
-    int toolSize() const { return _toolSize; }
+    int toolSize() const { return tool.size(); }
 
     void setToolSize(int size);
 
@@ -88,8 +87,8 @@ private:
     DirectX::XMFLOAT3 _size{10, 10, 5};
     std::pair<int, int> _pointsDensity{512, 512};
     float _maxDepth{3};
-    CNCType _toolType{static_cast<CNCType>(0)};
-    int _toolSize{8}, _simulationSpeed{0};
+    CNCTool tool;
+    int _simulationSpeed{0};
     bool _showPaths{false}, fresh{true};
     QString _filename;
     QProperty<int> _progress{0};

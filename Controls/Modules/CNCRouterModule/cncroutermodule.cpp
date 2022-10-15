@@ -141,6 +141,9 @@ void CNCRouterModule::updateState() {
             ui->skipButton->setEnabled(true);
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(true);
+
+            ui->toolType->setCurrentIndex((int)this->router->toolType());
+            ui->toolSize->setValue(this->router->toolSize());
             break;
         case NextPathLoaded:
             ui->filenameLabel->setText(router->filename());
@@ -152,6 +155,9 @@ void CNCRouterModule::updateState() {
             ui->skipButton->setEnabled(true);
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(true);
+
+            ui->toolType->setCurrentIndex((int)this->router->toolType());
+            ui->toolSize->setValue(this->router->toolSize());
             break;
         case Started:
             ui->filenameLabel->setText(router->filename());

@@ -2,7 +2,7 @@
 #define CNCROUTERMODULE_H
 
 #include <QWidget>
-#include "Objects/CNCRouter/CNCRouter.h"
+#include "Objects/CNC/CNCRouter.h"
 
 namespace Ui {
     class CNCRouterModule;

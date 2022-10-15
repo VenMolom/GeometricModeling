@@ -6,12 +6,12 @@
 #define MG1_OBJECTFACTORY_H
 
 #include "Objects/Point/point.h"
+#include "Objects/CNC/CNCRouter.h"
 #include "Objects/Curve/brezierC0.h"
 #include "Objects/Curve/brezierC2.h"
 #include "Objects/Patch/bicubicC0.h"
 #include "Objects/Patch/bicubicC2.h"
 #include "Objects/Parametric/torus.h"
-#include "Objects/CNCRouter/CNCRouter.h"
 #include "Objects/Curve/interpolationCurveC2.h"
 #include "Objects/Intersection/intersection.h"
 

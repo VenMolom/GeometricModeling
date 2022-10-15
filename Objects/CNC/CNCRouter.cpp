@@ -9,6 +9,7 @@ using namespace DirectX;
 
 CNCRouter::CNCRouter(uint id, XMFLOAT3 position)
         : Object(id, "Router", position, D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST),
+          tool(),
           drawPaths() {
     drawPaths.setPosition(position);
     drawPaths.setRotation(XMFLOAT3(-XM_PIDIV2, 0.f, 0.f));
@@ -38,11 +39,11 @@ void CNCRouter::setMaxDepth(float depth) {
 }
 
 void CNCRouter::setToolType(CNCType type) {
-    _toolType = type;
+    tool.setType(type);
 }
 
 void CNCRouter::setToolSize(int size) {
-    _toolSize = size;
+    tool.setSize(size);
 }
 
 void CNCRouter::setShowPaths(bool show) {
@@ -55,8 +56,10 @@ void CNCRouter::setSimulationSpeed(int speed) {
 
 void CNCRouter::draw(Renderer &renderer, DrawType drawType) {
     // TODO: draw block
-    // TODO: draw paths if selected
-    drawPaths.draw(renderer, drawType);
+    // TODO: draw tool
+    if (_showPaths) {
+        drawPaths.draw(renderer, drawType);
+    }
 }
 
 void CNCRouter::update(float frameTime) {
@@ -65,11 +68,15 @@ void CNCRouter::update(float frameTime) {
 
 void CNCRouter::loadPath(CNCPath &&path) {
     _filename = QString::fromStdString(path.filename);
-    _state = fresh ? RouterState::FirstPathLoaded : RouterState::NextPathLoaded;
     routerPath = path;
-    fillDrawPaths();
+
+    tool.setSize(path.size);
+    tool.setType(path.type);
 
     // TODO: implement
+
+    fillDrawPaths();
+    _state = fresh ? RouterState::FirstPathLoaded : RouterState::NextPathLoaded;
 }
 
 void CNCRouter::fillDrawPaths() {

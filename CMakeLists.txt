@@ -152,8 +152,8 @@ set(PROJECT_SOURCES
         Controls/Modules/CNCRouterModule/cncroutermodule.h
         Controls/Modules/CNCRouterModule/cncroutermodule.cpp
         Controls/Modules/CNCRouterModule/cncroutermodule.ui
-        Objects/updatable.h Objects/CNCRouter/CNCRouter.cpp
-        Objects/CNCRouter/CNCRouter.h)
+        Objects/updatable.h Objects/CNC/CNCRouter.cpp
+        Objects/CNC/CNCRouter.h Objects/CNC/CNCTool.cpp Objects/CNC/CNCTool.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
