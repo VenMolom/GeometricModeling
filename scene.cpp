@@ -33,6 +33,14 @@ void Scene::draw(Renderer &renderer) {
     }
 }
 
+void Scene::update(Renderer &renderer, float deltaTime) {
+    for (auto &object: _objects) {
+        if (object->type() & UPDATABLE) {
+            dynamic_pointer_cast<Updatable>(object)->update(renderer, deltaTime);
+        }
+    }
+}
+
 #pragma region Add
 
 void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
@@ -125,7 +133,7 @@ void Scene::createFromCreator() {
 void Scene::createInterpolationCurve(const vector<XMFLOAT3> &points, bool closed) {
     vector<std::weak_ptr<Point>> weakPoints{};
 
-    for (auto &point : points) {
+    for (auto &point: points) {
         auto p = factory.createPoint(point);
         weakPoints.emplace_back(p);
         addObjectNoAction(p);
@@ -185,7 +193,7 @@ void Scene::intersect(IntersectHandler &handler, Renderer &renderer) {
         auto released = comp->release();
 
         int index = 0;
-        for (auto& surf : released) {
+        for (auto &surf: released) {
             surfaces[index++] = static_pointer_cast<ParametricObject<2>>(surf);
         }
 
@@ -232,7 +240,7 @@ void Scene::selectFromScreen(QPointF start, QPointF end) {
 
     list<shared_ptr<Object>> selected{};
 
-    for(auto &object : _objects) {
+    for (auto &object: _objects) {
         if (!(object->type() & SCREENSELECTABLE)) continue;
 
         auto screenPos = project(object->position());
@@ -425,31 +433,31 @@ void Scene::load(MG1::Scene &scene) {
 
     factory.nextId = 0;
 
-    for(auto& patch : scene.surfacesC0) {
+    for (auto &patch: scene.surfacesC0) {
         factory.nextId = max(factory.nextId, patch.GetId() + 1);
         addObjectNoAction(make_shared<BicubicC0>(patch, scene.points, bindableSelected()));
     }
-    for(auto& patch : scene.surfacesC2) {
+    for (auto &patch: scene.surfacesC2) {
         factory.nextId = max(factory.nextId, patch.GetId() + 1);
         addObjectNoAction(make_shared<BicubicC2>(patch, scene.points, bindableSelected()));
     }
-    for(auto& point : scene.points) {
+    for (auto &point: scene.points) {
         factory.nextId = max(factory.nextId, point.GetId() + 1);
         addObjectNoAction(make_shared<Point>(point));
     }
-    for(auto& torus : scene.tori) {
+    for (auto &torus: scene.tori) {
         factory.nextId = max(factory.nextId, torus.GetId() + 1);
         addObjectNoAction(make_shared<Torus>(torus));
     }
-    for(auto& bezier : scene.bezierC0) {
+    for (auto &bezier: scene.bezierC0) {
         factory.nextId = max(factory.nextId, bezier.GetId() + 1);
         addObjectNoAction(make_shared<BrezierC0>(bezier, _objects));
     }
-    for(auto& bezier : scene.bezierC2) {
+    for (auto &bezier: scene.bezierC2) {
         factory.nextId = max(factory.nextId, bezier.GetId() + 1);
         addObjectNoAction(make_shared<BrezierC2>(bezier, _objects, bindableSelected()));
     }
-    for(auto& interpolated : scene.interpolatedC2) {
+    for (auto &interpolated: scene.interpolatedC2) {
         factory.nextId = max(factory.nextId, interpolated.GetId() + 1);
         addObjectNoAction(make_shared<InterpolationCurveC2>(interpolated, _objects));
     }
@@ -457,7 +465,7 @@ void Scene::load(MG1::Scene &scene) {
 
 void Scene::serialize(MG1::Scene &scene) {
     scene.Clear();
-    for(auto & object : _objects) {
+    for (auto &object: _objects) {
         if (object->type() == POINT3D) {
             auto p = static_pointer_cast<Point>(object);
             scene.points.push_back(p->serialize());
@@ -480,7 +488,7 @@ void Scene::serialize(MG1::Scene &scene) {
         }
     }
 
-    for(auto & object : _objects) {
+    for (auto &object: _objects) {
         if (object->type() == PATCHC0) {
             auto b = static_pointer_cast<BicubicC0>(object);
             scene.surfacesC0.push_back(b->serialize(scene.points));

@@ -7,7 +7,9 @@
 
 #endif //MG1_UPDATABLE_H
 
+#include "DIrectX/renderer.h"
+
 class Updatable {
 public:
-    virtual void update(float frameTime) = 0;
+    virtual void update(Renderer& renderer, float frameTime) = 0;
 };

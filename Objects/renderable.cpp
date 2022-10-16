@@ -33,22 +33,18 @@ void Renderable::updateBuffers() {
     }
 }
 
-void Renderable::setBuffers(vector<VertexPositionColor> vertices,
-                            vector<Index> indices) {
-    if (vertices.empty()) {
-        indexBuffer.reset();
-        vertexBuffer.reset();
-        return;
-    }
+void Renderable::setBuffers(vector<VertexPositionColor>&& vertices, vector<Index>&& indices) {
+    this->vertices = vertices;
+    this->indices = indices;
 
-    vertexBuffer = DxDevice::Instance().CreateVertexBuffer(vertices);
-    vertexCount = vertices.size();
-    indexBuffer.reset();
+    updateBuffers();
+}
 
-    if (!indices.empty()) {
-        indexBuffer = DxDevice::Instance().CreateIndexBuffer(indices);
-        indexCount = indices.size();
-    }
+void Renderable::setBuffers(const vector<VertexPositionColor>& vertices, const vector<Index>& indices) {
+    this->vertices = vertices;
+    this->indices = indices;
+
+    updateBuffers();
 }
 
 void Renderable::render(const dx_ptr<ID3D11DeviceContext> &context) const {

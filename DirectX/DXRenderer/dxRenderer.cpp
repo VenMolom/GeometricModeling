@@ -17,7 +17,7 @@ DxRenderer::DxRenderer(QWidget *parent) : m_device(this),
     init3D3();
 }
 
-void DxRenderer::renderScene() {
+void DxRenderer::renderScene(float deltaTime) {
     auto backBuffer = m_backBuffer.get();
     m_device.context()->OMSetRenderTargets(1, &backBuffer, m_depthBuffer.get());
     m_device.context()->ClearRenderTargetView(m_backBuffer.get(), CLEAR_COLOR);
@@ -33,6 +33,7 @@ void DxRenderer::renderScene() {
 
     if (scene) {
         updateCameraCB();
+        scene->update(*this, deltaTime);
         scene->draw(*this);
     }
 
@@ -298,6 +299,19 @@ void DxRenderer::draw(const IntersectionInstance &instance, bool clear) {
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
+void DxRenderer::draw(const Mesh &mesh, DirectX::XMMATRIX modelMatrix) {
+    updateBuffer(m_cbModel, modelMatrix);
+    updateBuffer(m_cbColor, mesh.color());
+
+    m_device.context()->VSSetShader(m_vertexPhongShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelPhongShader.get(), nullptr, 0);
+
+    mesh.render(m_device.context());
+
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+}
+
 void DxRenderer::enableStereoscopy(bool enable) {
     stereoscopic = enable;
     if (!enable) {
@@ -425,7 +439,7 @@ void DxRenderer::paintEvent(QPaintEvent *event) {
                                    .append("\t\t Mode: ")
                                    .append(inputHandler.currentMode()));
 
-    renderScene();
+    renderScene(deltaTime);
     m_device.swapChain()->Present(1, 0);
     update();
 }
@@ -494,6 +508,7 @@ void DxRenderer::init3D3() {
     m_vertexTextureShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsTexture.cso"));
     m_vertexBillboardShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsBillboard.cso"));
     m_vertexNoProjectionShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsNoProjection.cso"));
+    m_vertexPhongShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsPhong.cso"));
     m_hullBrezierShader = m_device.CreateHullShader(DxDevice::LoadByteCode(L"hsBrezier.cso"));
     m_hullBicubicShader = m_device.CreateHullShader(DxDevice::LoadByteCode(L"hsBicubic.cso"));
     m_hullGregoryShader = m_device.CreateHullShader(DxDevice::LoadByteCode(L"hsGregory.cso"));
@@ -508,6 +523,7 @@ void DxRenderer::init3D3() {
     m_pixelSelectorShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psSelector.cso"));
     m_pixelTextureShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psTexture.cso"));
     m_pixelParamShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psParam.cso"));
+    m_pixelPhongShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psPhong.cso"));
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);

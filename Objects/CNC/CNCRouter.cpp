@@ -3,16 +3,21 @@
 //
 
 #include "CNCRouter.h"
+#include "Utils/utils3D.h"
 
 using namespace std;
 using namespace DirectX;
 
+const XMFLOAT3 CNCRouter::NEUTRAL_TOOL_POSITION = {0.f, 0.f, 10.f};
+
 CNCRouter::CNCRouter(uint id, XMFLOAT3 position)
         : Object(id, "Router", position, D3D11_PRIMITIVE_TOPOLOGY_4_CONTROL_POINT_PATCHLIST),
-          tool(),
+          tool(NEUTRAL_TOOL_POSITION),
           drawPaths() {
     drawPaths.setPosition(position);
     drawPaths.setRotation(XMFLOAT3(-XM_PIDIV2, 0.f, 0.f));
+    Object::setPosition(position);
+    Object::setRotation(XMFLOAT3(-XM_PIDIV2, 0.f, 0.f));
 }
 
 Type CNCRouter::type() const {
@@ -56,14 +61,52 @@ void CNCRouter::setSimulationSpeed(int speed) {
 
 void CNCRouter::draw(Renderer &renderer, DrawType drawType) {
     // TODO: draw block
-    // TODO: draw tool
+    tool.draw(renderer, modelMatrix());
+
     if (_showPaths) {
         drawPaths.draw(renderer, drawType);
     }
 }
 
-void CNCRouter::update(float frameTime) {
-    // TODO: update texture from path
+void CNCRouter::update(Renderer &renderer, float frameTime) {
+    if (_state != RouterState::Started && _state != RouterState::Skipped) return;
+
+    if (drawPaths.vertices().size() < 2) {
+        _state = RouterState::Finished;
+        tool.setPosition(NEUTRAL_TOOL_POSITION);
+        return;
+    }
+
+    auto currentPosition = tool.position();
+    if (_state == RouterState::Started) {
+
+        auto distanceToTravel = _simulationSpeed * TOOL_SPEED * frameTime;
+
+        while (distanceToTravel > 0.f && drawPaths.vertices().size() >= 2) {
+            auto nextTarget = (drawPaths.vertices().end() - 2)->position;
+            auto distanceToTarget = XMVector3Length(
+                    XMVectorSubtract(XMLoadFloat3(&nextTarget), XMLoadFloat3(&currentPosition))).m128_f32[0];
+            if (distanceToTravel < distanceToTarget) {
+                Utils3D::storeFloat3Lerp(drawPaths.vertices().back().position, currentPosition, nextTarget,
+                                         distanceToTravel / distanceToTarget);
+                break;
+            }
+
+            distanceToTravel -= distanceToTarget;
+            drawPaths.vertices().pop_back();
+            currentPosition = nextTarget;
+
+            // TODO: update texture from path
+        }
+
+        if (!drawPaths.vertices().empty()) {
+            tool.setPosition(drawPaths.vertices().back().position);
+        }
+    } else {
+        drawPaths.vertices().pop_back();
+
+        // TODO: update texture from path
+    }
 }
 
 void CNCRouter::loadPath(CNCPath &&path) {
@@ -72,8 +115,6 @@ void CNCRouter::loadPath(CNCPath &&path) {
 
     tool.setSize(path.size);
     tool.setType(path.type);
-
-    // TODO: implement
 
     fillDrawPaths();
     _state = fresh ? RouterState::FirstPathLoaded : RouterState::NextPathLoaded;
@@ -94,13 +135,12 @@ void CNCRouter::fillDrawPaths() {
 void CNCRouter::start() {
     fresh = false;
     _state = RouterState::Started;
-    // TODO: implement
+    tool.setPosition(drawPaths.vertices().back().position);
 }
 
 void CNCRouter::skip() {
     fresh = false;
     _state = RouterState::Skipped;
-    // TODO: implement
 }
 
 void CNCRouter::reset() {

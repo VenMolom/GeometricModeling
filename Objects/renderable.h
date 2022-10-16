@@ -22,7 +22,9 @@ protected:
 
     void updateBuffers();
 
-    void setBuffers(std::vector<VertexPositionColor> vertices, std::vector<Index> indices);
+    void setBuffers(std::vector<VertexPositionColor>&& vertices, std::vector<Index>&& indices);
+
+    void setBuffers(const std::vector<VertexPositionColor>& vertices, const std::vector<Index>& indices);
 
     void setTopology(D3D11_PRIMITIVE_TOPOLOGY topology) { this->topology = topology; }
 

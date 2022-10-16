@@ -19,6 +19,9 @@ enum RouterState {
 };
 
 class CNCRouter : public Object, public Updatable {
+    static constexpr float TOOL_SPEED = 25.f;
+    static const DirectX::XMFLOAT3 NEUTRAL_TOOL_POSITION;
+
 public:
     CNCRouter(uint id, DirectX::XMFLOAT3 position);
 
@@ -32,7 +35,7 @@ public:
 
     Type type() const override;
 
-    void update(float frameTime) override;
+    void update(Renderer &renderer, float frameTime) override;
 
     void loadPath(CNCPath &&path);
 
@@ -88,12 +91,11 @@ private:
     std::pair<int, int> _pointsDensity{512, 512};
     float _maxDepth{3};
     CNCTool tool;
-    int _simulationSpeed{0};
+    int _simulationSpeed{1};
     bool _showPaths{false}, fresh{true};
     QString _filename;
     QProperty<int> _progress{0};
     QProperty<RouterState> _state{static_cast<RouterState>(0)};
-
 
     void fillDrawPaths();
 };

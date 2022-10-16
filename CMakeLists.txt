@@ -152,8 +152,13 @@ set(PROJECT_SOURCES
         Controls/Modules/CNCRouterModule/cncroutermodule.h
         Controls/Modules/CNCRouterModule/cncroutermodule.cpp
         Controls/Modules/CNCRouterModule/cncroutermodule.ui
-        Objects/updatable.h Objects/CNC/CNCRouter.cpp
-        Objects/CNC/CNCRouter.h Objects/CNC/CNCTool.cpp Objects/CNC/CNCTool.h)
+        Objects/updatable.h
+        Objects/CNC/CNCRouter.cpp
+        Objects/CNC/CNCRouter.h
+        Objects/CNC/CNCTool.cpp
+        Objects/CNC/CNCTool.h
+        Objects/CNC/mesh.cpp
+        Objects/CNC/mesh.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -179,7 +184,9 @@ set(HLSL_SHADER_FILES
         Shader/vsTexture.hlsl
         Shader/psTexture.hlsl
         Shader/vsParam.hlsl
-        Shader/psParam.hlsl)
+        Shader/psParam.hlsl
+        Shader/vsPhong.hlsl
+        Shader/psPhong.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsBillboard.hlsl PROPERTIES ShaderType "vs")
@@ -188,12 +195,14 @@ set_source_files_properties(Shader/vsStereo.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsSelector.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsTexture.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsParam.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties(Shader/vsPhong.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psStereo.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psSelector.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psTexture.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psParam.hlsl PROPERTIES ShaderType "ps")
+set_source_files_properties(Shader/psPhong.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/hsBrezier.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/hsBicubic.hlsl PROPERTIES ShaderType "hs")
 set_source_files_properties(Shader/hsGregory.hlsl PROPERTIES ShaderType "hs")

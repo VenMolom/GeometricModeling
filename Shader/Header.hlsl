@@ -41,6 +41,18 @@ struct HSBicubicConstOutput {
 	float2 end : TEXEND;
 };
 
+struct VSPhongIn {
+    float3 pos : POSITION;
+    float3 norm : NORMAL0;
+};
+
+struct PSPhongIn {
+    float4 pos : SV_POSITION;
+    float3 worldPos : POSITION0;
+    float3 norm : NORMAL0;
+    float3 viewVec : TEXCOORD0;
+};
+
 #define CONTROL_POINTS_BREZIER 4
 
 #define CONTROL_POINTS_PATCH 16

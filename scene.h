@@ -51,6 +51,8 @@ public:
 
     void draw(Renderer &renderer);
 
+    void update(Renderer &renderer, float deltaTime);
+
     void serialize(MG1::Scene &scene);
 
     void load(MG1::Scene &scene);

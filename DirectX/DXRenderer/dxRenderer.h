@@ -41,6 +41,8 @@ public:
 
     void draw(const IntersectionInstance &instance, bool clear = true) override;
 
+    void draw(const Mesh &mesh, DirectX::XMMATRIX modelMatrix) override;
+
     void drawSelector(const Selector &selector);
 
     void enableStereoscopy(bool enable) override;
@@ -90,6 +92,7 @@ private:
     mini::dx_ptr<ID3D11VertexShader> m_vertexSelectorShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexTextureShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexParamShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexPhongShader;
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11HullShader> m_hullBicubicShader;
@@ -107,6 +110,7 @@ private:
     mini::dx_ptr<ID3D11PixelShader> m_pixelSelectorShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelTextureShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelParamShader;
+    mini::dx_ptr<ID3D11PixelShader> m_pixelPhongShader;
 
     mini::dx_ptr<ID3D11InputLayout> m_layout;
     mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
@@ -149,7 +153,7 @@ private:
     mini::dx_ptr<ID3D11RenderTargetView> m_stereoscopicLeftTarget, m_stereoscopicRightTarget;
     mini::dx_ptr<ID3D11ShaderResourceView> m_stereoscopicLeftTexture, m_stereoscopicRightTexture;
 
-    void renderScene();
+    void renderScene(float deltaTime);
 
     void renderStereoscopic();
 
