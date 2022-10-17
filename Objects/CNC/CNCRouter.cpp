@@ -107,6 +107,7 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
 
         // TODO: update texture from path
     }
+    drawPaths.update();
 }
 
 void CNCRouter::loadPath(CNCPath &&path) {
