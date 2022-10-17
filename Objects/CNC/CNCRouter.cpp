@@ -147,5 +147,8 @@ void CNCRouter::skip() {
 void CNCRouter::reset() {
     fresh = true;
     _state = routerPath.moves.empty() ? RouterState::Created : RouterState::FirstPathLoaded;
+    if (!routerPath.moves.empty()) {
+        fillDrawPaths();
+    }
     // TODO: implement
 }
