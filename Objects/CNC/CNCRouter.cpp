@@ -74,6 +74,7 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
     if (drawPaths.vertices().size() < 2) {
         _state = RouterState::Finished;
         tool.setPosition(NEUTRAL_TOOL_POSITION);
+        drawPaths.update();
         return;
     }
 
@@ -102,12 +103,13 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
         if (!drawPaths.vertices().empty()) {
             tool.setPosition(drawPaths.vertices().back().position);
         }
+        drawPaths.update();
     } else {
         drawPaths.vertices().pop_back();
 
         // TODO: update texture from path
     }
-    drawPaths.update();
+    _progress = 100 - static_cast<int>(std::floor(static_cast<float>(drawPaths.vertices().size() * 100) / static_cast<float>(routerPath.moves.size())));
 }
 
 void CNCRouter::loadPath(CNCPath &&path) {
@@ -119,6 +121,7 @@ void CNCRouter::loadPath(CNCPath &&path) {
 
     fillDrawPaths();
     _state = fresh ? RouterState::FirstPathLoaded : RouterState::NextPathLoaded;
+    _progress = 0;
 }
 
 void CNCRouter::fillDrawPaths() {
@@ -147,6 +150,7 @@ void CNCRouter::skip() {
 void CNCRouter::reset() {
     fresh = true;
     _state = routerPath.moves.empty() ? RouterState::Created : RouterState::FirstPathLoaded;
+    _progress = 0;
     if (!routerPath.moves.empty()) {
         fillDrawPaths();
     }
