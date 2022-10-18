@@ -98,6 +98,14 @@ private:
     QProperty<RouterState> _state{static_cast<RouterState>(0)};
 
     void fillDrawPaths();
+
+    void generateBlock();
+
+    void generateFaceZ(bool ccw, float z, float normalZ, float deltaX, float deltaY, int pointsX, int pointsY);
+
+    void generateFaceX(bool ccw, float x, float normalX, float deltaY, int pointsY);
+
+    void generateFaceY(bool ccw, float y, float normalY, float deltaX, int pointsX);
 };
 
 

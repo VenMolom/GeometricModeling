@@ -43,6 +43,8 @@ public:
 
     void draw(const Mesh &mesh, DirectX::XMMATRIX modelMatrix) override;
 
+    void draw(const CNCRouter &router) override;
+
     void drawSelector(const Selector &selector);
 
     void enableStereoscopy(bool enable) override;
@@ -130,6 +132,7 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_selectorQuad;
 
     mini::dx_ptr<ID3D11DepthStencilState> m_dssNoDepthWrite;
+    mini::dx_ptr<ID3D11DepthStencilState> m_dssNoDepth;
 
     LARGE_INTEGER currentTicks, ticksPerSecond, lastFrameRateTick;
     uint frameCount = 0, lastFrameRate = 0;

@@ -69,6 +69,8 @@ DrawType {
 
 class Object : public Renderable {
 public:
+    bool noDepth;
+
     Object(Object &object) = default;
 
     Object(Object &&object) = default;

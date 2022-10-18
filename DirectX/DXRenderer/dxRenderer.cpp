@@ -3,6 +3,7 @@
 #include "Objects/object.h"
 #include "Objects/Curve/brezierCurve.h"
 #include "Objects/Curve/interpolationCurveC2.h"
+#include "Objects/CNC/CNCRouter.h"
 
 using namespace mini;
 using namespace std;
@@ -105,7 +106,13 @@ void DxRenderer::draw(const Object &object, XMFLOAT4 color) {
     updateBuffer(m_cbModel, object.modelMatrix());
     updateBuffer(m_cbColor, color);
 
+    if (object.noDepth) {
+        m_device.context()->OMSetDepthStencilState(m_dssNoDepth.get(), 0);
+    }
+
     object.render(m_device.context());
+
+    m_device.context()->OMSetDepthStencilState(nullptr, 0);
 }
 
 void DxRenderer::draw(const Torus &torus, DirectX::XMFLOAT4 color) {
@@ -307,6 +314,19 @@ void DxRenderer::draw(const Mesh &mesh, DirectX::XMMATRIX modelMatrix) {
     m_device.context()->PSSetShader(m_pixelPhongShader.get(), nullptr, 0);
 
     mesh.render(m_device.context());
+
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+}
+
+void DxRenderer::draw(const CNCRouter &router) {
+    updateBuffer(m_cbModel, router.modelMatrix());
+    updateBuffer(m_cbColor, XMFLOAT3{0.5f, 0.5f, 0.5f});
+
+    m_device.context()->VSSetShader(m_vertexPhongShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelPhongShader.get(), nullptr, 0);
+
+    router.render(m_device.context());
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
@@ -583,6 +603,9 @@ void DxRenderer::init3D3() {
     DepthStencilDescription dssDesc;
     dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
     m_dssNoDepthWrite = m_device.CreateDepthStencilState(dssDesc);
+
+    dssDesc.DepthEnable = false;
+    m_dssNoDepth = m_device.CreateDepthStencilState(dssDesc);
 
     SamplerDescription samplerDesc;
     m_sampler = m_device.CreateSamplerState(samplerDesc);
