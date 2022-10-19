@@ -14,17 +14,25 @@ CNCRouterModule::CNCRouterModule(shared_ptr<CNCRouter> router, QWidget *parent) 
     updateState();
     updateProgress();
 
+    QSignalBlocker x(ui->sizeX);
+    QSignalBlocker y(ui->sizeY);
+    QSignalBlocker z(ui->sizeZ);
     auto size = this->router->size();
     ui->sizeX->setValue(size.x);
     ui->sizeY->setValue(size.y);
     ui->sizeZ->setValue(size.z);
 
+    QSignalBlocker d1(ui->pointsDensityX);
+    QSignalBlocker d2(ui->pointsDensityY);
     auto density = this->router->pointsDensity();
     ui->pointsDensityX->setValue(density.first);
     ui->pointsDensityY->setValue(density.second);
 
+    QSignalBlocker dd(ui->maxDepth);
     ui->maxDepth->setValue(this->router->maxDepth());
 
+    QSignalBlocker tt(ui->toolType);
+    QSignalBlocker ts(ui->toolSize);
     ui->toolType->setCurrentIndex((int)this->router->toolType());
     ui->toolSize->setValue(this->router->toolSize());
 

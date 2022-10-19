@@ -41,6 +41,9 @@ public:
 
     mini::dx_ptr<ID3D11DepthStencilView> CreateDepthStencilView(SIZE size) const;
 
+    mini::dx_ptr<ID3D11DepthStencilView> CreateDepthStencilView(const mini::dx_ptr<ID3D11Texture2D>& texture,
+                                                          const DepthStencilViewDescription &desc) const;
+
     template<class T>
     mini::dx_ptr<ID3D11Buffer> CreateVertexBuffer(const std::vector<T> &vertices) const {
         auto desc = BufferDescription::VertexBufferDescription(vertices.size() * sizeof(T));
@@ -64,6 +67,8 @@ public:
     mini::dx_ptr<ID3D11DepthStencilState> CreateDepthStencilState(const DepthStencilDescription &desc = {}) const;
 
     mini::dx_ptr<ID3D11RasterizerState> CreateRasterizerState(const RasterizerDescription &desc = {}) const;
+
+    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const std::wstring& texPath) const;
 
     mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const mini::dx_ptr<ID3D11Texture2D>& texture,
                                                               const ShaderResourceViewDescription *desc = nullptr) const;

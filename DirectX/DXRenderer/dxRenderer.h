@@ -95,6 +95,7 @@ private:
     mini::dx_ptr<ID3D11VertexShader> m_vertexTextureShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexParamShader;
     mini::dx_ptr<ID3D11VertexShader> m_vertexPhongShader;
+    mini::dx_ptr<ID3D11VertexShader> m_vertexPhongTexShader;
 
     mini::dx_ptr<ID3D11HullShader> m_hullBrezierShader;
     mini::dx_ptr<ID3D11HullShader> m_hullBicubicShader;
@@ -118,6 +119,7 @@ private:
     mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
     mini::dx_ptr<ID3D11InputLayout> m_paramLayout;
     mini::dx_ptr<ID3D11InputLayout> m_selectorLayout;
+    mini::dx_ptr<ID3D11InputLayout> m_phongTexLayout;
 
     mini::dx_ptr<ID3D11Buffer> m_cbModel;
     mini::dx_ptr<ID3D11Buffer> m_cbView;
@@ -147,7 +149,7 @@ private:
 
     DirectX::XMFLOAT4 leftEyeColor, rightEyeColor;
 
-    mini::dx_ptr<ID3D11SamplerState> m_sampler;
+    mini::dx_ptr<ID3D11SamplerState> m_sampler, m_samplerBorder;
 
     mini::dx_ptr<ID3D11BlendState> m_bsAlpha;
 
@@ -155,6 +157,7 @@ private:
 
     mini::dx_ptr<ID3D11RenderTargetView> m_stereoscopicLeftTarget, m_stereoscopicRightTarget;
     mini::dx_ptr<ID3D11ShaderResourceView> m_stereoscopicLeftTexture, m_stereoscopicRightTexture;
+    mini::dx_ptr<ID3D11ShaderResourceView> m_woodTexture;
 
     void renderScene(float deltaTime);
 
@@ -171,6 +174,9 @@ private:
     void updateBuffer(const mini::dx_ptr<ID3D11Buffer> &buffer, const T &data);
 
     void setTextures(std::initializer_list<ID3D11ShaderResourceView*> resList,
+                     const mini::dx_ptr<ID3D11SamplerState>& sampler);
+
+    void setVSTextures(std::initializer_list<ID3D11ShaderResourceView*> resList,
                      const mini::dx_ptr<ID3D11SamplerState>& sampler);
 
     float frameTime();

@@ -17,6 +17,11 @@ void Renderable::updateBuffers() {
         return;
     }
 
+    if (shaded) {
+        updateBuffersShaded();
+        return;
+    }
+
     if (vertices.empty()) {
         indexBuffer.reset();
         vertexBuffer.reset();
@@ -33,14 +38,14 @@ void Renderable::updateBuffers() {
     }
 }
 
-void Renderable::setBuffers(vector<VertexPositionColor>&& vertices, vector<Index>&& indices) {
+void Renderable::setBuffers(vector<VertexPositionColor> &&vertices, vector<Index> &&indices) {
     this->vertices = vertices;
     this->indices = indices;
 
     updateBuffers();
 }
 
-void Renderable::setBuffers(const vector<VertexPositionColor>& vertices, const vector<Index>& indices) {
+void Renderable::setBuffers(const vector<VertexPositionColor> &vertices, const vector<Index> &indices) {
     this->vertices = vertices;
     this->indices = indices;
 
@@ -64,8 +69,16 @@ void Renderable::render(const dx_ptr<ID3D11DeviceContext> &context) const {
 
 void Renderable::convertToTextured() {
     textured = true;
+    shaded = false;
     stride = sizeof(VertexPositionTexture);
     updateBuffersTextured();
+}
+
+void Renderable::convertToShaded() {
+    shaded = true;
+    textured = false;
+    stride = sizeof(VertexPositionNormalTex);
+    updateBuffersShaded();
 }
 
 void Renderable::updateBuffersTextured() {
@@ -77,6 +90,23 @@ void Renderable::updateBuffersTextured() {
 
     vertexBuffer = DxDevice::Instance().CreateVertexBuffer(verticesTextured);
     vertexCount = verticesTextured.size();
+    indexBuffer.reset();
+
+    if (!indices.empty()) {
+        indexBuffer = DxDevice::Instance().CreateIndexBuffer(indices);
+        indexCount = indices.size();
+    }
+}
+
+void Renderable::updateBuffersShaded() {
+    if (verticesShaded.empty()) {
+        indexBuffer.reset();
+        vertexBuffer.reset();
+        return;
+    }
+
+    vertexBuffer = DxDevice::Instance().CreateVertexBuffer(verticesShaded);
+    vertexCount = verticesShaded.size();
     indexBuffer.reset();
 
     if (!indices.empty()) {

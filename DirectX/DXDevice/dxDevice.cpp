@@ -2,6 +2,8 @@
 #include "exceptions.h"
 #include "DirectX/DXStructures/dxStructures.h"
 #include <fstream>
+#include "Utils/DDSTextureLoader.h"
+#include "Utils/WICTextureLoader.h"
 
 using namespace mini;
 using namespace std;
@@ -148,6 +150,17 @@ mini::dx_ptr<ID3D11DepthStencilView> DxDevice::CreateDepthStencilView(SIZE size)
     return CreateDepthStencilView(texture);
 }
 
+dx_ptr<ID3D11DepthStencilView> DxDevice::CreateDepthStencilView(const dx_ptr<ID3D11Texture2D>& texture,
+                                                                const DepthStencilViewDescription &desc) const
+{
+    ID3D11DepthStencilView* temp = nullptr;
+    auto hr = m_device->CreateDepthStencilView(texture.get(), &desc, &temp);
+    dx_ptr<ID3D11DepthStencilView> result{ temp };
+    if (FAILED(hr))
+        THROW_DX(hr);
+    return result;
+}
+
 dx_ptr<ID3D11BlendState> DxDevice::CreateBlendState(const BlendDescription &desc) const {
     ID3D11BlendState *s = nullptr;
     auto hr = m_device->CreateBlendState(&desc, &s);
@@ -173,6 +186,22 @@ dx_ptr<ID3D11RasterizerState> DxDevice::CreateRasterizerState(const RasterizerDe
     if (FAILED(hr))
         THROW_DX(hr);
     return state;
+}
+
+dx_ptr<ID3D11ShaderResourceView> DxDevice::CreateShaderResourceView(const std::wstring& texPath) const
+{
+    ID3D11ShaderResourceView* rv = nullptr;;
+    HRESULT hr = 0;
+    const wstring ext{ L".dds" };
+    if (texPath.size() > ext.size() && texPath.compare(texPath.size() - ext.size(), ext.size(), ext) == 0)
+        hr = DirectX::CreateDDSTextureFromFile(m_device.get(), m_context.get(), texPath.c_str(), nullptr, &rv);
+    else
+        hr = DirectX::CreateWICTextureFromFile(m_device.get(), m_context.get(), texPath.c_str(), nullptr, &rv);
+    dx_ptr<ID3D11ShaderResourceView> resourceView(rv);
+    if (FAILED(hr))
+        //Make sure CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED); is called before first use of this function!
+        THROW_DX(hr);
+    return resourceView;
 }
 
 dx_ptr<ID3D11ShaderResourceView> DxDevice::CreateShaderResourceView(const dx_ptr<ID3D11Texture2D> &texture,

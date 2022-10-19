@@ -14,10 +14,12 @@ CNCRouter::CNCRouter(uint id, XMFLOAT3 position)
         : Object(id, "Router", position, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST),
           tool(NEUTRAL_TOOL_POSITION),
           drawPaths() {
+    convertToShaded();
     drawPaths.setPosition(position);
     drawPaths.setRotation(XMFLOAT3(-XM_PIDIV2, 0.f, 0.f));
     Object::setPosition(position);
     Object::setRotation(XMFLOAT3(-XM_PIDIV2, 0.f, 0.f));
+    Object::setScale(_size);
     generateBlock();
     drawPaths.noDepth = true;
 }
@@ -161,7 +163,7 @@ void CNCRouter::fillDrawPaths() {
 }
 
 void CNCRouter::generateBlock() {
-    vertices.clear();
+    verticesShaded.clear();
     indices.clear();
 
     auto pointsX = _pointsDensity.first >> 5;
@@ -178,18 +180,24 @@ void CNCRouter::generateBlock() {
     generateFaceY(true, -0.5f, -1.f, deltaX, pointsX); // y- facing
 
     updateBuffers();
+    createDepthAndTexture(DxDevice::Instance());
 }
 
 void CNCRouter::generateFaceZ(bool ccw, float z, float normalZ, float deltaX, float deltaY, int pointsX, int pointsY) {
     XMFLOAT3 pos = {-.5f, -.5f, z};
-    auto idx = vertices.size();
+    XMFLOAT2 tex = {0.f, 0.f};
+    auto idx = verticesShaded.size();
     for (int i = 0; i < pointsX; ++i) { // x points
         for (int j = 0; j < pointsY; ++j) { // y points
-            vertices.push_back({pos, {0, 0, normalZ}});
+            auto tt = normalZ > 0 ? tex : XMFLOAT2{-1.f, -1.f};
+            verticesShaded.push_back({pos, {0, 0, normalZ}, tt});
             pos.y += deltaY;
+            tex.y += deltaY;
         }
         pos.y = -.5f;
         pos.x += deltaX;
+        tex.y = 0.f;
+        tex.x += deltaX;
     }
 
     for (int i = 0; i < pointsX - 1; ++i) { // x points
@@ -218,12 +226,15 @@ void CNCRouter::generateFaceZ(bool ccw, float z, float normalZ, float deltaX, fl
 }
 
 void CNCRouter::generateFaceX(bool ccw, float x, float normalX, float deltaY, int pointsY) {
-    auto idx = vertices.size();
+    auto idx = verticesShaded.size();
+    auto sign = ccw ? 1.f : 0.f;
     for (float y = -.5f; y <= .5f; y += deltaY) { // y points
-        vertices.push_back({{x, y, 1.f},
-                            {normalX,  0, 0}});
-        vertices.push_back({{x, y, 0.f},
-                            {normalX,  0, 0}});
+        verticesShaded.push_back({{x,        y, 1.f},
+                                  {normalX,  0, 0},
+                                  {sign, y + 0.5f}});
+        verticesShaded.push_back({{x,       y, 0.f},
+                                  {normalX, 0, 0},
+                                  {1.f - sign, y + 0.5f}});
     }
 
     for (int i = 0; i < pointsY - 1; ++i) { // y points
@@ -250,12 +261,15 @@ void CNCRouter::generateFaceX(bool ccw, float x, float normalX, float deltaY, in
 }
 
 void CNCRouter::generateFaceY(bool ccw, float y, float normalY, float deltaX, int pointsX) {
-    auto idx = vertices.size();
+    auto idx = verticesShaded.size();
+    auto sign = ccw ? 0.f : 1.f;
     for (float x = -.5f; x <= .5f; x += deltaX) { // y points
-        vertices.push_back({{x, y, 1.f},
-                            {0, normalY, 0}});
-        vertices.push_back({{x, y, 0.f},
-                            {0, normalY, 0}});
+        verticesShaded.push_back({{x,        y,       1.f},
+                                  {0,        normalY, 0},
+                                  {x + 0.5f, sign}});
+        verticesShaded.push_back({{x,    y,       0.f},
+                                  {0,    normalY, 0},
+                                  {x + 0.5f, 1.f - sign}});
     }
 
     for (int i = 0; i < pointsX - 1; ++i) { // y points
@@ -279,4 +293,33 @@ void CNCRouter::generateFaceY(bool ccw, float y, float normalY, float deltaX, in
             indices.push_back(index + 1);
         }
     }
+}
+
+void CNCRouter::createDepthAndTexture(const DxDevice &device) {
+    Texture2DDescription textureDesc;
+    textureDesc.Width = _pointsDensity.first;
+    textureDesc.Height = _pointsDensity.second;
+    textureDesc.MipLevels = 1;
+    textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+    textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+    auto heightTexture = device.CreateTexture(textureDesc);
+
+    DepthStencilViewDescription dvd;
+    dvd.Format = DXGI_FORMAT_D32_FLOAT;
+
+    _depth = device.CreateDepthStencilView(heightTexture, dvd);
+
+    ShaderResourceViewDescription srvd;
+    srvd.Format = DXGI_FORMAT_R32_FLOAT;
+    srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvd.Texture2D.MipLevels = 1;
+    srvd.Texture2D.MostDetailedMip = 0;
+    _texture = device.CreateShaderResourceView(heightTexture, srvd);
+
+    device.context()->ClearDepthStencilView(_depth.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
+}
+
+void CNCRouter::carvePath(XMFLOAT3 start, XMFLOAT3 end, const DxDevice &device) {
+    // set proper render target
+    // call some function on renderer that draws into height map and resets target
 }

@@ -83,7 +83,14 @@ public:
 
     void reset();
 
+    const mini::dx_ptr<ID3D11DepthStencilView> &depth() const { return _depth; }
+
+    const mini::dx_ptr<ID3D11ShaderResourceView> &texture() const { return _texture; }
+
 private:
+    mini::dx_ptr<ID3D11ShaderResourceView> _texture;
+    mini::dx_ptr<ID3D11DepthStencilView> _depth;
+
     CNCPath routerPath;
     Linestrip drawPaths;
 
@@ -106,6 +113,10 @@ private:
     void generateFaceX(bool ccw, float x, float normalX, float deltaY, int pointsY);
 
     void generateFaceY(bool ccw, float y, float normalY, float deltaX, int pointsX);
+
+    void createDepthAndTexture(const DxDevice &device);
+
+    void carvePath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end, const DxDevice &device);
 };
 
 

@@ -126,3 +126,12 @@ ShaderResourceViewDescription::ShaderResourceViewDescription()
 {
     ZeroMemory(this, sizeof(ShaderResourceViewDescription));
 }
+
+DepthStencilViewDescription::DepthStencilViewDescription()
+{
+    ZeroMemory(this, sizeof(DepthStencilViewDescription));
+    Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    Flags = 0;
+    Texture2D.MipSlice = 0;
+}

@@ -12,7 +12,7 @@ struct Viewport : D3D11_VIEWPORT {
 };
 
 struct Texture2DDescription : D3D11_TEXTURE2D_DESC {
-    Texture2DDescription(UINT width, UINT height);
+    explicit Texture2DDescription(UINT width = 0U, UINT height = 0U);
 
     static Texture2DDescription DepthStencilDescription(UINT width, UINT height);
 };
@@ -41,6 +41,12 @@ struct VertexPositionTex {
     DirectX::XMFLOAT2 tex;
 };
 
+struct VertexPositionNormalTex {
+    DirectX::XMFLOAT3 position;
+    DirectX::XMFLOAT3 normal;
+    DirectX::XMFLOAT2 tex;
+};
+
 typedef unsigned short Index;
 
 struct BlendDescription : D3D11_BLEND_DESC {
@@ -62,4 +68,9 @@ struct SamplerDescription : D3D11_SAMPLER_DESC {
 struct ShaderResourceViewDescription : D3D11_SHADER_RESOURCE_VIEW_DESC
 {
     ShaderResourceViewDescription();
+};
+
+struct DepthStencilViewDescription : D3D11_DEPTH_STENCIL_VIEW_DESC
+{
+    DepthStencilViewDescription();
 };

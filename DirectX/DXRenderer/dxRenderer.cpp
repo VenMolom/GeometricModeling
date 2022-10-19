@@ -323,11 +323,15 @@ void DxRenderer::draw(const CNCRouter &router) {
     updateBuffer(m_cbModel, router.modelMatrix());
     updateBuffer(m_cbColor, XMFLOAT3{0.5f, 0.5f, 0.5f});
 
-    m_device.context()->VSSetShader(m_vertexPhongShader.get(), nullptr, 0);
+    m_device.context()->IASetInputLayout(m_phongTexLayout.get());
+    m_device.context()->VSSetShader(m_vertexPhongTexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelPhongShader.get(), nullptr, 0);
+    setTextures({m_woodTexture.get()}, m_samplerBorder);
+    setVSTextures({router.texture().get()}, m_sampler);
 
     router.render(m_device.context());
 
+    m_device.context()->IASetInputLayout(m_layout.get());
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
@@ -368,6 +372,13 @@ void DxRenderer::setTextures(initializer_list<ID3D11ShaderResourceView *> resLis
     m_device.context()->PSSetShaderResources(0, resList.size(), resList.begin());
     auto s_ptr = sampler.get();
     m_device.context()->PSSetSamplers(0, 1, &s_ptr);
+}
+
+void DxRenderer::setVSTextures(initializer_list<ID3D11ShaderResourceView *> resList,
+                               const dx_ptr<ID3D11SamplerState> &sampler) {
+    m_device.context()->VSSetShaderResources(0, resList.size(), resList.begin());
+    auto s_ptr = sampler.get();
+    m_device.context()->VSSetSamplers(0, 1, &s_ptr);
 }
 
 float DxRenderer::frameTime() {
@@ -521,10 +532,12 @@ void DxRenderer::init3D3() {
     const auto vsStereoBytes = DxDevice::LoadByteCode(L"vsStereo.cso");
     const auto vsSelectorBytes = DxDevice::LoadByteCode(L"vsSelector.cso");
     const auto vsParamBytes = DxDevice::LoadByteCode(L"vsParam.cso");
+    const auto vsPhongTexBytes = DxDevice::LoadByteCode(L"vsPhongTex.cso");
     m_vertexShader = m_device.CreateVertexShader(vsBytes);
     m_vertexStereoShader = m_device.CreateVertexShader(vsStereoBytes);
     m_vertexSelectorShader = m_device.CreateVertexShader(vsSelectorBytes);
     m_vertexParamShader = m_device.CreateVertexShader(vsParamBytes);
+    m_vertexPhongTexShader = m_device.CreateVertexShader(vsPhongTexBytes);
     m_vertexTextureShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsTexture.cso"));
     m_vertexBillboardShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsBillboard.cso"));
     m_vertexNoProjectionShader = m_device.CreateVertexShader(DxDevice::LoadByteCode(L"vsNoProjection.cso"));
@@ -561,8 +574,8 @@ void DxRenderer::init3D3() {
     elements = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
                     D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,
-                                                         static_cast<UINT>(offsetof(VertexPositionTexture, tex)),
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0,
+                                                            static_cast<UINT>(offsetof(VertexPositionTexture, tex)),
                     D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_paramLayout = m_device.CreateInputLayout(elements, vsParamBytes);
@@ -581,6 +594,19 @@ void DxRenderer::init3D3() {
              D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     m_selectorLayout = m_device.CreateInputLayout(elements, vsSelectorBytes);
+
+    elements = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
+                    D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0,
+                                                            static_cast<UINT>(offsetof(VertexPositionNormalTex,
+                                                                                       normal)),
+                    D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0,
+                                                            static_cast<UINT>(offsetof(VertexPositionNormalTex, tex)),
+                    D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+    m_phongTexLayout = m_device.CreateInputLayout(elements, vsPhongTexBytes);
 
     m_cbModel = m_device.CreateConstantBuffer<XMFLOAT4X4>();
     m_cbView = m_device.CreateConstantBuffer<XMFLOAT4X4, 2>();
@@ -609,6 +635,11 @@ void DxRenderer::init3D3() {
 
     SamplerDescription samplerDesc;
     m_sampler = m_device.CreateSamplerState(samplerDesc);
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+    samplerDesc.BorderColor[3] = 0.f;
+    m_samplerBorder = m_device.CreateSamplerState(samplerDesc);
 
     BlendDescription blendDesc;
     blendDesc.RenderTarget[0].BlendEnable = true;
@@ -642,6 +673,8 @@ void DxRenderer::init3D3() {
             {1.f,  1.f}
     };
     m_selectorQuad = m_device.CreateVertexBuffer(selectorNdc);
+
+    m_woodTexture = m_device.CreateShaderResourceView(L"../wood-grain-texture.jpg");
 
     QueryPerformanceFrequency(&ticksPerSecond);
     QueryPerformanceCounter(&currentTicks);

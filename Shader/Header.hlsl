@@ -46,11 +46,19 @@ struct VSPhongIn {
     float3 norm : NORMAL0;
 };
 
+struct VSPhongTexIn {
+    float3 pos : POSITION;
+    float3 norm : NORMAL0;
+    float2 tex: TEXCOORD0;
+};
+
+
 struct PSPhongIn {
     float4 pos : SV_POSITION;
     float3 worldPos : POSITION0;
     float3 norm : NORMAL0;
-    float3 viewVec : TEXCOORD0;
+    float3 viewVec : VIEWVEC0;
+    float2 tex: TEXCOORD0;
 };
 
 #define CONTROL_POINTS_BREZIER 4

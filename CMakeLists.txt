@@ -158,7 +158,11 @@ set(PROJECT_SOURCES
         Objects/CNC/CNCTool.cpp
         Objects/CNC/CNCTool.h
         Objects/CNC/mesh.cpp
-        Objects/CNC/mesh.h)
+        Objects/CNC/mesh.h
+        Utils/DDSTextureLoader.cpp
+        Utils/DDSTextureLoader.h
+        Utils/WICTextureLoader.cpp
+        Utils/WICTextureLoader.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -186,6 +190,7 @@ set(HLSL_SHADER_FILES
         Shader/vsParam.hlsl
         Shader/psParam.hlsl
         Shader/vsPhong.hlsl
+        Shader/vsPhongTex.hlsl
         Shader/psPhong.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
@@ -196,6 +201,7 @@ set_source_files_properties(Shader/vsSelector.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsTexture.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsParam.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsPhong.hlsl PROPERTIES ShaderType "vs")
+set_source_files_properties(Shader/vsPhongTex.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/ps.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psCameraFade.hlsl PROPERTIES ShaderType "ps")
 set_source_files_properties(Shader/psStereo.hlsl PROPERTIES ShaderType "ps")
