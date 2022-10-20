@@ -201,6 +201,11 @@ void CNCRouterModule::updateState() {
             ui->speed->setEnabled(false);
             break;
     }
+
+    QSignalBlocker tt(ui->toolType);
+    QSignalBlocker ts(ui->toolSize);
+    ui->toolType->setCurrentIndex((int)this->router->toolType());
+    ui->toolSize->setValue(this->router->toolSize());
 }
 
 void CNCRouterModule::updateProgress() {

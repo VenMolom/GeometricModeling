@@ -74,3 +74,8 @@ struct DepthStencilViewDescription : D3D11_DEPTH_STENCIL_VIEW_DESC
 {
     DepthStencilViewDescription();
 };
+
+struct UnorderedAccessViewDescription : D3D11_UNORDERED_ACCESS_VIEW_DESC
+{
+    UnorderedAccessViewDescription();
+};

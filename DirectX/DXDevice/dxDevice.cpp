@@ -133,6 +133,16 @@ dx_ptr<ID3D11GeometryShader> DxDevice::CreateGeometryShader(std::vector<BYTE> gs
     return geometryShader;
 }
 
+dx_ptr<ID3D11ComputeShader> DxDevice::CreateComputeShader(std::vector<BYTE> csCode) const {
+    ID3D11ComputeShader *temp = nullptr;
+    auto hr = m_device->CreateComputeShader(reinterpret_cast<const void *>(csCode.data()),
+                                            csCode.size(), nullptr, &temp);
+    dx_ptr<ID3D11ComputeShader> result{temp};
+    if (FAILED(hr))
+        THROW_DX(hr);
+    return result;
+}
+
 dx_ptr<ID3D11InputLayout>
 DxDevice::CreateInputLayout(const vector<D3D11_INPUT_ELEMENT_DESC> &elements, vector<BYTE> vsCode) const {
     ID3D11InputLayout *temp;
@@ -150,15 +160,24 @@ mini::dx_ptr<ID3D11DepthStencilView> DxDevice::CreateDepthStencilView(SIZE size)
     return CreateDepthStencilView(texture);
 }
 
-dx_ptr<ID3D11DepthStencilView> DxDevice::CreateDepthStencilView(const dx_ptr<ID3D11Texture2D>& texture,
-                                                                const DepthStencilViewDescription &desc) const
-{
-    ID3D11DepthStencilView* temp = nullptr;
+dx_ptr<ID3D11DepthStencilView> DxDevice::CreateDepthStencilView(const dx_ptr<ID3D11Texture2D> &texture,
+                                                                const DepthStencilViewDescription &desc) const {
+    ID3D11DepthStencilView *temp = nullptr;
     auto hr = m_device->CreateDepthStencilView(texture.get(), &desc, &temp);
-    dx_ptr<ID3D11DepthStencilView> result{ temp };
+    dx_ptr<ID3D11DepthStencilView> result{temp};
     if (FAILED(hr))
         THROW_DX(hr);
     return result;
+}
+
+dx_ptr<ID3D11UnorderedAccessView> DxDevice::CreateUnorderedAccessView(const dx_ptr<ID3D11Texture2D> &texture,
+                                                                      const UnorderedAccessViewDescription &desc) const {
+    ID3D11UnorderedAccessView *uav;
+    auto hr = m_device->CreateUnorderedAccessView(texture.get(), &desc, &uav);
+    dx_ptr<ID3D11UnorderedAccessView> unorderedAccessView(uav);
+    if (FAILED(hr))
+        THROW_DX(hr);
+    return unorderedAccessView;
 }
 
 dx_ptr<ID3D11BlendState> DxDevice::CreateBlendState(const BlendDescription &desc) const {
@@ -188,11 +207,10 @@ dx_ptr<ID3D11RasterizerState> DxDevice::CreateRasterizerState(const RasterizerDe
     return state;
 }
 
-dx_ptr<ID3D11ShaderResourceView> DxDevice::CreateShaderResourceView(const std::wstring& texPath) const
-{
-    ID3D11ShaderResourceView* rv = nullptr;;
+dx_ptr<ID3D11ShaderResourceView> DxDevice::CreateShaderResourceView(const std::wstring &texPath) const {
+    ID3D11ShaderResourceView *rv = nullptr;;
     HRESULT hr = 0;
-    const wstring ext{ L".dds" };
+    const wstring ext{L".dds"};
     if (texPath.size() > ext.size() && texPath.compare(texPath.size() - ext.size(), ext.size(), ext) == 0)
         hr = DirectX::CreateDDSTextureFromFile(m_device.get(), m_context.get(), texPath.c_str(), nullptr, &rv);
     else
@@ -214,9 +232,8 @@ dx_ptr<ID3D11ShaderResourceView> DxDevice::CreateShaderResourceView(const dx_ptr
     return resourceView;
 }
 
-dx_ptr<ID3D11SamplerState> DxDevice::CreateSamplerState(const SamplerDescription& desc) const
-{
-    ID3D11SamplerState* s = nullptr;
+dx_ptr<ID3D11SamplerState> DxDevice::CreateSamplerState(const SamplerDescription &desc) const {
+    ID3D11SamplerState *s = nullptr;
     auto hr = m_device->CreateSamplerState(&desc, &s);
     dx_ptr<ID3D11SamplerState> sampler(s);
     if (FAILED(hr))

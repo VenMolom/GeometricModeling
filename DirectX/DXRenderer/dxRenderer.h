@@ -45,6 +45,9 @@ public:
 
     void draw(const CNCRouter &router) override;
 
+    void
+    drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable*, DirectX::XMMATRIX>> toRender) override;
+
     void drawSelector(const Selector &selector);
 
     void enableStereoscopy(bool enable) override;
@@ -114,6 +117,9 @@ private:
     mini::dx_ptr<ID3D11PixelShader> m_pixelTextureShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelParamShader;
     mini::dx_ptr<ID3D11PixelShader> m_pixelPhongShader;
+    mini::dx_ptr<ID3D11PixelShader> m_pixelPhongTexShader;
+
+    mini::dx_ptr<ID3D11ComputeShader> m_computeNormal;
 
     mini::dx_ptr<ID3D11InputLayout> m_layout;
     mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
@@ -129,6 +135,7 @@ private:
     mini::dx_ptr<ID3D11Buffer> m_cbFarPlane;
     mini::dx_ptr<ID3D11Buffer> m_cbStereoColor;
     mini::dx_ptr<ID3D11Buffer> m_cbTrim;
+    mini::dx_ptr<ID3D11Buffer> m_cbNormal;
 
     mini::dx_ptr<ID3D11Buffer> m_ndcQuad;
     mini::dx_ptr<ID3D11Buffer> m_selectorQuad;
@@ -154,6 +161,7 @@ private:
     mini::dx_ptr<ID3D11BlendState> m_bsAlpha;
 
     mini::dx_ptr<ID3D11RasterizerState> m_noCullWireframe;
+    mini::dx_ptr<ID3D11RasterizerState> m_noCull;
 
     mini::dx_ptr<ID3D11RenderTargetView> m_stereoscopicLeftTarget, m_stereoscopicRightTarget;
     mini::dx_ptr<ID3D11ShaderResourceView> m_stereoscopicLeftTexture, m_stereoscopicRightTexture;
@@ -173,11 +181,11 @@ private:
     template<typename T>
     void updateBuffer(const mini::dx_ptr<ID3D11Buffer> &buffer, const T &data);
 
-    void setTextures(std::initializer_list<ID3D11ShaderResourceView*> resList,
-                     const mini::dx_ptr<ID3D11SamplerState>& sampler);
+    void setTextures(std::initializer_list<ID3D11ShaderResourceView *> resList,
+                     const mini::dx_ptr<ID3D11SamplerState> &sampler);
 
-    void setVSTextures(std::initializer_list<ID3D11ShaderResourceView*> resList,
-                     const mini::dx_ptr<ID3D11SamplerState>& sampler);
+    void setVSTextures(std::initializer_list<ID3D11ShaderResourceView *> resList,
+                       const mini::dx_ptr<ID3D11SamplerState> &sampler);
 
     float frameTime();
 

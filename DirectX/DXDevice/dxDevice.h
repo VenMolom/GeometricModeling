@@ -36,13 +36,18 @@ public:
 
     mini::dx_ptr<ID3D11GeometryShader> CreateGeometryShader(std::vector<BYTE> gsCode) const;
 
+    mini::dx_ptr<ID3D11ComputeShader> CreateComputeShader(std::vector<BYTE> csCode) const;
+
     mini::dx_ptr<ID3D11InputLayout>
     CreateInputLayout(const std::vector<D3D11_INPUT_ELEMENT_DESC> &elements, std::vector<BYTE> vsCode) const;
 
     mini::dx_ptr<ID3D11DepthStencilView> CreateDepthStencilView(SIZE size) const;
 
-    mini::dx_ptr<ID3D11DepthStencilView> CreateDepthStencilView(const mini::dx_ptr<ID3D11Texture2D>& texture,
-                                                          const DepthStencilViewDescription &desc) const;
+    mini::dx_ptr<ID3D11DepthStencilView> CreateDepthStencilView(const mini::dx_ptr<ID3D11Texture2D> &texture,
+                                                                const DepthStencilViewDescription &desc) const;
+
+    mini::dx_ptr<ID3D11UnorderedAccessView> CreateUnorderedAccessView(const mini::dx_ptr<ID3D11Texture2D> &texture,
+                                                                      const UnorderedAccessViewDescription &desc) const;
 
     template<class T>
     mini::dx_ptr<ID3D11Buffer> CreateVertexBuffer(const std::vector<T> &vertices) const {
@@ -68,17 +73,17 @@ public:
 
     mini::dx_ptr<ID3D11RasterizerState> CreateRasterizerState(const RasterizerDescription &desc = {}) const;
 
-    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const std::wstring& texPath) const;
+    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const std::wstring &texPath) const;
 
-    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const mini::dx_ptr<ID3D11Texture2D>& texture,
-                                                              const ShaderResourceViewDescription *desc = nullptr) const;
-    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const mini::dx_ptr<ID3D11Texture2D>& texture,
-                                                              const ShaderResourceViewDescription& desc) const
-    {
+    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const mini::dx_ptr<ID3D11Texture2D> &texture,
+                                                                    const ShaderResourceViewDescription *desc = nullptr) const;
+
+    mini::dx_ptr<ID3D11ShaderResourceView> CreateShaderResourceView(const mini::dx_ptr<ID3D11Texture2D> &texture,
+                                                                    const ShaderResourceViewDescription &desc) const {
         return CreateShaderResourceView(texture, &desc);
     }
 
-    mini::dx_ptr<ID3D11SamplerState> CreateSamplerState(const SamplerDescription& desc) const;
+    mini::dx_ptr<ID3D11SamplerState> CreateSamplerState(const SamplerDescription &desc) const;
 
     static const DxDevice &Instance() { return *instance; }
 

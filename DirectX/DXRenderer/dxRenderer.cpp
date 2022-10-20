@@ -285,9 +285,11 @@ void DxRenderer::draw(const GregoryPatch &patch, DirectX::XMFLOAT4 color) {
 }
 
 void DxRenderer::draw(const IntersectionInstance &instance, bool clear) {
-    float clearColor[4] = {1, 1, 1, 1};
+    updateBuffer(m_cbModel, XMMatrixIdentity());
+
     auto &target = instance.target();
     if (clear) {
+        float clearColor[4] = {1, 1, 1, 1};
         m_device.context()->ClearRenderTargetView(target.get(), clearColor);
     }
     auto renderTarget = target.get();
@@ -325,8 +327,8 @@ void DxRenderer::draw(const CNCRouter &router) {
 
     m_device.context()->IASetInputLayout(m_phongTexLayout.get());
     m_device.context()->VSSetShader(m_vertexPhongTexShader.get(), nullptr, 0);
-    m_device.context()->PSSetShader(m_pixelPhongShader.get(), nullptr, 0);
-    setTextures({m_woodTexture.get()}, m_samplerBorder);
+    m_device.context()->PSSetShader(m_pixelPhongTexShader.get(), nullptr, 0);
+    setTextures({m_woodTexture.get(), router.normal().get()}, m_samplerBorder);
     setVSTextures({router.texture().get()}, m_sampler);
 
     router.render(m_device.context());
@@ -334,6 +336,46 @@ void DxRenderer::draw(const CNCRouter &router) {
     m_device.context()->IASetInputLayout(m_layout.get());
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+}
+
+void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable*, DirectX::XMMATRIX>> toRender) {
+    static constexpr UINT NO_OFFSET = -1;
+    static constexpr ID3D11ShaderResourceView* NULL_SRV = nullptr;
+    static constexpr ID3D11UnorderedAccessView* NULL_UAV = nullptr;
+
+    auto size = router.pointsDensity();
+    Viewport v({size.first, size.second});
+    m_device.context()->RSSetState(m_noCull.get());
+    m_device.context()->RSSetViewports(1, &v);
+    m_device.context()->OMSetRenderTargets(0, nullptr, router.depth().get());
+    m_device.context()->VSSetShader(m_vertexTextureShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelTextureShader.get(), nullptr, 0);
+
+    for (auto &pair: toRender) {
+        updateBuffer(m_cbModel, pair.second);
+        pair.first->render(m_device.context());
+    }
+
+    auto backBuffer = m_backBuffer.get();
+    m_device.context()->RSSetState(nullptr);
+    m_device.context()->OMSetRenderTargets(1, &backBuffer, m_depthBuffer.get());
+    m_device.context()->RSSetViewports(1, &m_viewport);
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+
+    updateBuffer(m_cbNormal, XMINT4(size.first, size.second, 0.f, 0.f));
+    m_device.context()->CSSetShader(m_computeNormal.get(), nullptr, 0);
+
+    auto shaderRes = router.texture().get();
+    m_device.context()->CSSetShaderResources(0, 1, &shaderRes);
+    auto unordered = router.normalUnordered().get();
+    m_device.context()->CSSetUnorderedAccessViews(0, 1, &unordered, &NO_OFFSET);
+
+    m_device.context()->Dispatch(std::ceil(size.first / 16.f), std::ceil(size.second / 16.f), 1);
+
+    m_device.context()->CSSetShaderResources(0, 1, &NULL_SRV);
+    m_device.context()->CSSetUnorderedAccessViews(0, 1, &NULL_UAV, &NO_OFFSET);
+    m_device.context()->CSSetShader(nullptr, nullptr, 0);
 }
 
 void DxRenderer::enableStereoscopy(bool enable) {
@@ -557,6 +599,8 @@ void DxRenderer::init3D3() {
     m_pixelTextureShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psTexture.cso"));
     m_pixelParamShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psParam.cso"));
     m_pixelPhongShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psPhong.cso"));
+    m_pixelPhongTexShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psPhongTex.cso"));
+    m_computeNormal = m_device.CreateComputeShader(DxDevice::LoadByteCode(L"csNormal.cso"));
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
@@ -616,15 +660,18 @@ void DxRenderer::init3D3() {
     m_cbFarPlane = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbStereoColor = m_device.CreateConstantBuffer<XMFLOAT4, 2>();
     m_cbTrim = m_device.CreateConstantBuffer<XMFLOAT4>();
+    m_cbNormal = m_device.CreateConstantBuffer<XMINT4>();
 
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get(), m_cbStereoColor.get(), m_cbTrim.get()};
     ID3D11Buffer *hsCbs[] = {m_cbTesselation.get()};
     ID3D11Buffer *gsCbs[] = {m_cbFarPlane.get(), m_cbProj.get()};
+    ID3D11Buffer *csCbs[] = {m_cbNormal.get()};
     m_device.context()->VSSetConstantBuffers(0, 3, vsCbs);
     m_device.context()->PSSetConstantBuffers(0, 4, psCbs);
     m_device.context()->HSSetConstantBuffers(0, 1, hsCbs);
     m_device.context()->GSSetConstantBuffers(0, 2, gsCbs);
+    m_device.context()->CSSetConstantBuffers(0, 1, csCbs);
 
     DepthStencilDescription dssDesc;
     dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
@@ -650,6 +697,7 @@ void DxRenderer::init3D3() {
 
     RasterizerDescription rsDesc;
     rsDesc.CullMode = D3D11_CULL_NONE;
+    m_noCull = m_device.CreateRasterizerState(rsDesc);
     rsDesc.FillMode = D3D11_FILL_WIREFRAME;
     m_noCullWireframe = m_device.CreateRasterizerState(rsDesc);
 

@@ -5,21 +5,35 @@
 #ifndef MG1_RENDERER_H
 #define MG1_RENDERER_H
 
+#include <vector>
 #include <DirectXMath.h>
 #include "DirectX/DXStructures/dxStructures.h"
 
 class Object;
+
 class Torus;
+
 class BrezierCurve;
+
 class InterpolationCurveC2;
+
 class Grid;
+
 class Point;
+
 class Patch;
+
 class BicubicC2;
+
 class GregoryPatch;
+
 class IntersectionInstance;
+
 class Mesh;
+
 class CNCRouter;
+
+class Renderable;
 
 const DirectX::XMFLOAT4 SELECTED_COLOR{1.0f, 0.4f, 0.0f, 1.0f};
 const DirectX::XMFLOAT4 DEFAULT_COLOR{0.0f, 0.0f, 0.0f, 0.0f};
@@ -50,6 +64,9 @@ public:
     virtual void draw(const Mesh &mesh, DirectX::XMMATRIX modelMatrix) = 0;
 
     virtual void draw(const CNCRouter &router) = 0;
+
+    virtual void
+    drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable*, DirectX::XMMATRIX>> toRender) = 0;
 };
 
 #endif //MG1_RENDERER_H

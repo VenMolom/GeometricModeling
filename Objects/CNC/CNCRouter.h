@@ -87,15 +87,21 @@ public:
 
     const mini::dx_ptr<ID3D11ShaderResourceView> &texture() const { return _texture; }
 
+    const mini::dx_ptr<ID3D11ShaderResourceView> &normal() const { return _normal; }
+    const mini::dx_ptr<ID3D11UnorderedAccessView> &normalUnordered() const { return _normalUnordered; }
+
 private:
     mini::dx_ptr<ID3D11ShaderResourceView> _texture;
     mini::dx_ptr<ID3D11DepthStencilView> _depth;
 
+    mini::dx_ptr<ID3D11ShaderResourceView> _normal;
+    mini::dx_ptr<ID3D11UnorderedAccessView> _normalUnordered;
+
     CNCPath routerPath;
     Linestrip drawPaths;
 
-    DirectX::XMFLOAT3 _size{10, 10, 5};
-    std::pair<int, int> _pointsDensity{512, 512};
+    DirectX::XMFLOAT3 _size{18.f, 18.f, 4.6f};
+    std::pair<int, int> _pointsDensity{4096, 4096};
     float _maxDepth{3};
     CNCTool tool;
     int _simulationSpeed{1};
@@ -103,6 +109,10 @@ private:
     QString _filename;
     QProperty<int> _progress{0};
     QProperty<RouterState> _state{static_cast<RouterState>(0)};
+
+    Mesh textureDisk, textureSquare;
+    Mesh textureDome, textureHalfCylinder;
+    DirectX::XMFLOAT4X4 pathToTexture, toolScale;
 
     void fillDrawPaths();
 
@@ -116,7 +126,14 @@ private:
 
     void createDepthAndTexture(const DxDevice &device);
 
-    void carvePath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end, const DxDevice &device);
+    void clearDepth(const DxDevice &device);
+
+    void carvePath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end, Renderer &renderer);
+
+    void calculatePathToTexture();
+
+    // TODO: error detection
+    // TODO: increase paths per frame in skip mode
 };
 
 

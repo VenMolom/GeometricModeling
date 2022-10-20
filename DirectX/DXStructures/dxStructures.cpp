@@ -135,3 +135,8 @@ DepthStencilViewDescription::DepthStencilViewDescription()
     Flags = 0;
     Texture2D.MipSlice = 0;
 }
+
+UnorderedAccessViewDescription::UnorderedAccessViewDescription()
+{
+    ZeroMemory(this, sizeof(UnorderedAccessViewDescription));
+}

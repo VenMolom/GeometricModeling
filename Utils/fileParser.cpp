@@ -47,22 +47,22 @@ void FileParser::parseCNCLine(const std::string &line, CNCPath &path) {
     auto instruction = matches[2].str();
 
     // global coordinates
-    if (regex_match(instruction, matches, regex("G40G90"))) {
-        path.globalCoordinates = true;
-        return;
-    }
+//    if (regex_match(instruction, matches, regex("G40G90"))) {
+//        path.globalCoordinates = true;
+//        return;
+//    }
 
-    // rotation speed
-    if (regex_match(instruction, matches, regex(R"(S(\d\d\d\d))"))) {
-        path.rotationSpeed = stoi(matches[1]);
-        return;
-    }
-
-    // linear speed
-    if (regex_match(instruction, matches, regex(R"(F(\d\d\d\d))"))) {
-        path.linearSpeed = stof(matches[1]) / 100.f;
-        return;
-    }
+//    // rotation speed
+//    if (regex_match(instruction, matches, regex(R"(S(\d\d\d\d))"))) {
+//        path.rotationSpeed = stoi(matches[1]);
+//        return;
+//    }
+//
+//    // linear speed
+//    if (regex_match(instruction, matches, regex(R"(F(\d\d\d\d))"))) {
+//        path.linearSpeed = stof(matches[1]) / 100.f;
+//        return;
+//    }
 
     //move
     if (regex_match(instruction, matches,

@@ -14,6 +14,10 @@ public:
 
     Mesh(std::vector<VertexPositionColor> vertices,
          std::vector<Index> indices,
+         D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    Mesh(std::vector<VertexPositionColor> vertices,
+         std::vector<Index> indices,
          DirectX::XMFLOAT3 color,
          DirectX::XMMATRIX modelMatrix,
          D3D11_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -27,13 +31,33 @@ public:
         return {cylinderVerts(radius, height, stacks, slices), cylinderIdx(stacks, slices), color, modelMatrix};
     }
 
+    static Mesh cylinder(float radius, float height, unsigned int stacks, unsigned int slices) {
+        return {cylinderVerts(radius, height, stacks, slices), cylinderIdx(stacks, slices)};
+    }
+
     static Mesh disk(float radius, unsigned int slices, DirectX::XMFLOAT3 color, DirectX::XMMATRIX modelMatrix) {
         return {diskVerts(radius, slices), diskIdx(slices), color, modelMatrix};
     }
 
+    static Mesh disk(float radius, unsigned int slices) {
+        return {diskVerts(radius, slices), diskIdx(slices)};
+    }
+
     static Mesh dome(float radius, unsigned int stacks, unsigned int slices, DirectX::XMFLOAT3 color,
                      DirectX::XMMATRIX modelMatrix) {
-        return {domeVerts(radius, stacks, slices), domeIdx(stacks, slices), color, modelMatrix};
+        return {domeVerts(radius, stacks, slices, 1.f, 0.f), domeIdx(stacks, slices), color, modelMatrix};
+    }
+
+    static Mesh dome(float radius, unsigned int stacks, unsigned int slices, float zSign = 1.f, float zOffset = 0.f) {
+        return {domeVerts(radius, stacks, slices, zSign, zOffset), domeIdx(stacks, slices)};
+    }
+
+    static Mesh square(float side) {
+        return {squareVerts(side), squareIdx()};
+    }
+
+    static Mesh halfCylinder(float radius, float height, unsigned int stacks, unsigned int slices) {
+        return {halfCylinderVerts(radius, height, stacks, slices), cylinderIdx(stacks, slices)};
     }
 
 private:
@@ -49,9 +73,17 @@ private:
 
     static std::vector<Index> diskIdx(unsigned int slices);
 
-    static std::vector<VertexPositionColor> domeVerts(float radius, unsigned int stacks, unsigned int slices);
+    static std::vector<VertexPositionColor>
+    domeVerts(float radius, unsigned int stacks, unsigned int slices, float zSign, float zOffset);
 
     static std::vector<Index> domeIdx(unsigned int stacks, unsigned int slices);
+
+    static std::vector<VertexPositionColor> squareVerts(float side);
+
+    static std::vector<Index> squareIdx();
+
+    static std::vector<VertexPositionColor>
+    halfCylinderVerts(float radius, float height, unsigned int stacks, unsigned int slices);
 };
 
 
