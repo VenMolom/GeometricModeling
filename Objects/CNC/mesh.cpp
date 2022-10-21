@@ -180,7 +180,7 @@ std::vector<Index> Mesh::squareIdx() {
 std::vector<VertexPositionColor>
 Mesh::halfCylinderVerts(float radius, float height, unsigned int stacks, unsigned int slices) {
     assert(stacks > 0 && slices > 1);
-    auto n = (stacks + 1) * slices;
+    auto n = (stacks + 1) * (slices + 1);
     vector<VertexPositionColor> vertices(n);
     auto y = height / 2;
     auto dy = height / stacks;
@@ -188,7 +188,7 @@ Mesh::halfCylinderVerts(float radius, float height, unsigned int stacks, unsigne
     auto k = 0U;
     for (auto i = 0U; i <= stacks; ++i, y -= dy) {
         auto phi = 0.0f;
-        for (auto j = 0U; j < slices; ++j, phi += dp) {
+        for (auto j = 0U; j <= slices; ++j, phi += dp) {
             float sinp, cosp;
             XMScalarSinCos(&sinp, &cosp, phi);
             vertices[k].position = XMFLOAT3(y, radius * cosp, -radius * sinp + radius);
@@ -196,4 +196,22 @@ Mesh::halfCylinderVerts(float radius, float height, unsigned int stacks, unsigne
         }
     }
     return vertices;
+}
+
+std::vector<Index> Mesh::halfCylinderIdx(unsigned int stacks, unsigned int slices) {
+    assert(stacks > 0 && slices > 1);
+    auto in = 6 * stacks * slices;
+    vector<Index> indices(in);
+    auto k = 0U;
+    for (auto i = 0U; i < stacks; ++i) {
+        for (auto j = 0U; j < slices; ++j) {
+            indices[k++] = i * (slices + 1) + j;
+            indices[k++] = i * (slices + 1) + j + 1;
+            indices[k++] = (i + 1) * (slices + 1) + j + 1;
+            indices[k++] = i * (slices + 1) + j;
+            indices[k++] = (i + 1) * (slices + 1) + j + 1;
+            indices[k++] = (i + 1) * (slices + 1) + j;
+        }
+    }
+    return indices;
 }

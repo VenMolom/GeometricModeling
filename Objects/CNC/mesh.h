@@ -57,7 +57,7 @@ public:
     }
 
     static Mesh halfCylinder(float radius, float height, unsigned int stacks, unsigned int slices) {
-        return {halfCylinderVerts(radius, height, stacks, slices), cylinderIdx(stacks, slices)};
+        return {halfCylinderVerts(radius, height, stacks, slices), halfCylinderIdx(stacks, slices)};
     }
 
 private:
@@ -84,6 +84,8 @@ private:
 
     static std::vector<VertexPositionColor>
     halfCylinderVerts(float radius, float height, unsigned int stacks, unsigned int slices);
+
+    static std::vector<Index> halfCylinderIdx(unsigned int stacks, unsigned int slices);
 };
 
 

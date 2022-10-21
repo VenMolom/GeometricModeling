@@ -26,7 +26,7 @@ CNCRouter::CNCRouter(uint id, XMFLOAT3 position)
     textureDisk = Mesh::disk(0.5f, 32);
     textureSquare = Mesh::square(1.f);
     textureDome = Mesh::dome(0.5f, 32, 32, -1.f, 0.5f);
-    textureHalfCylinder = Mesh::halfCylinder(0.5f, 1.f, 1, 32);
+    textureHalfCylinder = Mesh::halfCylinder(0.5f, 1.f, 1, 64);
     calculatePathToTexture();
 
     auto size = tool.size() / 10.f;
@@ -366,6 +366,8 @@ void CNCRouter::carvePath(XMFLOAT3 start, XMFLOAT3 end, Renderer &renderer) {
     auto scaleYZ = tool.size() / 10.f;
     auto scaleXMtx = XMMatrixScaling(scaleX, scaleYZ, scaleYZ);
     auto moveMtx = XMMatrixTranslationFromVector(mid);
+
+    // TODO: add rotation from z difference
 
     Renderable *disk, *square;
     if (tool.endType() == CNCType::Flat) {
