@@ -96,6 +96,7 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
     }
 
     auto currentPosition = drawPaths.vertices().back().position;
+    vector<pair<XMFLOAT3, XMFLOAT3>> toCarve;
     if (_state == RouterState::Started) {
 
         auto distanceToTravel = _simulationSpeed * TOOL_SPEED * frameTime;
@@ -107,14 +108,13 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
             if (distanceToTravel < distanceToTarget) {
                 Utils3D::storeFloat3Lerp(drawPaths.vertices().back().position, currentPosition, nextTarget,
                                          distanceToTravel / distanceToTarget);
-                carvePath(currentPosition, drawPaths.vertices().back().position, renderer);
+                toCarve.emplace_back(currentPosition, drawPaths.vertices().back().position);
                 break;
             }
 
-            carvePath(currentPosition, nextTarget, renderer);
-
-            distanceToTravel -= distanceToTarget;
+            toCarve.emplace_back(currentPosition, nextTarget);
             drawPaths.vertices().pop_back();
+            distanceToTravel -= distanceToTarget;
             currentPosition = nextTarget;
         }
 
@@ -123,11 +123,17 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
         }
         drawPaths.update();
     } else {
-        auto nextTarget = (drawPaths.vertices().end() - 2)->position;
-        carvePath(currentPosition, nextTarget, renderer);
-        drawPaths.vertices().pop_back();
-
+        for (int i = 0; i < PATHS_PER_FRAME_SKIP && drawPaths.vertices().size() >= 2; ++i) {
+            auto nextTarget = (drawPaths.vertices().end() - 2)->position;
+            toCarve.emplace_back(currentPosition, nextTarget);
+            drawPaths.vertices().pop_back();
+            currentPosition = nextTarget;
+        }
     }
+    if (!toCarve.empty()) {
+        carvePaths(toCarve, renderer);
+    }
+
     _progress = 100 - static_cast<int>(std::floor(
             static_cast<float>(drawPaths.vertices().size() * 100) / static_cast<float>(routerPath.moves.size())));
 }
@@ -175,6 +181,47 @@ void CNCRouter::fillDrawPaths() {
         drawPaths.vertices()[i].position = routerPath.moves[size - i - 1].target;
     }
     drawPaths.update();
+}
+
+void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &renderer) {
+    if (paths.empty()) return;
+
+    vector<pair<Renderable *, XMMATRIX>> toRender;
+
+    auto scaleMtx = XMLoadFloat4x4(&toolScale), toTexMtx = XMLoadFloat4x4(&pathToTexture);
+    Renderable *disk, *square;
+    if (tool.endType() == CNCType::Flat) {
+        disk = &textureDisk;
+        square = &textureSquare;
+    } else {
+        disk = &textureDome;
+        square = &textureHalfCylinder;
+    }
+
+    for (auto &[start, end]: paths) {
+        auto startV = XMLoadFloat3(&start), endV = XMLoadFloat3(&end);
+
+        auto mid = XMVectorLerp(startV, endV, 0.5f);
+        auto rotZ = atan2f(end.y - start.y, end.x - start.x);
+        auto scaleX = XMVector3Length(XMVectorSubtract(endV, startV)).m128_f32[0];
+
+        auto rotMtx = XMMatrixRotationZ(rotZ);
+        auto scaleYZ = tool.size() / 10.f;
+        auto scaleXMtx = XMMatrixScaling(scaleX, scaleYZ, scaleYZ);
+        auto moveMtx = XMMatrixTranslationFromVector(mid);
+
+        // TODO: add rotation from z difference
+
+        toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(startV) * toTexMtx);
+        toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(endV) * toTexMtx);
+        toRender.emplace_back(square, scaleXMtx * rotMtx * moveMtx * toTexMtx);
+    }
+
+    renderer.drawToTexture(*this, toRender);
+}
+
+void CNCRouter::calculatePathToTexture() {
+    XMStoreFloat4x4(&pathToTexture, XMMatrixOrthographicLH(_size.x, _size.y, 0, _size.z));
 }
 
 void CNCRouter::generateBlock() {
@@ -347,43 +394,7 @@ void CNCRouter::createDepthAndTexture(const DxDevice &device) {
 }
 
 void CNCRouter::clearDepth(const DxDevice &device) {
-    static const float clearColor[] = { 0.5f, 0.5f, 1.f, 1.f };
+    static const float clearColor[] = {0.5f, 0.5f, 1.f, 1.f};
     device.context()->ClearDepthStencilView(_depth.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
     device.context()->ClearUnorderedAccessViewFloat(_normalUnordered.get(), clearColor);
-}
-
-void CNCRouter::carvePath(XMFLOAT3 start, XMFLOAT3 end, Renderer &renderer) {
-    vector<pair<Renderable *, XMMATRIX>> toRender;
-
-    auto scaleMtx = XMLoadFloat4x4(&toolScale), toTexMtx = XMLoadFloat4x4(&pathToTexture);
-    auto startV = XMLoadFloat3(&start), endV = XMLoadFloat3(&end);
-
-    auto mid = XMVectorLerp(startV, endV, 0.5f);
-    auto rotZ = atan2f(end.y - start.y, end.x - start.x);
-    auto scaleX = XMVector3Length(XMVectorSubtract(endV, startV)).m128_f32[0];
-
-    auto rotMtx = XMMatrixRotationZ(rotZ);
-    auto scaleYZ = tool.size() / 10.f;
-    auto scaleXMtx = XMMatrixScaling(scaleX, scaleYZ, scaleYZ);
-    auto moveMtx = XMMatrixTranslationFromVector(mid);
-
-    // TODO: add rotation from z difference
-
-    Renderable *disk, *square;
-    if (tool.endType() == CNCType::Flat) {
-        disk = &textureDisk;
-        square = &textureSquare;
-    } else {
-        disk = &textureDome;
-        square = &textureHalfCylinder;
-    }
-
-    toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(startV) * toTexMtx);
-    toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(endV) * toTexMtx);
-    toRender.emplace_back(square, scaleXMtx * rotMtx * moveMtx * toTexMtx);
-    renderer.drawToTexture(*this, toRender);
-}
-
-void CNCRouter::calculatePathToTexture() {
-    XMStoreFloat4x4(&pathToTexture, XMMatrixOrthographicLH(_size.x, _size.y, 0, _size.z));
 }

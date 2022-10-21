@@ -20,6 +20,7 @@ enum RouterState {
 
 class CNCRouter : public Object, public Updatable {
     static constexpr float TOOL_SPEED = 25.f;
+    static constexpr int PATHS_PER_FRAME_SKIP = 10;
     static const DirectX::XMFLOAT3 NEUTRAL_TOOL_POSITION;
 
 public:
@@ -128,12 +129,12 @@ private:
 
     void clearDepth(const DxDevice &device);
 
-    void carvePath(DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end, Renderer &renderer);
+    void carvePaths(std::vector<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>> paths, Renderer &renderer);
 
     void calculatePathToTexture();
 
     // TODO: error detection
-    // TODO: increase paths per frame in skip mode
+    // TODO: split parts of block into different buffors
 };
 
 
