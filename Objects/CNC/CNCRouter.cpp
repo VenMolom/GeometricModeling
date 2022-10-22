@@ -135,6 +135,8 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
         carvePaths(toCarve, renderer);
     }
 
+    // TODO: detect if some path z < 0
+
     _progress = 100 - static_cast<int>(std::floor(
             static_cast<float>(drawPaths.vertices().size() * 100) / static_cast<float>(routerPath.moves.size())));
 }
@@ -407,7 +409,7 @@ void CNCRouter::createDepthAndTexture(const DxDevice &device) {
     // Error map
     // staging
     Texture1DDescription texd1;
-    texd1.Width = 3U;
+    texd1.Width = 2U;
     texd1.MipLevels = 1;
     texd1.Format = DXGI_FORMAT_R32_UINT;
     texd1.Usage = D3D11_USAGE_STAGING;
@@ -465,8 +467,7 @@ void CNCRouter::checkForErrors(const DxDevice &device) {
     uint *data = reinterpret_cast<uint *>(res.pData);
 
 //    bool moveDown = data[0] != 0.f;
-    bool tooDeep = data[1] > 0;
-    bool tooBigChange = data[2] > 0;
+    bool tooBigChange = data[1] > 0;
 
     if (tooDeep || tooBigChange) {
         QMessageBox *msgBox = new QMessageBox(nullptr);

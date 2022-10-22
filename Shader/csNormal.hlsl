@@ -54,9 +54,6 @@ void main(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID, ui
 
     // TODO: check for first error type
 
-    // too deep globally
-    InterlockedAdd(errorMap[1], current < 0 ? 1 : 0);
-
     // too deep locally
-    InterlockedAdd(errorMap[2], diff >= maxDiff ? 1 : 0);
+    InterlockedAdd(errorMap[1], diff >= maxDiff ? 1 : 0);
 }
