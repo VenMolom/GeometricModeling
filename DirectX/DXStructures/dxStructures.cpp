@@ -51,6 +51,15 @@ Texture2DDescription Texture2DDescription::DepthStencilDescription(UINT width, U
     return desc;
 }
 
+Texture1DDescription::Texture1DDescription(UINT width) {
+    ZeroMemory(this, sizeof(Texture1DDescription));
+    Width = width;
+    ArraySize = 1;
+    Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    Usage = D3D11_USAGE_DEFAULT;
+    BindFlags = D3D11_BIND_SHADER_RESOURCE;
+}
+
 BufferDescription::BufferDescription(UINT bindFlags, size_t byteWidth) {
     ZeroMemory(this, sizeof(BufferDescription));
     BindFlags = bindFlags;

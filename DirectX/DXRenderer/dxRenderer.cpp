@@ -332,7 +332,7 @@ void DxRenderer::draw(const CNCRouter &router) {
     m_device.context()->VSSetShader(m_vertexPhongTexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelPhongTexShader.get(), nullptr, 0);
     setTextures({m_woodTexture.get(), router.normal().get()}, m_samplerBorder);
-    setVSTextures({router.texture().get()}, m_sampler);
+    setVSTextures({router.depthTexture().get()}, m_sampler);
 
     router.render(m_device.context());
 
@@ -367,13 +367,13 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 
-    updateBuffer(m_cbNormal, XMINT4(size.first, size.second, 0.f, 0.f));
+    updateBuffer(m_cbNormal, XMINT4(size.first, size.second, (int)router.toolType(), 0));
     m_device.context()->CSSetShader(m_computeNormal.get(), nullptr, 0);
 
-    auto shaderRes = router.texture().get();
-    m_device.context()->CSSetShaderResources(0, 1, &shaderRes);
-    auto unordered = router.normalUnordered().get();
-    m_device.context()->CSSetUnorderedAccessViews(0, 1, &unordered, &NO_OFFSET);
+    ID3D11ShaderResourceView *shaderRes[] = {router.depthTexture().get(), router.prevDepthTexture().get()};
+    m_device.context()->CSSetShaderResources(0, 2, shaderRes);
+    ID3D11UnorderedAccessView *unordered[] = {router.normalUnordered().get(), router.errorUnordered().get()};
+    m_device.context()->CSSetUnorderedAccessViews(0, 2, unordered, &NO_OFFSET);
 
     m_device.context()->Dispatch(std::ceil(size.first / 16.f), std::ceil(size.second / 16.f), 1);
 

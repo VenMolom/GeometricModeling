@@ -64,6 +64,15 @@ dx_ptr<ID3D11Texture2D> DxDevice::CreateTexture(const D3D11_TEXTURE2D_DESC &desc
     return result;
 }
 
+dx_ptr<ID3D11Texture1D> DxDevice::CreateTexture1D(const D3D11_TEXTURE1D_DESC &desc) const {
+    ID3D11Texture1D *temp;
+    auto hr = m_device->CreateTexture1D(&desc, nullptr, &temp);
+    dx_ptr<ID3D11Texture1D> result(temp);
+    if (FAILED(hr))
+        THROW_DX(hr);
+    return result;
+}
+
 dx_ptr<ID3D11DepthStencilView> DxDevice::CreateDepthStencilView(const dx_ptr<ID3D11Texture2D> &texture) const {
     ID3D11DepthStencilView *temp;
     auto hr = m_device->CreateDepthStencilView(texture.get(), nullptr, &temp);
@@ -171,6 +180,16 @@ dx_ptr<ID3D11DepthStencilView> DxDevice::CreateDepthStencilView(const dx_ptr<ID3
 }
 
 dx_ptr<ID3D11UnorderedAccessView> DxDevice::CreateUnorderedAccessView(const dx_ptr<ID3D11Texture2D> &texture,
+                                                                      const UnorderedAccessViewDescription &desc) const {
+    ID3D11UnorderedAccessView *uav;
+    auto hr = m_device->CreateUnorderedAccessView(texture.get(), &desc, &uav);
+    dx_ptr<ID3D11UnorderedAccessView> unorderedAccessView(uav);
+    if (FAILED(hr))
+        THROW_DX(hr);
+    return unorderedAccessView;
+}
+
+dx_ptr<ID3D11UnorderedAccessView> DxDevice::CreateUnorderedAccessView(const dx_ptr<ID3D11Texture1D> &texture,
                                                                       const UnorderedAccessViewDescription &desc) const {
     ID3D11UnorderedAccessView *uav;
     auto hr = m_device->CreateUnorderedAccessView(texture.get(), &desc, &uav);

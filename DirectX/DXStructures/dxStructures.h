@@ -17,6 +17,10 @@ struct Texture2DDescription : D3D11_TEXTURE2D_DESC {
     static Texture2DDescription DepthStencilDescription(UINT width, UINT height);
 };
 
+struct Texture1DDescription: D3D11_TEXTURE1D_DESC {
+    explicit Texture1DDescription(UINT width = 0U);
+};
+
 struct BufferDescription : D3D11_BUFFER_DESC {
     BufferDescription(UINT bindFlags, size_t byteWidth);
 

@@ -89,18 +89,25 @@ public:
     void reset();
 
     const mini::dx_ptr<ID3D11DepthStencilView> &depth() const { return _depth; }
-
-    const mini::dx_ptr<ID3D11ShaderResourceView> &texture() const { return _texture; }
+    const mini::dx_ptr<ID3D11ShaderResourceView> &depthTexture() const { return _depthTexture; }
 
     const mini::dx_ptr<ID3D11ShaderResourceView> &normal() const { return _normal; }
     const mini::dx_ptr<ID3D11UnorderedAccessView> &normalUnordered() const { return _normalUnordered; }
 
+    const mini::dx_ptr<ID3D11UnorderedAccessView> &errorUnordered() const { return _errorUnordered; }
+    const mini::dx_ptr<ID3D11ShaderResourceView> &prevDepthTexture() const { return _prevDepthTexture; }
+
 private:
-    mini::dx_ptr<ID3D11ShaderResourceView> _texture;
+    mini::dx_ptr<ID3D11ShaderResourceView> _depthTexture;
+    mini::dx_ptr<ID3D11ShaderResourceView> _prevDepthTexture;
     mini::dx_ptr<ID3D11DepthStencilView> _depth;
 
     mini::dx_ptr<ID3D11ShaderResourceView> _normal;
     mini::dx_ptr<ID3D11UnorderedAccessView> _normalUnordered;
+
+    mini::dx_ptr<ID3D11Texture1D> _errorStaging;
+    mini::dx_ptr<ID3D11UnorderedAccessView> _errorUnordered;
+
 
     CNCPath routerPath;
     Linestrip drawPaths;
@@ -133,12 +140,22 @@ private:
 
     void clearDepth(const DxDevice &device);
 
+    void clearErrorMap(const DxDevice &device);
+
+    void copyDepth(const DxDevice &device);
+
+    void copyErrorMap(const DxDevice &device);
+
     void carvePaths(std::vector<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>> paths, Renderer &renderer);
+
+    void checkForErrors(const DxDevice &device);
 
     void calculatePathToTexture();
 
-    // TODO: error detection
     // TODO: split parts of block into different buffors
+    // TODO: error detection:
+    //  flat: move straight down into material, too deep globally (z <= 0) and too big change of z
+    //  spherical: too deep globally (z <= 0) and too big change of z
 };
 
 

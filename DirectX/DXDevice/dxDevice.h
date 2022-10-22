@@ -20,6 +20,8 @@ public:
 
     mini::dx_ptr<ID3D11Texture2D> CreateTexture(const D3D11_TEXTURE2D_DESC &desc) const;
 
+    mini::dx_ptr<ID3D11Texture1D> CreateTexture1D(const D3D11_TEXTURE1D_DESC &desc) const;
+
     mini::dx_ptr<ID3D11DepthStencilView> CreateDepthStencilView(const mini::dx_ptr<ID3D11Texture2D> &texture) const;
 
     mini::dx_ptr<ID3D11Buffer> CreateBuffer(const void *data, const D3D11_BUFFER_DESC &desc) const;
@@ -47,6 +49,9 @@ public:
                                                                 const DepthStencilViewDescription &desc) const;
 
     mini::dx_ptr<ID3D11UnorderedAccessView> CreateUnorderedAccessView(const mini::dx_ptr<ID3D11Texture2D> &texture,
+                                                                      const UnorderedAccessViewDescription &desc) const;
+
+    mini::dx_ptr<ID3D11UnorderedAccessView> CreateUnorderedAccessView(const mini::dx_ptr<ID3D11Texture1D> &texture,
                                                                       const UnorderedAccessViewDescription &desc) const;
 
     template<class T>

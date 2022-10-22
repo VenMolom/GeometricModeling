@@ -220,6 +220,13 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
     }
 
     renderer.drawToTexture(*this, toRender);
+
+    auto& device = DxDevice::Instance();
+    copyErrorMap(device);
+    checkForErrors(device);
+
+    clearErrorMap(device);
+    copyDepth(device);
 }
 
 void CNCRouter::calculatePathToTexture() {
@@ -360,6 +367,7 @@ void CNCRouter::generateFaceY(bool ccw, float y, float normalY, float deltaX, in
 }
 
 void CNCRouter::createDepthAndTexture(const DxDevice &device) {
+    // Height map and prev
     Texture2DDescription texd;
     texd.Width = _pointsDensity.first;
     texd.Height = _pointsDensity.second;
@@ -367,6 +375,7 @@ void CNCRouter::createDepthAndTexture(const DxDevice &device) {
     texd.Format = DXGI_FORMAT_R32_TYPELESS;
     texd.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
     auto heightTexture = device.CreateTexture(texd);
+    auto prevHeightTexture = device.CreateTexture(texd);
 
     DepthStencilViewDescription dvd;
     dvd.Format = DXGI_FORMAT_D32_FLOAT;
@@ -377,8 +386,10 @@ void CNCRouter::createDepthAndTexture(const DxDevice &device) {
     srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     srvd.Texture2D.MipLevels = 1;
     srvd.Texture2D.MostDetailedMip = 0;
-    _texture = device.CreateShaderResourceView(heightTexture, srvd);
+    _depthTexture = device.CreateShaderResourceView(heightTexture, srvd);
+    _prevDepthTexture = device.CreateShaderResourceView(prevHeightTexture, srvd);
 
+    // Normal map
     texd.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
     texd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
     auto normalTexture = device.CreateTexture(texd);
@@ -392,11 +403,67 @@ void CNCRouter::createDepthAndTexture(const DxDevice &device) {
     uavd.Texture2D.MipSlice = 0;
     _normalUnordered = device.CreateUnorderedAccessView(normalTexture, uavd);
 
+    // Error map
+    // staging
+    Texture1DDescription texd1;
+    texd1.Width = 3U;
+    texd1.MipLevels = 1;
+    texd1.Format = DXGI_FORMAT_R32_UINT;
+    texd1.Usage = D3D11_USAGE_STAGING;
+    texd1.BindFlags = 0;
+    texd1.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    _errorStaging = device.CreateTexture1D(texd1);
+
+    // unordered
+    texd1.Usage = D3D11_USAGE_DEFAULT;
+    texd1.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+    texd1.CPUAccessFlags = 0;
+    auto errorTexture = device.CreateTexture1D(texd1);
+
+    uavd.Format = texd1.Format;
+    uavd.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE1D;
+    uavd.Texture1D.MipSlice = 0;
+    _errorUnordered = device.CreateUnorderedAccessView(errorTexture, uavd);
+
     clearDepth(device);
+    clearErrorMap(device);
 }
 
 void CNCRouter::clearDepth(const DxDevice &device) {
     static const float clearColor[] = {0.5f, 0.5f, 1.f, 1.f};
     device.context()->ClearDepthStencilView(_depth.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
     device.context()->ClearUnorderedAccessViewFloat(_normalUnordered.get(), clearColor);
+    copyDepth(device);
+}
+
+void CNCRouter::clearErrorMap(const DxDevice &device) {
+    static const float clearColor[] = {0.f, 0.f, 0.f, 0.f};
+    device.context()->ClearUnorderedAccessViewFloat(_normalUnordered.get(), clearColor);
+}
+
+void CNCRouter::copyDepth(const DxDevice &device) {
+    ID3D11Resource *sourceRes = nullptr, *targetRes = nullptr;
+    _depthTexture->GetResource(&sourceRes);
+    _prevDepthTexture->GetResource(&targetRes);
+    device.context()->CopyResource(targetRes, sourceRes);
+}
+
+void CNCRouter::copyErrorMap(const DxDevice &device) {
+    ID3D11Resource *sourceRes = nullptr;
+    _errorUnordered->GetResource(&sourceRes);
+    device.context()->CopyResource(_errorStaging.get(), sourceRes);
+}
+
+void CNCRouter::checkForErrors(const DxDevice &device) {
+    D3D11_MAPPED_SUBRESOURCE res;
+
+    auto hr = device.context()->Map(_errorStaging.get(), 0, D3D11_MAP_READ, 0, &res);
+    if (FAILED(hr))
+        return;
+
+    uint *data = reinterpret_cast<uint*>(res.pData);
+
+//    bool moveDown = data[0] != 0.f;
+//    bool tooDeep = data[1] != 0.f;
+//    bool tooBigChange = data[2] != 0.f;
 }
