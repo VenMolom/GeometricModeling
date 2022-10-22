@@ -46,6 +46,8 @@ private slots:
 
     void on_showPaths_stateChanged(int arg1);
 
+    void on_wireframe_stateChanged(int arg1);
+
 private:
     std::shared_ptr<CNCRouter> router;
     QPropertyNotifier stateHandler, progressHandler;
@@ -53,6 +55,7 @@ private:
     Ui::CNCRouterModule *ui;
 
     void updateState();
+
     void updateProgress();
 };
 

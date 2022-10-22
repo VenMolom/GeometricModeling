@@ -162,6 +162,7 @@ private:
 
     mini::dx_ptr<ID3D11RasterizerState> m_noCullWireframe;
     mini::dx_ptr<ID3D11RasterizerState> m_noCull;
+    mini::dx_ptr<ID3D11RasterizerState> m_wireframe;
 
     mini::dx_ptr<ID3D11RenderTargetView> m_stereoscopicLeftTarget, m_stereoscopicRightTarget;
     mini::dx_ptr<ID3D11ShaderResourceView> m_stereoscopicLeftTexture, m_stereoscopicRightTexture;

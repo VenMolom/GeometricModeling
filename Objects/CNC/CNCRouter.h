@@ -64,6 +64,10 @@ public:
 
     void setShowPaths(bool show);
 
+    bool wireframe() const { return _wireframe; }
+
+    void setWireframe(bool wire) { _wireframe = wire; }
+
     RouterState state() const { return _state; }
 
     QBindable<RouterState> bindableState() { return &_state; }
@@ -106,7 +110,7 @@ private:
     float _maxDepth{3};
     CNCTool tool;
     int _simulationSpeed{1};
-    bool _showPaths{false}, fresh{true};
+    bool _showPaths{false}, fresh{true}, _wireframe{false};
     QString _filename;
     QProperty<int> _progress{0};
     QProperty<RouterState> _state{static_cast<RouterState>(0)};

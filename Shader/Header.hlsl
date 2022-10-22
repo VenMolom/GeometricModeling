@@ -56,6 +56,7 @@ struct VSPhongTexIn {
 struct PSPhongIn {
     float4 pos : SV_POSITION;
     float3 worldPos : POSITION0;
+    float3 localPos : POSITION1;
     float3 norm : NORMAL0;
     float3 viewVec : VIEWVEC0;
     float2 tex: TEXCOORD0;

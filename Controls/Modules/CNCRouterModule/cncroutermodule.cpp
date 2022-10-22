@@ -33,10 +33,11 @@ CNCRouterModule::CNCRouterModule(shared_ptr<CNCRouter> router, QWidget *parent) 
 
     QSignalBlocker tt(ui->toolType);
     QSignalBlocker ts(ui->toolSize);
-    ui->toolType->setCurrentIndex((int)this->router->toolType());
+    ui->toolType->setCurrentIndex((int) this->router->toolType());
     ui->toolSize->setValue(this->router->toolSize());
 
     ui->showPaths->setChecked(this->router->showPaths());
+    ui->wireframe->setChecked(this->router->wireframe());
     ui->speed->setValue(this->router->simulationSpeed());
 }
 
@@ -111,6 +112,10 @@ void CNCRouterModule::on_showPaths_stateChanged(int arg1) {
     router->setShowPaths(Qt::Checked == (Qt::CheckState) arg1);
 }
 
+void CNCRouterModule::on_wireframe_stateChanged(int arg1) {
+    router->setWireframe(Qt::Checked == (Qt::CheckState) arg1);
+}
+
 void CNCRouterModule::on_speed_valueChanged(int value) {
     router->setSimulationSpeed(value);
 }
@@ -150,7 +155,7 @@ void CNCRouterModule::updateState() {
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(true);
 
-            ui->toolType->setCurrentIndex((int)this->router->toolType());
+            ui->toolType->setCurrentIndex((int) this->router->toolType());
             ui->toolSize->setValue(this->router->toolSize());
             break;
         case NextPathLoaded:
@@ -164,7 +169,7 @@ void CNCRouterModule::updateState() {
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(true);
 
-            ui->toolType->setCurrentIndex((int)this->router->toolType());
+            ui->toolType->setCurrentIndex((int) this->router->toolType());
             ui->toolSize->setValue(this->router->toolSize());
             break;
         case Started:
@@ -204,7 +209,7 @@ void CNCRouterModule::updateState() {
 
     QSignalBlocker tt(ui->toolType);
     QSignalBlocker ts(ui->toolSize);
-    ui->toolType->setCurrentIndex((int)this->router->toolType());
+    ui->toolType->setCurrentIndex((int) this->router->toolType());
     ui->toolSize->setValue(this->router->toolSize());
 }
 

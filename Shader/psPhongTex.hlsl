@@ -9,7 +9,7 @@ cbuffer cbColor: register(b0) {
 
 static const float3 ambientColor = float3(0.2f, 0.2f, 0.2f);
 static const float3 lightColor = float3(1.0f, 1.0f, 1.0f);
-static const float3 lightPos = float3(100.f, 1000.f, 100.f);
+static const float3 lightPos = float3(100.f, 100.f, 100.f);
 static const float kd = 0.5, ks = 0.2f, m = 100.0f;
 
 float3 normalMapping(float3 N, float3 T, float3 tn)
@@ -21,11 +21,11 @@ float3 normalMapping(float3 N, float3 T, float3 tn)
 
 float4 main(PSPhongIn i) : SV_TARGET
 {
-    float3 dPdx = ddx(i.worldPos);
-    float3 dPdy = ddy(i.worldPos);
+    float3 dPdx = ddx(i.localPos);
+    float3 dPdy = ddy(i.localPos);
     float2 dtdx = ddx(i.tex);
     float2 dtdy = ddy(i.tex);
-    float3 T = normalize(-dPdx * dtdy.y + dPdy * dtdx.y);
+    float3 T = -normalize(-dPdx * dtdy.y + dPdy * dtdx.y);
 
     float4 normMapped = normMap.Sample(texSampler, i.tex);
     float3 tn = normMapped.xyz;

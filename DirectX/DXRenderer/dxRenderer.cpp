@@ -325,6 +325,9 @@ void DxRenderer::draw(const CNCRouter &router) {
     updateBuffer(m_cbModel, router.modelMatrix());
     updateBuffer(m_cbColor, XMFLOAT3{0.5f, 0.5f, 0.5f});
 
+    if (router.wireframe()) {
+        m_device.context()->RSSetState(m_wireframe.get());
+    }
     m_device.context()->IASetInputLayout(m_phongTexLayout.get());
     m_device.context()->VSSetShader(m_vertexPhongTexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelPhongTexShader.get(), nullptr, 0);
@@ -333,15 +336,16 @@ void DxRenderer::draw(const CNCRouter &router) {
 
     router.render(m_device.context());
 
+    m_device.context()->RSSetState(nullptr);
     m_device.context()->IASetInputLayout(m_layout.get());
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
-void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable*, DirectX::XMMATRIX>> toRender) {
+void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *, DirectX::XMMATRIX>> toRender) {
     static constexpr UINT NO_OFFSET = -1;
-    static constexpr ID3D11ShaderResourceView* NULL_SRV = nullptr;
-    static constexpr ID3D11UnorderedAccessView* NULL_UAV = nullptr;
+    static constexpr ID3D11ShaderResourceView *NULL_SRV = nullptr;
+    static constexpr ID3D11UnorderedAccessView *NULL_UAV = nullptr;
 
     auto size = router.pointsDensity();
     Viewport v({size.first, size.second});
@@ -696,10 +700,12 @@ void DxRenderer::init3D3() {
     m_bsAlpha = m_device.CreateBlendState(blendDesc);
 
     RasterizerDescription rsDesc;
-    rsDesc.CullMode = D3D11_CULL_NONE;
-    m_noCull = m_device.CreateRasterizerState(rsDesc);
     rsDesc.FillMode = D3D11_FILL_WIREFRAME;
+    m_wireframe = m_device.CreateRasterizerState(rsDesc);
+    rsDesc.CullMode = D3D11_CULL_NONE;
     m_noCullWireframe = m_device.CreateRasterizerState(rsDesc);
+    rsDesc.FillMode = D3D11_FILL_SOLID;
+    m_noCull = m_device.CreateRasterizerState(rsDesc);
 
     vector<VertexPositionTex> quad{
             {{-1.f, -1.f}, {.0f, 1.f}},

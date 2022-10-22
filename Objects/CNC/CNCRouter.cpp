@@ -189,6 +189,7 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
     vector<pair<Renderable *, XMMATRIX>> toRender;
 
     auto scaleMtx = XMLoadFloat4x4(&toolScale), toTexMtx = XMLoadFloat4x4(&pathToTexture);
+    auto scaleYZ = tool.size() / 10.f;
     Renderable *disk, *square;
     if (tool.endType() == CNCType::Flat) {
         disk = &textureDisk;
@@ -203,18 +204,19 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
 
         auto mid = XMVectorLerp(startV, endV, 0.5f);
         auto rotZ = atan2f(end.y - start.y, end.x - start.x);
-        auto scaleX = XMVector3Length(XMVectorSubtract(endV, startV)).m128_f32[0];
+        auto lengthX = XMVector3Length(XMVectorSet(end.x - start.x, end.y - start.y, 0.f, 0.f)).m128_f32[0];
+        auto lengthZ = end.z - start.z;
+        auto lambdaZ = lengthZ / lengthX;
 
         auto rotMtx = XMMatrixRotationZ(rotZ);
-        auto scaleYZ = tool.size() / 10.f;
-        auto scaleXMtx = XMMatrixScaling(scaleX, scaleYZ, scaleYZ);
+        auto scaleXMtx = XMMatrixScaling(lengthX, scaleYZ, scaleYZ);
+        auto shearMtx = XMMatrixIdentity();
+        shearMtx.r[0].m128_f32[2] = lambdaZ;
         auto moveMtx = XMMatrixTranslationFromVector(mid);
 
-        // TODO: add rotation from z difference
-
         toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(startV) * toTexMtx);
-        toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(endV) * toTexMtx);
-        toRender.emplace_back(square, scaleXMtx * rotMtx * moveMtx * toTexMtx);
+//        toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(endV) * toTexMtx);
+        toRender.emplace_back(square, scaleXMtx * shearMtx * rotMtx * moveMtx * toTexMtx);
     }
 
     renderer.drawToTexture(*this, toRender);

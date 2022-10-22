@@ -21,6 +21,7 @@ cbuffer cbProj : register(b2)
 PSPhongIn main(VSPhongTexIn i)
 {
     PSPhongIn o;
+    o.localPos = i.pos;
     i.pos.z *= heightMap.SampleLevel(heightSampler, i.tex, 0).x;
     o.worldPos = mul(worldMatrix, float4(i.pos, 1.0f)).xyz;
     o.pos = mul(viewMatrix, float4(o.worldPos, 1.0f));

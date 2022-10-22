@@ -31,7 +31,7 @@ void main(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID, ui
     float bottom = readInput(pixel + uint2(0, 1));
 
     float3 xDiff = float3(2 * h.x, 0, right - left);
-    float3 yDiff = float3(0, 2 * h.y, bottom - top);
+    float3 yDiff = float3(0, 2 * h.y, top - bottom);
 
     float3 norm = normal(xDiff, yDiff);
 
