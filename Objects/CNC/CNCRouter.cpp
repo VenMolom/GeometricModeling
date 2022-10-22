@@ -4,6 +4,7 @@
 
 #include "CNCRouter.h"
 #include "Utils/utils3D.h"
+#include <QMessageBox>
 
 using namespace std;
 using namespace DirectX;
@@ -221,7 +222,7 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
 
     renderer.drawToTexture(*this, toRender);
 
-    auto& device = DxDevice::Instance();
+    auto &device = DxDevice::Instance();
     copyErrorMap(device);
     checkForErrors(device);
 
@@ -438,7 +439,7 @@ void CNCRouter::clearDepth(const DxDevice &device) {
 
 void CNCRouter::clearErrorMap(const DxDevice &device) {
     static const float clearColor[] = {0.f, 0.f, 0.f, 0.f};
-    device.context()->ClearUnorderedAccessViewFloat(_normalUnordered.get(), clearColor);
+    device.context()->ClearUnorderedAccessViewFloat(_errorUnordered.get(), clearColor);
 }
 
 void CNCRouter::copyDepth(const DxDevice &device) {
@@ -461,9 +462,23 @@ void CNCRouter::checkForErrors(const DxDevice &device) {
     if (FAILED(hr))
         return;
 
-    uint *data = reinterpret_cast<uint*>(res.pData);
+    uint *data = reinterpret_cast<uint *>(res.pData);
 
 //    bool moveDown = data[0] != 0.f;
-//    bool tooDeep = data[1] != 0.f;
-//    bool tooBigChange = data[2] != 0.f;
+    bool tooDeep = data[1] > 0;
+    bool tooBigChange = data[2] > 0;
+
+    if (tooDeep || tooBigChange) {
+        QMessageBox *msgBox = new QMessageBox(nullptr);
+        msgBox->setIcon( QMessageBox::Warning );
+        msgBox->setWindowTitle("Error in path");
+        msgBox->setText(QString(tooDeep ? "Tool moved into table\n" : "")
+                        + QString(tooBigChange ? "Max depth exceeded" : ""));
+        QPushButton *btnCancel =  msgBox->addButton( "Cancel", QMessageBox::RejectRole );
+        msgBox->setAttribute(Qt::WA_DeleteOnClose); // delete pointer after close
+        msgBox->setModal(false);
+        msgBox->show();
+    }
+
+    device.context()->Unmap(_errorStaging.get(), 0);
 }

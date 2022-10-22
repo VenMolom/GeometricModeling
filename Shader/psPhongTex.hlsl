@@ -16,7 +16,7 @@ float3 normalMapping(float3 N, float3 T, float3 tn)
 {
     float3 B = normalize(cross(N, T));
     T = normalize(cross(B, N));
-    return mul(transpose(float3x3(T, B, N)), tn);
+    return mul(transpose(float3x3(-T, B, N)), tn);
 }
 
 float4 main(PSPhongIn i) : SV_TARGET
@@ -25,7 +25,7 @@ float4 main(PSPhongIn i) : SV_TARGET
     float3 dPdy = ddy(i.localPos);
     float2 dtdx = ddx(i.tex);
     float2 dtdy = ddy(i.tex);
-    float3 T = -normalize(-dPdx * dtdy.y + dPdy * dtdx.y);
+    float3 T = normalize(-dPdx * dtdy.y + dPdy * dtdx.y);
 
     float4 normMapped = normMap.Sample(texSampler, i.tex);
     float3 tn = normMapped.xyz;

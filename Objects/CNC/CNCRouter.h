@@ -152,10 +152,9 @@ private:
 
     void calculatePathToTexture();
 
-    // TODO: split parts of block into different buffors
+    // TODO: split parts of block into different buffers
     // TODO: error detection:
-    //  flat: move straight down into material, too deep globally (z <= 0) and too big change of z
-    //  spherical: too deep globally (z <= 0) and too big change of z
+    //  flat: move straight down into material
 };
 
 

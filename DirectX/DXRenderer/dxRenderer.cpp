@@ -367,7 +367,11 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 
-    updateBuffer(m_cbNormal, XMINT4(size.first, size.second, (int)router.toolType(), 0));
+    NormalBuffer nb {
+            XMINT4(size.first, size.second, (int)router.toolType(), 0),
+            XMFLOAT4(router.maxDepth(), router.size().z, 0.f, 0.f)
+    };
+    updateBuffer(m_cbNormal, nb);
     m_device.context()->CSSetShader(m_computeNormal.get(), nullptr, 0);
 
     ID3D11ShaderResourceView *shaderRes[] = {router.depthTexture().get(), router.prevDepthTexture().get()};
@@ -377,8 +381,8 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
 
     m_device.context()->Dispatch(std::ceil(size.first / 16.f), std::ceil(size.second / 16.f), 1);
 
-    m_device.context()->CSSetShaderResources(0, 1, &NULL_SRV);
-    m_device.context()->CSSetUnorderedAccessViews(0, 1, &NULL_UAV, &NO_OFFSET);
+    m_device.context()->CSSetShaderResources(0, 2, &NULL_SRV);
+    m_device.context()->CSSetUnorderedAccessViews(0, 2, &NULL_UAV, &NO_OFFSET);
     m_device.context()->CSSetShader(nullptr, nullptr, 0);
 }
 
@@ -664,7 +668,7 @@ void DxRenderer::init3D3() {
     m_cbFarPlane = m_device.CreateConstantBuffer<XMFLOAT4>();
     m_cbStereoColor = m_device.CreateConstantBuffer<XMFLOAT4, 2>();
     m_cbTrim = m_device.CreateConstantBuffer<XMFLOAT4>();
-    m_cbNormal = m_device.CreateConstantBuffer<XMINT4>();
+    m_cbNormal = m_device.CreateConstantBuffer<NormalBuffer>();
 
     ID3D11Buffer *vsCbs[] = {m_cbModel.get(), m_cbView.get(), m_cbProj.get()};
     ID3D11Buffer *psCbs[] = {m_cbColor.get(), m_cbFarPlane.get(), m_cbStereoColor.get(), m_cbTrim.get()};

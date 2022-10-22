@@ -11,6 +11,11 @@
 #undef max
 #undef min
 
+struct NormalBuffer {
+    DirectX::XMINT4 size;
+    DirectX::XMFLOAT4 opts;
+};
+
 class DxRenderer : public QWidget, public Renderer, public StereoscopicRenderer {
 Q_OBJECT
 
