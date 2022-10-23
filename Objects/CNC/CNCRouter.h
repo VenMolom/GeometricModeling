@@ -5,6 +5,7 @@
 #ifndef MG1_CNCROUTER_H
 #define MG1_CNCROUTER_H
 
+#include <QMessageBox>
 #include "CNCTool.h"
 #include "Objects/updatable.h"
 #include "Objects/linestrip.h"
@@ -90,12 +91,12 @@ public:
 
     const mini::dx_ptr<ID3D11DepthStencilView> &depth() const { return _depth; }
     const mini::dx_ptr<ID3D11ShaderResourceView> &depthTexture() const { return _depthTexture; }
+    const mini::dx_ptr<ID3D11ShaderResourceView> &prevDepthTexture() const { return _prevDepthTexture; }
 
     const mini::dx_ptr<ID3D11ShaderResourceView> &normal() const { return _normal; }
     const mini::dx_ptr<ID3D11UnorderedAccessView> &normalUnordered() const { return _normalUnordered; }
 
     const mini::dx_ptr<ID3D11UnorderedAccessView> &errorUnordered() const { return _errorUnordered; }
-    const mini::dx_ptr<ID3D11ShaderResourceView> &prevDepthTexture() const { return _prevDepthTexture; }
 
 private:
     mini::dx_ptr<ID3D11ShaderResourceView> _depthTexture;
@@ -126,6 +127,9 @@ private:
     Mesh textureDome, textureHalfCylinder;
     DirectX::XMFLOAT4X4 pathToTexture, toolScale;
 
+    QMessageBox *errorBox;
+    int currentLine{2};
+
     void fillDrawPaths();
 
     void generateBlock();
@@ -150,11 +154,12 @@ private:
 
     void checkForErrors(const DxDevice &device);
 
+    void showErrorAndFinish(const QString &text);
+
     void calculatePathToTexture();
 
     // TODO: split parts of block into different buffers
-    // TODO: error detection:
-    //  flat: move straight down into material
+    // TODO: error detection: flat: move straight down into material
 };
 
 

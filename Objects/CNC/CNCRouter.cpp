@@ -4,7 +4,6 @@
 
 #include "CNCRouter.h"
 #include "Utils/utils3D.h"
-#include <QMessageBox>
 
 using namespace std;
 using namespace DirectX;
@@ -104,6 +103,12 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
 
         while (distanceToTravel > 0.f && drawPaths.vertices().size() >= 2) {
             auto nextTarget = (drawPaths.vertices().end() - 2)->position;
+
+            if (nextTarget.z <= 0) {
+                showErrorAndFinish("Tool will move into worktable");
+                return;
+            }
+
             auto distanceToTarget = XMVector3Length(
                     XMVectorSubtract(XMLoadFloat3(&nextTarget), XMLoadFloat3(&currentPosition))).m128_f32[0];
             if (distanceToTravel < distanceToTarget) {
@@ -117,6 +122,7 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
             drawPaths.vertices().pop_back();
             distanceToTravel -= distanceToTarget;
             currentPosition = nextTarget;
+            currentLine++;
         }
 
         if (!drawPaths.vertices().empty()) {
@@ -126,16 +132,21 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
     } else {
         for (int i = 0; i < PATHS_PER_FRAME_SKIP && drawPaths.vertices().size() >= 2; ++i) {
             auto nextTarget = (drawPaths.vertices().end() - 2)->position;
+
+            if (nextTarget.z <= 0) {
+                showErrorAndFinish("Tool will move into worktable");
+                return;
+            }
+
             toCarve.emplace_back(currentPosition, nextTarget);
             drawPaths.vertices().pop_back();
             currentPosition = nextTarget;
+            currentLine++;
         }
     }
     if (!toCarve.empty()) {
         carvePaths(toCarve, renderer);
     }
-
-    // TODO: detect if some path z < 0
 
     _progress = 100 - static_cast<int>(std::floor(
             static_cast<float>(drawPaths.vertices().size() * 100) / static_cast<float>(routerPath.moves.size())));
@@ -155,12 +166,14 @@ void CNCRouter::loadPath(CNCPath &&path) {
 
 void CNCRouter::start() {
     fresh = false;
+    currentLine = 2;
     _state = RouterState::Started;
     tool.setPosition(drawPaths.vertices().back().position);
 }
 
 void CNCRouter::skip() {
     fresh = false;
+    if (_state != RouterState::Started) currentLine = 2;
     _state = RouterState::Skipped;
 }
 
@@ -168,6 +181,7 @@ void CNCRouter::reset() {
     fresh = true;
     _state = routerPath.moves.empty() ? RouterState::Created : RouterState::FirstPathLoaded;
     _progress = 0;
+    currentLine = 2;
     if (!routerPath.moves.empty()) {
         fillDrawPaths();
     }
@@ -466,20 +480,28 @@ void CNCRouter::checkForErrors(const DxDevice &device) {
 
     uint *data = reinterpret_cast<uint *>(res.pData);
 
-//    bool moveDown = data[0] != 0.f;
     bool tooBigChange = data[1] > 0;
 
-    if (tooDeep || tooBigChange) {
-        QMessageBox *msgBox = new QMessageBox(nullptr);
-        msgBox->setIcon( QMessageBox::Warning );
-        msgBox->setWindowTitle("Error in path");
-        msgBox->setText(QString(tooDeep ? "Tool moved into table\n" : "")
-                        + QString(tooBigChange ? "Max depth exceeded" : ""));
-        QPushButton *btnCancel =  msgBox->addButton( "Cancel", QMessageBox::RejectRole );
-        msgBox->setAttribute(Qt::WA_DeleteOnClose); // delete pointer after close
-        msgBox->setModal(false);
-        msgBox->show();
-    }
-
     device.context()->Unmap(_errorStaging.get(), 0);
+
+    if (tooBigChange) {
+        showErrorAndFinish("Max depth exceeded");
+    }
+}
+
+void CNCRouter::showErrorAndFinish(const QString &text) {
+    errorBox = new QMessageBox(nullptr);
+    errorBox->setIcon(QMessageBox::Warning);
+    errorBox->setWindowTitle("Error in path");
+    errorBox->setText(QString("Error in move ")
+                            .append(QString::fromStdString(std::to_string(currentLine)))
+                            .append(": ")
+                            .append(text));
+    QPushButton *btnCancel = errorBox->addButton("Ok", QMessageBox::RejectRole);
+    errorBox->setAttribute(Qt::WA_DeleteOnClose); // delete pointer after close
+    errorBox->setModal(false);
+    errorBox->show();
+
+    _state = Finished;
+    _progress = 100;
 }
