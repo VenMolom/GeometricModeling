@@ -4,6 +4,7 @@
 
 #include "CNCRouter.h"
 #include "Utils/utils3D.h"
+#include <cmath>
 
 using namespace std;
 using namespace DirectX;
@@ -90,6 +91,7 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
 
     if (drawPaths.vertices().size() < 2) {
         _state = RouterState::Finished;
+        _progress = 100;
         tool.setPosition(NEUTRAL_TOOL_POSITION);
         drawPaths.update();
         return;
@@ -207,6 +209,7 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
 
     auto scaleMtx = XMLoadFloat4x4(&toolScale), toTexMtx = XMLoadFloat4x4(&pathToTexture);
     auto scaleYZ = tool.size() / 10.f;
+    auto moveZ = 0.f;
     Renderable *disk, *square;
     if (tool.endType() == CNCType::Flat) {
         disk = &textureDisk;
@@ -214,26 +217,28 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
     } else {
         disk = &textureDome;
         square = &textureHalfCylinder;
+        moveZ = scaleYZ / 2.f;
     }
 
     for (auto &[start, end]: paths) {
         auto startV = XMLoadFloat3(&start), endV = XMLoadFloat3(&end);
 
+        auto diffV = XMVectorSubtract(endV, startV);
         auto mid = XMVectorLerp(startV, endV, 0.5f);
-        auto rotZ = atan2f(end.y - start.y, end.x - start.x);
-        auto lengthX = XMVector3Length(XMVectorSet(end.x - start.x, end.y - start.y, 0.f, 0.f)).m128_f32[0];
-        auto lengthZ = end.z - start.z;
-        auto lambdaZ = lengthZ / lengthX;
+        mid.m128_f32[2] += moveZ;
+        auto length = XMVector3Length(diffV).m128_f32[0];
+        auto len2 = XMVector2Length(diffV).m128_f32[0];
+        auto rotZ = atan2f(diffV.m128_f32[1], diffV.m128_f32[0]);
+//        float rotY = -0.194789055994972182985416891938195258421997833906155465701932235;
+        auto rotY = atan2f(diffV.m128_f32[2], len2);
 
-        auto rotMtx = XMMatrixRotationZ(rotZ);
-        auto scaleXMtx = XMMatrixScaling(lengthX, scaleYZ, scaleYZ);
-        auto shearMtx = XMMatrixIdentity();
-        shearMtx.r[0].m128_f32[2] = lambdaZ;
+        auto rotMtx = XMMatrixRotationY(-rotY) * XMMatrixRotationZ(rotZ);
+        auto scaleXMtx = XMMatrixScaling(length, scaleYZ, scaleYZ);
         auto moveMtx = XMMatrixTranslationFromVector(mid);
 
         toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(startV) * toTexMtx);
 //        toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(endV) * toTexMtx);
-        toRender.emplace_back(square, scaleXMtx * shearMtx * rotMtx * moveMtx * toTexMtx);
+        toRender.emplace_back(square, scaleXMtx * rotMtx * moveMtx * toTexMtx);
     }
 
     renderer.drawToTexture(*this, toRender);
@@ -254,8 +259,8 @@ void CNCRouter::generateBlock() {
     verticesShaded.clear();
     indices.clear();
 
-    auto pointsX = _pointsDensity.first >> 5;
-    auto pointsY = _pointsDensity.second >> 5;
+    auto pointsX = _pointsDensity.first >> 4;
+    auto pointsY = _pointsDensity.second >> 4;
 
     auto deltaX = 1.f / (pointsX - 1);
     auto deltaY = 1.f / (pointsY - 1);
@@ -485,7 +490,7 @@ void CNCRouter::checkForErrors(const DxDevice &device) {
     device.context()->Unmap(_errorStaging.get(), 0);
 
     if (tooBigChange) {
-        showErrorAndFinish("Max depth exceeded");
+//        showErrorAndFinish("Max depth exceeded");
     }
 }
 

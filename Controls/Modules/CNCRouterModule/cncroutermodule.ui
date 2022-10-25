@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>631</height>
+    <height>659</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -186,7 +186,7 @@
             <number>128</number>
            </property>
            <property name="maximum">
-            <number>8196</number>
+            <number>8192</number>
            </property>
            <property name="stepType">
             <enum>QAbstractSpinBox::DefaultStepType</enum>
@@ -211,7 +211,7 @@
             <number>128</number>
            </property>
            <property name="maximum">
-            <number>8196</number>
+            <number>8192</number>
            </property>
            <property name="stepType">
             <enum>QAbstractSpinBox::DefaultStepType</enum>

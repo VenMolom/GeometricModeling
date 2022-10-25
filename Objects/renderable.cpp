@@ -60,7 +60,7 @@ void Renderable::render(const dx_ptr<ID3D11DeviceContext> &context) const {
     context->IASetVertexBuffers(0, 1, &vb, &stride, &offset);
 
     if (indexBuffer && indexed) {
-        context->IASetIndexBuffer(indexBuffer.get(), DXGI_FORMAT_R16_UINT, 0);
+        context->IASetIndexBuffer(indexBuffer.get(), DXGI_FORMAT_R32_UINT, 0);
         context->DrawIndexed(indexCount, 0, 0);
     } else {
         context->Draw(vertexCount, 0);

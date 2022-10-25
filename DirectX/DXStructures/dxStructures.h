@@ -51,7 +51,7 @@ struct VertexPositionNormalTex {
     DirectX::XMFLOAT2 tex;
 };
 
-typedef unsigned short Index;
+typedef unsigned int Index;
 
 struct BlendDescription : D3D11_BLEND_DESC {
     BlendDescription();

@@ -191,7 +191,7 @@ Mesh::halfCylinderVerts(float radius, float height, unsigned int stacks, unsigne
         for (auto j = 0U; j <= slices; ++j, phi += dp) {
             float sinp, cosp;
             XMScalarSinCos(&sinp, &cosp, phi);
-            vertices[k].position = XMFLOAT3(y, radius * cosp, -radius * sinp + radius);
+            vertices[k].position = XMFLOAT3(y, radius * cosp, -radius * sinp);
             vertices[k++].color = XMFLOAT3(0, cosp, sinp);
         }
     }
