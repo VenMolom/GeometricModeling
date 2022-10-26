@@ -20,7 +20,7 @@ enum RouterState {
 };
 
 class CNCRouter : public Object, public Updatable {
-    static constexpr float TOOL_SPEED = 25.f;
+    static constexpr float TOOL_SPEED = 15.f;
     static constexpr int PATHS_PER_FRAME_SKIP = 10;
     static const DirectX::XMFLOAT3 NEUTRAL_TOOL_POSITION;
 
@@ -92,6 +92,8 @@ public:
     void skip();
 
     void reset();
+
+    void stop();
 
     const mini::dx_ptr<ID3D11DepthStencilView> &depth() const { return _depth; }
     const mini::dx_ptr<ID3D11ShaderResourceView> &depthTexture() const { return _depthTexture; }

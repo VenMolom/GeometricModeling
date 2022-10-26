@@ -133,6 +133,10 @@ void CNCRouterModule::on_skipButton_clicked() {
     router->skip();
 }
 
+void CNCRouterModule::on_stopButton_clicked() {
+    router->stop();
+}
+
 void CNCRouterModule::on_resetButton_clicked() {
     router->reset();
 }
@@ -146,6 +150,7 @@ void CNCRouterModule::updateState() {
             ui->loadFileButton->setEnabled(true);
             ui->startButton->setEnabled(true);
             ui->skipButton->setEnabled(true);
+            ui->stopButton->setEnabled(false);
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(true);
             break;
@@ -157,6 +162,7 @@ void CNCRouterModule::updateState() {
             ui->loadFileButton->setEnabled(true);
             ui->startButton->setEnabled(true);
             ui->skipButton->setEnabled(true);
+            ui->stopButton->setEnabled(false);
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(true);
 
@@ -171,6 +177,7 @@ void CNCRouterModule::updateState() {
             ui->loadFileButton->setEnabled(true);
             ui->startButton->setEnabled(true);
             ui->skipButton->setEnabled(true);
+            ui->stopButton->setEnabled(false);
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(true);
 
@@ -185,6 +192,7 @@ void CNCRouterModule::updateState() {
             ui->loadFileButton->setEnabled(false);
             ui->startButton->setEnabled(false);
             ui->skipButton->setEnabled(true);
+            ui->stopButton->setEnabled(true);
             ui->resetButton->setEnabled(false);
             ui->speed->setEnabled(true);
             break;
@@ -196,6 +204,7 @@ void CNCRouterModule::updateState() {
             ui->loadFileButton->setEnabled(false);
             ui->startButton->setEnabled(false);
             ui->skipButton->setEnabled(false);
+            ui->stopButton->setEnabled(true);
             ui->resetButton->setEnabled(false);
             ui->speed->setEnabled(false);
             break;
@@ -207,6 +216,7 @@ void CNCRouterModule::updateState() {
             ui->loadFileButton->setEnabled(true);
             ui->startButton->setEnabled(false);
             ui->skipButton->setEnabled(false);
+            ui->stopButton->setEnabled(false);
             ui->resetButton->setEnabled(true);
             ui->speed->setEnabled(false);
             break;

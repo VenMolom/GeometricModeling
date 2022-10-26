@@ -40,6 +40,8 @@ private slots:
 
     void on_skipButton_clicked();
 
+    void on_stopButton_clicked();
+
     void on_speed_valueChanged(int value);
 
     void on_resetButton_clicked();

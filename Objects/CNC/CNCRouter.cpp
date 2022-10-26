@@ -192,6 +192,10 @@ void CNCRouter::reset() {
     clearErrorMap(DxDevice::Instance());
 }
 
+void CNCRouter::stop() {
+    _state = RouterState::Finished;
+}
+
 void CNCRouter::fillDrawPaths() {
     auto size = routerPath.moves.size();
     drawPaths.vertices().clear();
@@ -202,6 +206,10 @@ void CNCRouter::fillDrawPaths() {
         drawPaths.vertices()[i].position = routerPath.moves[size - i - 1].target;
     }
     drawPaths.update();
+
+    if (!routerPath.moves.empty()) {
+        tool.setPosition(routerPath.moves[0].target);
+    }
 }
 
 void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &renderer) {

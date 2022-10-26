@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>659</height>
+    <height>690</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,6 +44,41 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
+         <item row="12" column="0">
+          <widget class="QPushButton" name="resetButton">
+           <property name="text">
+            <string>Reset material</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="showPaths">
+           <property name="text">
+            <string>Show paths</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QProgressBar" name="progressBar">
+           <property name="value">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QLabel" name="speedLabel">
+           <property name="text">
+            <string>Speed</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="progressLabel">
+           <property name="text">
+            <string>Progress</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="filenameLabel">
            <property name="text">
@@ -51,10 +86,10 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="0">
-          <widget class="QProgressBar" name="progressBar">
-           <property name="value">
-            <number>0</number>
+         <item row="3" column="0">
+          <widget class="QPushButton" name="skipButton">
+           <property name="text">
+            <string>Skip to end</string>
            </property>
           </widget>
          </item>
@@ -65,7 +100,7 @@
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
+         <item row="11" column="0">
           <widget class="QSlider" name="speed">
            <property name="minimum">
             <number>1</number>
@@ -90,38 +125,10 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <widget class="QPushButton" name="skipButton">
-           <property name="text">
-            <string>Skip to end</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QLabel" name="speedLabel">
-           <property name="text">
-            <string>Speed</string>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QPushButton" name="resetButton">
-           <property name="text">
-            <string>Reset material</string>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="0">
-          <widget class="QLabel" name="progressLabel">
+          <widget class="QPushButton" name="stopButton">
            <property name="text">
-            <string>Progress</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="showPaths">
-           <property name="text">
-            <string>Show paths</string>
+            <string>Stop</string>
            </property>
           </widget>
          </item>
