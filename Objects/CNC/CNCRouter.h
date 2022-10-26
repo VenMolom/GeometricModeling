@@ -119,9 +119,9 @@ private:
 
     DirectX::XMFLOAT3 _size{18.f, 18.f, 4.6f};
     std::pair<int, int> _pointsDensity{4096, 4096};
-    float _maxDepth{3};
+    float _maxDepth{3.5};
     CNCTool tool;
-    int _workingHeight{15};
+    int _workingHeight{30};
     int _simulationSpeed{1};
     bool _showPaths{false}, fresh{true}, _wireframe{false};
     QString _filename;
@@ -162,9 +162,6 @@ private:
     void showErrorAndFinish(const QString &text);
 
     void calculatePathToTexture();
-
-    // TODO: split parts of block into different buffers
-    // TODO: error detection: flat: move straight down into material
 };
 
 

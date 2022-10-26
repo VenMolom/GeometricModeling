@@ -462,8 +462,8 @@ void CNCRouter::clearDepth(const DxDevice &device) {
 }
 
 void CNCRouter::clearErrorMap(const DxDevice &device) {
-    static const float clearColor[] = {0.f, 0.f, 0.f, 0.f};
-    device.context()->ClearUnorderedAccessViewFloat(_errorUnordered.get(), clearColor);
+    static const uint clearColor[] = {0, 0};
+    device.context()->ClearUnorderedAccessViewUint(_errorUnordered.get(), clearColor);
     copyErrorMap(device);
 }
 
