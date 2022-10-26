@@ -42,7 +42,7 @@ CNCPath FileParser::parseCNCPath(std::filesystem::path path) {
 
 void FileParser::parseCNCLine(const std::string &line, CNCPath &path) {
 //    static const regex rgx(R"(N(\d*)(.*))");
-    smatch matches;
+    stringstream ss(line);
 //    // return if doesn't have instruction number
 //    if (!regex_match(line, matches, rgx)) { return; }
 //    auto number = stoi(matches[1]);
@@ -67,31 +67,35 @@ void FileParser::parseCNCLine(const std::string &line, CNCPath &path) {
 //    }
 
     //move
-    if (regex_match(line, matches,
-                    regex(R"(N\d*G0[0|1](X-?\d*\.?\d*)?(Y-?\d*\.?\d*)?(Z-?\d*\.?\d*)?)"))) {
-        CNCMove move{};
+    // N\d*G0[0|1](X-?\d*\.?\d*)?(Y-?\d*\.?\d*)?(Z-?\d*\.?\d*)?
+    CNCMove move{};
+    ss.seekg(1); // skip N
+    ss >> move.number;
+    ss.seekg(3, stringstream::cur); // skip G0[0|1]
 
-        if (path.moves.empty()) {
-            move.target = XMFLOAT3(0, 0, 0);
-        } else {
-            move.target = path.moves[path.moves.size() - 1].target;
-        }
-
-        for (int i = 1; i < matches.size(); ++i) {
-            auto match = matches[i].str();
-            switch (match[0]) {
-                case 'X':
-                    move.target.x = stof(match.c_str() + 1) / 10.f;
-                    break;
-                case 'Y':
-                    move.target.y = stof(match.c_str() + 1) / 10.f;
-                    break;
-                case 'Z':
-                    move.target.z = stof(match.c_str() + 1) / 10.f;
-                    break;
-            }
-        }
-        path.moves.push_back(move);
-        return;
+    if (path.moves.empty()) {
+        move.target = XMFLOAT3(0, 0, 0);
+    } else {
+        move.target = path.moves[path.moves.size() - 1].target;
     }
+
+    char axis;
+    float value;
+
+    while (!ss.eof()) {
+        ss >> axis >> value;
+        switch (axis) {
+            case 'X':
+                move.target.x = value / 10.f;
+                break;
+            case 'Y':
+                move.target.y = value / 10.f;
+                break;
+            case 'Z':
+                move.target.z = value / 10.f;
+                break;
+        }
+    }
+
+    path.moves.push_back(move);
 }

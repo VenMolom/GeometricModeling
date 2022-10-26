@@ -21,7 +21,7 @@ enum RouterState {
 
 class CNCRouter : public Object, public Updatable {
     static constexpr float TOOL_SPEED = 15.f;
-    static constexpr int PATHS_PER_FRAME_SKIP = 10;
+    static constexpr int PATHS_PER_FRAME_SKIP = 1000;
     static const DirectX::XMFLOAT3 NEUTRAL_TOOL_POSITION;
 
 public:
