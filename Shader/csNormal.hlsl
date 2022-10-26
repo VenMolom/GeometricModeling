@@ -5,8 +5,8 @@ RWTexture1D<uint> errorMap : register(u1);
 
 cbuffer cbHeightParams : register(b0)
 {
-    int4 size; // x - width; y - height; z - tool type
-    float4 opt; // x - max depth; y - height of material
+    int4 size; // x - width; y - height; z - tool type; w - tool working height
+    float4 opt; // x - height of material; y - down move
 }
 
 float readInput(uint2 loc)
@@ -50,10 +50,11 @@ void main(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID, ui
     float current = readInput(pixel);
     float prev = readInputPrev(pixel);
     float diff = prev - current;
-    float maxDiff = opt.x / opt.y;
+    float maxDiff = float(size.w / 10.f) / opt.x;
 
     // TODO: check for first error type
 
     // too deep locally
     InterlockedAdd(errorMap[1], diff >= maxDiff ? 1 : 0);
+    InterlockedAdd(errorMap[0], (diff > 0 && size.z == 0 && opt.y > 0.f) ? 1 : 0);
 }

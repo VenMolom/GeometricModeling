@@ -106,8 +106,8 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
         while (distanceToTravel > 0.f && drawPaths.vertices().size() >= 2) {
             auto nextTarget = (drawPaths.vertices().end() - 2)->position;
 
-            if (nextTarget.z <= 0) {
-                showErrorAndFinish("Tool will move into worktable");
+            if (_size.z - nextTarget.z > _maxDepth) {
+                showErrorAndFinish("Tool will exceed max depth");
                 return;
             }
 
@@ -135,8 +135,8 @@ void CNCRouter::update(Renderer &renderer, float frameTime) {
         for (int i = 0; i < PATHS_PER_FRAME_SKIP && drawPaths.vertices().size() >= 2; ++i) {
             auto nextTarget = (drawPaths.vertices().end() - 2)->position;
 
-            if (nextTarget.z <= 0) {
-                showErrorAndFinish("Tool will move into worktable");
+            if (_size.z - nextTarget.z > _maxDepth) {
+                showErrorAndFinish("Tool will exceed max depth");
                 return;
             }
 
@@ -184,10 +184,12 @@ void CNCRouter::reset() {
     _state = routerPath.moves.empty() ? RouterState::Created : RouterState::FirstPathLoaded;
     _progress = 0;
     currentLine = 2;
+    tool.setPosition(NEUTRAL_TOOL_POSITION);
     if (!routerPath.moves.empty()) {
         fillDrawPaths();
     }
     clearDepth(DxDevice::Instance());
+    clearErrorMap(DxDevice::Instance());
 }
 
 void CNCRouter::fillDrawPaths() {
@@ -210,6 +212,7 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
     auto scaleMtx = XMLoadFloat4x4(&toolScale), toTexMtx = XMLoadFloat4x4(&pathToTexture);
     auto scaleYZ = tool.size() / 10.f;
     auto moveZ = 0.f;
+    bool downMove = true;
     Renderable *disk, *square;
     if (tool.endType() == CNCType::Flat) {
         disk = &textureDisk;
@@ -229,19 +232,19 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
         auto length = XMVector3Length(diffV).m128_f32[0];
         auto len2 = XMVector2Length(diffV).m128_f32[0];
         auto rotZ = atan2f(diffV.m128_f32[1], diffV.m128_f32[0]);
-//        float rotY = -0.194789055994972182985416891938195258421997833906155465701932235;
         auto rotY = atan2f(diffV.m128_f32[2], len2);
 
         auto rotMtx = XMMatrixRotationY(-rotY) * XMMatrixRotationZ(rotZ);
         auto scaleXMtx = XMMatrixScaling(length, scaleYZ, scaleYZ);
         auto moveMtx = XMMatrixTranslationFromVector(mid);
+        downMove = downMove && diffV.m128_f32[2] != 0.f;
 
         toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(startV) * toTexMtx);
 //        toRender.emplace_back(disk, scaleMtx * XMMatrixTranslationFromVector(endV) * toTexMtx);
         toRender.emplace_back(square, scaleXMtx * rotMtx * moveMtx * toTexMtx);
     }
 
-    renderer.drawToTexture(*this, toRender);
+    renderer.drawToTexture(*this, toRender, downMove);
 
     auto &device = DxDevice::Instance();
     copyErrorMap(device);
@@ -461,6 +464,7 @@ void CNCRouter::clearDepth(const DxDevice &device) {
 void CNCRouter::clearErrorMap(const DxDevice &device) {
     static const float clearColor[] = {0.f, 0.f, 0.f, 0.f};
     device.context()->ClearUnorderedAccessViewFloat(_errorUnordered.get(), clearColor);
+    copyErrorMap(device);
 }
 
 void CNCRouter::copyDepth(const DxDevice &device) {
@@ -486,11 +490,15 @@ void CNCRouter::checkForErrors(const DxDevice &device) {
     uint *data = reinterpret_cast<uint *>(res.pData);
 
     bool tooBigChange = data[1] > 0;
+    bool flatStraightDown = data[0] > 0;
 
     device.context()->Unmap(_errorStaging.get(), 0);
 
     if (tooBigChange) {
-//        showErrorAndFinish("Max depth exceeded");
+        showErrorAndFinish("Max depth exceeded");
+    }
+    if (flatStraightDown) {
+        showErrorAndFinish("Flat tool moving down into material");
     }
 }
 

@@ -405,13 +405,6 @@
       <string>Tool</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
-      <item row="0" column="0">
-       <widget class="QLabel" name="toolTypeLabel">
-        <property name="text">
-         <string>Type</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="toolType">
         <property name="currentText">
@@ -440,6 +433,30 @@
        <widget class="QSpinBox" name="toolSize">
         <property name="minimum">
          <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="toolTypeLabel">
+        <property name="text">
+         <string>Type</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="workingHeightLabel">
+        <property name="text">
+         <string>Working height [mm]</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QSpinBox" name="workingHeight">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>15</number>
         </property>
        </widget>
       </item>

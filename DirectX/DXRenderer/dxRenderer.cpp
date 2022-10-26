@@ -342,7 +342,7 @@ void DxRenderer::draw(const CNCRouter &router) {
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
-void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *, DirectX::XMMATRIX>> toRender) {
+void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *, DirectX::XMMATRIX>> toRender, bool downMove) {
     static constexpr UINT NO_OFFSET = -1;
     static constexpr ID3D11ShaderResourceView *NULL_SRV = nullptr;
     static constexpr ID3D11UnorderedAccessView *NULL_UAV = nullptr;
@@ -368,8 +368,8 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 
     NormalBuffer nb {
-            XMINT4(size.first, size.second, (int)router.toolType(), 0),
-            XMFLOAT4(router.maxDepth(), router.size().z, 0.f, 0.f)
+            XMINT4(size.first, size.second, (int)router.toolType(), router.toolWorkingHeight()),
+            XMFLOAT4(router.size().z, downMove ? 1.f : 0.f, 0.f, 0.f)
     };
     updateBuffer(m_cbNormal, nb);
     m_device.context()->CSSetShader(m_computeNormal.get(), nullptr, 0);

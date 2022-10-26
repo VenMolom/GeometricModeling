@@ -48,6 +48,8 @@ private slots:
 
     void on_wireframe_stateChanged(int arg1);
 
+    void on_workingHeight_valueChanged(int arg1);
+
 private:
     std::shared_ptr<CNCRouter> router;
     QPropertyNotifier stateHandler, progressHandler;

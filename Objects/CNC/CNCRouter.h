@@ -61,6 +61,10 @@ public:
 
     void setToolSize(int size);
 
+    int toolWorkingHeight() const { return _workingHeight; }
+
+    void setToolWorkingHeight(int height) { _workingHeight = height; }
+
     bool showPaths() const { return _showPaths; }
 
     void setShowPaths(bool show);
@@ -117,6 +121,7 @@ private:
     std::pair<int, int> _pointsDensity{4096, 4096};
     float _maxDepth{3};
     CNCTool tool;
+    int _workingHeight{15};
     int _simulationSpeed{1};
     bool _showPaths{false}, fresh{true}, _wireframe{false};
     QString _filename;

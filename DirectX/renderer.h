@@ -66,7 +66,8 @@ public:
     virtual void draw(const CNCRouter &router) = 0;
 
     virtual void
-    drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable*, DirectX::XMMATRIX>> toRender) = 0;
+    drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable *, DirectX::XMMATRIX>> toRender,
+                  bool downMove) = 0;
 };
 
 #endif //MG1_RENDERER_H

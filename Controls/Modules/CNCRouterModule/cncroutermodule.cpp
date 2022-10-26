@@ -33,8 +33,10 @@ CNCRouterModule::CNCRouterModule(shared_ptr<CNCRouter> router, QWidget *parent) 
 
     QSignalBlocker tt(ui->toolType);
     QSignalBlocker ts(ui->toolSize);
+    QSignalBlocker th(ui->workingHeight);
     ui->toolType->setCurrentIndex((int) this->router->toolType());
     ui->toolSize->setValue(this->router->toolSize());
+    ui->workingHeight->setValue(this->router->toolWorkingHeight());
 
     ui->showPaths->setChecked(this->router->showPaths());
     ui->wireframe->setChecked(this->router->wireframe());
@@ -94,6 +96,9 @@ void CNCRouterModule::on_toolSize_valueChanged(int arg1) {
     router->setToolSize(arg1);
 }
 
+void CNCRouterModule::on_workingHeight_valueChanged(int arg1) {
+    router->setToolWorkingHeight(arg1);
+}
 
 void CNCRouterModule::on_loadFileButton_clicked() {
     QFileDialog dialog(this, "Select paths file");

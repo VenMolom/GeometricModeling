@@ -51,7 +51,8 @@ public:
     void draw(const CNCRouter &router) override;
 
     void
-    drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable*, DirectX::XMMATRIX>> toRender) override;
+    drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable *, DirectX::XMMATRIX>> toRender,
+                  bool downMove) override;
 
     void drawSelector(const Selector &selector);
 
