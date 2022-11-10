@@ -24,10 +24,10 @@ CNCRouter::CNCRouter(uint id, XMFLOAT3 position)
     generateBlock();
     drawPaths.noDepth = true;
 
-    textureDisk = Mesh::disk(0.5f, 32);
+    textureDisk = Mesh::disk(0.5f, 128);
     textureSquare = Mesh::square(1.f);
-    textureDome = Mesh::dome(0.5f, 32, 32, -1.f, 0.5f);
-    textureHalfCylinder = Mesh::halfCylinder(0.5f, 1.f, 1, 64);
+    textureDome = Mesh::dome(0.5f, 128, 128, -1.f, 0.5f);
+    textureHalfCylinder = Mesh::halfCylinder(0.5f, 1.f, 1, 256);
     calculatePathToTexture();
 
     auto size = tool.size() / 10.f;
