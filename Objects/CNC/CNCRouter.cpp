@@ -256,7 +256,10 @@ void CNCRouter::carvePaths(vector<pair<XMFLOAT3, XMFLOAT3>> paths, Renderer &ren
 
     auto &device = DxDevice::Instance();
     copyErrorMap(device);
-    checkForErrors(device);
+
+    if (_state != RouterState::Skipped) {
+        checkForErrors(device);
+    }
 
     clearErrorMap(device);
     copyDepth(device);
@@ -515,9 +518,9 @@ void CNCRouter::showErrorAndFinish(const QString &text) {
     errorBox->setIcon(QMessageBox::Warning);
     errorBox->setWindowTitle("Error in path");
     errorBox->setText(QString("Error in move ")
-                            .append(QString::fromStdString(std::to_string(currentLine)))
-                            .append(": ")
-                            .append(text));
+                              .append(QString::fromStdString(std::to_string(currentLine)))
+                              .append(": ")
+                              .append(text));
     QPushButton *btnCancel = errorBox->addButton("Ok", QMessageBox::RejectRole);
     errorBox->setAttribute(Qt::WA_DeleteOnClose); // delete pointer after close
     errorBox->setModal(false);

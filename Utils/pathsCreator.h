@@ -16,12 +16,12 @@ class PathsCreator {
 public:
     static constexpr int TEX_SIZE = 4096;
 
-    static void create(const std::filesystem::path& directory,
+    static void create(const std::filesystem::path &directory,
                        std::vector<std::shared_ptr<Object>> objects,
                        Renderer &renderer);
 
 private:
-    explicit PathsCreator(std::filesystem::path  basePath, std::vector<std::shared_ptr<Object>> objects);
+    explicit PathsCreator(std::filesystem::path basePath, std::vector<std::shared_ptr<Object>> objects);
 
     void createRoughPaths(int toolSize, Renderer &renderer);
 
@@ -29,7 +29,11 @@ private:
 
     void createDetailPaths(int toolSize);
 
-    mini::dx_ptr<ID3D11DepthStencilView> createDepthTexture(const DxDevice &device);
+    static std::pair<mini::dx_ptr<ID3D11DepthStencilView>, mini::dx_ptr<ID3D11Texture2D>>
+    createDepthTexture(const DxDevice &device);
+
+    static void copyResource(const DxDevice &device, mini::dx_ptr<ID3D11DepthStencilView> &source,
+                      mini::dx_ptr<ID3D11Texture2D> &target);
 
     std::filesystem::path basePath;
     std::vector<std::shared_ptr<Object>> objects;

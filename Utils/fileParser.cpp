@@ -4,6 +4,7 @@
 
 #include "fileParser.h"
 #include <fstream>
+#include <ostream>
 #include <regex>
 
 using namespace std;
@@ -98,4 +99,28 @@ void FileParser::parseCNCLine(const std::string &line, CNCPath &path) {
     }
 
     path.moves.push_back(move);
+}
+
+void FileParser::saveCNCPath(const std::filesystem::path& path, const std::vector<DirectX::XMFLOAT3>& positions) {
+    ofstream output;
+    output.open(path, ios_base::out | ios_base::trunc);
+
+    int i = 1;
+    XMFLOAT3 last(-INFINITY, -INFINITY, -INFINITY);
+    for (auto& pos : positions) {
+        output << std::format("N{}G01", i++);
+        if (abs(pos.x - last.x) > FLT_EPSILON) {
+            output << std::format("X{:.3f}", pos.x);
+        }
+        if (abs(pos.y - last.y) > FLT_EPSILON) {
+            output << std::format("Y{:.3f}", pos.y);
+        }
+        if (abs(pos.z - last.z) > FLT_EPSILON) {
+            output << std::format("Z{:.3f}", pos.z);
+        }
+        output << "\n";
+        last = pos;
+    }
+
+    output.close();
 }

@@ -33,6 +33,8 @@ struct CNCPath {
 namespace FileParser {
     CNCPath parseCNCPath(std::filesystem::path path);
     void parseCNCLine(const std::string& line, CNCPath &path);
+
+    void saveCNCPath(const std::filesystem::path& path, const std::vector<DirectX::XMFLOAT3>& positions);
 };
 
 
