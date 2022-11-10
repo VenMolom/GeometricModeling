@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Controls/intersectdialog.h"
+#include "Utils/pathsCreator.h"
 #include <QFileDialog>
 #include <QMessageBox>
 
@@ -256,7 +257,7 @@ void MainWindow::on_actionSave_triggered() {
     QFileDialog dialog(this, "Save scene file");
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setFilter(QDir::Files);
-    dialog.setDirectory("../Saves");
+    dialog.setDirectory("./Saves");
     dialog.setNameFilter("Scene (*.json)");
     dialog.selectFile("scene.json");
 
@@ -277,7 +278,7 @@ void MainWindow::on_actionLoad_triggered() {
     QFileDialog dialog(this, "Select scene file");
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setFilter(QDir::Files);
-    dialog.setDirectory("../Saves");
+    dialog.setDirectory("./Saves");
     dialog.setNameFilter("Scene (*.json)");
 
     if (!dialog.exec()) return;
@@ -294,3 +295,16 @@ void MainWindow::on_actionLoad_triggered() {
         QMessageBox::warning(this, "Load error", "Failed to load scene");
     }
 }
+
+void MainWindow::on_actionGenerate_paths_triggered() {
+    QFileDialog dialog(this, "Select paths base directory");
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setFilter(QDir::Dirs);
+    dialog.setDirectory("./Paths");
+
+    if (!dialog.exec()) return;
+
+    auto path = filesystem::path(dialog.selectedFiles()[0].toStdString());
+    PathsCreator::create(path, scene->objects(), *ui->renderWidget);
+}
+

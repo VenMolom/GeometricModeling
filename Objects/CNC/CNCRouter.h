@@ -115,11 +115,10 @@ private:
     mini::dx_ptr<ID3D11Texture1D> _errorStaging;
     mini::dx_ptr<ID3D11UnorderedAccessView> _errorUnordered;
 
-
     CNCPath routerPath;
     Linestrip drawPaths;
 
-    DirectX::XMFLOAT3 _size{18.f, 18.f, 4.6f};
+    DirectX::XMFLOAT3 _size{15.f, 15.f, 5.f};
     std::pair<int, int> _pointsDensity{4096, 4096};
     float _maxDepth{3.5};
     CNCTool tool;

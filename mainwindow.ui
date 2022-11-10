@@ -296,6 +296,7 @@
     <addaction name="actionCollapse_Points"/>
     <addaction name="actionFill_In"/>
     <addaction name="actionIntersect"/>
+    <addaction name="actionGenerate_paths"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAction"/>
@@ -344,6 +345,11 @@
    </property>
    <property name="shortcut">
     <string>F3</string>
+   </property>
+  </action>
+  <action name="actionGenerate_paths">
+   <property name="text">
+    <string>Generate paths</string>
    </property>
   </action>
  </widget>

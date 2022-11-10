@@ -342,7 +342,8 @@ void DxRenderer::draw(const CNCRouter &router) {
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 }
 
-void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *, DirectX::XMMATRIX>> toRender, bool downMove) {
+void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *, DirectX::XMMATRIX>> toRender,
+                               bool downMove) {
     static constexpr UINT NO_OFFSET = -1;
     static constexpr ID3D11ShaderResourceView *NULL_SRV = nullptr;
     static constexpr ID3D11UnorderedAccessView *NULL_UAV = nullptr;
@@ -367,8 +368,8 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
 
-    NormalBuffer nb {
-            XMINT4(size.first, size.second, (int)router.toolType(), router.toolWorkingHeight()),
+    NormalBuffer nb{
+            XMINT4(size.first, size.second, (int) router.toolType(), router.toolWorkingHeight()),
             XMFLOAT4(router.size().z, downMove ? 1.f : 0.f, 0.f, 0.f)
     };
     updateBuffer(m_cbNormal, nb);
@@ -384,6 +385,47 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
     m_device.context()->CSSetShaderResources(0, 2, &NULL_SRV);
     m_device.context()->CSSetUnorderedAccessViews(0, 2, &NULL_UAV, &NO_OFFSET);
     m_device.context()->CSSetShader(nullptr, nullptr, 0);
+}
+
+void DxRenderer::drawToTexture(const mini::dx_ptr<ID3D11DepthStencilView> &texture,
+                               std::pair<int, int> viewportSize,
+                               std::vector<std::shared_ptr<Object>> objects,
+                               DirectX::XMMATRIX projection, DirectX::XMMATRIX view) {
+    updateBuffer(m_cbProj, projection);
+    updateCameraCB(view);
+    updateBuffer(m_cbModel, XMMatrixIdentity());
+
+    Viewport v({viewportSize.first, viewportSize.second});
+    m_device.context()->RSSetViewports(1, &v);
+    m_device.context()->OMSetRenderTargets(0, nullptr, texture.get());
+
+    m_device.context()->RSSetState(m_noCull.get());
+    m_device.context()->HSSetShader(m_hullBicubicShader.get(), nullptr, 0);
+    m_device.context()->DSSetShader(m_domainBicubicDeBoorShader.get(), nullptr, 0);
+
+    for (auto &object: objects) {
+        auto patch = dynamic_pointer_cast<BicubicC2>(object);
+        if (!patch) continue;
+
+        auto size = patch->size();
+        XMINT4 tesselationAmount = {32, 32, size[0], size[1]};
+        updateBuffer(m_cbTesselation, tesselationAmount);
+
+        patch->render(m_device.context());
+    }
+
+    auto backBuffer = m_backBuffer.get();
+    m_device.context()->RSSetState(nullptr);
+    m_device.context()->OMSetRenderTargets(1, &backBuffer, m_depthBuffer.get());
+    m_device.context()->RSSetViewports(1, &m_viewport);
+    m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
+    m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);
+
+    m_device.context()->RSSetState(nullptr);
+    m_device.context()->HSSetShader(nullptr, nullptr, 0);
+    m_device.context()->DSSetShader(nullptr, nullptr, 0);
+
+    updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
 }
 
 void DxRenderer::enableStereoscopy(bool enable) {

@@ -23,6 +23,8 @@ class Scene : public QObject {
 public:
     explicit Scene();
 
+    std::vector<std::shared_ptr<Object>> objects() const;
+
     void addObject(std::shared_ptr<Object> &&object, bool overrideCursor = false);
 
     std::shared_ptr<CompositeObject> addComposite(std::list<std::shared_ptr<Object>> &&objects);

@@ -54,6 +54,8 @@ private slots:
 
     void on_addCNCRouter_clicked();
 
+    void on_actionGenerate_paths_triggered();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 

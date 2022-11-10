@@ -41,6 +41,10 @@ void Scene::update(Renderer &renderer, float deltaTime) {
     }
 }
 
+std::vector<std::shared_ptr<Object>> Scene::objects() const {
+    return {_objects.begin(), _objects.end()};
+}
+
 #pragma region Add
 
 void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
@@ -72,6 +76,9 @@ void Scene::addObject(shared_ptr<Object> &&object, bool overrideCursor) {
 }
 
 void Scene::addObjectNoAction(shared_ptr<Object> &&object) {
+    if (object->type() & VIRTUALPOINTSHOLDER) {
+        virtualPointsHolders.push_back(dynamic_pointer_cast<VirtualPointsHolder>(object));
+    }
     _objects.push_back(std::move(object));
     emit objectAdded(_objects.back(), false);
 }

@@ -8,6 +8,7 @@
 #include <vector>
 #include <DirectXMath.h>
 #include "DirectX/DXStructures/dxStructures.h"
+#include "DirectX/DXDevice/dxptr.h"
 
 class Object;
 
@@ -68,6 +69,11 @@ public:
     virtual void
     drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable *, DirectX::XMMATRIX>> toRender,
                   bool downMove) = 0;
+
+    virtual void drawToTexture(const mini::dx_ptr<ID3D11DepthStencilView>& texture,
+                               std::pair<int, int> viewportSize,
+                               std::vector<std::shared_ptr<Object>> objects,
+                               DirectX::XMMATRIX projection, DirectX::XMMATRIX view) = 0;
 };
 
 #endif //MG1_RENDERER_H

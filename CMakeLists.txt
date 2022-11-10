@@ -162,7 +162,7 @@ set(PROJECT_SOURCES
         Utils/DDSTextureLoader.cpp
         Utils/DDSTextureLoader.h
         Utils/WICTextureLoader.cpp
-        Utils/WICTextureLoader.h)
+        Utils/WICTextureLoader.h Utils/pathsCreator.cpp Utils/pathsCreator.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

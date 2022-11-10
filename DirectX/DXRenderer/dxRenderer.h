@@ -54,6 +54,11 @@ public:
     drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable *, DirectX::XMMATRIX>> toRender,
                   bool downMove) override;
 
+    void drawToTexture(const mini::dx_ptr<ID3D11DepthStencilView> &texture,
+                       std::pair<int, int> viewportSize,
+                       std::vector<std::shared_ptr<Object>> objects,
+                       DirectX::XMMATRIX projection, DirectX::XMMATRIX view) override;
+
     void drawSelector(const Selector &selector);
 
     void enableStereoscopy(bool enable) override;
