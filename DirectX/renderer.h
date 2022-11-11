@@ -42,6 +42,16 @@ const DirectX::XMFLOAT4 POLYGONAL_COLOR{0.0f, 1.0f, 1.0f, 1.0f};
 
 class Renderer {
 public:
+    struct Textures {
+        ID3D11DepthStencilView *depth;
+        ID3D11ShaderResourceView *depthTexture;
+        ID3D11UnorderedAccessView *unorderedTexture;
+        std::pair<int, int> viewportSize;
+        std::pair<float, float> materialSize;
+        float materialDepth;
+        int toolSize;
+    };
+
     virtual void draw(const Object &object, DirectX::XMFLOAT4 color) = 0;
 
     virtual void draw(const Torus &torus, DirectX::XMFLOAT4 color) = 0;
@@ -70,8 +80,7 @@ public:
     drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable *, DirectX::XMMATRIX>> toRender,
                   bool downMove) = 0;
 
-    virtual void drawToTexture(const mini::dx_ptr<ID3D11DepthStencilView>& texture,
-                               std::pair<int, int> viewportSize,
+    virtual void drawToTexture(const Renderer::Textures &textures,
                                std::vector<std::shared_ptr<Object>> objects,
                                DirectX::XMMATRIX projection, DirectX::XMMATRIX view) = 0;
 };

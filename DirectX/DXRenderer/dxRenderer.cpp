@@ -387,17 +387,20 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
     m_device.context()->CSSetShader(nullptr, nullptr, 0);
 }
 
-void DxRenderer::drawToTexture(const mini::dx_ptr<ID3D11DepthStencilView> &texture,
-                               std::pair<int, int> viewportSize,
+void DxRenderer::drawToTexture(const Renderer::Textures& textures,
                                std::vector<std::shared_ptr<Object>> objects,
                                DirectX::XMMATRIX projection, DirectX::XMMATRIX view) {
+    static constexpr UINT NO_OFFSET = -1;
+    static constexpr ID3D11ShaderResourceView *NULL_SRV = nullptr;
+    static constexpr ID3D11UnorderedAccessView *NULL_UAV = nullptr;
+
     updateBuffer(m_cbProj, projection);
     updateCameraCB(view);
     updateBuffer(m_cbModel, XMMatrixIdentity());
 
-    Viewport v({viewportSize.first, viewportSize.second});
+    Viewport v({textures.viewportSize.first, textures.viewportSize.second});
     m_device.context()->RSSetViewports(1, &v);
-    m_device.context()->OMSetRenderTargets(0, nullptr, texture.get());
+    m_device.context()->OMSetRenderTargets(0, nullptr, textures.depth);
 
     m_device.context()->RSSetState(m_noCull.get());
     m_device.context()->HSSetShader(m_hullBicubicShader.get(), nullptr, 0);
@@ -426,6 +429,24 @@ void DxRenderer::drawToTexture(const mini::dx_ptr<ID3D11DepthStencilView> &textu
     m_device.context()->DSSetShader(nullptr, nullptr, 0);
 
     updateBuffer(m_cbProj, scene->camera()->projectionMatrix());
+
+    NormalBuffer nb{
+            XMINT4(textures.viewportSize.first, textures.viewportSize.second, textures.toolSize, 0),
+            XMFLOAT4(textures.materialSize.first, textures.materialSize.second, textures.materialDepth, 0.f)
+    };
+    updateBuffer(m_cbNormal, nb);
+    m_device.context()->CSSetShader(m_computeHeight.get(), nullptr, 0);
+
+    ID3D11ShaderResourceView *shaderRes[] = {textures.depthTexture};
+    m_device.context()->CSSetShaderResources(0, 1, shaderRes);
+    ID3D11UnorderedAccessView *unordered[] = {textures.unorderedTexture};
+    m_device.context()->CSSetUnorderedAccessViews(0, 1, unordered, &NO_OFFSET);
+
+    m_device.context()->Dispatch(std::ceil(textures.viewportSize.first / 16.f), std::ceil(textures.viewportSize.second / 16.f), 1);
+
+    m_device.context()->CSSetShaderResources(0, 1, &NULL_SRV);
+    m_device.context()->CSSetUnorderedAccessViews(0, 1, &NULL_UAV, &NO_OFFSET);
+    m_device.context()->CSSetShader(nullptr, nullptr, 0);
 }
 
 void DxRenderer::enableStereoscopy(bool enable) {
@@ -651,6 +672,7 @@ void DxRenderer::init3D3() {
     m_pixelPhongShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psPhong.cso"));
     m_pixelPhongTexShader = m_device.CreatePixelShader(DxDevice::LoadByteCode(L"psPhongTex.cso"));
     m_computeNormal = m_device.CreateComputeShader(DxDevice::LoadByteCode(L"csNormal.cso"));
+    m_computeHeight = m_device.CreateComputeShader(DxDevice::LoadByteCode(L"csHeight.cso"));
 
     m_device.context()->VSSetShader(m_vertexShader.get(), nullptr, 0);
     m_device.context()->PSSetShader(m_pixelShader.get(), nullptr, 0);

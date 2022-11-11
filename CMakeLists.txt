@@ -162,7 +162,9 @@ set(PROJECT_SOURCES
         Utils/DDSTextureLoader.cpp
         Utils/DDSTextureLoader.h
         Utils/WICTextureLoader.cpp
-        Utils/WICTextureLoader.h Utils/pathsCreator.cpp Utils/pathsCreator.h)
+        Utils/WICTextureLoader.h
+        Utils/pathsCreator.cpp
+        Utils/pathsCreator.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)
@@ -193,7 +195,8 @@ set(HLSL_SHADER_FILES
         Shader/vsPhongTex.hlsl
         Shader/psPhong.hlsl
         Shader/psPhongTex.hlsl
-        Shader/csNormal.hlsl)
+        Shader/csNormal.hlsl
+        Shader/csHeight.hlsl)
 
 set_source_files_properties(Shader/vs.hlsl PROPERTIES ShaderType "vs")
 set_source_files_properties(Shader/vsBillboard.hlsl PROPERTIES ShaderType "vs")
@@ -221,6 +224,7 @@ set_source_files_properties(Shader/dsGregory.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/dsBicubicDeBoor.hlsl PROPERTIES ShaderType "ds")
 set_source_files_properties(Shader/gsPoint.hlsl PROPERTIES ShaderType "gs")
 set_source_files_properties(Shader/csNormal.hlsl PROPERTIES ShaderType "cs")
+set_source_files_properties(Shader/csHeight.hlsl PROPERTIES ShaderType "cs")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
 foreach (FILE ${HLSL_SHADER_FILES})

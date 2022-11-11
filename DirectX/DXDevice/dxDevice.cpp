@@ -16,7 +16,8 @@ DxDevice::DxDevice(const QWidget *parent) {
     ID3D11DeviceContext *context = nullptr;
     IDXGISwapChain *swapChain = nullptr;
 
-    auto hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG,
+    auto hr = D3D11CreateDeviceAndSwapChain(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
+                                            D3D11_CREATE_DEVICE_DEBUG | D3D11_CREATE_DEVICE_DISABLE_GPU_TIMEOUT,
                                             nullptr, 0, D3D11_SDK_VERSION, &desc, &swapChain, &device, nullptr,
                                             &context);
 

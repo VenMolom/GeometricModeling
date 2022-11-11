@@ -54,8 +54,7 @@ public:
     drawToTexture(const CNCRouter &router, std::vector<std::pair<Renderable *, DirectX::XMMATRIX>> toRender,
                   bool downMove) override;
 
-    void drawToTexture(const mini::dx_ptr<ID3D11DepthStencilView> &texture,
-                       std::pair<int, int> viewportSize,
+    void drawToTexture(const Renderer::Textures &textures,
                        std::vector<std::shared_ptr<Object>> objects,
                        DirectX::XMMATRIX projection, DirectX::XMMATRIX view) override;
 
@@ -131,6 +130,7 @@ private:
     mini::dx_ptr<ID3D11PixelShader> m_pixelPhongTexShader;
 
     mini::dx_ptr<ID3D11ComputeShader> m_computeNormal;
+    mini::dx_ptr<ID3D11ComputeShader> m_computeHeight;
 
     mini::dx_ptr<ID3D11InputLayout> m_layout;
     mini::dx_ptr<ID3D11InputLayout> m_stereoLayout;
