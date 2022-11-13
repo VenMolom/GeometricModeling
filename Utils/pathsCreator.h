@@ -36,6 +36,12 @@ private:
         mini::dx_ptr<ID3D11Texture2D> allowedHeightStaging;
     };
 
+    enum FlatteningSegment {
+        HandleExternal,
+        MainRight,
+        MainLeft,
+    };
+
     explicit PathsCreator(std::filesystem::path basePath, std::vector<std::shared_ptr<Object>> objects);
 
     void createRoughPaths(int toolSize, Renderer &renderer);
@@ -50,7 +56,8 @@ private:
                             float y, int texY);
 
     std::vector<DirectX::XMFLOAT3>
-    calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize);
+    calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize,
+                             FlatteningSegment segment);
 
     static PathsCreator::Textures createDepthTextures(const DxDevice &device);
 

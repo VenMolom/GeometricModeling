@@ -152,7 +152,7 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
 
 // main - left: starting - {u=3.79921484, v=5.70407104, s=1.50598717, t=2.7277267}
-// main - right: starting - {u=1.01107454, v=1.30299461, s=3.28164053, t=0.732948482}
+// main - right: starting - {u=3.42344403, v=0.896888852, s=0.475813448, t=1.58128047}
 
 // dziubek- top: starting - {u=0.852348148, v=0.997951567, s=2.90446663, t=6.00563574,}
 // dziubek - bottom: starting - {u=0.337863445, v=1.43801117, s=0.147527888, t=7.22353839}
@@ -169,11 +169,25 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
     IntersectHandler intersect(false, factory);
 
-    // handle
+    // handle external
     intersect.setSurfaces({patch, handle});
     auto handleExternal = static_pointer_cast<Intersection>(
             intersect.calculateIntersection(renderer, {4.56668663, 2.79134393, 2.47588515, 2.7601614}));
     assert(handleExternal);
+    auto handleDistant = calculateToolDistantPath(*handle, *handleExternal, toolSize, HandleExternal);
+
+    // main right
+    intersect.setSurfaces({patch, main});
+    auto mainRight = static_pointer_cast<Intersection>(
+            intersect.calculateIntersection(renderer, {3.42344403, 0.896888852, 0.475813448, 1.58128047}));
+    assert(mainRight);
+    auto mainRightDistant = calculateToolDistantPath(*main, *mainRight, toolSize, MainRight);
+
+    // main left
+//    auto mainLeft = static_pointer_cast<Intersection>(
+//            intersect.calculateIntersection(renderer, {3.42344403, 0.896888852, 0.475813448, 1.58128047}));
+//    assert(mainRight);
+//    auto mainLeftDistant = calculateToolDistantPath(*main, *mainLeft, toolSize, MainLeft);
 
     vector<XMFLOAT3> positions;
 
@@ -182,9 +196,8 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     positions.emplace_back(START_X, -START_Y, START_Z);
     positions.emplace_back(START_X, -START_Y, BLOCK_BOTTOM_LOCAL);
 
-    auto handleDistant = calculateToolDistantPath(*handle, *handleExternal, toolSize);
-    positions.insert(positions.end(), handleDistant.begin(), handleDistant.end());
-
+//    positions.insert(positions.end(), handleDistant.begin(), handleDistant.end());
+    positions.insert(positions.end(), mainRightDistant.begin(), mainRightDistant.end());
 
     positions.emplace_back(START_X, START_Y, BLOCK_BOTTOM_LOCAL);
     positions.emplace_back(START_X, START_Y, START_Z);
@@ -193,23 +206,34 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 }
 
 std::vector<DirectX::XMFLOAT3>
-PathsCreator::calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize) {
+PathsCreator::calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize,
+                                       FlatteningSegment segment) {
     auto parameters = intersection.secondParameters();
     auto points = intersection.points();
 
     assert(parameters.size() == points.size());
 
     vector<XMFLOAT3> path(points.size());
-    for (int i = 0; i < points.size(); ++i) {
+    for (int i = 0; i < path.size(); ++i) {
         array<float, 2> params = {parameters[i].first, parameters[i].second};
+        if (i >= points.size() - 2 && segment == MainRight) {
+            params = {parameters[points.size() - 3].first, parameters[points.size() - 3].second};
+        };
 
         auto tangent = patch.tangent(params);
         auto bitangent = patch.bitangent(params);
-        auto normal = XMVector3Normalize(XMVector3Cross(tangent, bitangent));
+        auto normal = XMVector3Normalize(XMVector3Cross(bitangent, tangent));
 
-        auto step = XMVectorAdd(XMVectorScale(XMLoadFloat3(&points[i]), 10.f), XMVectorScale(normal, -toolSize / 2.f));
+        // override normal on end points
+        if (i == 0 && segment == MainRight) {
+            normal = XMVectorSet(0, 0, 1.f, 0);
+        }
+
+        auto step = XMVectorAdd(XMVectorScale(XMLoadFloat3(&points[i]), 10.f), XMVectorScale(normal, toolSize / 2.f));
         path[i] = {step.m128_f32[0], -step.m128_f32[2], BLOCK_BOTTOM_LOCAL};
     }
+
+    // TODO: for Main interpolate on C0 edge
 
     return path;
 }
