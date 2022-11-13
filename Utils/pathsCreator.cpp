@@ -78,7 +78,7 @@ void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
 
         positions.emplace_back(-xDir * START_X, y, FIRST_LAYER_Z);
 
-        int texY = (BLOCK_SIZE_XY - y) * TEX_SIZE / (2.f * BLOCK_SIZE_XY);
+        int texY = (BLOCK_SIZE_XY * 5.f - y) * TEX_SIZE / (10.f * BLOCK_SIZE_XY);
         if (texY >= 0 && texY < TEX_SIZE) {
             addPositionsOnLine(positions, data,
                                xDir,
@@ -96,7 +96,7 @@ void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
         int xDir = (i % 2) * 2 - 1;
         positions.emplace_back(xDir * START_X, y, SECOND_LAYER_Z);
 
-        int texY = (BLOCK_SIZE_XY * 10.f - y) * TEX_SIZE / (20.f * BLOCK_SIZE_XY);
+        int texY = (BLOCK_SIZE_XY * 5.f - y) * TEX_SIZE / (10.f * BLOCK_SIZE_XY);
         if (texY >= 0 && texY < TEX_SIZE) {
             addPositionsOnLine(positions, data,
                                -xDir,
@@ -130,7 +130,6 @@ void PathsCreator::addPositionsOnLine(vector<XMFLOAT3> &positions, float *data, 
 
         // continue if same slope
         if (abs(height - prevHeight - slope) < 0.001f) {
-            slope = height - prevHeight;
             prevHeight = height;
             continue;
         }

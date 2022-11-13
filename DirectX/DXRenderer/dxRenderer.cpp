@@ -383,7 +383,7 @@ void DxRenderer::drawToTexture(const CNCRouter &router, vector<pair<Renderable *
     m_device.context()->Dispatch(std::ceil(size.first / 16.f), std::ceil(size.second / 16.f), 1);
 
     m_device.context()->CSSetShaderResources(0, 2, &NULL_SRV);
-    m_device.context()->CSSetUnorderedAccessViews(0, 2, &NULL_UAV, &NO_OFFSET);
+    m_device.context()->CSSetUnorderedAccessViews(0, 1, &NULL_UAV, &NO_OFFSET);
     m_device.context()->CSSetShader(nullptr, nullptr, 0);
 }
 

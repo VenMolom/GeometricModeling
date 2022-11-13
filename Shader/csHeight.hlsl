@@ -41,7 +41,7 @@ void main(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID, ui
     int2 startEnd = pixelsConcerned / 2;
     for (int i = -startEnd.x; i < startEnd.x; ++i) {
         for (int j = -startEnd.y; j < startEnd.y; ++j) {
-            int2 delta = int2(i, 0);
+            int2 delta = int2(i, j);
             float currentHeight = baseHeight + toolHeight(float2(delta) * mmPerPixel);
             float pixelHeight = readInputConverted(pixel + delta);
             heightMod = max(heightMod, pixelHeight - currentHeight);
