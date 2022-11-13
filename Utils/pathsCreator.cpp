@@ -150,8 +150,7 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 // handle - internal: starting - {u=0.139966473, v=2.86276722, s=4.21201801, t=2.62888551}
 // handle - external: starting - {u=4.56668663, v=2.79134393, s=2.47588515, t=2.7601614}
 
-
-// main - left: starting - {u=3.79921484, v=5.70407104, s=1.50598717, t=2.7277267}
+// main - left: starting - {u=1.83718324, v=0.757870793, s=3.52815628, t=1.48308873}
 // main - right: starting - {u=3.42344403, v=0.896888852, s=0.475813448, t=1.58128047}
 
 // dziubek- top: starting - {u=0.852348148, v=0.997951567, s=2.90446663, t=6.00563574,}
@@ -178,16 +177,16 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
     // main right
     intersect.setSurfaces({patch, main});
-    auto mainRight = static_pointer_cast<Intersection>(
-            intersect.calculateIntersection(renderer, {3.42344403, 0.896888852, 0.475813448, 1.58128047}));
-    assert(mainRight);
-    auto mainRightDistant = calculateToolDistantPath(*main, *mainRight, toolSize, MainRight);
-
-    // main left
-//    auto mainLeft = static_pointer_cast<Intersection>(
+//    auto mainRight = static_pointer_cast<Intersection>(
 //            intersect.calculateIntersection(renderer, {3.42344403, 0.896888852, 0.475813448, 1.58128047}));
 //    assert(mainRight);
-//    auto mainLeftDistant = calculateToolDistantPath(*main, *mainLeft, toolSize, MainLeft);
+//    auto mainRightDistant = calculateToolDistantPath(*main, *mainRight, toolSize, MainRight);
+
+    // main left
+    auto mainLeft = static_pointer_cast<Intersection>(
+            intersect.calculateIntersection(renderer, {1.83718324, 0.757870793, 3.52815628, 1.48308873}));
+    assert(mainLeft);
+    auto mainLeftDistant = calculateToolDistantPath(*main, *mainLeft, toolSize, MainLeft);
 
     vector<XMFLOAT3> positions;
 
@@ -197,7 +196,8 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     positions.emplace_back(START_X, -START_Y, BLOCK_BOTTOM_LOCAL);
 
 //    positions.insert(positions.end(), handleDistant.begin(), handleDistant.end());
-    positions.insert(positions.end(), mainRightDistant.begin(), mainRightDistant.end());
+//    positions.insert(positions.end(), mainRightDistant.begin(), mainRightDistant.end());
+    positions.insert(positions.end(), mainLeftDistant.begin(), mainLeftDistant.end());
 
     positions.emplace_back(START_X, START_Y, BLOCK_BOTTOM_LOCAL);
     positions.emplace_back(START_X, START_Y, START_Z);
@@ -218,14 +218,17 @@ PathsCreator::calculateToolDistantPath(ParametricObject<2> &patch, Intersection 
         array<float, 2> params = {parameters[i].first, parameters[i].second};
         if (i >= points.size() - 2 && segment == MainRight) {
             params = {parameters[points.size() - 3].first, parameters[points.size() - 3].second};
-        };
+        }
+        if (i < 2 && segment == MainLeft) {
+            params = {parameters[2].first, parameters[2].second};
+        }
 
         auto tangent = patch.tangent(params);
         auto bitangent = patch.bitangent(params);
         auto normal = XMVector3Normalize(XMVector3Cross(bitangent, tangent));
 
         // override normal on end points
-        if (i == 0 && segment == MainRight) {
+        if ((i == 0 && segment == MainRight) || (i == points.size() - 1 && segment == MainLeft)) {
             normal = XMVectorSet(0, 0, 1.f, 0);
         }
 
