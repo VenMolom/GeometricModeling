@@ -35,13 +35,16 @@ public:
 
     std::shared_ptr<IntersectionInstance> secondInstance() const { return instances[1] ? instances[1] : instances[0]; }
 
-    const std::vector<DirectX::XMFLOAT3> &points() const { return _points; };
+    const std::vector<std::pair<float, float>> &secondParameters() { return _secondParameters; }
+
+    const std::vector<DirectX::XMFLOAT3> &points() const { return _points; }
 
     bool closed() { return _closed; }
 
 private:
     bool _closed;
     std::vector<DirectX::XMFLOAT3> _points;
+    std::vector<std::pair<float, float>> _secondParameters;
     std::array<std::shared_ptr<IntersectionInstance>, 2> instances;
 };
 

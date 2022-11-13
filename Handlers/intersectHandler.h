@@ -28,12 +28,14 @@ public:
 
     std::shared_ptr<Object> calculateIntersection(Renderer &renderer, DirectX::XMFLOAT3 hint);
 
+    std::shared_ptr<Object> calculateIntersection(Renderer &renderer, std::array<float, 4> starting);
+
 private:
     bool _useCursor{};
     bool hasCursor{};
-    int maxPoints{};
-    int iterations{};
-    float step{};
+    int maxPoints{500};
+    int iterations{500};
+    float step{0.05f};
     bool selfIntersection{};
 
     float epsilon = 1e-6;

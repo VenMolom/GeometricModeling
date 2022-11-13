@@ -24,6 +24,11 @@ shared_ptr<Object> IntersectHandler::calculateIntersection(Renderer &renderer, X
     return findIntersectCurve(starting, renderer);
 }
 
+shared_ptr<Object> IntersectHandler::calculateIntersection(Renderer &renderer, array<float, 4> starting) {
+    IntersectPoint startingPoint = {starting[0], starting[1], starting[2], starting[3]};
+    return findIntersectCurve(startingPoint, renderer);
+}
+
 IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint() const {
     auto pPoints = generatePoints(surfaces[0], maxPoints);
     auto qPoints = generatePoints(surfaces[1], maxPoints);

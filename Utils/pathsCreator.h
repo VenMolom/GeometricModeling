@@ -7,17 +7,25 @@
 
 #include <filesystem>
 #include "Objects/object.h"
+#include "Objects/objectFactory.h"
 
 class PathsCreator {
     static constexpr float BLOCK_SIZE_XY = 15.f;
     static constexpr float BLOCK_SIZE_Z = 5.f;
     static constexpr float BLOCK_BOTTOM = 1.5f;
 
+    static constexpr float BLOCK_BOTTOM_LOCAL = 15.f;
+
+    static constexpr float START_X = 88.f;
+    static constexpr float START_Y = 88.f;
+    static constexpr float START_Z = 66.f;
+
 public:
     static constexpr int TEX_SIZE = 2048;
 
     static void create(const std::filesystem::path &directory,
                        std::vector<std::shared_ptr<Object>> objects,
+                       ObjectFactory &factory,
                        Renderer &renderer);
 
 private:
@@ -32,7 +40,7 @@ private:
 
     void createRoughPaths(int toolSize, Renderer &renderer);
 
-    void createFlatteningPaths(int toolSize);
+    void createFlatteningPaths(int toolSize, Renderer &renderer, ObjectFactory &factory);
 
     void createDetailPaths(int toolSize);
 
@@ -40,6 +48,9 @@ private:
                             float *data, int dir,
                             float baseZ, float xSize,
                             float y, int texY);
+
+    std::vector<DirectX::XMFLOAT3>
+    calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize);
 
     static PathsCreator::Textures createDepthTextures(const DxDevice &device);
 

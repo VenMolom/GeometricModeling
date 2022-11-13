@@ -305,6 +305,6 @@ void MainWindow::on_actionGenerate_paths_triggered() {
     if (!dialog.exec()) return;
 
     auto path = filesystem::path(dialog.selectedFiles()[0].toStdString());
-    PathsCreator::create(path, scene->objects(), *ui->renderWidget);
+    PathsCreator::create(path, scene->objects(), scene->objectFactory(), *ui->renderWidget);
 }
 

@@ -7,18 +7,23 @@
 #include <cassert>
 #include <utility>
 #include "Utils/fileParser.h"
+#include "Handlers/intersectHandler.h"
+#include "Objects/Patch/bicubicC0Creator.h"
 
 using namespace std;
 using namespace DirectX;
 
 void PathsCreator::create(const filesystem::path &directory,
                           vector<shared_ptr<Object>> objects,
+                          ObjectFactory &factory,
                           Renderer &renderer) {
+    // objects order: main, handle, dziubek
+
     assert(filesystem::is_directory(directory));
 
     auto creator = PathsCreator(directory, std::move(objects));
-    creator.createRoughPaths(16, renderer);
-    creator.createFlatteningPaths(12);
+//    creator.createRoughPaths(16, renderer);
+    creator.createFlatteningPaths(12, renderer, factory);
     creator.createDetailPaths(8);
 }
 
@@ -29,9 +34,6 @@ PathsCreator::PathsCreator(filesystem::path basePath, std::vector<std::shared_pt
 }
 
 void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
-    static float START_X = 88.f;
-    static float START_Y = 88.f;
-    static float START_Z = 66.f;
     static float FIRST_LAYER_Z = 33.5f;
     static float SECOND_LAYER_Z = 17.f;
     static float Y_DIFF = 8.f;
@@ -140,8 +142,76 @@ void PathsCreator::addPositionsOnLine(vector<XMFLOAT3> &positions, float *data, 
     }
 }
 
-void PathsCreator::createFlatteningPaths(int toolSize) {
+void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, ObjectFactory &factory) {
+// patch C0 5x5 scale (2.5, 1, 2.5)\
 
+// U,V - patch; S,T - surface
+
+// handle - internal: starting - {u=0.139966473, v=2.86276722, s=4.21201801, t=2.62888551}
+// handle - external: starting - {u=4.56668663, v=2.79134393, s=2.47588515, t=2.7601614}
+
+
+// main - left: starting - {u=3.79921484, v=5.70407104, s=1.50598717, t=2.7277267}
+// main - right: starting - {u=1.01107454, v=1.30299461, s=3.28164053, t=0.732948482}
+
+// dziubek- top: starting - {u=0.852348148, v=0.997951567, s=2.90446663, t=6.00563574,}
+// dziubek - bottom: starting - {u=0.337863445, v=1.43801117, s=0.147527888, t=7.22353839}
+
+    QProperty<weak_ptr<Object>> prop{};
+    auto patchCreator = BicubicC0Creator({0, 0, 0}, &prop);
+    patchCreator.setSegments({5, 5});
+    patchCreator.setSize({2.5, 2.5});
+    auto patch = static_pointer_cast<ParametricObject<2>>(patchCreator.create(0));
+
+    auto main = static_pointer_cast<ParametricObject<2>>(objects[0]);
+    auto handle = static_pointer_cast<ParametricObject<2>>(objects[1]);
+    auto dziubek = static_pointer_cast<ParametricObject<2>>(objects[2]);
+
+    IntersectHandler intersect(false, factory);
+
+    // handle
+    intersect.setSurfaces({patch, handle});
+    auto handleExternal = static_pointer_cast<Intersection>(
+            intersect.calculateIntersection(renderer, {4.56668663, 2.79134393, 2.47588515, 2.7601614}));
+    assert(handleExternal);
+
+    vector<XMFLOAT3> positions;
+
+    // TODO: replace with correct
+    positions.emplace_back(0.f, 0.f, START_Z);
+    positions.emplace_back(START_X, -START_Y, START_Z);
+    positions.emplace_back(START_X, -START_Y, BLOCK_BOTTOM_LOCAL);
+
+    auto handleDistant = calculateToolDistantPath(*handle, *handleExternal, toolSize);
+    positions.insert(positions.end(), handleDistant.begin(), handleDistant.end());
+
+
+    positions.emplace_back(START_X, START_Y, BLOCK_BOTTOM_LOCAL);
+    positions.emplace_back(START_X, START_Y, START_Z);
+    positions.emplace_back(0.f, 0.f, START_Z);
+    FileParser::saveCNCPath(basePath / std::format("2.f{}", toolSize), positions);
+}
+
+std::vector<DirectX::XMFLOAT3>
+PathsCreator::calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize) {
+    auto parameters = intersection.secondParameters();
+    auto points = intersection.points();
+
+    assert(parameters.size() == points.size());
+
+    vector<XMFLOAT3> path(points.size());
+    for (int i = 0; i < points.size(); ++i) {
+        array<float, 2> params = {parameters[i].first, parameters[i].second};
+
+        auto tangent = patch.tangent(params);
+        auto bitangent = patch.bitangent(params);
+        auto normal = XMVector3Normalize(XMVector3Cross(tangent, bitangent));
+
+        auto step = XMVectorAdd(XMVectorScale(XMLoadFloat3(&points[i]), 10.f), XMVectorScale(normal, -toolSize / 2.f));
+        path[i] = {step.m128_f32[0], -step.m128_f32[2], BLOCK_BOTTOM_LOCAL};
+    }
+
+    return path;
 }
 
 void PathsCreator::createDetailPaths(int toolSize) {
