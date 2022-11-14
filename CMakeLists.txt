@@ -164,7 +164,7 @@ set(PROJECT_SOURCES
         Utils/WICTextureLoader.cpp
         Utils/WICTextureLoader.h
         Utils/pathsCreator.cpp
-        Utils/pathsCreator.h)
+        Utils/pathsCreator.h Utils/pathsCreatorHelper.cpp Utils/pathsCreatorHelper.h)
 
 # Build HLSL shaders
 add_custom_target(shaders)

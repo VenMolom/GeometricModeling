@@ -7,11 +7,12 @@
 #include <cassert>
 #include <utility>
 #include "Utils/fileParser.h"
-#include "Handlers/intersectHandler.h"
 #include "Objects/Patch/bicubicC0Creator.h"
+#include "Utils/pathsCreatorHelper.h"
 
 using namespace std;
 using namespace DirectX;
+using namespace PathsCreatorHelper;
 
 void PathsCreator::create(const filesystem::path &directory,
                           vector<shared_ptr<Object>> objects,
@@ -22,7 +23,7 @@ void PathsCreator::create(const filesystem::path &directory,
     assert(filesystem::is_directory(directory));
 
     auto creator = PathsCreator(directory, std::move(objects));
-//    creator.createRoughPaths(16, renderer);
+    creator.createRoughPaths(16, renderer);
     creator.createFlatteningPaths(12, renderer, factory);
     creator.createDetailPaths(8);
 }
@@ -114,32 +115,9 @@ void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
     positions.emplace_back(0.f, 0.f, START_Z);
 
     device.context()->Unmap(tex.allowedHeightStaging.get(), 0);
+    allowedHeightStaging = std::move(tex.allowedHeightStaging);
 
     FileParser::saveCNCPath(basePath / std::format("1.k{}", toolSize), positions);
-}
-
-void PathsCreator::addPositionsOnLine(vector<XMFLOAT3> &positions, float *data, int dir, float baseZ, float xSize,
-                                      float y, int texY) {
-    auto sizePerPixel = xSize * 10.f / TEX_SIZE;
-    auto prevHeight = baseZ;
-    auto slope = 0.f;
-
-    auto start = dir > 0 ? 0 : TEX_SIZE - 1;
-    auto end = dir > 0 ? TEX_SIZE : -1;
-    for (int i = start; i != end; i += dir) {
-        int index = texY * TEX_SIZE + i;
-        auto height = max(data[index], baseZ);
-
-        // continue if same slope
-        if (abs(height - prevHeight - slope) < 0.001f) {
-            prevHeight = height;
-            continue;
-        }
-
-        slope = height - prevHeight;
-        prevHeight = height;
-        positions.emplace_back(i * sizePerPixel - 5.f * xSize, y, height);
-    }
 }
 
 void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, ObjectFactory &factory) {
@@ -153,8 +131,7 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 // main - left: starting - {u=1.83718324, v=0.757870793, s=3.52815628, t=1.48308873}
 // main - right: starting - {u=3.42344403, v=0.896888852, s=0.475813448, t=1.58128047}
 
-// dziubek- top: starting - {u=0.852348148, v=0.997951567, s=2.90446663, t=6.00563574,}
-// dziubek - bottom: starting - {u=0.337863445, v=1.43801117, s=0.147527888, t=7.22353839}
+// dziubek: starting - {u=0.587088287, v=1.62481773, s=0.297016472, t=5.40027523}
 
     QProperty<weak_ptr<Object>> prop{};
     auto patchCreator = BicubicC0Creator({0, 0, 0}, &prop);
@@ -169,24 +146,53 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     IntersectHandler intersect(false, factory);
 
     // handle external
-//    intersect.setSurfaces({patch, handle});
-//    auto handleExternal = static_pointer_cast<Intersection>(
-//            intersect.calculateIntersection(renderer, {4.56668663, 2.79134393, 2.47588515, 2.7601614}));
-//    assert(handleExternal);
-//    auto handleDistant = calculateToolDistantPath(*handle, *handleExternal, toolSize, HandleExternal);
+    auto handleDistant = intersectAndCalculateToolDistant(intersect, renderer, patch, handle,
+                                                          {4.56668663, 2.79134393, 2.47588515, 2.7601614},
+                                                          HandleExternal, toolSize);
+
+    // dziubek top
+    auto dziubekDistant = intersectAndCalculateToolDistant(intersect, renderer, patch, dziubek,
+                                                           {0.587088287, 1.62481773, 0.297016472, 5.40027523},
+                                                           Dziubek, toolSize);
 
     // main right
     intersect.setSurfaces({patch, main});
-//    auto mainRight = static_pointer_cast<Intersection>(
-//            intersect.calculateIntersection(renderer, {3.42344403, 0.896888852, 0.475813448, 1.58128047}));
-//    assert(mainRight);
-//    auto mainRightDistant = calculateToolDistantPath(*main, *mainRight, toolSize, MainRight);
+    auto mainRight = static_pointer_cast<Intersection>(
+            intersect.calculateIntersection(renderer, {3.42344403, 0.896888852, 0.475813448, 1.58128047}));
+    assert(mainRight);
+    auto mainRightDistant = calculateToolDistantPath(*main, *mainRight, toolSize, MainRight);
 
     // main left
+    intersect.setSurfaces({patch, main});
     auto mainLeft = static_pointer_cast<Intersection>(
             intersect.calculateIntersection(renderer, {1.83718324, 0.757870793, 3.52815628, 1.48308873}));
     assert(mainLeft);
     auto mainLeftDistant = calculateToolDistantPath(*main, *mainLeft, toolSize, MainLeft);
+
+    // connect main right and main left;
+    vector<XMFLOAT3> envelope(std::move(mainRightDistant));
+    {
+        auto paramsStart = mainRight->secondParameters()[mainRight->secondParameters().size() - 3];
+        array<float, 2> paramStart = {paramsStart.first, paramsStart.second};
+        auto tangentStart = main->tangent(paramStart);
+        auto bitangentStart = main->bitangent(paramStart);
+        auto normalStart = XMVector3Normalize(XMVector3Cross(bitangentStart, tangentStart));
+        auto point = main->value({0.f, 0.f});
+
+        auto paramsEnd = mainLeft->secondParameters()[2];
+        array<float, 2> paramEnd = {paramsEnd.first, paramsEnd.second};
+        auto tangentEnd = main->tangent(paramEnd);
+        auto bitangentEnd = main->bitangent(paramEnd);
+        auto normalEnd = XMVector3Normalize(XMVector3Cross(bitangentEnd, tangentEnd));
+
+        insertSlerpNormalPosition(envelope, XMVectorScale(point, 10.f), normalStart, normalEnd,
+                                  toolSize / 2.f);
+        envelope.insert(envelope.end(), mainLeftDistant.begin(), mainLeftDistant.end());
+    }
+
+    // TODO: connect paths into envelope
+//    auto [mainInter, handleInter] = findIntersection(envelope.begin() + 25, handleDistant.begin() + 4);
+//    auto [mainInter2, handleInter2] = findIntersection(mainInter + 10, handleDistant.end() - 20);
 
     vector<XMFLOAT3> positions;
 
@@ -195,11 +201,8 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     positions.emplace_back(START_X, -START_Y, START_Z);
     positions.emplace_back(START_X, -START_Y, BLOCK_BOTTOM_LOCAL);
 
+//    positions.insert(positions.end(), mainDistant.begin(), mainDistant.end());
 //    positions.insert(positions.end(), handleDistant.begin(), handleDistant.end());
-//    positions.insert(positions.end(), mainRightDistant.begin(), mainRightDistant.end());
-    positions.insert(positions.end(), mainLeftDistant.begin(), mainLeftDistant.end());
-
-    // TODO: end of mainRight connects with start of mainLeft (slerp)
 
     positions.emplace_back(START_X, START_Y, BLOCK_BOTTOM_LOCAL);
     positions.emplace_back(START_X, START_Y, START_Z);
@@ -207,112 +210,6 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     FileParser::saveCNCPath(basePath / std::format("2.f{}", toolSize), positions);
 }
 
-std::vector<DirectX::XMFLOAT3>
-PathsCreator::calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize,
-                                       FlatteningSegment segment) {
-    static float MAX_ANGLE_COS = 0.5f;
-    static int ANGLE_INTERPOLATION_STEPS = 12;
-
-    auto parameters = intersection.secondParameters();
-    auto points = intersection.points();
-
-    assert(parameters.size() == points.size());
-
-    XMVECTOR prevNormal;
-    vector<XMFLOAT3> path;
-    path.reserve(points.size());
-    for (int i = 0; i < points.size(); ++i) {
-        array<float, 2> params = {parameters[i].first, parameters[i].second};
-        if (i >= points.size() - 2 && segment == MainRight) {
-            params = {parameters[points.size() - 3].first, parameters[points.size() - 3].second};
-        }
-        if (i < 2 && segment == MainLeft) {
-            params = {parameters[2].first, parameters[2].second};
-        }
-
-        auto tangent = patch.tangent(params);
-        auto bitangent = patch.bitangent(params);
-        auto normal = XMVector3Normalize(XMVector3Cross(bitangent, tangent));
-
-        // override normal on end points
-        if ((i == 0 && segment == MainRight) || (i == points.size() - 1 && segment == MainLeft)) {
-            normal = XMVectorSet(0, 0, 1.f, 0);
-        }
-
-        if (i > 0 && XMVector3Dot(prevNormal, normal).m128_f32[0] < MAX_ANGLE_COS) {
-            array<float, 2> midPointParams = {(parameters[i].first + parameters[i - 1].first) * 0.5f,
-                                   (parameters[i].second + parameters[i - 1].second) * 0.5f};
-            auto point = patch.value(midPointParams);
-            for (int j = 1; j < ANGLE_INTERPOLATION_STEPS; ++j) {
-                auto slerpNormal = XMVector3Normalize(
-                        XMVectorLerp(prevNormal, normal, static_cast<float>(j) / ANGLE_INTERPOLATION_STEPS));
-                auto step = XMVectorAdd(XMVectorScale(point, 10.f), XMVectorScale(slerpNormal, toolSize / 2.f));
-                path.emplace_back(step.m128_f32[0], -step.m128_f32[2], BLOCK_BOTTOM_LOCAL);
-            }
-        }
-
-        auto step = XMVectorAdd(XMVectorScale(XMLoadFloat3(&points[i]), 10.f), XMVectorScale(normal, toolSize / 2.f));
-        path.emplace_back(step.m128_f32[0], -step.m128_f32[2], BLOCK_BOTTOM_LOCAL);
-
-        prevNormal = normal;
-    }
-
-    return path;
-}
-
 void PathsCreator::createDetailPaths(int toolSize) {
 
-}
-
-PathsCreator::Textures PathsCreator::createDepthTextures(const DxDevice &device) {
-    Texture2DDescription texd;
-    texd.Width = TEX_SIZE;
-    texd.Height = TEX_SIZE;
-    texd.MipLevels = 1;
-    texd.Format = DXGI_FORMAT_R32_TYPELESS;
-    texd.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-    auto heightTexture = device.CreateTexture(texd);
-
-    DepthStencilViewDescription dvd;
-    dvd.Format = DXGI_FORMAT_D32_FLOAT;
-    auto depth = device.CreateDepthStencilView(heightTexture, dvd);
-
-    ShaderResourceViewDescription srvd;
-    srvd.Format = DXGI_FORMAT_R32_FLOAT;
-    srvd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvd.Texture2D.MipLevels = 1;
-    srvd.Texture2D.MostDetailedMip = 0;
-    auto depthTexture = device.CreateShaderResourceView(heightTexture, srvd);
-
-    texd.Format = DXGI_FORMAT_R32_FLOAT;
-    texd.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-    auto unorderedTex = device.CreateTexture(texd);
-
-    UnorderedAccessViewDescription uavd;
-    uavd.Format = texd.Format;
-    uavd.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
-    uavd.Texture2D.MipSlice = 0;
-    auto allowedHeight = device.CreateUnorderedAccessView(unorderedTex, uavd);
-
-    texd.Usage = D3D11_USAGE_STAGING;
-    texd.BindFlags = 0;
-    texd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-    auto allowedHeightStaging = device.CreateTexture(texd);
-
-    device.context()->ClearDepthStencilView(depth.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
-
-    Textures tex;
-    tex.allowedHeight = std::move(allowedHeight);
-    tex.allowedHeightStaging = std::move(allowedHeightStaging);
-    tex.depth = std::move(depth);
-    tex.depthTexture = std::move(depthTexture);
-
-    return tex;
-}
-
-void PathsCreator::copyResource(const DxDevice &device, mini::dx_ptr<ID3D11UnorderedAccessView> &source,
-                                mini::dx_ptr<ID3D11Texture2D> &target) {
-    ID3D11Resource *sourceRes = nullptr;
-    source->GetResource(&sourceRes);
-    device.context()->CopyResource(target.get(), sourceRes);
 }
