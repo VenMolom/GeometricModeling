@@ -169,11 +169,11 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     IntersectHandler intersect(false, factory);
 
     // handle external
-    intersect.setSurfaces({patch, handle});
-    auto handleExternal = static_pointer_cast<Intersection>(
-            intersect.calculateIntersection(renderer, {4.56668663, 2.79134393, 2.47588515, 2.7601614}));
-    assert(handleExternal);
-    auto handleDistant = calculateToolDistantPath(*handle, *handleExternal, toolSize, HandleExternal);
+//    intersect.setSurfaces({patch, handle});
+//    auto handleExternal = static_pointer_cast<Intersection>(
+//            intersect.calculateIntersection(renderer, {4.56668663, 2.79134393, 2.47588515, 2.7601614}));
+//    assert(handleExternal);
+//    auto handleDistant = calculateToolDistantPath(*handle, *handleExternal, toolSize, HandleExternal);
 
     // main right
     intersect.setSurfaces({patch, main});
@@ -199,6 +199,8 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 //    positions.insert(positions.end(), mainRightDistant.begin(), mainRightDistant.end());
     positions.insert(positions.end(), mainLeftDistant.begin(), mainLeftDistant.end());
 
+    // TODO: end of mainRight connects with start of mainLeft (slerp)
+
     positions.emplace_back(START_X, START_Y, BLOCK_BOTTOM_LOCAL);
     positions.emplace_back(START_X, START_Y, START_Z);
     positions.emplace_back(0.f, 0.f, START_Z);
@@ -208,13 +210,18 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 std::vector<DirectX::XMFLOAT3>
 PathsCreator::calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize,
                                        FlatteningSegment segment) {
+    static float MAX_ANGLE_COS = 0.5f;
+    static int ANGLE_INTERPOLATION_STEPS = 12;
+
     auto parameters = intersection.secondParameters();
     auto points = intersection.points();
 
     assert(parameters.size() == points.size());
 
-    vector<XMFLOAT3> path(points.size());
-    for (int i = 0; i < path.size(); ++i) {
+    XMVECTOR prevNormal;
+    vector<XMFLOAT3> path;
+    path.reserve(points.size());
+    for (int i = 0; i < points.size(); ++i) {
         array<float, 2> params = {parameters[i].first, parameters[i].second};
         if (i >= points.size() - 2 && segment == MainRight) {
             params = {parameters[points.size() - 3].first, parameters[points.size() - 3].second};
@@ -232,11 +239,23 @@ PathsCreator::calculateToolDistantPath(ParametricObject<2> &patch, Intersection 
             normal = XMVectorSet(0, 0, 1.f, 0);
         }
 
-        auto step = XMVectorAdd(XMVectorScale(XMLoadFloat3(&points[i]), 10.f), XMVectorScale(normal, toolSize / 2.f));
-        path[i] = {step.m128_f32[0], -step.m128_f32[2], BLOCK_BOTTOM_LOCAL};
-    }
+        if (i > 0 && XMVector3Dot(prevNormal, normal).m128_f32[0] < MAX_ANGLE_COS) {
+            array<float, 2> midPointParams = {(parameters[i].first + parameters[i - 1].first) * 0.5f,
+                                   (parameters[i].second + parameters[i - 1].second) * 0.5f};
+            auto point = patch.value(midPointParams);
+            for (int j = 1; j < ANGLE_INTERPOLATION_STEPS; ++j) {
+                auto slerpNormal = XMVector3Normalize(
+                        XMVectorLerp(prevNormal, normal, static_cast<float>(j) / ANGLE_INTERPOLATION_STEPS));
+                auto step = XMVectorAdd(XMVectorScale(point, 10.f), XMVectorScale(slerpNormal, toolSize / 2.f));
+                path.emplace_back(step.m128_f32[0], -step.m128_f32[2], BLOCK_BOTTOM_LOCAL);
+            }
+        }
 
-    // TODO: for Main interpolate on C0 edge
+        auto step = XMVectorAdd(XMVectorScale(XMLoadFloat3(&points[i]), 10.f), XMVectorScale(normal, toolSize / 2.f));
+        path.emplace_back(step.m128_f32[0], -step.m128_f32[2], BLOCK_BOTTOM_LOCAL);
+
+        prevNormal = normal;
+    }
 
     return path;
 }
