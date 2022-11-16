@@ -67,8 +67,8 @@ namespace PathsCreatorHelper {
                                                                     FlatteningSegment segment,
                                                                     int toolSize);
 
-//    std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
-//    findIntersection(std::vector<DirectX::XMFLOAT3>::iterator path1, std::vector<DirectX::XMFLOAT3>::iterator path2);
+    std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
+    findIntersection(std::vector<DirectX::XMFLOAT3>::iterator path1, std::vector<DirectX::XMFLOAT3>::iterator path2);
 }
 
 

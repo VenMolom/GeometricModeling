@@ -193,9 +193,23 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
         envelope.insert(envelope.end(), mainLeftDistant.begin(), mainLeftDistant.end());
     }
 
-    // TODO: connect paths into envelope
-//    auto [mainInter, handleInter, inter1] = findIntersection(envelope.begin() + 50, handleDistant.begin() + 4);
-//    auto [mainInter2, handleInter2, inter2] = findIntersection(mainInter + 20, handleDistant.end() - 20);
+    // add handle into envelope
+    auto [envelopeIter, handleIter, inter1] = findIntersection(envelope.begin() + 50, handleDistant.begin() + 10);
+    auto [envelopeIter2, handleIter2, inter2] = findIntersection(envelopeIter + 100, handleDistant.end() - 50);
+
+    envelope.erase(envelopeIter + 1, envelopeIter2 + 1);
+    envelope.insert(envelopeIter + 1, inter2);
+    envelope.insert(envelopeIter + 1, inter1);
+    envelope.insert(envelopeIter + 2, handleIter + 1, handleIter2 + 1);
+
+    // add dziubek into envelope
+    auto [envelopeIter3, dziubekIter, inter3] = findIntersection(envelope.begin() + 350, dziubekDistant.begin() + 50);
+    auto [dziubekIter2, envelopeIter4, inter4] = findIntersection(dziubekIter + 100, envelopeIter3 + 50);
+
+    envelope.erase(envelopeIter3 + 1, envelopeIter4 + 1);
+    envelope.insert(envelopeIter3 + 1, inter4);
+    envelope.insert(envelopeIter3 + 1, inter3);
+    envelope.insert(envelopeIter3 + 2, dziubekIter + 1, dziubekIter2 + 1);
 
     D3D11_MAPPED_SUBRESOURCE res;
     auto &device = DxDevice::Instance();
@@ -213,14 +227,14 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     // TODO: replace with correct
     positions.emplace_back(0.f, 0.f, START_Z);
     positions.emplace_back(START_X, -START_Y, START_Z);
-    positions.emplace_back(START_X, -START_Y, BLOCK_BOTTOM_LOCAL);
 
-//    positions.insert(positions.end(), mainDistant.begin(), mainDistant.end());
-//    positions.insert(positions.end(), handleDistant.begin(), handleDistant.end());
-//    positions.insert(positions.end(), envelope.begin(), envelope.end());
     positions.insert(positions.end(), zigzag.begin(), zigzag.end());
 
-    positions.emplace_back(START_X, -START_Y, BLOCK_BOTTOM_LOCAL);
+    positions.emplace_back(START_X, envelope.front().y, BLOCK_BOTTOM_LOCAL);
+
+    positions.insert(positions.end(), envelope.begin(), envelope.end());
+
+    positions.emplace_back(START_X, envelope.back().y, BLOCK_BOTTOM_LOCAL);
     positions.emplace_back(START_X, -START_Y, START_Z);
     positions.emplace_back(0.f, 0.f, START_Z);
     FileParser::saveCNCPath(basePath / std::format("2.f{}", toolSize), positions);

@@ -35,7 +35,7 @@ void PathsCreatorHelper::addPositionsOnLine(vector<XMFLOAT3> &positions, float *
 }
 
 vector<DirectX::XMFLOAT3> PathsCreatorHelper::createZigZagLines(const float *data, int toolSize) {
-    float lineDistance = static_cast<float>(toolSize) * 0.95f;
+    float lineDistance = static_cast<float>(toolSize) * 0.75f;
     int yMoves = std::ceil(10.f * BLOCK_SIZE_XY / lineDistance);
 
     vector<XMFLOAT3> zigZag;
@@ -46,14 +46,15 @@ vector<DirectX::XMFLOAT3> PathsCreatorHelper::createZigZagLines(const float *dat
 
     zigZagLines(zigZag, data, yMoves + 1, lineDistance, y, x, dir);
 
+    zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+    zigZag.emplace_back(-x, y, BLOCK_BOTTOM_LOCAL);
+
     x = -x;
     dir = -dir;
-    zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
     y -= 3.f * lineDistance;
     zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
 
-    zigZagLines(zigZag, data, 10, -lineDistance, y, x, dir);
-    zigZag.emplace_back(x, -START_Y, BLOCK_BOTTOM_LOCAL);
+    zigZagLines(zigZag, data, 12, -lineDistance, y, x, dir);
 
     return zigZag;
 }
@@ -74,6 +75,9 @@ void PathsCreatorHelper::zigZagLines(vector<XMFLOAT3> &zigZag, const float *data
             x = dir * START_X;
             zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
 
+            // don't start next line if this is last one
+            if (j == yMoves - 1) continue;
+
             i = clamp(i, 0, TEX_SIZE - 1);
             y += lineDistance;
             zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
@@ -87,17 +91,22 @@ void PathsCreatorHelper::zigZagLines(vector<XMFLOAT3> &zigZag, const float *data
         x = i * sizePerPixel - BLOCK_END_LOCAL;
         zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
 
+        // don't start next line if this is last one
+        if (j == yMoves - 1) continue;
+
         y += lineDistance;
         texY = (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
 
         dir = -dir;
+
+        if (j == 13) { //! hard coded for first zigzag path, where we need to go directly above and right.
+            zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+        }
+
+        while (i >= 0 && i < TEX_SIZE && data[texY * TEX_SIZE + i] < BLOCK_BOTTOM_LOCAL) i -= dir;
         while (data[texY * TEX_SIZE + i] > BLOCK_BOTTOM_LOCAL) i += dir;
 
         x = i * sizePerPixel - BLOCK_END_LOCAL;
-
-        if (j == 0) { //! hard coded for second zigzag first path, where we need to go back before going to next line.
-            zigZag.emplace_back(x, y - lineDistance, BLOCK_BOTTOM_LOCAL);
-        }
         zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
     }
 }
@@ -227,6 +236,40 @@ vector<XMFLOAT3> PathsCreatorHelper::intersectAndCalculateToolDistant(IntersectH
     return calculateToolDistantPath(*object, params, points, toolSize, segment);
 }
 
-//std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
-//findIntersection(vector<XMFLOAT3>::iterator path1, vector<XMFLOAT3>::iterator path2) {
-//}
+std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
+PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::iterator path1, vector<XMFLOAT3>::iterator path2) {
+    static const auto ccw = [](XMFLOAT3 p1, XMFLOAT3 p2, XMFLOAT3 q1) -> bool {
+        float delta = (p2.y - p1.y) * (q1.x - p2.x) -
+                      (p2.x - p1.x) * (q1.y - p2.y);
+        return delta > 0.f;
+    };
+
+    for (int i = 0;; ++i) {
+        auto e1 = *(path1 + i);
+        auto e2 = *(path1 + i + 1);
+
+        auto normal = XMVector3Normalize(XMVectorSet(e2.y - e1.y, e1.x - e2.x, 0, 0));
+
+        for (int j = 0; j <= i; ++j) {
+            auto p0 = *(path2 + j);
+            auto p1 = *(path2 + j + 1);
+
+            if (ccw(e1, e2, p0) != ccw(e1, e2, p1) && (ccw(p0, p1, e1) != ccw(p0, p1, e2))) {
+                XMVECTOR d{p1.x - p0.x, p1.y - p0.y, 0, 0};
+                auto dot = XMVector3Dot(normal, d).m128_f32[0];
+                if (abs(dot) < FLT_EPSILON) {
+                    continue;
+                }
+
+                XMVECTOR diff{p0.x - e1.x, p0.y - e1.y, 0, 0};
+                float t = -XMVector3Dot(normal, diff).m128_f32[0] / dot;
+
+                if (t >= 0 && t <= 1) {
+                    XMFLOAT3 p{};
+                    XMStoreFloat3(&p, XMVectorLerp(XMLoadFloat3(&p0), XMLoadFloat3(&p1), t));
+                    return make_tuple(path1 + i, path2 + j, p);
+                }
+            }
+        }
+    }
+}
