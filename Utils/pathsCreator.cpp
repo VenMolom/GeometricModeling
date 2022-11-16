@@ -35,10 +35,10 @@ PathsCreator::PathsCreator(filesystem::path basePath, std::vector<std::shared_pt
 }
 
 void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
-    static float FIRST_LAYER_Z = 33.5f;
-    static float SECOND_LAYER_Z = 17.f;
-    static float Y_DIFF = 8.f;
-    static int Y_MOVES = 23;
+    static const float FIRST_LAYER_Z = 33.5f;
+    static const float SECOND_LAYER_Z = 17.f;
+    static const float Y_DIFF = 8.f;
+    static const int Y_MOVES = 23;
 
     auto &device = DxDevice::Instance();
     auto tex = createDepthTextures(device);
@@ -81,7 +81,7 @@ void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
 
         positions.emplace_back(-xDir * START_X, y, FIRST_LAYER_Z);
 
-        int texY = (BLOCK_SIZE_XY * 5.f - y) * TEX_SIZE / (10.f * BLOCK_SIZE_XY);
+        int texY =  (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
         if (texY >= 0 && texY < TEX_SIZE) {
             addPositionsOnLine(positions, data,
                                xDir,
@@ -99,7 +99,7 @@ void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
         int xDir = (i % 2) * 2 - 1;
         positions.emplace_back(xDir * START_X, y, SECOND_LAYER_Z);
 
-        int texY = (BLOCK_SIZE_XY * 5.f - y) * TEX_SIZE / (10.f * BLOCK_SIZE_XY);
+        int texY =  (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
         if (texY >= 0 && texY < TEX_SIZE) {
             addPositionsOnLine(positions, data,
                                -xDir,
@@ -157,29 +157,32 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
     // main right
     intersect.setSurfaces({patch, main});
-    auto mainRight = static_pointer_cast<Intersection>(
-            intersect.calculateIntersection(renderer, {3.42344403, 0.896888852, 0.475813448, 1.58128047}));
-    assert(mainRight);
-    auto mainRightDistant = calculateToolDistantPath(*main, *mainRight, toolSize, MainRight);
+    auto [mainRightParams, mainRightPoints] = intersect.calculateIntersection(renderer,
+                                                                              {3.42344403, 0.896888852, 0.475813448,
+                                                                               1.58128047});
+    assert(!mainRightParams.empty());
+    auto mainRightDistant = calculateToolDistantPath(*main, mainRightParams, mainRightPoints, toolSize, MainRight);
 
     // main left
     intersect.setSurfaces({patch, main});
-    auto mainLeft = static_pointer_cast<Intersection>(
-            intersect.calculateIntersection(renderer, {1.83718324, 0.757870793, 3.52815628, 1.48308873}));
-    assert(mainLeft);
-    auto mainLeftDistant = calculateToolDistantPath(*main, *mainLeft, toolSize, MainLeft);
+    auto [mainLeftParams, mainLeftPoints] = intersect.calculateIntersection(renderer,
+                                                                            {1.83718324, 0.757870793, 3.52815628,
+                                                                             1.48308873});
+    assert(!mainLeftParams.empty());
+    auto mainLeftDistant = calculateToolDistantPath(*main, mainLeftParams, mainLeftPoints, toolSize, MainLeft);
 
     // connect main right and main left;
+    // TODO: some anomaly on connection
     vector<XMFLOAT3> envelope(std::move(mainRightDistant));
     {
-        auto paramsStart = mainRight->secondParameters()[mainRight->secondParameters().size() - 3];
+        auto paramsStart = mainRightParams[mainRightParams.size() - 3];
         array<float, 2> paramStart = {paramsStart.first, paramsStart.second};
         auto tangentStart = main->tangent(paramStart);
         auto bitangentStart = main->bitangent(paramStart);
         auto normalStart = XMVector3Normalize(XMVector3Cross(bitangentStart, tangentStart));
         auto point = main->value({0.f, 0.f});
 
-        auto paramsEnd = mainLeft->secondParameters()[2];
+        auto paramsEnd = mainLeftParams[2];
         array<float, 2> paramEnd = {paramsEnd.first, paramsEnd.second};
         auto tangentEnd = main->tangent(paramEnd);
         auto bitangentEnd = main->bitangent(paramEnd);
@@ -191,8 +194,19 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     }
 
     // TODO: connect paths into envelope
-//    auto [mainInter, handleInter] = findIntersection(envelope.begin() + 25, handleDistant.begin() + 4);
-//    auto [mainInter2, handleInter2] = findIntersection(mainInter + 10, handleDistant.end() - 20);
+//    auto [mainInter, handleInter, inter1] = findIntersection(envelope.begin() + 50, handleDistant.begin() + 4);
+//    auto [mainInter2, handleInter2, inter2] = findIntersection(mainInter + 20, handleDistant.end() - 20);
+
+    D3D11_MAPPED_SUBRESOURCE res;
+    auto &device = DxDevice::Instance();
+
+    auto hr = device.context()->Map(allowedHeightStaging.get(), 0, D3D11_MAP_READ, 0, &res);
+    if (FAILED(hr))
+        return;
+
+    auto *data = reinterpret_cast<float *>(res.pData);
+    auto zigzag = createZigZagLines(data, toolSize);
+    device.context()->Unmap(allowedHeightStaging.get(), 0);
 
     vector<XMFLOAT3> positions;
 
@@ -203,9 +217,11 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
 //    positions.insert(positions.end(), mainDistant.begin(), mainDistant.end());
 //    positions.insert(positions.end(), handleDistant.begin(), handleDistant.end());
+//    positions.insert(positions.end(), envelope.begin(), envelope.end());
+    positions.insert(positions.end(), zigzag.begin(), zigzag.end());
 
-    positions.emplace_back(START_X, START_Y, BLOCK_BOTTOM_LOCAL);
-    positions.emplace_back(START_X, START_Y, START_Z);
+    positions.emplace_back(START_X, -START_Y, BLOCK_BOTTOM_LOCAL);
+    positions.emplace_back(START_X, -START_Y, START_Z);
     positions.emplace_back(0.f, 0.f, START_Z);
     FileParser::saveCNCPath(basePath / std::format("2.f{}", toolSize), positions);
 }

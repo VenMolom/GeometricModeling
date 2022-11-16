@@ -29,7 +29,8 @@ namespace PathsCreatorHelper {
     static constexpr float BLOCK_SIZE_Z = 5.f;
     static constexpr float BLOCK_BOTTOM = 1.5f;
 
-    static constexpr float BLOCK_BOTTOM_LOCAL = 15.f;
+    static constexpr float BLOCK_BOTTOM_LOCAL = BLOCK_BOTTOM * 10.f;
+    static constexpr float BLOCK_END_LOCAL = BLOCK_SIZE_XY * 5.f;
 
     static constexpr float START_X = 88.f;
     static constexpr float START_Y = 88.f;
@@ -40,8 +41,14 @@ namespace PathsCreatorHelper {
                             float baseZ, float xSize,
                             float y, int texY);
 
+    std::vector<DirectX::XMFLOAT3> createZigZagLines(const float *data, int toolSize);
+
+    void zigZagLines(std::vector<DirectX::XMFLOAT3> &zigZag, const float *data, int yMoves, float lineDistance,
+                     float &y, float &x, int &dir);
+
     std::vector<DirectX::XMFLOAT3>
-    calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize,
+    calculateToolDistantPath(ParametricObject<2> &patch, const std::vector<std::pair<float, float>> &parameters,
+                             const std::vector<DirectX::XMFLOAT3> &points, int toolSize,
                              FlatteningSegment segment);
 
     void insertSlerpNormalPosition(std::vector<DirectX::XMFLOAT3> &path, DirectX::XMVECTOR position,
@@ -60,9 +67,8 @@ namespace PathsCreatorHelper {
                                                                     FlatteningSegment segment,
                                                                     int toolSize);
 
-    std::pair<std::vector<DirectX::XMFLOAT3>::iterator,
-            std::vector<DirectX::XMFLOAT3>::iterator>
-    findIntersection(std::vector<DirectX::XMFLOAT3>::iterator path1, std::vector<DirectX::XMFLOAT3>::iterator path2);
+//    std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
+//    findIntersection(std::vector<DirectX::XMFLOAT3>::iterator path1, std::vector<DirectX::XMFLOAT3>::iterator path2);
 }
 
 

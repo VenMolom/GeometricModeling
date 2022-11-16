@@ -28,7 +28,8 @@ public:
 
     std::shared_ptr<Object> calculateIntersection(Renderer &renderer, DirectX::XMFLOAT3 hint);
 
-    std::shared_ptr<Object> calculateIntersection(Renderer &renderer, std::array<float, 4> starting);
+    std::pair<std::vector<std::pair<float, float>>, std::vector<DirectX::XMFLOAT3>>
+    calculateIntersection(Renderer &renderer, std::array<float, 4> starting);
 
 private:
     bool _useCursor{};
@@ -42,6 +43,12 @@ private:
     float parameterEpsilon = 1e-2;
     std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces{};
     ObjectFactory &factory;
+
+    struct IntersectionData {
+        std::vector<std::pair<float, float>> firstParams, secondParams;
+        std::vector<DirectX::XMFLOAT3> points;
+        bool closed;
+    };
 
     struct IntersectPoint {
         float u, v, s, t;
@@ -61,16 +68,16 @@ private:
         bool outOfRange(const std::tuple<float, float> &uRange, const std::tuple<float, float> &vRange,
                         const std::tuple<float, float> &sRange, const std::tuple<float, float> &tRange,
                         bool wrapU = false, bool wrapV = false, bool wrapS = false, bool wrapT = false) {
-            auto[startU, endU] = uRange;
+            auto [startU, endU] = uRange;
             if ((u > endU || u < startU) && !wrapU) return true;
 
-            auto[startV, endV] = vRange;
+            auto [startV, endV] = vRange;
             if ((v > endV || v < startV) && !wrapV) return true;
 
-            auto[startS, endS] = sRange;
+            auto [startS, endS] = sRange;
             if ((s > endS || s < startS) && !wrapS) return true;
 
-            auto[startT, endT] = tRange;
+            auto [startT, endT] = tRange;
             if ((t > endT || t < startT) && !wrapT) return true;
 
             return false;
@@ -85,10 +92,10 @@ private:
 
             auto minDiff = 1.f;
 
-            auto[startU, endU] = uRange;
-            auto[startV, endV] = vRange;
-            auto[startS, endS] = sRange;
-            auto[startT, endT] = tRange;
+            auto [startU, endU] = uRange;
+            auto [startV, endV] = vRange;
+            auto [startS, endS] = sRange;
+            auto [startT, endT] = tRange;
 
             if (delta.u != 0) {
                 minDiff = std::min(minDiff, (std::clamp(u, startU, endU) - prev.u) / delta.u);
@@ -115,19 +122,19 @@ private:
                   const std::tuple<float, float> &sRange, const std::tuple<float, float> &tRange,
                   bool wrapU, bool wrapV, bool wrapS, bool wrapT) {
             if (wrapU) {
-                auto[startU, endU] = uRange;
+                auto [startU, endU] = uRange;
                 u = wrap(u, startU, endU);
             }
             if (wrapV) {
-                auto[startV, endV] = vRange;
+                auto [startV, endV] = vRange;
                 v = wrap(v, startV, endV);
             }
             if (wrapS) {
-                auto[startS, endS] = sRange;
+                auto [startS, endS] = sRange;
                 s = wrap(s, startS, endS);
             }
             if (wrapT) {
-                auto[startT, endT] = tRange;
+                auto [startT, endT] = tRange;
                 t = wrap(t, startT, endT);
             }
         }
@@ -152,7 +159,7 @@ private:
 
     bool findIntersectPoint(IntersectPoint starting, IntersectPoint &intersect) const;
 
-    std::shared_ptr<Object> findIntersectCurve(IntersectPoint starting, Renderer &renderer);
+    IntersectionData findIntersectCurve(IntersectPoint starting);
 
     PointResult calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
                                             DirectX::XMVECTOR startValue, DirectX::XMVECTOR t) const;

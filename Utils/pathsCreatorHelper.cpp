@@ -23,7 +23,7 @@ void PathsCreatorHelper::addPositionsOnLine(vector<XMFLOAT3> &positions, float *
         auto height = max(data[index], baseZ);
 
         // continue if same slope
-        if (abs(height - prevHeight - slope) < 0.001f) {
+        if (abs(height - prevHeight - slope) < 0.01f) {
             prevHeight = height;
             continue;
         }
@@ -34,13 +34,79 @@ void PathsCreatorHelper::addPositionsOnLine(vector<XMFLOAT3> &positions, float *
     }
 }
 
-std::vector<DirectX::XMFLOAT3>
-PathsCreatorHelper::calculateToolDistantPath(ParametricObject<2> &patch, Intersection &intersection, int toolSize,
+vector<DirectX::XMFLOAT3> PathsCreatorHelper::createZigZagLines(const float *data, int toolSize) {
+    float lineDistance = static_cast<float>(toolSize) * 0.95f;
+    int yMoves = std::ceil(10.f * BLOCK_SIZE_XY / lineDistance);
+
+    vector<XMFLOAT3> zigZag;
+    zigZag.emplace_back(START_X, -BLOCK_END_LOCAL, BLOCK_BOTTOM_LOCAL);
+    float x = BLOCK_END_LOCAL;
+    float y = -BLOCK_END_LOCAL;
+    int dir = -1.f;
+
+    zigZagLines(zigZag, data, yMoves + 1, lineDistance, y, x, dir);
+
+    x = -x;
+    dir = -dir;
+    zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+    y -= 3.f * lineDistance;
+    zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+
+    zigZagLines(zigZag, data, 10, -lineDistance, y, x, dir);
+    zigZag.emplace_back(x, -START_Y, BLOCK_BOTTOM_LOCAL);
+
+    return zigZag;
+}
+
+void PathsCreatorHelper::zigZagLines(vector<XMFLOAT3> &zigZag, const float *data, int yMoves, float lineDistance,
+                                     float &y, float &x, int &dir) {
+    static const float sizePerPixel = BLOCK_SIZE_XY * 10.f / TEX_SIZE;
+
+    int i = dir > 0 ? 0 : TEX_SIZE - 1;
+    for (int j = 0; j < yMoves; ++j) {
+        if (abs(y) > BLOCK_END_LOCAL) break;
+
+        int texY = (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
+        while (i >= 0 && i < TEX_SIZE && data[texY * TEX_SIZE + i] < BLOCK_BOTTOM_LOCAL) i += dir;
+
+        // line goes all the way
+        if (i < 0 || i >= TEX_SIZE) {
+            x = dir * START_X;
+            zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+
+            i = clamp(i, 0, TEX_SIZE - 1);
+            y += lineDistance;
+            zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+            dir = -dir;
+
+            continue;
+        }
+
+        // line needs to stop
+        i -= dir;
+        x = i * sizePerPixel - BLOCK_END_LOCAL;
+        zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+
+        y += lineDistance;
+        texY = (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
+
+        dir = -dir;
+        while (data[texY * TEX_SIZE + i] > BLOCK_BOTTOM_LOCAL) i += dir;
+
+        x = i * sizePerPixel - BLOCK_END_LOCAL;
+
+        if (j == 0) { //! hard coded for second zigzag first path, where we need to go back before going to next line.
+            zigZag.emplace_back(x, y - lineDistance, BLOCK_BOTTOM_LOCAL);
+        }
+        zigZag.emplace_back(x, y, BLOCK_BOTTOM_LOCAL);
+    }
+}
+
+vector<DirectX::XMFLOAT3>
+PathsCreatorHelper::calculateToolDistantPath(ParametricObject<2> &patch, const vector<pair<float, float>> &parameters,
+                                             const vector<XMFLOAT3> &points, int toolSize,
                                              FlatteningSegment segment) {
     static float MAX_ANGLE_COS = 0.5f;
-
-    auto parameters = intersection.secondParameters();
-    auto points = intersection.points();
 
     assert(parameters.size() == points.size());
 
@@ -66,6 +132,7 @@ PathsCreatorHelper::calculateToolDistantPath(ParametricObject<2> &patch, Interse
             normal = XMVector3Normalize(XMVector3Cross(bitangent, tangent));
         }
 
+        // TODO: some anomaly on connection
         if (i > 0 && XMVector3Dot(prevNormal, normal).m128_f32[0] < MAX_ANGLE_COS) {
             array<float, 2> midPointParams = {(parameters[i].first + parameters[i - 1].first) * 0.5f,
                                               (parameters[i].second + parameters[i - 1].second) * 0.5f};
@@ -147,17 +214,19 @@ void PathsCreatorHelper::copyResource(const DxDevice &device, mini::dx_ptr<ID3D1
     device.context()->CopyResource(target.get(), sourceRes);
 }
 
-std::vector<DirectX::XMFLOAT3>
-PathsCreatorHelper::intersectAndCalculateToolDistant(IntersectHandler &intersect,
-                                                     Renderer &renderer,
-                                                     shared_ptr<ParametricObject<2>> patch,
-                                                     shared_ptr<ParametricObject<2>> object,
-                                                     const array<float, 4> &starting,
-                                                     FlatteningSegment segment,
-                                                     int toolSize) {
-    intersect.setSurfaces({patch, object});
-    auto intersection = static_pointer_cast<Intersection>(
-            intersect.calculateIntersection(renderer, starting));
-    assert(intersection);
-    return calculateToolDistantPath(*object, *intersection, toolSize, segment);
+vector<XMFLOAT3> PathsCreatorHelper::intersectAndCalculateToolDistant(IntersectHandler &intersect,
+                                                                      Renderer &renderer,
+                                                                      shared_ptr<ParametricObject<2>> patch,
+                                                                      shared_ptr<ParametricObject<2>> object,
+                                                                      const array<float, 4> &starting,
+                                                                      FlatteningSegment segment,
+                                                                      int toolSize) {
+    intersect.setSurfaces({std::move(patch), object});
+    auto [params, points] = intersect.calculateIntersection(renderer, starting);
+    assert(!params.empty());
+    return calculateToolDistantPath(*object, params, points, toolSize, segment);
 }
+
+//std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
+//findIntersection(vector<XMFLOAT3>::iterator path1, vector<XMFLOAT3>::iterator path2) {
+//}
