@@ -23,11 +23,13 @@ private:
 
     void createFlatteningPaths(int toolSize, Renderer &renderer, ObjectFactory &factory);
 
-    void createDetailPaths(int toolSize);
+    void createDetailPaths(int toolSize, Renderer &renderer, ObjectFactory &factory);
 
     std::filesystem::path basePath;
     std::vector<std::shared_ptr<Object>> objects;
     mini::dx_ptr<ID3D11Texture2D> allowedHeightStaging;
+
+    std::shared_ptr<Patch> patch;
 };
 
 

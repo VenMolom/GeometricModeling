@@ -130,7 +130,7 @@ std::shared_ptr<VirtualPoint> BicubicC0::pointAt(std::pair<int, int> index) cons
     return points[idx];
 }
 
-DirectX::XMVECTOR BicubicC0::value(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC0::value(const array<float, 2> &parameters) const {
     auto[u, v] = parameters;
     auto control = getControlPoints(u, v);
 
@@ -148,7 +148,7 @@ DirectX::XMVECTOR BicubicC0::value(const array<float, 2> &parameters) {
     return Utils3D::bernsteinPolynomial(p, u);
 }
 
-DirectX::XMVECTOR BicubicC0::tangent(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC0::tangent(const array<float, 2> &parameters) const {
     auto[u, v] = parameters;
     auto control = getControlPoints(u, v);
 
@@ -172,7 +172,7 @@ DirectX::XMVECTOR BicubicC0::tangent(const array<float, 2> &parameters) {
     return Utils3D::bernsteinPolynomial(pp, u);
 }
 
-DirectX::XMVECTOR BicubicC0::bitangent(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC0::bitangent(const array<float, 2> &parameters) const {
     auto[u, v] = parameters;
     auto control = getControlPoints(u, v);
 

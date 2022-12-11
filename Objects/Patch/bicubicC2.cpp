@@ -128,7 +128,7 @@ BicubicC2::BicubicC2(const MG1::BezierSurfaceC2 &surface, vector<MG1::Point> &se
     updatePoints();
 }
 
-DirectX::XMVECTOR BicubicC2::value(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC2::value(const array<float, 2> &parameters) const {
     auto[u, v] = parameters;
     auto control = getControlPoints(u, v);
 
@@ -148,7 +148,7 @@ DirectX::XMVECTOR BicubicC2::value(const array<float, 2> &parameters) {
     return Utils3D::bernsteinPolynomial(Utils3D::convertToBernstein(p), u);
 }
 
-DirectX::XMVECTOR BicubicC2::tangent(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC2::tangent(const array<float, 2> &parameters) const {
     auto[u, v] = parameters;
     auto control = getControlPoints(u, v);
 
@@ -175,7 +175,7 @@ DirectX::XMVECTOR BicubicC2::tangent(const array<float, 2> &parameters) {
     return Utils3D::bernsteinPolynomial(pp, u);
 }
 
-DirectX::XMVECTOR BicubicC2::bitangent(const array<float, 2> &parameters) {
+DirectX::XMVECTOR BicubicC2::bitangent(const array<float, 2> &parameters) const {
     auto[u, v] = parameters;
     auto control = getControlPoints(u, v);
 

@@ -9,6 +9,7 @@
 #include "Utils/fileParser.h"
 #include "Objects/Patch/bicubicC0Creator.h"
 #include "Utils/pathsCreatorHelper.h"
+#include "Objects/Parametric/toolDistantSurface.h"
 
 using namespace std;
 using namespace DirectX;
@@ -25,13 +26,17 @@ void PathsCreator::create(const filesystem::path &directory,
     auto creator = PathsCreator(directory, std::move(objects));
     creator.createRoughPaths(16, renderer);
     creator.createFlatteningPaths(12, renderer, factory);
-    creator.createDetailPaths(8);
+    creator.createDetailPaths(8, renderer, factory);
 }
 
 PathsCreator::PathsCreator(filesystem::path basePath, std::vector<std::shared_ptr<Object>> objects)
         : basePath(std::move(basePath)),
           objects(std::move(objects)) {
-
+    QProperty<weak_ptr<Object>> prop{};
+    auto patchCreator = BicubicC0Creator({0, 0, 0}, &prop);
+    patchCreator.setSegments({5, 5});
+    patchCreator.setSize({2.5, 2.5});
+    patch = static_pointer_cast<Patch>(patchCreator.create(0));
 }
 
 void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
@@ -133,12 +138,6 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
 // dziubek: starting - {u=0.587088287, v=1.62481773, s=0.297016472, t=5.40027523}
 
-    QProperty<weak_ptr<Object>> prop{};
-    auto patchCreator = BicubicC0Creator({0, 0, 0}, &prop);
-    patchCreator.setSegments({5, 5});
-    patchCreator.setSize({2.5, 2.5});
-    auto patch = static_pointer_cast<ParametricObject<2>>(patchCreator.create(0));
-
     auto main = static_pointer_cast<ParametricObject<2>>(objects[0]);
     auto handle = static_pointer_cast<ParametricObject<2>>(objects[1]);
     auto dziubek = static_pointer_cast<ParametricObject<2>>(objects[2]);
@@ -161,6 +160,8 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
                                                                               {3.42344403, 0.896888852, 0.475813448,
                                                                                1.58128047});
     assert(!mainRightParams.empty());
+    mainRightParams.back() = {0, 0};
+    XMStoreFloat3(&mainRightPoints.back(), main->value({0, 0}));
     auto mainRightDistant = calculateToolDistantPath(*main, mainRightParams, mainRightPoints, toolSize, MainRight);
 
     // main left
@@ -169,24 +170,29 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
                                                                             {1.83718324, 0.757870793, 3.52815628,
                                                                              1.48308873});
     assert(!mainLeftParams.empty());
+    mainLeftParams[0] = {0, 0};
+    mainLeftPoints[0] = mainRightPoints.back();
     auto mainLeftDistant = calculateToolDistantPath(*main, mainLeftParams, mainLeftPoints, toolSize, MainLeft);
 
     // connect main right and main left;
-    // TODO: some anomaly on connection
     vector<XMFLOAT3> envelope(std::move(mainRightDistant));
     {
         auto paramsStart = mainRightParams[mainRightParams.size() - 3];
         array<float, 2> paramStart = {paramsStart.first, paramsStart.second};
         auto tangentStart = main->tangent(paramStart);
         auto bitangentStart = main->bitangent(paramStart);
-        auto normalStart = XMVector3Normalize(XMVector3Cross(bitangentStart, tangentStart));
-        auto point = main->value({0.f, 0.f});
+        auto normalStart = XMVector3Cross(bitangentStart, tangentStart);
+        normalStart.m128_f32[1] = 0;
+        normalStart = XMVector3Normalize(normalStart);
+        auto point = XMLoadFloat3(&mainRightPoints.back());
 
         auto paramsEnd = mainLeftParams[2];
         array<float, 2> paramEnd = {paramsEnd.first, paramsEnd.second};
         auto tangentEnd = main->tangent(paramEnd);
         auto bitangentEnd = main->bitangent(paramEnd);
-        auto normalEnd = XMVector3Normalize(XMVector3Cross(bitangentEnd, tangentEnd));
+        auto normalEnd = XMVector3Cross(bitangentEnd, tangentEnd);
+        normalEnd.m128_f32[1] = 0;
+        normalEnd = XMVector3Normalize(normalEnd);
 
         insertSlerpNormalPosition(envelope, XMVectorScale(point, 10.f), normalStart, normalEnd,
                                   toolSize / 2.f);
@@ -223,8 +229,6 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     device.context()->Unmap(allowedHeightStaging.get(), 0);
 
     vector<XMFLOAT3> positions;
-
-    // TODO: replace with correct
     positions.emplace_back(0.f, 0.f, START_Z);
     positions.emplace_back(START_X, -START_Y, START_Z);
 
@@ -240,6 +244,42 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
     FileParser::saveCNCPath(basePath / std::format("2.f{}", toolSize), positions);
 }
 
-void PathsCreator::createDetailPaths(int toolSize) {
+void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFactory &factory) {
+    float distance = toolSize / 20.f;
+    auto mainDistant = make_shared<ToolDistantSurface>(static_pointer_cast<Patch>(objects[0]), distance);
+    auto handleDistant = make_shared<ToolDistantSurface>(static_pointer_cast<Patch>(objects[1]), distance);
+    auto dziubekDistant = make_shared<ToolDistantSurface>(static_pointer_cast<Patch>(objects[2]), distance);
 
+    auto patchDistant = make_shared<ToolDistantSurface>(patch, distance);
+
+    IntersectHandler intersect(false, factory);
+
+    // handle paths
+    intersect.setSurfaces({patchDistant, handleDistant});
+    auto [outsideParams, outsidePoints] = intersect.calculateIntersection(renderer, {4.57867765, 3.19881678, 3.17830682, 2.34179115});
+    auto [insideParams, insidePoints] = intersect.calculateIntersection(renderer, {4.02702141, 2.75102615, 0.896845459, 2.65458512});
+
+    intersect.setSurfaces({mainDistant, handleDistant});
+    auto [topRingParams, topRingPoints] = intersect.calculateIntersection(renderer, {5.95757055, 4.5840373, 4.29148722, 5.70556259});
+    auto [bottomRingParams, bottomRingPoints] = intersect.calculateIntersection(renderer, {0.792187035, 6.699512, 0.868857979, 0.548215151});
+
+    // trim top and bottom ring
+    // TODO: split and connect
+    auto topRingIter1 = findIntersectionHeight(topRingPoints.begin(), distance);
+    auto topRingIter2 = findIntersectionHeight(topRingIter1 + 10, distance);
+    topRingPoints.erase(topRingIter1, topRingIter2 + 1);
+
+    auto bottomRingIter1 = findIntersectionHeight(bottomRingPoints.begin(), distance);
+    auto bottomRingIter2 = findIntersectionHeight(bottomRingIter1 + 10, distance);
+    bottomRingPoints.erase(bottomRingIter2, bottomRingPoints.end());
+    bottomRingPoints.erase(bottomRingPoints.begin(), bottomRingIter1 + 1);
+
+    vector<XMFLOAT3> positions;
+    for (auto& point: topRingPoints) {
+        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL);
+    }
+    for (auto& point: bottomRingPoints) {
+        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL);
+    }
+    FileParser::saveCNCPath(basePath / std::format("3.k{}", toolSize), positions);
 }

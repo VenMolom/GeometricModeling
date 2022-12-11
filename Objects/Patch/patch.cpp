@@ -247,7 +247,7 @@ std::array<int, PATCH_DIM> Patch::size() const {
     return segments;
 }
 
-std::array<DirectX::XMFLOAT3, 16> Patch::getControlPoints(float &u, float &v) {
+std::array<DirectX::XMFLOAT3, 16> Patch::getControlPoints(float &u, float &v) const {
     int segmentU = std::clamp(static_cast<int>(u), 0, segments[0] - 1);
     int segmentV = std::clamp(static_cast<int>(v), 0, segments[1] - 1);
 

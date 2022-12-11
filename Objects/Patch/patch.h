@@ -84,7 +84,7 @@ protected:
     template<typename T>
     T serialize(std::vector<MG1::Point> &serializedPoints);
 
-    std::array<DirectX::XMFLOAT3, 16> getControlPoints(float &u, float &v);
+    std::array<DirectX::XMFLOAT3, 16> getControlPoints(float &u, float &v) const;
 
 private:
     std::vector<QPropertyNotifier> pointsHandlers{};

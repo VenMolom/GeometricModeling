@@ -23,11 +23,11 @@ public:
 
     void replacePoint(std::shared_ptr<VirtualPoint> point, std::shared_ptr<VirtualPoint> newPoint) override {}
 
-    DirectX::XMVECTOR value(const std::array<float, 2> &parameters) override { return {}; }
+    DirectX::XMVECTOR value(const std::array<float, 2> &parameters) const override { return {}; }
 
-    DirectX::XMVECTOR tangent(const std::array<float, 2> &parameters) override { return {}; }
+    DirectX::XMVECTOR tangent(const std::array<float, 2> &parameters) const override { return {}; }
 
-    DirectX::XMVECTOR bitangent(const std::array<float, 2> &parameters) override { return {}; }
+    DirectX::XMVECTOR bitangent(const std::array<float, 2> &parameters) const override { return {}; }
 
 protected:
     void calculateMeshIndices(std::array<int, 2> segments, Linelist &linelist) override;

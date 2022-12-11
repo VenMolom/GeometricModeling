@@ -24,11 +24,11 @@ public:
 
     virtual std::array<bool, Dim> looped() const = 0;
 
-    virtual DirectX::XMVECTOR value(const std::array<float, Dim> &parameters) = 0;
+    virtual DirectX::XMVECTOR value(const std::array<float, Dim> &parameters) const = 0;
 
-    virtual DirectX::XMVECTOR tangent(const std::array<float, Dim> &parameters) = 0;
+    virtual DirectX::XMVECTOR tangent(const std::array<float, Dim> &parameters) const = 0;
 
-    virtual DirectX::XMVECTOR bitangent(const std::array<float, Dim> &parameters) = 0;
+    virtual DirectX::XMVECTOR bitangent(const std::array<float, Dim> &parameters) const = 0;
 
     void setIntersectionInstance(const std::shared_ptr<IntersectionInstance> &instance);
 

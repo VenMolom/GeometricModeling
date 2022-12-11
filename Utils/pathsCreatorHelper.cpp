@@ -138,10 +138,11 @@ PathsCreatorHelper::calculateToolDistantPath(ParametricObject<2> &patch, const v
         } else {
             auto tangent = patch.tangent(params);
             auto bitangent = patch.bitangent(params);
-            normal = XMVector3Normalize(XMVector3Cross(bitangent, tangent));
+            normal = XMVector3Cross(bitangent, tangent);
+            normal.m128_f32[1] = 0;
+            normal = XMVector3Normalize(normal);
         }
 
-        // TODO: some anomaly on connection
         if (i > 0 && XMVector3Dot(prevNormal, normal).m128_f32[0] < MAX_ANGLE_COS) {
             array<float, 2> midPointParams = {(parameters[i].first + parameters[i - 1].first) * 0.5f,
                                               (parameters[i].second + parameters[i - 1].second) * 0.5f};
@@ -160,7 +161,7 @@ PathsCreatorHelper::calculateToolDistantPath(ParametricObject<2> &patch, const v
 
 void PathsCreatorHelper::insertSlerpNormalPosition(vector<XMFLOAT3> &path, XMVECTOR position, XMVECTOR normalStart,
                                                    XMVECTOR normalEnd, float normalLength) {
-    static int ANGLE_INTERPOLATION_STEPS = 12;
+    static int ANGLE_INTERPOLATION_STEPS = 20;
 
     for (int j = 1; j < ANGLE_INTERPOLATION_STEPS; ++j) {
         auto slerpNormal = XMVector3Normalize(
@@ -272,4 +273,17 @@ PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::iterator path1, vector<XM
             }
         }
     }
+}
+
+std::vector<DirectX::XMFLOAT3>::iterator
+PathsCreatorHelper::findIntersectionHeight(std::vector<DirectX::XMFLOAT3>::iterator path, float height) {
+    for (int i = 0;; ++i) {
+        auto e1 = *(path + i);
+        auto e2 = *(path + i + 1);
+
+        if (signbit(e1.y - height) != signbit(e2.y - height)) {
+            return path + i;
+        }
+    }
+    // TODO: return additionally t between points
 }

@@ -21,11 +21,11 @@ public:
 
     MG1::BezierSurfaceC2 serialize(std::vector<MG1::Point> &serializedPoints);
 
-    DirectX::XMVECTOR value(const std::array<float, 2> &parameters) override;
+    DirectX::XMVECTOR value(const std::array<float, 2> &parameters) const override;
 
-    DirectX::XMVECTOR tangent(const std::array<float, 2> &parameters) override;
+    DirectX::XMVECTOR tangent(const std::array<float, 2> &parameters) const override;
 
-    DirectX::XMVECTOR bitangent(const std::array<float, 2> &parameters) override;
+    DirectX::XMVECTOR bitangent(const std::array<float, 2> &parameters) const override;
 
 protected:
     void drawMesh(Renderer &renderer, DrawType drawType) override;
