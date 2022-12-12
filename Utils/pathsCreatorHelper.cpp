@@ -36,7 +36,7 @@ void PathsCreatorHelper::addPositionsOnLine(vector<XMFLOAT3> &positions, float *
 
 vector<DirectX::XMFLOAT3> PathsCreatorHelper::createZigZagLines(const float *data, int toolSize) {
     float lineDistance = static_cast<float>(toolSize) * 0.75f;
-    int yMoves = std::ceil(10.f * BLOCK_SIZE_XY / lineDistance);
+    int yMoves = ceil(10.f * BLOCK_SIZE_XY / lineDistance);
 
     vector<XMFLOAT3> zigZag;
     zigZag.emplace_back(START_X, -BLOCK_END_LOCAL, BLOCK_BOTTOM_LOCAL);
@@ -209,10 +209,10 @@ PathsCreatorHelper::Textures PathsCreatorHelper::createDepthTextures(const DxDev
     device.context()->ClearDepthStencilView(depth.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.f, 0);
 
     Textures tex;
-    tex.allowedHeight = std::move(allowedHeight);
-    tex.allowedHeightStaging = std::move(allowedHeightStaging);
-    tex.depth = std::move(depth);
-    tex.depthTexture = std::move(depthTexture);
+    tex.allowedHeight = move(allowedHeight);
+    tex.allowedHeightStaging = move(allowedHeightStaging);
+    tex.depth = move(depth);
+    tex.depthTexture = move(depthTexture);
 
     return tex;
 }
@@ -231,13 +231,13 @@ vector<XMFLOAT3> PathsCreatorHelper::intersectAndCalculateToolDistant(IntersectH
                                                                       const array<float, 4> &starting,
                                                                       FlatteningSegment segment,
                                                                       int toolSize) {
-    intersect.setSurfaces({std::move(patch), object});
+    intersect.setSurfaces({move(patch), object});
     auto [params, points] = intersect.calculateIntersection(renderer, starting);
     assert(!params.empty());
     return calculateToolDistantPath(*object, params, points, toolSize, segment);
 }
 
-std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
+tuple<vector<DirectX::XMFLOAT3>::iterator, vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
 PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::iterator path1, vector<XMFLOAT3>::iterator path2) {
     static const auto ccw = [](XMFLOAT3 p1, XMFLOAT3 p2, XMFLOAT3 q1) -> bool {
         float delta = (p2.y - p1.y) * (q1.x - p2.x) -
@@ -275,8 +275,8 @@ PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::iterator path1, vector<XM
     }
 }
 
-std::vector<DirectX::XMFLOAT3>::iterator
-PathsCreatorHelper::findIntersectionHeight(std::vector<DirectX::XMFLOAT3>::iterator path, float height) {
+vector<DirectX::XMFLOAT3>::iterator
+PathsCreatorHelper::findIntersectionHeight(vector<DirectX::XMFLOAT3>::iterator path, float height) {
     for (int i = 0;; ++i) {
         auto e1 = *(path + i);
         auto e2 = *(path + i + 1);
@@ -286,4 +286,30 @@ PathsCreatorHelper::findIntersectionHeight(std::vector<DirectX::XMFLOAT3>::itera
         }
     }
     // TODO: return additionally t between points
+}
+
+pair<float, float>
+PathsCreatorHelper::findIntersection(const vector<pair<float, float>> &path, pair<float, float> start,
+                                     pair<float, float> end) {
+    static const auto intersect = [](pair<float, float> u0, pair<float, float> v0,
+                                     pair<float, float> u1, pair<float, float> v1) -> float {
+        float d = v1.first * v0.second - v0.first * v1.second;
+        return 1 / d * -(-(u0.first - u1.first) * v1.second + (u0.second - u1.second) * v1.first);
+    };
+
+    auto u0 = start;
+    auto v0 = make_pair(end.first - start.first, end.second - start.second);
+
+    auto u1 = path[0];
+    for (int i = 1; i < path.size(); ++i) {
+        auto tmp = path[i];
+        auto v1 = make_pair(tmp.first - u1.first, tmp.second - u1.second);
+
+        auto t = intersect(u0, v0, u1, v1);
+        if (isnan(t) || t < 0 || t > 1) continue;
+
+        return {u0.first + t * v0.first, u0.second + t * v0.second};
+    }
+
+    return {NAN, NAN};
 }

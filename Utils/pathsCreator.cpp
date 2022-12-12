@@ -86,7 +86,7 @@ void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
 
         positions.emplace_back(-xDir * START_X, y, FIRST_LAYER_Z);
 
-        int texY =  (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
+        int texY = (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
         if (texY >= 0 && texY < TEX_SIZE) {
             addPositionsOnLine(positions, data,
                                xDir,
@@ -104,7 +104,7 @@ void PathsCreator::createRoughPaths(int toolSize, Renderer &renderer) {
         int xDir = (i % 2) * 2 - 1;
         positions.emplace_back(xDir * START_X, y, SECOND_LAYER_Z);
 
-        int texY =  (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
+        int texY = (TEX_SIZE - 1) * ((BLOCK_END_LOCAL - y) / (BLOCK_END_LOCAL * 2.f));
         if (texY >= 0 && texY < TEX_SIZE) {
             addPositionsOnLine(positions, data,
                                -xDir,
@@ -256,30 +256,83 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
 
     // handle paths
     intersect.setSurfaces({patchDistant, handleDistant});
-    auto [outsideParams, outsidePoints] = intersect.calculateIntersection(renderer, {4.57867765, 3.19881678, 3.17830682, 2.34179115});
-    auto [insideParams, insidePoints] = intersect.calculateIntersection(renderer, {4.02702141, 2.75102615, 0.896845459, 2.65458512});
+    auto [outsideParams, outsidePoints] = intersect.calculateIntersection(renderer, {4.57867765, 3.19881678, 3.17830682,
+                                                                                     2.34179115});
+    auto [insideParams, insidePoints] = intersect.calculateIntersection(renderer, {4.02702141, 2.75102615, 0.896845459,
+                                                                                   2.65458512});
 
     intersect.setSurfaces({mainDistant, handleDistant});
-    auto [topRingParams, topRingPoints] = intersect.calculateIntersection(renderer, {5.95757055, 4.5840373, 4.29148722, 5.70556259});
-    auto [bottomRingParams, bottomRingPoints] = intersect.calculateIntersection(renderer, {0.792187035, 6.699512, 0.868857979, 0.548215151});
+    auto [topRingParams, topRingPoints] = intersect.calculateIntersection(renderer, {5.95757055, 4.5840373, 4.29148722,
+                                                                                     5.70556259});
+    auto [bottomRingParams, bottomRingPoints] = intersect.calculateIntersection(renderer,
+                                                                                {0.792187035, 6.699512, 0.868857979,
+                                                                                 0.548215151});
 
     // trim top and bottom ring
-    // TODO: split and connect
     auto topRingIter1 = findIntersectionHeight(topRingPoints.begin(), distance);
     auto topRingIter2 = findIntersectionHeight(topRingIter1 + 10, distance);
-    topRingPoints.erase(topRingIter1, topRingIter2 + 1);
+    {
+        vector<pair<float, float>> topRingTemp;
+        auto topRingParamIter1 = topRingParams.begin() - (topRingPoints.begin() - topRingIter1);
+        auto topRingParamIter2 = topRingParams.begin() - (topRingPoints.begin() - topRingIter2);
+        topRingTemp.insert(topRingTemp.end(), topRingParamIter2, topRingParams.end());
+        topRingTemp.insert(topRingTemp.end(), topRingParams.begin(), topRingParamIter1 + 1);
+        topRingParams = topRingTemp;
+    }
+    {
+        vector<XMFLOAT3> topRingTemp;
+        topRingTemp.insert(topRingTemp.end(), topRingIter2, topRingPoints.end());
+        topRingTemp.insert(topRingTemp.end(), topRingPoints.begin(), topRingIter1 + 1);
+        topRingPoints = topRingTemp;
+    }
 
     auto bottomRingIter1 = findIntersectionHeight(bottomRingPoints.begin(), distance);
     auto bottomRingIter2 = findIntersectionHeight(bottomRingIter1 + 10, distance);
+    auto bottomRingParamIter1 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter1);
+    auto bottomRingParamIter2 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter2);
+    bottomRingParams.erase(bottomRingParamIter2, bottomRingParams.end());
+    bottomRingParams.erase(bottomRingParams.begin(), bottomRingParamIter1 + 1);
     bottomRingPoints.erase(bottomRingIter2, bottomRingPoints.end());
     bottomRingPoints.erase(bottomRingPoints.begin(), bottomRingIter1 + 1);
 
+    // TODO: use topRingParams. bottomRingParams,  insideParams and outsideParams to create zigzag path in parameter space;
+    auto startParam = bottomRingParams[bottomRingParams.size() / 2];
+    auto stepLength = 0.05f;
+    auto pathStep = 0.05f;
+    auto sign = 1.f;
     vector<XMFLOAT3> positions;
-    for (auto& point: topRingPoints) {
-        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL);
+    auto endParam = findIntersection(topRingParams, startParam, {startParam.first, 10});
+    for (int i = 0; i < 5; ++i) {
+        auto param = startParam;
+        XMFLOAT3 val;
+        while (sign * param.second < sign * endParam.second) {
+            XMStoreFloat3(&val, handleDistant->value({param.first, param.second}));
+            positions.emplace_back(val.x * 10.f, -val.z * 10.f, val.y * 10.f + BLOCK_BOTTOM_LOCAL);
+            param.second += sign * stepLength;
+        }
+        XMStoreFloat3(&val, handleDistant->value({endParam.first, endParam.second}));
+        positions.emplace_back(val.x * 10.f, -val.z * 10.f, val.y * 10.f + BLOCK_BOTTOM_LOCAL);
+
+        auto paramU = endParam.first + pathStep;
+        if (i % 2 == 0) {
+            startParam = findIntersection(topRingParams, {paramU, -10}, {paramU, 10});
+            endParam = findIntersection(bottomRingParams, {paramU, -10}, {paramU, 10});
+        } else {
+            startParam = findIntersection(bottomRingParams, {paramU, -10}, {paramU, 10});
+            endParam = findIntersection(topRingParams, {paramU, -10}, {paramU, 10});
+        }
+        sign = -sign;
+
+        // TODO: go to new startParam moving through ring
     }
-    for (auto& point: bottomRingPoints) {
-        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL);
-    }
-    FileParser::saveCNCPath(basePath / std::format("3.k{}", toolSize), positions);
+
+
+
+//    for (auto& point: topRingPoints) {
+//        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL);
+//    }
+//    for (auto& point: bottomRingPoints) {
+//        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL);
+//    }
+    FileParser::saveCNCPath(basePath / std::format("3.k{:0>2}", toolSize), positions);
 }
