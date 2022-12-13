@@ -77,11 +77,20 @@ namespace PathsCreatorHelper {
     findIntersection(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,
                      std::pair<float, float> end);
 
+    std::pair<std::pair<float, float>, size_t>
+    findIntersectionEnd(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,
+                        std::pair<float, float> end);
+
     std::vector<DirectX::XMFLOAT3> createHandlePath(const std::vector<std::pair<float, float>> &topRing,
                                                     const std::vector<std::pair<float, float>> &bottomRing,
                                                     const std::vector<std::pair<float, float>> &insideLine,
                                                     const std::vector<std::pair<float, float>> &outsideLine,
                                                     const std::shared_ptr<ParametricObject<2>> &distant);
+
+    std::vector<DirectX::XMFLOAT3> createHandleContour(const std::vector<DirectX::XMFLOAT3> &topRing,
+                                                       const std::vector<DirectX::XMFLOAT3> &bottomRing,
+                                                       const std::vector<DirectX::XMFLOAT3> &insideLine,
+                                                       const std::vector<DirectX::XMFLOAT3> &outsideLine);
 }
 
 
