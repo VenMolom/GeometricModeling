@@ -295,39 +295,12 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     bottomRingPoints.erase(bottomRingIter2, bottomRingPoints.end());
     bottomRingPoints.erase(bottomRingPoints.begin(), bottomRingIter1 + 1);
 
-    // TODO: use topRingParams. bottomRingParams,  insideParams and outsideParams to create zigzag path in parameter space;
-    auto startParam = bottomRingParams[bottomRingParams.size() / 2];
-    auto stepLength = 0.05f;
-    auto pathStep = 0.05f;
-    auto sign = 1.f;
+    auto handlePath = createHandlePath(topRingParams, bottomRingParams, insideParams, outsideParams, handleDistant);
+
     vector<XMFLOAT3> positions;
-    auto endParam = findIntersection(topRingParams, startParam, {startParam.first, 10});
-    for (int i = 0; i < 5; ++i) {
-        auto param = startParam;
-        XMFLOAT3 val;
-        while (sign * param.second < sign * endParam.second) {
-            XMStoreFloat3(&val, handleDistant->value({param.first, param.second}));
-            positions.emplace_back(val.x * 10.f, -val.z * 10.f, val.y * 10.f + BLOCK_BOTTOM_LOCAL);
-            param.second += sign * stepLength;
-        }
-        XMStoreFloat3(&val, handleDistant->value({endParam.first, endParam.second}));
-        positions.emplace_back(val.x * 10.f, -val.z * 10.f, val.y * 10.f + BLOCK_BOTTOM_LOCAL);
-
-        auto paramU = endParam.first + pathStep;
-        if (i % 2 == 0) {
-            startParam = findIntersection(topRingParams, {paramU, -10}, {paramU, 10});
-            endParam = findIntersection(bottomRingParams, {paramU, -10}, {paramU, 10});
-        } else {
-            startParam = findIntersection(bottomRingParams, {paramU, -10}, {paramU, 10});
-            endParam = findIntersection(topRingParams, {paramU, -10}, {paramU, 10});
-        }
-        sign = -sign;
-
-        // TODO: go to new startParam moving through ring
+    for (auto &point: handlePath) {
+        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f);
     }
-
-
-
 //    for (auto& point: topRingPoints) {
 //        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL);
 //    }
