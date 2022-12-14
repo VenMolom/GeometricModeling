@@ -114,6 +114,7 @@ IntersectHandler::IntersectionData IntersectHandler::findIntersectCurve(Intersec
         auto t = XMVector3Normalize(XMVector3Cross(np, nq));
         IntersectPoint next{};
 
+        // intersections.size() == 17
         auto result = calculateNextIntersectPoint(i0, next, p0, t);
         if (result == NoResult) break;
 

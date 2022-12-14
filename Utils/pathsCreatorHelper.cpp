@@ -239,35 +239,27 @@ vector<XMFLOAT3> PathsCreatorHelper::intersectAndCalculateToolDistant(IntersectH
 
 tuple<vector<XMFLOAT3>::iterator, vector<XMFLOAT3>::iterator, XMFLOAT3>
 PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::iterator path1, vector<XMFLOAT3>::iterator path2) {
-    static const auto ccw = [](XMFLOAT3 p1, XMFLOAT3 p2, XMFLOAT3 q1) -> bool {
-        float delta = (p2.y - p1.y) * (q1.x - p2.x) -
-                      (p2.x - p1.x) * (q1.y - p2.y);
-        return delta > 0.f;
-    };
-
     for (int i = 0;; ++i) {
         auto e1 = *(path1 + i);
         auto e2 = *(path1 + i + 1);
 
-        auto normal = XMVector3Normalize(XMVectorSet(e2.y - e1.y, e1.x - e2.x, 0, 0));
+        auto da = XMVectorSet(e2.x - e1.x, e2.y - e1.y, e2.z - e1.z, 0);
 
         for (int j = 0; j <= i; ++j) {
             auto p0 = *(path2 + j);
             auto p1 = *(path2 + j + 1);
 
-            if (ccw(e1, e2, p0) != ccw(e1, e2, p1) && (ccw(p0, p1, e1) != ccw(p0, p1, e2))) {
-                XMVECTOR d{p1.x - p0.x, p1.y - p0.y, 0, 0};
-                auto dot = XMVector3Dot(normal, d).m128_f32[0];
-                if (abs(dot) < FLT_EPSILON) {
-                    continue;
-                }
+            auto db = XMVectorSet(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z, 0);
+            auto dc = XMVectorSet(p0.x - e1.x, p0.y - e1.y, p0.z - e1.z, 0);
 
-                XMVECTOR diff{p0.x - e1.x, p0.y - e1.y, 0, 0};
-                float t = -XMVector3Dot(normal, diff).m128_f32[0] / dot;
+            if (abs(XMVector3Dot(dc, XMVector3Cross(da, db)).m128_f32[0]) < 1e-6) {
+                auto norm = XMVector3LengthSq(XMVector3Cross(da, db)).m128_f32[0];
+                float t = XMVector3Dot(XMVector3Cross(dc, db), XMVector3Cross(da, db)).m128_f32[0] / norm;
+                float s = XMVector3Dot(XMVector3Cross(dc, da), XMVector3Cross(da, db)).m128_f32[0] / norm;
 
-                if (t >= 0 && t <= 1) {
+                if ((t >= 0 && t <= 1) && (s >= 0 && s <= 1)) {
                     XMFLOAT3 p{};
-                    XMStoreFloat3(&p, XMVectorLerp(XMLoadFloat3(&p0), XMLoadFloat3(&p1), t));
+                    XMStoreFloat3(&p, XMVectorLerp(XMLoadFloat3(&e1), XMLoadFloat3(&e2), t));
                     return make_tuple(path1 + i, path2 + j, p);
                 }
             }

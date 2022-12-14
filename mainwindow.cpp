@@ -24,6 +24,21 @@ MainWindow::MainWindow(QWidget *parent)
     ui->sceneControls->setRenderer(unique_ptr<DxRenderer>(ui->renderWidget));
     ui->renderWidget->setScene(scene);
     ui->renderWidget->setStatusBar(ui->statusbar);
+
+    // TODO: remove when done with paths
+    auto fileName = R"(../Saves/mug_final_v2.json)";
+
+    try {
+        auto loaded = serializer.LoadScene(fileName);
+
+        ui->objectsList->clearSelection();
+        items.clear();
+        scene->load(loaded);
+    } catch (...) {
+        QMessageBox::warning(this, "Load error", "Failed to load scene");
+    }
+    auto path = filesystem::path(R"(../Paths)");
+    PathsCreator::create(path, scene->objects(), scene->objectFactory(), *ui->renderWidget);
 }
 
 MainWindow::~MainWindow() {

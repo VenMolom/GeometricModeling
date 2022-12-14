@@ -91,6 +91,13 @@ namespace PathsCreatorHelper {
                                                        const std::vector<DirectX::XMFLOAT3> &bottomRing,
                                                        const std::vector<DirectX::XMFLOAT3> &insideLine,
                                                        const std::vector<DirectX::XMFLOAT3> &outsideLine);
+
+    std::vector<DirectX::XMFLOAT3> createDziubekPath(const std::vector<std::pair<float, float>> &outline,
+                                                    const std::vector<std::pair<float, float>> &mainRing,
+                                                    const std::shared_ptr<ParametricObject<2>> &distant);
+
+    std::vector<DirectX::XMFLOAT3> createDziubekContour(const std::vector<DirectX::XMFLOAT3> &outline,
+                                                       const std::vector<DirectX::XMFLOAT3> &mainRing);
 }
 
 

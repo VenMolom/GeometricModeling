@@ -149,7 +149,7 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
                                                           {4.56668663, 2.79134393, 2.47588515, 2.7601614},
                                                           HandleExternal, toolSize);
 
-    // dziubek top
+    // dziubek
     auto dziubekDistant = intersectAndCalculateToolDistant(intersect, renderer, patch, dziubek,
                                                            {0.587088287, 1.62481773, 0.297016472, 5.40027523},
                                                            Dziubek, toolSize);
@@ -255,98 +255,164 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     IntersectHandler intersect(false, factory);
 
     // handle paths
-    intersect.setSurfaces({patchDistant, handleDistant});
-    auto [outsideParams, outsidePoints] = intersect.calculateIntersection(renderer, {4.57867765, 3.19881678, 3.17830682,
-                                                                                     2.34179115});
-    auto [insideParams, insidePoints] = intersect.calculateIntersection(renderer, {4.02702141, 2.75102615, 0.896845459,
-                                                                                   2.65458512});
+//    intersect.setSurfaces({patchDistant, handleDistant});
+//    auto [outsideParams, outsidePoints] = intersect.calculateIntersection(renderer, {4.57867765, 3.19881678, 3.17830682,
+//                                                                                     2.34179115});
+//    auto [insideParams, insidePoints] = intersect.calculateIntersection(renderer, {4.02702141, 2.75102615, 0.896845459,
+//                                                                                   2.65458512});
+//
+//    intersect.setSurfaces({mainDistant, handleDistant});
+//    auto [topRingParams, topRingPoints] = intersect.calculateIntersection(renderer, {5.95757055, 4.5840373, 4.29148722,
+//                                                                                     5.70556259});
+//    auto [bottomRingParams, bottomRingPoints] = intersect.calculateIntersection(renderer,
+//                                                                                {0.792187035, 6.699512, 0.868857979,
+//                                                                                 0.548215151});
+//
+//    // trim top and bottom ring by height and reorder
+//    {
+//        auto topRingIter1 = findIntersectionHeight(topRingPoints.begin(), distance);
+//        auto topRingIter2 = findIntersectionHeight(topRingIter1 + 10, distance);
+//        {
+//            vector<pair<float, float>> topRingTemp;
+//            auto topRingParamIter1 = topRingParams.begin() - (topRingPoints.begin() - topRingIter1);
+//            auto topRingParamIter2 = topRingParams.begin() - (topRingPoints.begin() - topRingIter2);
+//            topRingTemp.insert(topRingTemp.end(), topRingParamIter2, topRingParams.end());
+//            topRingTemp.insert(topRingTemp.end(), topRingParams.begin(), topRingParamIter1 + 2);
+//            topRingParams = topRingTemp;
+//        }
+//        {
+//            vector<XMFLOAT3> topRingTemp;
+//            topRingTemp.insert(topRingTemp.end(), topRingIter2, topRingPoints.end());
+//            topRingTemp.insert(topRingTemp.end(), topRingPoints.begin(), topRingIter1 + 2);
+//            topRingPoints = topRingTemp;
+//        }
+//    }
+//    {
+//        auto bottomRingIter1 = findIntersectionHeight(bottomRingPoints.begin(), distance);
+//        auto bottomRingIter2 = findIntersectionHeight(bottomRingIter1 + 10, distance);
+//        auto bottomRingParamIter1 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter1);
+//        auto bottomRingParamIter2 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter2);
+//        bottomRingParams.erase(bottomRingParamIter2 + 2, bottomRingParams.end());
+//        bottomRingParams.erase(bottomRingParams.begin(), bottomRingParamIter1);
+//        bottomRingPoints.erase(bottomRingIter2 + 2, bottomRingPoints.end());
+//        bottomRingPoints.erase(bottomRingPoints.begin(), bottomRingIter1);
+//    }
+//
+//    // trim bottom ring
+//    {
+//        auto [bottomRingIter1, outsideIter, inter1] = findIntersection(bottomRingPoints.begin() + 40,
+//                                                                       outsidePoints.begin());
+//        auto [insideIter, bottomRingIter2, inter2] = findIntersection(insidePoints.begin() + 70,
+//                                                                      bottomRingPoints.begin());
+//
+//        bottomRingPoints.erase(bottomRingIter1 + 1, bottomRingPoints.end());
+//        bottomRingPoints.push_back(inter1);
+//        bottomRingPoints.erase(bottomRingPoints.begin(), bottomRingIter2 + 1);
+//        bottomRingPoints.insert(bottomRingPoints.begin(), inter2);
+//
+//        outsidePoints.erase(outsidePoints.begin(), outsideIter + 1);
+//        outsidePoints.insert(outsidePoints.begin(), inter1);
+//
+//        insidePoints.erase(insideIter + 1, insidePoints.end());
+//        insidePoints.push_back(inter2);
+//    }
+//
+//    // trim top ring
+//    {
+//        auto [outsideIter, topRingIter1, inter1] = findIntersection(outsidePoints.begin() + 140,
+//                                                                    topRingPoints.begin());
+//        auto [topRingIter2, insideIter, inter2] = findIntersection(topRingPoints.begin() + 40,
+//                                                                   insidePoints.begin());
+//
+//        topRingPoints.erase(topRingIter2 + 1, topRingPoints.end());
+//        topRingPoints.push_back(inter2);
+//        topRingPoints.erase(topRingPoints.begin(), topRingIter1 + 1);
+//        topRingPoints.insert(topRingPoints.begin(), inter1);
+//
+//        insidePoints.erase(insidePoints.begin(), insideIter + 1);
+//        insidePoints.insert(insidePoints.begin(), inter2);
+//
+//        outsidePoints.erase(outsideIter + 1, outsidePoints.end());
+//        outsidePoints.push_back(inter1);
+//    }
+//
+//    auto handlePath = createHandlePath(topRingParams, bottomRingParams, insideParams, outsideParams, handleDistant);
+//    auto handleContour = createHandleContour(topRingPoints, bottomRingPoints, insidePoints, outsidePoints);
 
-    intersect.setSurfaces({mainDistant, handleDistant});
-    auto [topRingParams, topRingPoints] = intersect.calculateIntersection(renderer, {5.95757055, 4.5840373, 4.29148722,
-                                                                                     5.70556259});
-    auto [bottomRingParams, bottomRingPoints] = intersect.calculateIntersection(renderer,
-                                                                                {0.792187035, 6.699512, 0.868857979,
-                                                                                 0.548215151});
+    // dziubek paths
+    intersect.setSurfaces({patchDistant, dziubekDistant});
+    auto [outlineParams, outlinePoints] = intersect.calculateIntersection(renderer, {1.57030964, 2.58925247, 4.08817434,
+                                                                                     2.03704619});
 
-    // trim top and bottom ring by height and reorder
+    intersect.setSurfaces({mainDistant, dziubekDistant});
+    auto [mainRingParams1, mainRingPoints1] = intersect.calculateIntersection(renderer,
+                                                                              {3.70599818, 4.72525215, 4.6687994,
+                                                                               3.47903776});
+    auto [mainRingParams2, mainRingPoints2] = intersect.calculateIntersection(renderer,
+                                                                              {3.49459791, 2.0580492, 2.79279518,
+                                                                               5.72590542});
+
+    // trim outline
     {
-        auto topRingIter1 = findIntersectionHeight(topRingPoints.begin(), distance);
-        auto topRingIter2 = findIntersectionHeight(topRingIter1 + 10, distance);
-        {
-            vector<pair<float, float>> topRingTemp;
-            auto topRingParamIter1 = topRingParams.begin() - (topRingPoints.begin() - topRingIter1);
-            auto topRingParamIter2 = topRingParams.begin() - (topRingPoints.begin() - topRingIter2);
-            topRingTemp.insert(topRingTemp.end(), topRingParamIter2, topRingParams.end());
-            topRingTemp.insert(topRingTemp.end(), topRingParams.begin(), topRingParamIter1 + 2);
-            topRingParams = topRingTemp;
-        }
-        {
-            vector<XMFLOAT3> topRingTemp;
-            topRingTemp.insert(topRingTemp.end(), topRingIter2, topRingPoints.end());
-            topRingTemp.insert(topRingTemp.end(), topRingPoints.begin(), topRingIter1 + 2);
-            topRingPoints = topRingTemp;
-        }
-    }
-    {
-        auto bottomRingIter1 = findIntersectionHeight(bottomRingPoints.begin(), distance);
-        auto bottomRingIter2 = findIntersectionHeight(bottomRingIter1 + 10, distance);
-        auto bottomRingParamIter1 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter1);
-        auto bottomRingParamIter2 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter2);
-        bottomRingParams.erase(bottomRingParamIter2 + 2, bottomRingParams.end());
-        bottomRingParams.erase(bottomRingParams.begin(), bottomRingParamIter1);
-        bottomRingPoints.erase(bottomRingIter2 + 2, bottomRingPoints.end());
-        bottomRingPoints.erase(bottomRingPoints.begin(), bottomRingIter1);
-    }
+        auto [outlineIter1, mainRingIter1, inter1] = findIntersection(outlinePoints.begin() + 200,
+                                                                      mainRingPoints1.begin() + 50);
+        auto [outlineIter2, mainRingIter2, inter2] = findIntersection(outlinePoints.begin() + 80,
+                                                                      mainRingPoints2.begin());
 
-    // trim bottom ring
-    {
-        auto [bottomRingIter1, outsideIter, inter1] = findIntersection(bottomRingPoints.begin() + 40,
-                                                                       outsidePoints.begin());
-        auto [insideIter, bottomRingIter2, inter2] = findIntersection(insidePoints.begin() + 70,
-                                                                      bottomRingPoints.begin());
+        auto outlineParamIter1 = outlineParams.begin() - (outlinePoints.begin() - outlineIter1);
+        auto outlineParamIter2 = outlineParams.begin() - (outlinePoints.begin() - outlineIter2);
+        outlineParams.erase(outlineParamIter1 + 2, outlineParams.end());
+        outlineParams.erase(outlineParams.begin(), outlineParamIter2);
 
-        bottomRingPoints.erase(bottomRingIter1 + 1, bottomRingPoints.end());
-        bottomRingPoints.push_back(inter1);
-        bottomRingPoints.erase(bottomRingPoints.begin(), bottomRingIter2 + 1);
-        bottomRingPoints.insert(bottomRingPoints.begin(), inter2);
+        outlinePoints.erase(outlineIter1 + 1, outlinePoints.end());
+        outlinePoints.push_back(inter1);
+        outlinePoints.erase(outlinePoints.begin(), outlineIter2 + 1);
+        outlinePoints.insert(outlinePoints.begin(), inter2);
 
-        outsidePoints.erase(outsidePoints.begin(), outsideIter + 1);
-        outsidePoints.insert(outsidePoints.begin(), inter1);
+        auto mainRingParamIter1 = mainRingParams1.begin() - (mainRingPoints1.begin() - mainRingIter1);
+        mainRingParams1.erase(mainRingParams1.begin(), mainRingParamIter1);
+        mainRingParams1.pop_back();
+        mainRingPoints1.erase(mainRingPoints1.begin(), mainRingIter1 + 1);
+        mainRingPoints1.insert(mainRingPoints1.begin(), inter1);
+        mainRingPoints1.pop_back();
 
-        insidePoints.erase(insideIter + 1, insidePoints.end());
-        insidePoints.push_back(inter2);
+        auto mainRingParamIter2 = mainRingParams2.begin() - (mainRingPoints2.begin() - mainRingIter2);
+        mainRingParams2.erase(mainRingParamIter2 + 2, mainRingParams2.end());
+        mainRingParams2.erase(mainRingParams2.begin());
+        mainRingPoints2.erase(mainRingIter2 + 1, mainRingPoints2.end());
+        mainRingPoints2.push_back(inter2);
+        mainRingPoints2.erase(mainRingPoints2.begin());
     }
 
-    // trim top ring
-    {
-        auto [outsideIter, topRingIter1, inter1] = findIntersection(outsidePoints.begin() + 140,
-                                                                      topRingPoints.begin());
-        auto [topRingIter2, insideIter, inter2] = findIntersection(topRingPoints.begin() + 40,
-                                                                   insidePoints.begin());
+    // connect mainRing parths together
+    // (3.66265297, 3.43369985) (3.64193535, 2.70709586)
+    // TODO: find a better solution
+    vector<XMFLOAT3> mainRingPoints(mainRingPoints1);
+    mainRingPoints.insert(mainRingPoints.end(), mainRingPoints2.begin(), mainRingPoints2.end());
+    vector<pair<float, float>> mainRingParams(mainRingParams1);
+    mainRingParams.insert(mainRingParams.end(), mainRingParams2.begin(), mainRingParams2.end());
 
-        topRingPoints.erase(topRingIter2 + 1, topRingPoints.end());
-        topRingPoints.push_back(inter2);
-        topRingPoints.erase(topRingPoints.begin(), topRingIter1 + 1);
-        topRingPoints.insert(topRingPoints.begin(), inter1);
-
-        insidePoints.erase(insidePoints.begin(), insideIter + 1);
-        insidePoints.insert(insidePoints.begin(), inter2);
-
-        outsidePoints.erase(outsideIter + 1, outsidePoints.end());
-        outsidePoints.push_back(inter1);
-    }
-
-    auto handlePath = createHandlePath(topRingParams, bottomRingParams, insideParams, outsideParams, handleDistant);
-    auto handleContour = createHandleContour(topRingPoints, bottomRingPoints, insidePoints, outsidePoints);
+    auto dziubekPath = createDziubekPath(outlineParams, mainRingParams, dziubekDistant);
+    auto dziubekContour = createDziubekContour(outlinePoints, mainRingPoints);
 
     vector<XMFLOAT3> positions;
-    positions.emplace_back(0.f, 0.f, START_Z);
-    positions.emplace_back(handlePath.front().x * 10.f, -handlePath.front().z * 10.f, START_Z);
+//    positions.emplace_back(0.f, 0.f, START_Z);
+//    positions.emplace_back(handlePath.front().x * 10.f, -handlePath.front().z * 10.f, START_Z);
+//
+//    for (auto &point: handlePath) {
+//        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f);
+//    }
+//    for (auto &point: handleContour) {
+//        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f);
+//    }
 
-    for (auto &point: handlePath) {
+    for (auto &point: outlinePoints) {
         positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f);
     }
-    for (auto &point: handleContour) {
+    for (auto &point: mainRingPoints1) {
+        positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f);
+    }
+    for (auto &point: mainRingPoints2) {
         positions.emplace_back(point.x * 10.f, -point.z * 10.f, point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f);
     }
 
