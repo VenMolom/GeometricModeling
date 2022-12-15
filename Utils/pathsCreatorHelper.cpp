@@ -252,7 +252,7 @@ PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::iterator path1, vector<XM
             auto db = XMVectorSet(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z, 0);
             auto dc = XMVectorSet(p0.x - e1.x, p0.y - e1.y, p0.z - e1.z, 0);
 
-            if (abs(XMVector3Dot(dc, XMVector3Cross(da, db)).m128_f32[0]) < 1e-6) {
+            if (abs(XMVector3Dot(dc, XMVector3Cross(da, db)).m128_f32[0]) < 1e-3) {
                 auto norm = XMVector3LengthSq(XMVector3Cross(da, db)).m128_f32[0];
                 float t = XMVector3Dot(XMVector3Cross(dc, db), XMVector3Cross(da, db)).m128_f32[0] / norm;
                 float s = XMVector3Dot(XMVector3Cross(dc, da), XMVector3Cross(da, db)).m128_f32[0] / norm;
@@ -439,7 +439,6 @@ PathsCreatorHelper::createHandlePath(const vector<pair<float, float>> &topRing,
                     auto idx = endIdx;
                     // idx is index of segment first point, so when we move forward we need to start from second point
                     if (dir > 0) idx++;
-                    if (dir > 0) idx++;
                     while ((dir == -1 && idx != startIdx) || (dir == 1 && idx <= startIdx)) {
                         XMStoreFloat3(&val, distant->value({firstStartRing[idx].first, firstStartRing[idx].second}));
                         handlePath.emplace_back(val);
@@ -484,4 +483,107 @@ PathsCreatorHelper::createHandleContour(const vector<XMFLOAT3> &topRing, const v
     handleContour.insert(handleContour.end(), outsideLine.rbegin() + 1, outsideLine.rend());
 
     return handleContour;
+}
+
+vector<XMFLOAT3>
+PathsCreatorHelper::createDziubekPath(const vector<pair<float, float>> &outline,
+                                      const vector<pair<float, float>> &mainRing,
+                                      const shared_ptr<ParametricObject<2>> &distant) {
+    auto stepLength = 0.05f;
+    auto pathsToSide = [stepLength, &distant, &outline, &mainRing](vector<XMFLOAT3> &handlePath,
+                                                                   pair<float, float> startParam,
+                                                                   pair<float, float> endParam,
+                                                                   size_t endIdx, float sign, float pathStep) {
+        size_t startIdx, nextEndIdx;
+        size_t restrictionEndIdx, restrictionStartIdx;
+        pair<float, float> restrictionStart, restrictionEnd;
+        for (int i = 0; i < 100; ++i) {
+            auto param = startParam;
+            XMFLOAT3 val;
+            while (sign * param.second < sign * endParam.second) {
+                XMStoreFloat3(&val, distant->value({param.first, param.second}));
+                handlePath.emplace_back(val);
+                param.second += sign * stepLength;
+            }
+            XMStoreFloat3(&val, distant->value({endParam.first, endParam.second}));
+            handlePath.emplace_back(val);
+
+            auto paramU = endParam.first + pathStep;
+            // use different params to get start and end
+            if (i % 2 == 0) {
+                tie(startParam, startIdx) = findIntersection(outline, {paramU, -10}, {paramU, 10});
+                tie(endParam, nextEndIdx) = findIntersection(mainRing, {paramU, -10}, {paramU, 10});
+                if (startIdx == 0xffffffff || nextEndIdx == 0xffffffff) break;
+                // if end and new start do not intersect same segment in params
+                if (startIdx != endIdx) {
+                    auto dir = startIdx > endIdx ? 1 : -1;
+                    auto idx = endIdx;
+                    // idx is index of segment first point, so when we move forward we need to start from second point
+                    if (dir > 0) idx++;
+                    while ((dir == -1 && idx != startIdx) || (dir == 1 && idx <= startIdx)) {
+                        XMStoreFloat3(&val, distant->value({outline[idx].first, outline[idx].second}));
+                        handlePath.emplace_back(val);
+                        idx += dir;
+                    }
+                }
+
+                if (startIdx == 0xffffffff) break;
+            } else {
+                tie(startParam, startIdx) = findIntersection(mainRing, {paramU, -10}, {paramU, 10});
+                tie(endParam, nextEndIdx) = findIntersection(outline, {paramU, -10}, {paramU, 10});
+                if (startIdx == 0xffffffff || nextEndIdx == 0xffffffff) break;
+                // if end and new start do not intersect same segment in params
+                if (startIdx != endIdx) {
+                    auto dir = startIdx > endIdx ? 1 : -1;
+                    auto idx = endIdx;
+                    // idx is index of segment first point, so when we move forward we need to start from second point
+                    if (dir > 0) idx++;
+                    while ((dir == -1 && idx != startIdx) || (dir == 1 && idx <= startIdx)) {
+                        XMStoreFloat3(&val, distant->value({mainRing[idx].first, mainRing[idx].second}));
+                        handlePath.emplace_back(val);
+                        idx += dir;
+                    }
+                }
+            }
+            endIdx = nextEndIdx;
+            sign = -sign;
+        }
+    };
+
+    vector<XMFLOAT3> dziubekPath;
+    auto sign = 1.f;
+    auto pathStep = 0.05f;
+    auto startParam = mainRing[mainRing.size() / 2];
+    auto [endParam, endIdx] = findIntersection(outline, startParam, {startParam.first, 10});
+    pathsToSide(dziubekPath, startParam, endParam, endIdx, sign, pathStep);
+
+    auto &lastPoint = dziubekPath.back();
+    dziubekPath.emplace_back(lastPoint.x, lastPoint.y + 1.5, lastPoint.z);
+
+    pathStep = -pathStep;
+    auto paramU = startParam.first + pathStep;
+    tie(startParam, endIdx) = findIntersection(mainRing, {paramU, -10}, {paramU, 10});
+    tie(endParam, endIdx) = findIntersection(outline, startParam, {startParam.first, 10});
+
+    auto startPoint = distant->value({startParam.first, startParam.second});
+    dziubekPath.emplace_back(startPoint.m128_f32[0], lastPoint.y + 1.5, startPoint.m128_f32[2]);
+    pathsToSide(dziubekPath, startParam, endParam, endIdx, sign, pathStep);
+
+    return dziubekPath;
+}
+
+vector<XMFLOAT3>
+PathsCreatorHelper::createDziubekContour(const vector<XMFLOAT3> &outline, const vector<XMFLOAT3> &mainRing) {
+    vector<XMFLOAT3> dziubekContour;
+    dziubekContour.insert(dziubekContour.end(), outline.begin(), outline.end());
+    dziubekContour.insert(dziubekContour.end(), mainRing.begin() + 1, mainRing.end());
+
+    return dziubekContour;
+}
+
+void PathsCreatorHelper::transformAndAppend(vector<XMFLOAT3> &positions, const vector<XMFLOAT3> &path, float toolSize) {
+    for (auto &point: path) {
+        positions.emplace_back(point.x * 10.f, -point.z * 10.f,
+                               max(point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f, BLOCK_BOTTOM_LOCAL));
+    }
 }

@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->renderWidget->setStatusBar(ui->statusbar);
 
     // TODO: remove when done with paths
-    auto fileName = R"(../Saves/mug_final_v2.json)";
+    auto fileName = R"(../Saves/mug_final_v3.json)";
 
     try {
         auto loaded = serializer.LoadScene(fileName);
