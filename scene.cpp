@@ -203,8 +203,8 @@ void Scene::intersect(IntersectHandler &handler, Renderer &renderer) {
         int index = 0;
         for (auto &surf: released) {
             // TODO: remove when done with paths
-//            surfaces[index++] = make_shared<ToolDistantSurface>(static_pointer_cast<Patch>(surf), 0.4f);
-            surfaces[index++] = static_pointer_cast<ParametricObject<2>>(surf);
+            surfaces[index++] = make_shared<ToolDistantSurface>(static_pointer_cast<Patch>(surf), 0.4f);
+//            surfaces[index++] = static_pointer_cast<ParametricObject<2>>(surf);
         }
 
         _objects.splice(_objects.end(), std::move(released));

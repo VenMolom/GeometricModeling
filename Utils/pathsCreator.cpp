@@ -344,30 +344,32 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     // dziubek paths
 #pragma region Dziubek
     intersect.setSurfaces({patchDistant, dziubekDistant});
-    auto [outlineParams, outlinePoints] = intersect.calculateIntersection(renderer, {1.29923332, 1.80520785, 3.2055254,
-                                                                                     4.43139553});
+    auto [dziubekOutlineParams, dziubekOutlinePoints] = intersect.calculateIntersection(renderer,
+                                                                                        {1.29923332, 1.80520785,
+                                                                                         3.2055254,
+                                                                                         4.43139553});
 
     intersect.setSurfaces({mainDistant, dziubekDistant});
     auto [mainRingParams, mainRingPoints] = intersect.calculateIntersection(renderer,
-                                                                              {3.5824976, 3.81490111, 3.00511742,
-                                                                               5.7883172});
+                                                                            {3.5824976, 3.81490111, 3.00511742,
+                                                                             5.7883172});
 
     // trim outline
     {
-        auto [outlineIter1, mainRingIter1, inter1] = findIntersection(outlinePoints.begin(),
+        auto [outlineIter1, mainRingIter1, inter1] = findIntersection(dziubekOutlinePoints.begin(),
                                                                       mainRingPoints.begin());
         auto [mainRingIter2, outlineIter2, inter2] = findIntersection(mainRingIter1 + 20,
-                                                                      outlinePoints.begin());
+                                                                      dziubekOutlinePoints.begin());
 
-        auto outlineParamIter1 = outlineParams.begin() - (outlinePoints.begin() - outlineIter1);
-        auto outlineParamIter2 = outlineParams.begin() - (outlinePoints.begin() - outlineIter2);
-        outlineParams.erase(outlineParamIter1 + 2, outlineParams.end());
-        outlineParams.erase(outlineParams.begin(), outlineParamIter2);
+        auto outlineParamIter1 = dziubekOutlineParams.begin() - (dziubekOutlinePoints.begin() - outlineIter1);
+        auto outlineParamIter2 = dziubekOutlineParams.begin() - (dziubekOutlinePoints.begin() - outlineIter2);
+        dziubekOutlineParams.erase(outlineParamIter1 + 2, dziubekOutlineParams.end());
+        dziubekOutlineParams.erase(dziubekOutlineParams.begin(), outlineParamIter2);
 
-        outlinePoints.erase(outlineIter1 + 1, outlinePoints.end());
-        outlinePoints.push_back(inter1);
-        outlinePoints.erase(outlinePoints.begin(), outlineIter2 + 1);
-        outlinePoints.insert(outlinePoints.begin(), inter2);
+        dziubekOutlinePoints.erase(outlineIter1 + 1, dziubekOutlinePoints.end());
+        dziubekOutlinePoints.push_back(inter1);
+        dziubekOutlinePoints.erase(dziubekOutlinePoints.begin(), outlineIter2 + 1);
+        dziubekOutlinePoints.insert(dziubekOutlinePoints.begin(), inter2);
 
         auto mainRingParamIter1 = mainRingParams.begin() - (mainRingPoints.begin() - mainRingIter1);
         auto mainRingParamIter2 = mainRingParams.begin() - (mainRingPoints.begin() - mainRingIter2);
@@ -380,23 +382,35 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
         mainRingPoints.insert(mainRingPoints.begin(), inter1);
     }
 
-    auto dziubekPath = createDziubekPath(outlineParams, mainRingParams, dziubekDistant);
-    auto dziubekContour = createDziubekContour(outlinePoints, mainRingPoints);
+    auto dziubekPath = createDziubekPath(dziubekOutlineParams, mainRingParams, dziubekDistant);
+    auto dziubekContour = createDziubekContour(dziubekOutlinePoints, mainRingPoints);
+#pragma endregion
+
+#pragma region Main
+    intersect.setSurfaces({patchDistant, mainDistant});
+    auto [mainBottomParams, mainBottomPoints] = intersect.calculateIntersection(renderer,
+                                                                                {4.07142401, 1.49915862, 0.36954397,
+                                                                                 3.97987604});
+    // TODO: remove last point, add point at start and end that just prolongs previous segment
+    // TODO: create vector of C0 edge parameters and points (v = 3, u = ?, Pu = {0, 0, +- 1} (so normal behaves like on circle)
+    // TODO: trimming and path + contour
 #pragma endregion
 
     vector<XMFLOAT3> positions;
     positions.emplace_back(0.f, 0.f, START_Z);
-    positions.emplace_back(handlePath.front().x * 10.f, -handlePath.front().z * 10.f, START_Z);
+//    positions.emplace_back(handlePath.front().x * 10.f, -handlePath.front().z * 10.f, START_Z);
 
-    transformAndAppend(positions, handlePath, toolSize);
-    transformAndAppend(positions, handleContour, toolSize);
+//    transformAndAppend(positions, handlePath, toolSize);
+//    transformAndAppend(positions, handleContour, toolSize);
+//
+//    auto height = positions.back().z + 30.f;
+//    positions.emplace_back(positions.back().x, positions.back().y, height);
+//    positions.emplace_back(dziubekPath.front().x * 10.f, -dziubekPath.front().z * 10.f, height);
+//
+//    transformAndAppend(positions, dziubekPath, toolSize);
+//    transformAndAppend(positions, dziubekContour, toolSize);
 
-    auto height = positions.back().z + 30.f;
-    positions.emplace_back(positions.back().x, positions.back().y, height);
-    positions.emplace_back(dziubekPath.front().x * 10.f, -dziubekPath.front().z * 10.f, height);
-
-    transformAndAppend(positions, dziubekPath, toolSize);
-    transformAndAppend(positions, dziubekContour, toolSize);
+    transformAndAppend(positions, mainBottomPoints, toolSize);
 
     positions.emplace_back(positions.back().x, positions.back().y, START_Z);
     positions.emplace_back(0.f, 0.f, START_Z);
