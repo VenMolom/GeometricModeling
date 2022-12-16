@@ -391,14 +391,88 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     auto [mainBottomParams, mainBottomPoints] = intersect.calculateIntersection(renderer,
                                                                                 {4.07142401, 1.49915862, 0.36954397,
                                                                                  3.97987604});
-    // TODO: remove last point, add point at start and end that just prolongs previous segment
-    // TODO: create vector of C0 edge parameters and points (v = 3, u = ?, Pu = {0, 0, +- 1} (so normal behaves like on circle)
-    // TODO: trimming and path + contour
+    mainBottomParams.pop_back();
+    mainBottomPoints.pop_back();
+    // prolong first and last segment (for intersection later on)
+    {
+        XMFLOAT3 val;
+        auto v1 = XMLoadFloat3(&mainBottomPoints[0]);
+        auto v2 = XMLoadFloat3(&mainBottomPoints[1]);
+        XMStoreFloat3(&val, XMVectorLerp(v1, v2, -10));
+        mainBottomPoints.insert(mainBottomPoints.begin(), val);
+
+        v1 = XMLoadFloat3(&mainBottomPoints[mainBottomPoints.size() - 1]);
+        v2 = XMLoadFloat3(&mainBottomPoints[mainBottomPoints.size() - 2]);
+        XMStoreFloat3(&val, XMVectorLerp(v1, v2, -10));
+        mainBottomPoints.push_back(val);
+
+        auto p1 = mainBottomParams[0];
+        auto p2 = mainBottomParams[1];
+        mainBottomParams.insert(mainBottomParams.begin(),
+                                {p1.first - 10 * (p2.first - p1.first),
+                                 p1.second - 10 * (p2.second - p1.second)});
+
+        p1 = mainBottomParams[mainBottomParams.size() - 1];
+        p2 = mainBottomParams[mainBottomParams.size() - 2];
+        mainBottomParams.push_back({p1.first - 10 * (p2.first - p1.first),
+                                    p1.second - 10 * (p2.second - p1.second)});
+    }
+
+    vector<XMFLOAT3> midRingPoints;
+    vector<pair<float, float>> midRingParams;
+    XMFLOAT3 val;
+    const static float V = 3.000001f;
+    for (int i = 0; i <= 200; i++) {
+        float u = i / 200.f * 6.f;
+        midRingParams.push_back({u, V});
+        XMStoreFloat3(&val, mainDistant->value({u, V}));
+        midRingPoints.push_back(val);
+    }
+
+    // trim outline
+    {
+        auto [mainBottomIter1, midRingIter1, inter1] = findIntersection(mainBottomPoints.begin() + 400,
+                                                                        midRingPoints.begin());
+        auto [midRingIter2, mainBottomIter2, inter2] = findIntersection(midRingPoints.begin() + 80,
+                                                                        mainBottomPoints.begin());
+
+        auto mainBottomParamIter1 = mainBottomParams.begin() - (mainBottomPoints.begin() - mainBottomIter1);
+        auto mainBottomParamIter2 = mainBottomParams.begin() - (mainBottomPoints.begin() - mainBottomIter2);
+        mainBottomParams.erase(mainBottomParamIter1 + 2, mainBottomParams.end());
+        mainBottomParams.erase(mainBottomParams.begin(), mainBottomParamIter2);
+
+        mainBottomPoints.erase(mainBottomIter1 + 1, mainBottomPoints.end());
+        mainBottomPoints.push_back(inter1);
+        mainBottomPoints.erase(mainBottomPoints.begin(), mainBottomIter2 + 1);
+        mainBottomPoints.insert(mainBottomPoints.begin(), inter2);
+
+        vector<pair<float, float>> midRingParamTemp;
+        auto midRingParamIter1 = midRingParams.begin() - (midRingPoints.begin() - midRingIter1);
+        auto midRingParamIter2 = midRingParams.begin() - (midRingPoints.begin() - midRingIter2);
+        midRingParamTemp.insert(midRingParamTemp.end(), midRingParamIter2, midRingParams.end());
+        midRingParamTemp.insert(midRingParamTemp.end(), midRingParams.begin(), midRingParamIter1 + 2);
+        midRingParams = midRingParamTemp;
+
+        vector<XMFLOAT3> midRingTemp;
+        midRingTemp.push_back(inter2);
+        midRingTemp.insert(midRingTemp.end(), midRingIter2 + 1, midRingPoints.end());
+        midRingTemp.insert(midRingTemp.end(), midRingPoints.begin(), midRingIter1 + 1);
+        midRingTemp.push_back(inter1);
+        midRingPoints = midRingTemp;
+    }
+
+    // TODO: mainRingParams, topRingParams and bottomRingParams are currently in wrong parameter space
+    // return handle ones from intersections and process as needed
+    auto mainPath = createMainPath(mainBottomParams, midRingParams, mainRingParams, topRingParams, bottomRingParams,
+                                   mainDistant);
+    auto mainContour = createMainContour(mainBottomPoints, midRingPoints, mainRingPoints, topRingPoints,
+                                         bottomRingPoints);
 #pragma endregion
 
     vector<XMFLOAT3> positions;
     positions.emplace_back(0.f, 0.f, START_Z);
 //    positions.emplace_back(handlePath.front().x * 10.f, -handlePath.front().z * 10.f, START_Z);
+    positions.emplace_back(mainPath.front().x * 10.f, -mainPath.front().z * 10.f, START_Z);
 
 //    transformAndAppend(positions, handlePath, toolSize);
 //    transformAndAppend(positions, handleContour, toolSize);
@@ -409,8 +483,13 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
 //
 //    transformAndAppend(positions, dziubekPath, toolSize);
 //    transformAndAppend(positions, dziubekContour, toolSize);
+//
+//    height = positions.back().z + 30.f;
+//    positions.emplace_back(positions.back().x, positions.back().y, height);
+//    positions.emplace_back(mainPath.front().x * 10.f, -mainPath.front().z * 10.f, height);
 
-    transformAndAppend(positions, mainBottomPoints, toolSize);
+    transformAndAppend(positions, mainPath, toolSize);
+    transformAndAppend(positions, mainContour, toolSize);
 
     positions.emplace_back(positions.back().x, positions.back().y, START_Z);
     positions.emplace_back(0.f, 0.f, START_Z);

@@ -70,6 +70,9 @@ namespace PathsCreatorHelper {
     std::tuple<std::vector<DirectX::XMFLOAT3>::iterator, std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
     findIntersection(std::vector<DirectX::XMFLOAT3>::iterator path1, std::vector<DirectX::XMFLOAT3>::iterator path2);
 
+    std::pair<std::vector<DirectX::XMFLOAT3>::const_iterator, DirectX::XMFLOAT3>
+    findIntersection(std::vector<DirectX::XMFLOAT3>::const_iterator path1, DirectX::XMFLOAT3 start, DirectX::XMFLOAT3 end);
+
     std::vector<DirectX::XMFLOAT3>::iterator
     findIntersectionHeight(std::vector<DirectX::XMFLOAT3>::iterator path, float height);
 
@@ -98,6 +101,19 @@ namespace PathsCreatorHelper {
 
     std::vector<DirectX::XMFLOAT3> createDziubekContour(const std::vector<DirectX::XMFLOAT3> &outline,
                                                         const std::vector<DirectX::XMFLOAT3> &mainRing);
+
+    std::vector<DirectX::XMFLOAT3> createMainPath(const std::vector<std::pair<float, float>> &outline,
+                                                  const std::vector<std::pair<float, float>> &midRing,
+                                                  const std::vector<std::pair<float, float>> &dziubekRing,
+                                                  const std::vector<std::pair<float, float>> &topRing,
+                                                  const std::vector<std::pair<float, float>> &bottomRing,
+                                                  const std::shared_ptr<ParametricObject<2>> &distant);
+
+    std::vector<DirectX::XMFLOAT3> createMainContour(const std::vector<DirectX::XMFLOAT3> &outline,
+                                                     const std::vector<DirectX::XMFLOAT3> &midRing,
+                                                     const std::vector<DirectX::XMFLOAT3> &dziubekRing,
+                                                     const std::vector<DirectX::XMFLOAT3> &topRing,
+                                                     const std::vector<DirectX::XMFLOAT3> &bottomRing);
 
     void transformAndAppend(std::vector<DirectX::XMFLOAT3> &positions,
                             const std::vector<DirectX::XMFLOAT3> &path,

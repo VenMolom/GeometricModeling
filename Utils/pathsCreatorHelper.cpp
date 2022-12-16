@@ -267,6 +267,34 @@ PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::iterator path1, vector<XM
     }
 }
 
+pair<vector<XMFLOAT3>::const_iterator, XMFLOAT3>
+PathsCreatorHelper::findIntersection(vector<XMFLOAT3>::const_iterator path1, XMFLOAT3 start, XMFLOAT3 end) {
+    auto e1 = start;
+    auto e2 = end;
+
+    auto da = XMVectorSet(e2.x - e1.x, e2.y - e1.y, e2.z - e1.z, 0);
+
+    for (int i = 0;; ++i) {
+        auto p0 = *(path1 + i);
+        auto p1 = *(path1 + i + 1);
+
+        auto db = XMVectorSet(p1.x - p0.x, p1.y - p0.y, p1.z - p0.z, 0);
+        auto dc = XMVectorSet(p0.x - e1.x, p0.y - e1.y, p0.z - e1.z, 0);
+
+        if (abs(XMVector3Dot(dc, XMVector3Cross(da, db)).m128_f32[0]) < 1e-3) {
+            auto norm = XMVector3LengthSq(XMVector3Cross(da, db)).m128_f32[0];
+            float t = XMVector3Dot(XMVector3Cross(dc, db), XMVector3Cross(da, db)).m128_f32[0] / norm;
+            float s = XMVector3Dot(XMVector3Cross(dc, da), XMVector3Cross(da, db)).m128_f32[0] / norm;
+
+            if ((t >= -1e-2 && t <= 1 + 1e-3) && (s >= 0 && s <= 1)) {
+                XMFLOAT3 p{};
+                XMStoreFloat3(&p, XMVectorLerp(XMLoadFloat3(&e1), XMLoadFloat3(&e2), t));
+                return {path1 + i, p};
+            }
+        }
+    }
+}
+
 vector<XMFLOAT3>::iterator
 PathsCreatorHelper::findIntersectionHeight(vector<XMFLOAT3>::iterator path, float height) {
     for (int i = 0;; ++i) {
@@ -586,4 +614,165 @@ void PathsCreatorHelper::transformAndAppend(vector<XMFLOAT3> &positions, const v
         positions.emplace_back(point.x * 10.f, -point.z * 10.f,
                                max(point.y * 10.f + BLOCK_BOTTOM_LOCAL - toolSize / 2.f, BLOCK_BOTTOM_LOCAL));
     }
+}
+
+vector<XMFLOAT3>
+PathsCreatorHelper::createMainContour(const vector<XMFLOAT3> &outline,
+                                      const vector<XMFLOAT3> &midRing,
+                                      const vector<XMFLOAT3> &dziubekRing,
+                                      const vector<XMFLOAT3> &topRing,
+                                      const vector<XMFLOAT3> &bottomRing) {
+    vector<XMFLOAT3> mainContour;
+    {
+        auto dziubekIter1 = findIntersection(outline.begin(), dziubekRing[0], dziubekRing[1]).first;
+        auto dziubekIter2 = findIntersection(outline.begin(), dziubekRing[dziubekRing.size() - 2],
+                                             dziubekRing.back()).first;
+
+        mainContour.insert(mainContour.end(), outline.begin(), dziubekIter2 + 1);
+        mainContour.insert(mainContour.end(), dziubekRing.rbegin(), dziubekRing.rend());
+
+        auto bottomIter1 = findIntersection(outline.begin() + outline.size() / 2, bottomRing[0], bottomRing[1]).first;
+        auto bottomIter2 = findIntersection(outline.begin() + outline.size() / 2, bottomRing[bottomRing.size() - 2],
+                                            bottomRing.back()).first;
+        mainContour.insert(mainContour.end(), dziubekIter1 + 1, bottomIter2 + 1);
+        mainContour.insert(mainContour.end(), bottomRing.rbegin(), bottomRing.rend());
+
+        auto topIter1 = findIntersection(outline.begin() + 4 * outline.size() / 5, topRing[0], topRing[1]).first;
+        auto topIter2 = findIntersection(outline.begin() + 4 * outline.size() / 5, topRing[topRing.size() - 2],
+                                         topRing.back()).first;
+        mainContour.insert(mainContour.end(), bottomIter1 + 1, topIter2 + 1);
+        mainContour.insert(mainContour.end(), topRing.rbegin(), topRing.rend());
+        mainContour.insert(mainContour.end(), topIter1 + 1, outline.end());
+
+        mainContour.insert(mainContour.end(), midRing.rbegin() + 1, midRing.rend());
+    }
+
+    return mainContour;
+}
+
+vector<XMFLOAT3>
+PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
+                                   const vector<pair<float, float>> &midRing,
+                                   const vector<pair<float, float>> &dziubekRing,
+                                   const vector<pair<float, float>> &topRing,
+                                   const vector<pair<float, float>> &bottomRing,
+                                   const shared_ptr<ParametricObject<2>> &distant) {
+    auto stepLength = 0.05f;
+    auto pathsToSide = [stepLength, &distant, &outline, &midRing](vector<XMFLOAT3> &handlePath,
+                                                                  const vector<pair<float, float>> &sideRestriction,
+                                                                  pair<float, float> startParam,
+                                                                  pair<float, float> endParam,
+                                                                  size_t endIdx, float sign, float pathStep) {
+        size_t startIdx, nextEndIdx;
+        size_t restrictionEndIdx, restrictionStartIdx;
+        pair<float, float> restrictionStart, restrictionEnd;
+        for (int i = 0; i < 100; ++i) {
+            auto param = startParam;
+
+            // find intersection with side restriction
+            tie(restrictionStart, restrictionStartIdx) = findIntersection(sideRestriction, startParam, endParam);
+            bool hasRestriction = false;
+            if (restrictionStartIdx != 0xffffffff) {
+                // intersection exists
+                tie(restrictionEnd, restrictionEndIdx) = findIntersectionEnd(sideRestriction, startParam, endParam);
+
+                // swap ends if needed
+                if (abs(startParam.second - restrictionEnd.second) < abs(startParam.second - restrictionStart.second)) {
+                    std::swap(restrictionStart, restrictionEnd);
+                    std::swap(restrictionStartIdx, restrictionEndIdx);
+                }
+
+                hasRestriction = true;
+            }
+
+            XMFLOAT3 val;
+            while (sign * param.second < sign * endParam.second) {
+                // check if there will be collision
+                if (hasRestriction && sign * param.second > sign * restrictionStart.second) {
+                    XMStoreFloat3(&val, distant->value({restrictionStart.first, restrictionStart.second}));
+                    handlePath.emplace_back(val);
+                    auto dir = restrictionEndIdx > restrictionStartIdx ? 1 : -1;
+                    auto idx = restrictionStartIdx;
+                    // idx is index of segment first point, so when we move forward we need to start from second point
+                    if (dir > 0) idx++;
+                    while ((dir == -1 && idx != restrictionEndIdx) || (dir == 1 && idx <= restrictionEndIdx)) {
+                        XMStoreFloat3(&val, distant->value({sideRestriction[idx].first, sideRestriction[idx].second}));
+                        handlePath.emplace_back(val);
+                        idx += dir;
+                    }
+                    XMStoreFloat3(&val, distant->value({restrictionEnd.first, restrictionEnd.second}));
+                    handlePath.emplace_back(val);
+                    param.second = restrictionEnd.second + sign * stepLength;
+                    hasRestriction = false;
+                }
+
+                XMStoreFloat3(&val, distant->value({param.first, param.second}));
+                handlePath.emplace_back(val);
+                param.second += sign * stepLength;
+            }
+            XMStoreFloat3(&val, distant->value({endParam.first, endParam.second}));
+            handlePath.emplace_back(val);
+
+            auto paramU = endParam.first + pathStep;
+            // use different params to get start and end
+            if (i % 2 == 0) {
+                tie(startParam, startIdx) = findIntersection(outline, {paramU, -20}, {paramU, 20});
+                tie(endParam, nextEndIdx) = findIntersection(midRing, {paramU, -20}, {paramU, 20});
+                if (startIdx == 0xffffffff || nextEndIdx == 0xffffffff) break;
+                // if end and new start do not intersect same segment in params
+                if (startIdx != endIdx) {
+                    auto dir = startIdx > endIdx ? 1 : -1;
+                    auto idx = endIdx;
+                    // idx is index of segment first point, so when we move forward we need to start from second point
+                    if (dir > 0) idx++;
+                    while ((dir == -1 && idx != startIdx) || (dir == 1 && idx <= startIdx)) {
+                        XMStoreFloat3(&val, distant->value({outline[idx].first, outline[idx].second}));
+                        handlePath.emplace_back(val);
+                        idx += dir;
+                    }
+                }
+
+                if (startIdx == 0xffffffff) break;
+            } else {
+                tie(startParam, startIdx) = findIntersection(midRing, {paramU, -20}, {paramU, 20});
+                tie(endParam, nextEndIdx) = findIntersection(outline, {paramU, -20}, {paramU, 20});
+                if (startIdx == 0xffffffff || nextEndIdx == 0xffffffff) break;
+                // if end and new start do not intersect same segment in params
+                if (startIdx != endIdx) {
+                    auto dir = startIdx > endIdx ? 1 : -1;
+                    auto idx = endIdx;
+                    // idx is index of segment first point, so when we move forward we need to start from second point
+                    if (dir > 0) idx++;
+                    while ((dir == -1 && idx != startIdx) || (dir == 1 && idx <= startIdx)) {
+                        XMStoreFloat3(&val, distant->value({midRing[idx].first, midRing[idx].second}));
+                        handlePath.emplace_back(val);
+                        idx += dir;
+                    }
+                }
+            }
+            endIdx = nextEndIdx;
+            sign = -sign;
+        }
+    };
+
+    vector<XMFLOAT3> mainPath;
+    auto sign = 1.f;
+    auto pathStep = 0.025f;
+    auto startParam = midRing[midRing.size() / 2];
+    auto [endParam, endIdx] = findIntersection(outline, startParam, {startParam.first, 20});
+    pathsToSide(mainPath, bottomRing, startParam, endParam, endIdx, sign, pathStep);
+
+//    auto &lastPoint = mainPath.back();
+//    mainPath.emplace_back(lastPoint.x, lastPoint.y + 1.5, lastPoint.z);
+//
+//    pathStep = -pathStep;
+//    auto paramU = startParam.first + pathStep;
+//    tie(startParam, endIdx) = findIntersection(midRing, {paramU, -20}, {paramU, 20});
+//    tie(endParam, endIdx) = findIntersection(outline, startParam, {startParam.first, 20});
+//
+//    auto startPoint = distant->value({startParam.first, startParam.second});
+//    mainPath.emplace_back(startPoint.m128_f32[0], lastPoint.y + 1.5, startPoint.m128_f32[2]);
+//    pathsToSide(mainPath, dziubekRing, startParam, endParam, endIdx, sign, pathStep);
+
+    return mainPath;
 }
