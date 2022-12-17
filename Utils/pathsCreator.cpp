@@ -438,8 +438,8 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
 
         p1 = mainBottomParams[mainBottomParams.size() - 1];
         p2 = mainBottomParams[mainBottomParams.size() - 2];
-        mainBottomParams.push_back({p1.first - 10 * (p2.first - p1.first),
-                                    p1.second - 10 * (p2.second - p1.second)});
+        mainBottomParams.emplace_back(p1.first - 10 * (p2.first - p1.first),
+                                    p1.second - 10 * (p2.second - p1.second));
     }
 
     vector<XMFLOAT3> midRingPoints;
@@ -448,7 +448,7 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     const static float V = 3.000001f;
     for (int i = 0; i < 200; i++) {
         float u = i / 200.f * 6.f;
-        midRingParams.push_back({u, V});
+        midRingParams.emplace_back(u, V);
         XMStoreFloat3(&val, mainDistant->value({u, V}));
         midRingPoints.push_back(val);
     }
@@ -490,7 +490,88 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     auto mainContour = createMainContour(mainBottomPoints, midRingPoints, mainRingPoints, topRingPoints,
                                          bottomRingPoints);
 #pragma endregion
-    // TODO: main top paths and hole paths
+
+#pragma region MainTop
+    auto [_____, mainTopParams, mainTopPoints] = intersect.calculateIntersection(renderer,
+                                                                                      {3.57268357, 1.03585434, 1.18505836,
+                                                                                       2.7381289});
+    mainTopParams.erase(mainTopParams.begin());
+    mainTopPoints.erase(mainTopPoints.begin());
+    mainTopParams.pop_back();
+    mainTopPoints.pop_back();
+
+    // prolong first and last segment (for intersection later on)
+    {
+        XMFLOAT3 val;
+        auto v1 = XMLoadFloat3(&mainTopPoints[0]);
+        auto v2 = XMLoadFloat3(&mainTopPoints[1]);
+        XMStoreFloat3(&val, XMVectorLerp(v1, v2, -10));
+        mainTopPoints.insert(mainTopPoints.begin(), val);
+
+        v1 = XMLoadFloat3(&mainTopPoints[mainTopPoints.size() - 1]);
+        v2 = XMLoadFloat3(&mainTopPoints[mainTopPoints.size() - 2]);
+        XMStoreFloat3(&val, XMVectorLerp(v1, v2, -10));
+        mainTopPoints.push_back(val);
+
+        auto p1 = mainTopParams[0];
+        auto p2 = mainTopParams[1];
+        mainTopParams.insert(mainTopParams.begin(),
+                                {p1.first - 10 * (p2.first - p1.first),
+                                 p1.second - 10 * (p2.second - p1.second)});
+
+        p1 = mainTopParams[mainTopParams.size() - 1];
+        p2 = mainTopParams[mainTopParams.size() - 2];
+        mainTopParams.emplace_back(p1.first - 10 * (p2.first - p1.first),
+                                    p1.second - 10 * (p2.second - p1.second));
+    }
+
+    midRingPoints.clear();
+    midRingParams.clear();
+    const static float VV = 2.99999f;
+    for (int i = 0; i < 200; i++) {
+        float u = i / 200.f * 6.f;
+        midRingParams.emplace_back(u, VV);
+        XMStoreFloat3(&val, mainDistant->value({u, VV}));
+        midRingPoints.push_back(val);
+    }
+
+    // trim outline
+    {
+        auto [mainTopIter1, midRingIter1, inter1] = findIntersection(mainTopPoints.begin(),
+                                                                        midRingPoints.begin());
+        auto [midRingIter2, mainTopIter2, inter2] = findIntersection(midRingPoints.begin(),
+                                                                        mainTopPoints.begin());
+
+        auto mainTopParamIter1 = mainTopParams.begin() - (mainTopPoints.begin() - mainTopIter1);
+        auto mainTopParamIter2 = mainTopParams.begin() - (mainTopPoints.begin() - mainTopIter2);
+        mainTopParams.erase(mainTopParamIter1 + 2, mainTopParams.end());
+        mainTopParams.erase(mainTopParams.begin(), mainTopParamIter2);
+
+        mainTopPoints.erase(mainTopIter1 + 1, mainTopPoints.end());
+        mainTopPoints.push_back(inter1);
+        mainTopPoints.erase(mainTopPoints.begin(), mainTopIter2 + 1);
+        mainTopPoints.insert(mainTopPoints.begin(), inter2);
+
+        vector<pair<float, float>> midRingParamTemp;
+        auto midRingParamIter1 = midRingParams.begin() - (midRingPoints.begin() - midRingIter1);
+        auto midRingParamIter2 = midRingParams.begin() - (midRingPoints.begin() - midRingIter2);
+        midRingParamTemp.insert(midRingParamTemp.end(), midRingParamIter1, midRingParams.end());
+        midRingParamTemp.insert(midRingParamTemp.end(), midRingParams.begin(), midRingParamIter2 + 2);
+        midRingParams = midRingParamTemp;
+
+        vector<XMFLOAT3> midRingTemp;
+        midRingTemp.push_back(inter1);
+        midRingTemp.insert(midRingTemp.end(), midRingIter1 + 1, midRingPoints.end());
+        midRingTemp.insert(midRingTemp.end(), midRingPoints.begin(), midRingIter2 + 1);
+        midRingTemp.push_back(inter2);
+        midRingPoints = midRingTemp;
+    }
+
+    auto mainTopPath = createMainTopPath(mainTopParams, midRingParams, mainDistant);
+    auto mainTopContour = createMainTopContour(mainTopPoints, midRingPoints);
+#pragma endregion
+
+    // TODO: hole paths
 
     vector<XMFLOAT3> positions;
     positions.emplace_back(0.f, 0.f, START_Z);
@@ -513,6 +594,14 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     transformAndAppend(positions, mainPath, toolSize);
     positions.emplace_back(mainContour.front().x * 10.f, -mainContour.front().z * 10.f, positions.back().z);
     transformAndAppend(positions, mainContour, toolSize);
+
+    height = positions.back().z + 30.f;
+    positions.emplace_back(positions.back().x, positions.back().y, height);
+    positions.emplace_back(mainTopPath.front().x * 10.f, -mainTopPath.front().z * 10.f, height);
+
+    transformAndAppend(positions, mainTopPath, toolSize);
+    positions.emplace_back(mainTopContour.front().x * 10.f, -mainTopContour.front().z * 10.f, positions.back().z);
+    transformAndAppend(positions, mainTopContour, toolSize);
 
     positions.emplace_back(positions.back().x, positions.back().y, START_Z);
     positions.emplace_back(0.f, 0.f, START_Z);

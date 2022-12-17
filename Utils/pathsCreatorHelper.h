@@ -78,7 +78,7 @@ namespace PathsCreatorHelper {
 
     std::pair<std::pair<float, float>, size_t>
     findIntersection(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,
-                     std::pair<float, float> end, bool mod = false);
+                     std::pair<float, float> end, bool mod = false, bool patch = false);
 
     std::pair<std::pair<float, float>, size_t>
     findIntersectionEnd(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,
@@ -114,6 +114,13 @@ namespace PathsCreatorHelper {
                                                      const std::vector<DirectX::XMFLOAT3> &dziubekRing,
                                                      const std::vector<DirectX::XMFLOAT3> &topRing,
                                                      const std::vector<DirectX::XMFLOAT3> &bottomRing);
+
+    std::vector<DirectX::XMFLOAT3> createMainTopPath(const std::vector<std::pair<float, float>> &outline,
+                                                     const std::vector<std::pair<float, float>> &mainRing,
+                                                     const std::shared_ptr<ParametricObject<2>> &distant);
+
+    std::vector<DirectX::XMFLOAT3> createMainTopContour(const std::vector<DirectX::XMFLOAT3> &outline,
+                                                        const std::vector<DirectX::XMFLOAT3> &mainRing);
 
     void transformAndAppend(std::vector<DirectX::XMFLOAT3> &positions,
                             const std::vector<DirectX::XMFLOAT3> &path,
