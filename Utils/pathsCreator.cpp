@@ -156,7 +156,7 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
     // main right
     intersect.setSurfaces({patch, main});
-    auto [mainRightParams, mainRightPoints] = intersect.calculateIntersection(renderer,
+    auto [_, mainRightParams, mainRightPoints] = intersect.calculateIntersection(renderer,
                                                                               {3.42344403, 0.896888852, 0.475813448,
                                                                                1.58128047});
     assert(!mainRightParams.empty());
@@ -166,7 +166,7 @@ void PathsCreator::createFlatteningPaths(int toolSize, Renderer &renderer, Objec
 
     // main left
     intersect.setSurfaces({patch, main});
-    auto [mainLeftParams, mainLeftPoints] = intersect.calculateIntersection(renderer,
+    auto [__, mainLeftParams, mainLeftPoints] = intersect.calculateIntersection(renderer,
                                                                             {1.83718324, 0.757870793, 3.52815628,
                                                                              1.48308873});
     assert(!mainLeftParams.empty());
@@ -257,17 +257,23 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     // handle paths
 #pragma region Handle
     intersect.setSurfaces({patchDistant, handleDistant});
-    auto [outsideParams, outsidePoints] = intersect.calculateIntersection(renderer, {4.57867765, 3.19881678, 3.17830682,
-                                                                                     2.34179115});
-    auto [insideParams, insidePoints] = intersect.calculateIntersection(renderer, {4.02702141, 2.75102615, 0.896845459,
-                                                                                   2.65458512});
+    auto [_, outsideParams, outsidePoints] = intersect.calculateIntersection(renderer,
+                                                                             {4.57867765, 3.19881678, 3.17830682,
+                                                                              2.34179115});
+    auto [__, insideParams, insidePoints] = intersect.calculateIntersection(renderer,
+                                                                           {4.02702141, 2.75102615, 0.896845459,
+                                                                            2.65458512});
 
     intersect.setSurfaces({mainDistant, handleDistant});
-    auto [topRingParams, topRingPoints] = intersect.calculateIntersection(renderer, {5.95757055, 4.5840373, 4.29148722,
-                                                                                     5.70556259});
-    auto [bottomRingParams, bottomRingPoints] = intersect.calculateIntersection(renderer,
-                                                                                {0.792187035, 6.699512, 0.868857979,
-                                                                                 0.548215151});
+    auto [topRingMainParams, topRingParams, topRingPoints] = intersect.calculateIntersection(renderer,
+                                                                                             {5.95757055, 4.5840373,
+                                                                                              4.29148722,
+                                                                                              5.70556259});
+    auto [bottomRingMainParams, bottomRingParams, bottomRingPoints] = intersect.calculateIntersection(renderer,
+                                                                                                      {0.792187035,
+                                                                                                       6.699512,
+                                                                                                       0.868857979,
+                                                                                                       0.548215151});
 
     // trim top and bottom ring by height and reorder
     {
@@ -280,6 +286,13 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
             topRingTemp.insert(topRingTemp.end(), topRingParamIter2, topRingParams.end());
             topRingTemp.insert(topRingTemp.end(), topRingParams.begin(), topRingParamIter1 + 2);
             topRingParams = topRingTemp;
+
+            vector<pair<float, float>> topRingMainTemp;
+            auto topRingMainParamIter1 = topRingMainParams.begin() - (topRingPoints.begin() - topRingIter1);
+            auto topRingMainParamIter2 = topRingMainParams.begin() - (topRingPoints.begin() - topRingIter2);
+            topRingTemp.insert(topRingTemp.end(), topRingMainParamIter2, topRingMainParams.end());
+            topRingTemp.insert(topRingTemp.end(), topRingMainParams.begin(), topRingMainParamIter1 + 2);
+            topRingMainParams = topRingTemp;
         }
         {
             vector<XMFLOAT3> topRingTemp;
@@ -293,6 +306,10 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
         auto bottomRingIter2 = findIntersectionHeight(bottomRingIter1 + 10, distance);
         auto bottomRingParamIter1 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter1);
         auto bottomRingParamIter2 = bottomRingParams.begin() - (bottomRingPoints.begin() - bottomRingIter2);
+        auto bottomRingMainParamIter1 = bottomRingMainParams.begin() - (bottomRingPoints.begin() - bottomRingIter1);
+        auto bottomRingMainParamIter2 = bottomRingMainParams.begin() - (bottomRingPoints.begin() - bottomRingIter2);
+        bottomRingMainParams.erase(bottomRingMainParamIter2 + 2, bottomRingMainParams.end());
+        bottomRingMainParams.erase(bottomRingMainParams.begin(), bottomRingMainParamIter1);
         bottomRingParams.erase(bottomRingParamIter2 + 2, bottomRingParams.end());
         bottomRingParams.erase(bottomRingParams.begin(), bottomRingParamIter1);
         bottomRingPoints.erase(bottomRingIter2 + 2, bottomRingPoints.end());
@@ -344,15 +361,16 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     // dziubek paths
 #pragma region Dziubek
     intersect.setSurfaces({patchDistant, dziubekDistant});
-    auto [dziubekOutlineParams, dziubekOutlinePoints] = intersect.calculateIntersection(renderer,
-                                                                                        {1.29923332, 1.80520785,
-                                                                                         3.2055254,
-                                                                                         4.43139553});
+    auto [___, dziubekOutlineParams, dziubekOutlinePoints] = intersect.calculateIntersection(renderer,
+                                                                                           {1.29923332, 1.80520785,
+                                                                                            3.2055254,
+                                                                                            4.43139553});
 
     intersect.setSurfaces({mainDistant, dziubekDistant});
-    auto [mainRingParams, mainRingPoints] = intersect.calculateIntersection(renderer,
-                                                                            {3.5824976, 3.81490111, 3.00511742,
-                                                                             5.7883172});
+    auto [dziubekRingParams, mainRingParams, mainRingPoints] = intersect.calculateIntersection(renderer,
+                                                                                              {3.5824976, 3.81490111,
+                                                                                               3.00511742,
+                                                                                               5.7883172});
 
     // trim outline
     {
@@ -376,6 +394,11 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
         mainRingParams.erase(mainRingParamIter2 + 2, mainRingParams.end());
         mainRingParams.erase(mainRingParams.begin(), mainRingParamIter1);
 
+        auto dziubekRingParamIter1 = dziubekRingParams.begin() - (mainRingPoints.begin() - mainRingIter1);
+        auto dziubekRingParamIter2 = dziubekRingParams.begin() - (mainRingPoints.begin() - mainRingIter2);
+        dziubekRingParams.erase(dziubekRingParamIter2 + 2, dziubekRingParams.end());
+        dziubekRingParams.erase(dziubekRingParams.begin(), dziubekRingParamIter1);
+
         mainRingPoints.erase(mainRingIter2 + 1, mainRingPoints.end());
         mainRingPoints.push_back(inter2);
         mainRingPoints.erase(mainRingPoints.begin(), mainRingIter1 + 1);
@@ -386,9 +409,10 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     auto dziubekContour = createDziubekContour(dziubekOutlinePoints, mainRingPoints);
 #pragma endregion
 
+    // main part paths
 #pragma region Main
     intersect.setSurfaces({patchDistant, mainDistant});
-    auto [mainBottomParams, mainBottomPoints] = intersect.calculateIntersection(renderer,
+    auto [____, mainBottomParams, mainBottomPoints] = intersect.calculateIntersection(renderer,
                                                                                 {4.07142401, 1.49915862, 0.36954397,
                                                                                  3.97987604});
     mainBottomParams.pop_back();
@@ -461,10 +485,8 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
         midRingPoints = midRingTemp;
     }
 
-    // TODO: mainRingParams, topRingParams and bottomRingParams are currently in wrong parameter space
-    // return handle ones from intersections and process as needed
-    auto mainPath = createMainPath(mainBottomParams, midRingParams, mainRingParams, topRingParams, bottomRingParams,
-                                   mainDistant);
+    auto mainPath = createMainPath(mainBottomParams, midRingParams, dziubekRingParams, topRingMainParams,
+                                   bottomRingMainParams, mainDistant);
     auto mainContour = createMainContour(mainBottomPoints, midRingPoints, mainRingPoints, topRingPoints,
                                          bottomRingPoints);
 #pragma endregion

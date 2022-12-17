@@ -232,7 +232,7 @@ vector<XMFLOAT3> PathsCreatorHelper::intersectAndCalculateToolDistant(IntersectH
                                                                       FlatteningSegment segment,
                                                                       int toolSize) {
     intersect.setSurfaces({move(patch), object});
-    auto [params, points] = intersect.calculateIntersection(renderer, starting);
+    auto [_, params, points] = intersect.calculateIntersection(renderer, starting);
     assert(!params.empty());
     return calculateToolDistantPath(*object, params, points, toolSize, segment);
 }
@@ -321,9 +321,9 @@ PathsCreatorHelper::findIntersection(const vector<pair<float, float>> &path,
         };
     };
 
-    if (mod && start.first > 5.98f) {
-        start.first -= 6.f;
-        end.first -= 6.f;
+    if (mod && start.first < 1.f) {
+        start.first += 6.f;
+        end.first += 6.f;
     }
 
     auto u0 = start;
@@ -333,9 +333,13 @@ PathsCreatorHelper::findIntersection(const vector<pair<float, float>> &path,
     for (int i = 1; i < path.size(); ++i) {
         auto tmp = path[i];
 
-        if (mod && (u1.first > 5.f && tmp.first < 1.f) || (u1.first > 5.98f && tmp.first > 5.98f)) {
-            u1.first -= 6.f;
-        }
+        if (mod) {
+            if ((u1.first > 5.f && tmp.first < 1.f)) {
+                tmp.first += 6.f;
+            } else if (tmp.first > 5.f && u1.first < 1.f) {
+                u1.first += 6.f;
+            }
+        } else if ((u1.first > 5.f && tmp.first < 1.f) || tmp.first > 5.f && u1.first < 1.f) continue;
 
         auto v1 = make_pair(tmp.first - u1.first, tmp.second - u1.second);
 
@@ -345,8 +349,8 @@ PathsCreatorHelper::findIntersection(const vector<pair<float, float>> &path,
         if (isnan(s) || s < 0 || s > 1) continue;
 
         pair<float, float> res = {u0.first + t * v0.first, u0.second + t * v0.second};
-        if (mod && res.first < 0.f) {
-            res.first += 6.f;
+        if (mod && res.first >= 6.f) {
+            res.first -= 6.f;
         }
         return {res, static_cast<size_t>(i - 1)};
     }
@@ -357,7 +361,7 @@ PathsCreatorHelper::findIntersection(const vector<pair<float, float>> &path,
 pair<pair<float, float>, size_t>
 PathsCreatorHelper::findIntersectionEnd(const vector<pair<float, float>> &path,
                                         pair<float, float> start,
-                                        pair<float, float> end) {
+                                        pair<float, float> end, bool mod) {
     static const auto intersect = [](pair<float, float> u0, pair<float, float> v0,
                                      pair<float, float> u1, pair<float, float> v1) -> pair<float, float> {
         float d = v1.first * v0.second - v0.first * v1.second;
@@ -367,12 +371,26 @@ PathsCreatorHelper::findIntersectionEnd(const vector<pair<float, float>> &path,
         };
     };
 
+    if (mod && start.first < 1.f) {
+        start.first += 6.f;
+        end.first += 6.f;
+    }
+
     auto u0 = start;
     auto v0 = make_pair(end.first - start.first, end.second - start.second);
 
     auto u1 = path.back();
     for (int i = path.size() - 2; i >= 0; --i) {
         auto tmp = path[i];
+
+        if (mod) {
+            if ((u1.first > 5.f && tmp.first < 1.f)) {
+                tmp.first += 6.f;
+            } else if (tmp.first > 5.f && u1.first < 1.f) {
+                u1.first += 6.f;
+            }
+        }
+
         auto v1 = make_pair(tmp.first - u1.first, tmp.second - u1.second);
 
         auto [t, s] = intersect(u0, v0, u1, v1);
@@ -380,7 +398,11 @@ PathsCreatorHelper::findIntersectionEnd(const vector<pair<float, float>> &path,
         if (isnan(t) || t < 0 || t > 1) continue;
         if (isnan(s) || s < 0 || s > 1) continue;
 
-        return {{u0.first + t * v0.first, u0.second + t * v0.second}, static_cast<size_t>(i)};
+        pair<float, float> res = {u0.first + t * v0.first, u0.second + t * v0.second};
+        if (mod && res.first >= 6.f) {
+            res.first -= 6.f;
+        }
+        return {res, static_cast<size_t>(i)};
     }
 
     return {{NAN, NAN}, 0xffffffff};
@@ -671,12 +693,14 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
                                    const vector<pair<float, float>> &topRing,
                                    const vector<pair<float, float>> &bottomRing,
                                    const shared_ptr<ParametricObject<2>> &distant) {
-    auto stepLength = 0.05f;
-    auto pathsToSide = [stepLength, &distant, &outline, &midRing](vector<XMFLOAT3> &handlePath,
+    const float V = 3.000001f;
+    auto stepLength = 0.1f;
+    auto pathsToSide = [stepLength, &distant, &outline, &midRing, V](vector<XMFLOAT3> &handlePath,
                                                                   const vector<pair<float, float>> &sideRestriction,
                                                                   pair<float, float> startParam,
                                                                   pair<float, float> endParam,
                                                                   size_t endIdx, float sign, float pathStep, bool mod) {
+
         size_t startIdx, nextEndIdx;
         size_t restrictionEndIdx, restrictionStartIdx;
         pair<float, float> restrictionStart, restrictionEnd;
@@ -684,11 +708,12 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
             auto param = startParam;
 
             // find intersection with side restriction
-            tie(restrictionStart, restrictionStartIdx) = findIntersection(sideRestriction, startParam, endParam);
+            tie(restrictionStart, restrictionStartIdx) = findIntersection(sideRestriction, startParam, endParam, mod);
             bool hasRestriction = false;
             if (restrictionStartIdx != 0xffffffff) {
                 // intersection exists
-                tie(restrictionEnd, restrictionEndIdx) = findIntersectionEnd(sideRestriction, startParam, endParam);
+                tie(restrictionEnd, restrictionEndIdx) = findIntersectionEnd(sideRestriction, startParam, endParam,
+                                                                             mod);
 
                 // swap ends if needed
                 if (abs(startParam.second - restrictionEnd.second) < abs(startParam.second - restrictionStart.second)) {
@@ -702,23 +727,23 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
             XMFLOAT3 val;
             while (sign * param.second < sign * endParam.second) {
                 // check if there will be collision
-//                if (hasRestriction && sign * param.second > sign * restrictionStart.second) {
-//                    XMStoreFloat3(&val, distant->value({restrictionStart.first, restrictionStart.second}));
-//                    handlePath.emplace_back(val);
-//                    auto dir = restrictionEndIdx > restrictionStartIdx ? 1 : -1;
-//                    auto idx = restrictionStartIdx;
-//                    // idx is index of segment first point, so when we move forward we need to start from second point
-//                    if (dir > 0) idx++;
-//                    while ((dir == -1 && idx != restrictionEndIdx) || (dir == 1 && idx <= restrictionEndIdx)) {
-//                        XMStoreFloat3(&val, distant->value({sideRestriction[idx].first, sideRestriction[idx].second}));
-//                        handlePath.emplace_back(val);
-//                        idx += dir;
-//                    }
-//                    XMStoreFloat3(&val, distant->value({restrictionEnd.first, restrictionEnd.second}));
-//                    handlePath.emplace_back(val);
-//                    param.second = restrictionEnd.second + sign * stepLength;
-//                    hasRestriction = false;
-//                }
+                if (hasRestriction && sign * param.second > sign * restrictionStart.second) {
+                    XMStoreFloat3(&val, distant->value({restrictionStart.first, restrictionStart.second}));
+                    handlePath.emplace_back(val);
+                    auto dir = restrictionEndIdx > restrictionStartIdx ? 1 : -1;
+                    auto idx = restrictionStartIdx;
+                    // idx is index of segment first point, so when we move forward we need to start from second point
+                    if (dir > 0) idx++;
+                    while ((dir == -1 && idx != restrictionEndIdx) || (dir == 1 && idx <= restrictionEndIdx)) {
+                        XMStoreFloat3(&val, distant->value({sideRestriction[idx].first, sideRestriction[idx].second}));
+                        handlePath.emplace_back(val);
+                        idx += dir;
+                    }
+                    XMStoreFloat3(&val, distant->value({restrictionEnd.first, restrictionEnd.second}));
+                    handlePath.emplace_back(val);
+                    param.second = restrictionEnd.second + sign * stepLength;
+                    hasRestriction = false;
+                }
 
                 XMStoreFloat3(&val, distant->value({param.first, param.second}));
                 handlePath.emplace_back(val);
@@ -733,6 +758,7 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
             if (i % 2 == 0) {
                 tie(startParam, startIdx) = findIntersection(outline, {paramU, -20}, {paramU, 20}, mod);
                 tie(endParam, nextEndIdx) = findIntersection(midRing, {paramU, -20}, {paramU, 20}, mod);
+                endParam.second = V;
                 if (startIdx == 0xffffffff || nextEndIdx == 0xffffffff) {
                     break;
                 }
@@ -753,6 +779,7 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
             } else {
                 tie(startParam, startIdx) = findIntersection(midRing, {paramU, -20}, {paramU, 20}, mod);
                 tie(endParam, nextEndIdx) = findIntersection(outline, {paramU, -20}, {paramU, 20}, mod);
+                startParam.second = V;
                 if (startIdx == 0xffffffff || nextEndIdx == 0xffffffff) {
                     break;
                 }
@@ -780,6 +807,7 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
     auto startParam = midRing[midRing.size() / 2];
     auto [endParam, endIdx] = findIntersection(outline, startParam, {startParam.first, 20});
     pathsToSide(mainPath, bottomRing, startParam, endParam, endIdx, sign, pathStep, true);
+    // TODO: add second intersection
 
     auto &lastPoint = mainPath.back();
     mainPath.emplace_back(lastPoint.x, lastPoint.y + 4, lastPoint.z);
@@ -787,13 +815,12 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
     pathStep = -pathStep;
     auto paramU = startParam.first + pathStep;
     tie(startParam, endIdx) = findIntersection(midRing, {paramU, -20}, {paramU, 20});
+    startParam.second = V;
     tie(endParam, endIdx) = findIntersection(outline, startParam, {startParam.first, 20});
 
     auto startPoint = distant->value({startParam.first, startParam.second});
     mainPath.emplace_back(startPoint.m128_f32[0], lastPoint.y + 4, startPoint.m128_f32[2]);
     pathsToSide(mainPath, dziubekRing, startParam, endParam, endIdx, sign, pathStep, false);
-    // TODO: this run doesn't stop in correct spot
-    // TODO: distant.value() returns wrong values
 
     return mainPath;
 }

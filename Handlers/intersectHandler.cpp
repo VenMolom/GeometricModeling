@@ -41,11 +41,11 @@ shared_ptr<Object> IntersectHandler::calculateIntersection(Renderer &renderer, X
                                         renderer);
 }
 
-pair<vector<pair<float, float>>, vector<XMFLOAT3>>
+IntersectHandler::IntersectionData
 IntersectHandler::calculateIntersection(Renderer &renderer, array<float, 4> starting) {
     IntersectPoint startingPoint = {starting[0], starting[1], starting[2], starting[3]};
     auto data = findIntersectCurve(startingPoint);
-    return make_pair(std::move(data.secondParams), std::move(data.points));
+    return {std::move(data)};
 }
 
 IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint() const {
@@ -98,7 +98,7 @@ IntersectHandler::IntersectPoint IntersectHandler::probeStartingPoint(XMFLOAT3 h
     return closest;
 }
 
-IntersectHandler::IntersectionData IntersectHandler::findIntersectCurve(IntersectPoint starting) {
+IntersectHandler::IntersectionDataInternal IntersectHandler::findIntersectCurve(IntersectPoint starting) {
     IntersectPoint firstIntersect{};
     if (!findIntersectPoint(starting, firstIntersect)) return {};
 
@@ -162,7 +162,7 @@ IntersectHandler::IntersectionData IntersectHandler::findIntersectCurve(Intersec
         secondParams.emplace_back(i.first.s, i.first.t);
     }
 
-    IntersectionData d;
+    IntersectionDataInternal d;
     d.firstParams = std::move(firstParams);
     d.secondParams = std::move(secondParams);
     d.points = std::move(points);

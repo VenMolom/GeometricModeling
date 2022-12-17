@@ -9,7 +9,25 @@
 #include "Objects/objectFactory.h"
 
 class IntersectHandler {
+    struct IntersectionDataInternal {
+        std::vector<std::pair<float, float>> firstParams, secondParams;
+        std::vector<DirectX::XMFLOAT3> points;
+        bool closed;
+    };
+
 public:
+    struct IntersectionData {
+        std::vector<std::pair<float, float>> firstParams, secondParams;
+        std::vector<DirectX::XMFLOAT3> points;
+
+        IntersectionData(IntersectHandler::IntersectionDataInternal &&data)
+                : firstParams(std::move(data.firstParams)),
+                  secondParams(std::move(data.secondParams)),
+                  points(std::move(data.points)) {
+
+        }
+    };
+
     IntersectHandler(bool cursorExists, ObjectFactory &factory);
 
     bool canUseCursor() const { return hasCursor; }
@@ -28,8 +46,7 @@ public:
 
     std::shared_ptr<Object> calculateIntersection(Renderer &renderer, DirectX::XMFLOAT3 hint);
 
-    std::pair<std::vector<std::pair<float, float>>, std::vector<DirectX::XMFLOAT3>>
-    calculateIntersection(Renderer &renderer, std::array<float, 4> starting);
+    IntersectHandler::IntersectionData calculateIntersection(Renderer &renderer, std::array<float, 4> starting);
 
 private:
     bool _useCursor{};
@@ -43,12 +60,6 @@ private:
     float parameterEpsilon = 1e-2;
     std::array<std::shared_ptr<ParametricObject<2>>, 2> surfaces{};
     ObjectFactory &factory;
-
-    struct IntersectionData {
-        std::vector<std::pair<float, float>> firstParams, secondParams;
-        std::vector<DirectX::XMFLOAT3> points;
-        bool closed;
-    };
 
     struct IntersectPoint {
         float u, v, s, t;
@@ -159,7 +170,7 @@ private:
 
     bool findIntersectPoint(IntersectPoint starting, IntersectPoint &intersect) const;
 
-    IntersectionData findIntersectCurve(IntersectPoint starting);
+    IntersectionDataInternal findIntersectCurve(IntersectPoint starting);
 
     PointResult calculateNextIntersectPoint(IntersectPoint start, IntersectPoint &next,
                                             DirectX::XMVECTOR startValue, DirectX::XMVECTOR t) const;

@@ -82,7 +82,7 @@ namespace PathsCreatorHelper {
 
     std::pair<std::pair<float, float>, size_t>
     findIntersectionEnd(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,
-                        std::pair<float, float> end);
+                        std::pair<float, float> end, bool mod = false);
 
     std::vector<DirectX::XMFLOAT3> createHandlePath(const std::vector<std::pair<float, float>> &topRing,
                                                     const std::vector<std::pair<float, float>> &bottomRing,
