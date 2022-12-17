@@ -490,27 +490,28 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     auto mainContour = createMainContour(mainBottomPoints, midRingPoints, mainRingPoints, topRingPoints,
                                          bottomRingPoints);
 #pragma endregion
+    // TODO: main top paths and hole paths
 
     vector<XMFLOAT3> positions;
     positions.emplace_back(0.f, 0.f, START_Z);
-//    positions.emplace_back(handlePath.front().x * 10.f, -handlePath.front().z * 10.f, START_Z);
-    positions.emplace_back(mainPath.front().x * 10.f, -mainPath.front().z * 10.f, START_Z);
+    positions.emplace_back(handlePath.front().x * 10.f, -handlePath.front().z * 10.f, START_Z);
 
-//    transformAndAppend(positions, handlePath, toolSize);
-//    transformAndAppend(positions, handleContour, toolSize);
-//
-//    auto height = positions.back().z + 30.f;
-//    positions.emplace_back(positions.back().x, positions.back().y, height);
-//    positions.emplace_back(dziubekPath.front().x * 10.f, -dziubekPath.front().z * 10.f, height);
-//
-//    transformAndAppend(positions, dziubekPath, toolSize);
-//    transformAndAppend(positions, dziubekContour, toolSize);
-//
-//    height = positions.back().z + 30.f;
-//    positions.emplace_back(positions.back().x, positions.back().y, height);
-//    positions.emplace_back(mainPath.front().x * 10.f, -mainPath.front().z * 10.f, height);
+    transformAndAppend(positions, handlePath, toolSize);
+    transformAndAppend(positions, handleContour, toolSize);
+
+    auto height = positions.back().z + 30.f;
+    positions.emplace_back(positions.back().x, positions.back().y, height);
+    positions.emplace_back(dziubekPath.front().x * 10.f, -dziubekPath.front().z * 10.f, height);
+
+    transformAndAppend(positions, dziubekPath, toolSize);
+    transformAndAppend(positions, dziubekContour, toolSize);
+
+    height = positions.back().z + 30.f;
+    positions.emplace_back(positions.back().x, positions.back().y, height);
+    positions.emplace_back(mainPath.front().x * 10.f, -mainPath.front().z * 10.f, height);
 
     transformAndAppend(positions, mainPath, toolSize);
+    positions.emplace_back(mainContour.front().x * 10.f, -mainContour.front().z * 10.f, positions.back().z);
     transformAndAppend(positions, mainContour, toolSize);
 
     positions.emplace_back(positions.back().x, positions.back().y, START_Z);
