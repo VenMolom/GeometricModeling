@@ -571,7 +571,48 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     auto mainTopContour = createMainTopContour(mainTopPoints, midRingPoints);
 #pragma endregion
 
-    // TODO: hole paths
+#pragma region C0Ring
+    auto main = static_pointer_cast<ParametricObject<2>>(objects[1]);
+    auto bitan = XMVectorSet(0, 0, -1, 0);
+    vector<XMFLOAT3> c0RingPoints;
+    for (int i = 0; i < 200; i++) {
+        float u = i / 200.f * 6.f;
+        auto loc = main->value({u, 3});
+        auto tan = main->tangent({u, 3});
+
+        auto normal = XMVectorScale(XMVector3Normalize(XMVector3Cross(tan, bitan)), distance + 0.01f);
+        XMStoreFloat3(&val, XMVectorAdd(normal, loc));
+        c0RingPoints.push_back(val);
+    }
+
+    {
+        auto [iter1, inter1] = findIntersectionHeightInter(c0RingPoints.begin(), distance);
+        auto [iter2, inter2] = findIntersectionHeightInter(iter1 + 50, distance);
+
+        vector<XMFLOAT3> c0RingTemp;
+        c0RingTemp.push_back(inter2);
+        c0RingTemp.insert(c0RingTemp.end(), iter2 + 1, c0RingPoints.end());
+        c0RingTemp.insert(c0RingTemp.end(), c0RingPoints.begin(), iter1 + 1);
+        c0RingTemp.push_back(inter1);
+        c0RingPoints = c0RingTemp;
+    }
+#pragma endregion
+
+    vector<XMFLOAT3> holeOutline;
+    {
+        auto [mainBottomIter1, insideIter1, inter1] = findIntersection(mainBottomPoints.begin() + 380,
+                                                                       insidePoints.begin());
+        auto [insideIter2, mainBottomIter2, inter2] = findIntersection(insidePoints.begin() + 45,
+                                                                       mainBottomPoints.begin() + 330);
+
+        holeOutline.push_back(inter2);
+        holeOutline.insert(holeOutline.end(), mainBottomIter2 + 1, mainBottomIter1);
+        holeOutline.push_back(inter1);
+        holeOutline.insert(holeOutline.end(), insideIter1 + 1, insideIter2);
+        holeOutline.push_back(inter2);
+    }
+
+    auto holePath = createHolePath(holeOutline, distance);
 
     vector<XMFLOAT3> positions;
     positions.emplace_back(0.f, 0.f, START_Z);
@@ -580,14 +621,14 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     transformAndAppend(positions, handlePath, toolSize);
     transformAndAppend(positions, handleContour, toolSize);
 
-    auto height = positions.back().z + 30.f;
+    auto height = positions.back().z + 25.f;
     positions.emplace_back(positions.back().x, positions.back().y, height);
     positions.emplace_back(dziubekPath.front().x * 10.f, -dziubekPath.front().z * 10.f, height);
 
     transformAndAppend(positions, dziubekPath, toolSize);
     transformAndAppend(positions, dziubekContour, toolSize);
 
-    height = positions.back().z + 30.f;
+    height = positions.back().z + 25.f;
     positions.emplace_back(positions.back().x, positions.back().y, height);
     positions.emplace_back(mainPath.front().x * 10.f, -mainPath.front().z * 10.f, height);
 
@@ -595,13 +636,30 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     positions.emplace_back(mainContour.front().x * 10.f, -mainContour.front().z * 10.f, positions.back().z);
     transformAndAppend(positions, mainContour, toolSize);
 
-    height = positions.back().z + 30.f;
+    height = positions.back().z + 25.f;
     positions.emplace_back(positions.back().x, positions.back().y, height);
     positions.emplace_back(mainTopPath.front().x * 10.f, -mainTopPath.front().z * 10.f, height);
 
     transformAndAppend(positions, mainTopPath, toolSize);
     positions.emplace_back(mainTopContour.front().x * 10.f, -mainTopContour.front().z * 10.f, positions.back().z);
     transformAndAppend(positions, mainTopContour, toolSize);
+
+    height = positions.back().z + 5.f;
+    positions.emplace_back(positions.back().x, positions.back().y, height);
+    positions.emplace_back(c0RingPoints.front().x * 10.f, -c0RingPoints.front().z * 10.f, height);
+
+    transformAndAppend(positions, c0RingPoints, toolSize);
+
+    height = positions.back().z + 15.f;
+    positions.emplace_back(positions.back().x, positions.back().y, height);
+    positions.emplace_back(holeOutline.front().x * 10.f, -holeOutline.front().z * 10.f, height);
+
+    transformAndAppend(positions, holeOutline, toolSize);
+
+    height = positions.back().z + 5.f;
+    positions.emplace_back(positions.back().x, positions.back().y, height);
+    positions.emplace_back(holePath.front().x * 10.f, -holePath.front().z * 10.f, height);
+    transformAndAppend(positions, holePath, toolSize);
 
     positions.emplace_back(positions.back().x, positions.back().y, START_Z);
     positions.emplace_back(0.f, 0.f, START_Z);

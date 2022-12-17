@@ -308,6 +308,21 @@ PathsCreatorHelper::findIntersectionHeight(vector<XMFLOAT3>::iterator path, floa
     // TODO: return additionally t between points
 }
 
+pair<vector<XMFLOAT3>::iterator, XMFLOAT3>
+PathsCreatorHelper::findIntersectionHeightInter(vector<XMFLOAT3>::iterator path, float height) {
+    for (int i = 0;; ++i) {
+        auto e1 = *(path + i);
+        auto e2 = *(path + i + 1);
+
+        if (signbit(e1.y - height) != signbit(e2.y - height)) {
+
+            auto t = (height - e1.y) / (e2.y - e1.y);
+            XMFLOAT3 res = {e1.x + (e2.x - e1.x) * t, height, e1.z + (e2.z - e1.z) * t};
+            return {path + i, res};
+        }
+    }
+}
+
 pair<pair<float, float>, size_t>
 PathsCreatorHelper::findIntersection(const vector<pair<float, float>> &path,
                                      pair<float, float> start,
@@ -533,7 +548,7 @@ PathsCreatorHelper::createHandlePath(const vector<pair<float, float>> &topRing,
     pathsToSide(handlePath, topRing, bottomRing, insideLine, startParam, endParam, endIdx, sign, pathStep);
 
     auto &lastPoint = handlePath.back();
-    handlePath.emplace_back(lastPoint.x, lastPoint.y + 1.5, lastPoint.z);
+    handlePath.emplace_back(lastPoint.x, lastPoint.y + 1.f, lastPoint.z);
 
     pathStep = -pathStep;
     auto paramU = startParam.first + pathStep;
@@ -541,7 +556,7 @@ PathsCreatorHelper::createHandlePath(const vector<pair<float, float>> &topRing,
     tie(endParam, endIdx) = findIntersection(topRing, startParam, {startParam.first, 10});
 
     auto startPoint = distant->value({startParam.first, startParam.second});
-    handlePath.emplace_back(startPoint.m128_f32[0], lastPoint.y + 1.5, startPoint.m128_f32[2]);
+    handlePath.emplace_back(startPoint.m128_f32[0], lastPoint.y + 1.f, startPoint.m128_f32[2]);
     pathsToSide(handlePath, topRing, bottomRing, outsideLine, startParam, endParam, endIdx, sign, pathStep);
 
     return handlePath;
@@ -632,7 +647,7 @@ PathsCreatorHelper::createDziubekPath(const vector<pair<float, float>> &outline,
     pathsToSide(dziubekPath, startParam, endParam, endIdx, sign, pathStep);
 
     auto &lastPoint = dziubekPath.back();
-    dziubekPath.emplace_back(lastPoint.x, lastPoint.y + 1.5, lastPoint.z);
+    dziubekPath.emplace_back(lastPoint.x, lastPoint.y + 1.f, lastPoint.z);
 
     pathStep = -pathStep;
     auto paramU = startParam.first + pathStep;
@@ -640,7 +655,7 @@ PathsCreatorHelper::createDziubekPath(const vector<pair<float, float>> &outline,
     tie(endParam, endIdx) = findIntersection(outline, startParam, {startParam.first, 10});
 
     auto startPoint = distant->value({startParam.first, startParam.second});
-    dziubekPath.emplace_back(startPoint.m128_f32[0], lastPoint.y + 1.5, startPoint.m128_f32[2]);
+    dziubekPath.emplace_back(startPoint.m128_f32[0], lastPoint.y + 1.f, startPoint.m128_f32[2]);
     pathsToSide(dziubekPath, startParam, endParam, endIdx, sign, pathStep);
 
     return dziubekPath;
@@ -979,7 +994,7 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
                 auto param = restrictionStart;
                 XMStoreFloat3(&val, distant->value({param.first, param.second}));
 
-                auto height = handlePath.back().y + 1.f;
+                auto height = handlePath.back().y + 1.5f;
                 handlePath.emplace_back(handlePath.back().x, height, handlePath.back().z);
                 handlePath.emplace_back(val.x, height, val.z);
 
@@ -1007,7 +1022,7 @@ PathsCreatorHelper::createMainPath(const vector<pair<float, float>> &outline,
     pathsToSide(mainPath, bottomRing, topRing, startParam, endParam, endIdx, sign, pathStep, true);
 
     auto &lastPoint = mainPath.back();
-    auto height = lastPoint.y + 3;
+    auto height = lastPoint.y + 2.5f;
     mainPath.emplace_back(lastPoint.x, height, lastPoint.z);
 
     pathStep = -pathStep;
@@ -1112,7 +1127,7 @@ PathsCreatorHelper::createMainTopPath(const vector<pair<float, float>> &outline,
     pathsToSide(mainTopPath, startParam, endParam, endIdx, sign, pathStep, true);
 
     auto &lastPoint = mainTopPath.back();
-    auto height = lastPoint.y + 3;
+    auto height = lastPoint.y + 2.5f;
     mainTopPath.emplace_back(lastPoint.x, height, lastPoint.z);
 
     pathStep = -pathStep;
@@ -1126,4 +1141,26 @@ PathsCreatorHelper::createMainTopPath(const vector<pair<float, float>> &outline,
     pathsToSide(mainTopPath, startParam, endParam, endIdx, sign, pathStep, false);
 
     return mainTopPath;
+}
+
+vector<XMFLOAT3>
+PathsCreatorHelper::createHolePath(const vector<XMFLOAT3> &outline, float distance) {
+    const float xMove = 0.075f;
+    const float xStart = 3.25f;
+
+    float x = xStart;
+    float sign = 1;
+    vector<XMFLOAT3> holePath;
+    for(int i = 0; i < 9; i++) {
+        auto [startIdx, startPoint] = findIntersection(outline.begin(), {x, distance, -sign * 100}, {x, distance, 0.5f});
+        auto [endIdx, endPoint] = findIntersection(outline.begin(), {x, distance, sign * 100}, {x, distance, 0.5f});
+
+        holePath.push_back(startPoint);
+        holePath.push_back(endPoint);
+
+        x += xMove;
+        sign = -sign;
+    }
+
+    return holePath;
 }

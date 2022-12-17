@@ -76,6 +76,9 @@ namespace PathsCreatorHelper {
     std::vector<DirectX::XMFLOAT3>::iterator
     findIntersectionHeight(std::vector<DirectX::XMFLOAT3>::iterator path, float height);
 
+    std::pair<std::vector<DirectX::XMFLOAT3>::iterator, DirectX::XMFLOAT3>
+    findIntersectionHeightInter(std::vector<DirectX::XMFLOAT3>::iterator path, float height);
+
     std::pair<std::pair<float, float>, size_t>
     findIntersection(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,
                      std::pair<float, float> end, bool mod = false, bool patch = false);
@@ -121,6 +124,8 @@ namespace PathsCreatorHelper {
 
     std::vector<DirectX::XMFLOAT3> createMainTopContour(const std::vector<DirectX::XMFLOAT3> &outline,
                                                         const std::vector<DirectX::XMFLOAT3> &mainRing);
+
+    std::vector<DirectX::XMFLOAT3> createHolePath(const std::vector<DirectX::XMFLOAT3> &outline, float distance);
 
     void transformAndAppend(std::vector<DirectX::XMFLOAT3> &positions,
                             const std::vector<DirectX::XMFLOAT3> &path,
