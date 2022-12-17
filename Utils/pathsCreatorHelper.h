@@ -78,7 +78,7 @@ namespace PathsCreatorHelper {
 
     std::pair<std::pair<float, float>, size_t>
     findIntersection(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,
-                     std::pair<float, float> end);
+                     std::pair<float, float> end, bool mod = false);
 
     std::pair<std::pair<float, float>, size_t>
     findIntersectionEnd(const std::vector<std::pair<float, float>> &path, std::pair<float, float> start,

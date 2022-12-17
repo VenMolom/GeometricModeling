@@ -422,7 +422,7 @@ void PathsCreator::createDetailPaths(int toolSize, Renderer &renderer, ObjectFac
     vector<pair<float, float>> midRingParams;
     XMFLOAT3 val;
     const static float V = 3.000001f;
-    for (int i = 0; i <= 200; i++) {
+    for (int i = 0; i < 200; i++) {
         float u = i / 200.f * 6.f;
         midRingParams.push_back({u, V});
         XMStoreFloat3(&val, mainDistant->value({u, V}));
