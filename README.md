@@ -79,4 +79,4 @@ LMB + Drag - scale object with value dependend on distance moved since press dow
 
 ![image](https://user-images.githubusercontent.com/35574506/214945288-aaa8470d-8b5d-4008-a556-69e230a30287.png)
 
-![image](https://user-images.githubusercontent.com/35574506/214945502-43a47119-aee2-41f4-8605-decf49bba891.png)
+![dzban](https://github.com/user-attachments/assets/1ab0ec25-ab8b-41cd-bcc9-0ebb292b531d)
